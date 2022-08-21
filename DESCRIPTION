@@ -1,0 +1,21 @@
+Package: PrecMed
+Type: Package
+Title: A doubly robust precision medicine approach to estimate and
+        validate conditional average treatment effects
+Version: 0.1.2
+Author: Lu Tian, Phoebe Jiang and Gabrielle Simoneau 
+Maintainer: Phoebe Jiang <phoebe.jiang@biogen.com>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+Depends: R (>= 3.5.0)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
+Imports: dplyr, gbm, gam, ggplot2, glmnet, graphics, MASS, MESS, mgcv,
+        rlang, stringr, tidyr, survival, randomForestSRC
+Suggests: knitr, markdown, rmarkdown
+URL: https://github.biogen.com/pages/pjiang/PMMS
+VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2022-08-19 21:52:05 UTC; gsimonea
