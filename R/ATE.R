@@ -234,12 +234,16 @@ estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, high
   cut <- quantile(score, prop)
   n.subgroup <- length(prop) - 1
   ate.est <- rep(NA, n.subgroup)
-  for (b in 1:n.subgroup) {
+  for (b in seq(n.subgroup)) {
     idsub <- (score >= cut[b] & score <= cut[b + 1])
-    ate.est[b] <- drcount(y = y[idsub], x.cate = x.cate[idsub, , drop = FALSE],
+    ate.est[b] <- drcount(y = y[idsub],
+                          x.cate = x.cate[idsub, , drop = FALSE],
                           x.ps = x.ps[idsub, , drop = FALSE],
                           trt = trt[idsub], time = time[idsub],
-                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE)$log.rate.ratio
+                          ps.method = ps.method,
+                          minPS = minPS,
+                          maxPS = maxPS,
+                          interactions = FALSE)$log.rate.ratio
   }
   return(exp(ate.est))
 }
