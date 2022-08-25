@@ -286,8 +286,8 @@
 #'                  seed = 999)
 #'
 #' # Try:
-#' plotsurv(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#' boxplotsurv(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' plot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' boxplot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #' abc(x = output_cv2)
 #'
 #'
@@ -1128,8 +1128,8 @@ abc <- function(x) {
 #'              seed = 999)
 #'
 #' # Try:
-#' plotsurv(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#' boxplotsurv(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' plot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' boxplot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #' abc(x = cv)
 #'
 #' @export
@@ -1954,9 +1954,6 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
 }
 
 
-# plotsurv <- function(x, ...) UseMethod("plotsurv")
-# boxplotsurv <- function(x, ...)  UseMethod("boxplotsurv")
-
 
 #' Two side-by-side line plots of validation curves from the \code{"PrecMed"} object
 #'
@@ -2062,10 +2059,10 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
 #'               plot.gbmperf = FALSE)
 #'
 #' # default setting, plot RMTL ratios in both training and validation sets
-#' plotsurv(x = cv_surv)
+#' plot(x = cv_surv)
 #'
 #' # plot hazard ratio
-#' plotsurv(x = cv_surv, plot.hr = TRUE)
+#' plot(x = cv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
 #' cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
