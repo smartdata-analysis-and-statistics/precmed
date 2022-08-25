@@ -253,8 +253,8 @@ output_cv2 <- cv(response = "survival",
                  seed = 999)
 
 # Try:
-plotsurv(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-boxplotsurv(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+plot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(x = output_cv2)
 
 

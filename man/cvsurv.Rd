@@ -357,8 +357,8 @@ cv <- cvsurv(cate.model = survival::Surv(y, d) ~ age + female
              seed = 999)
 
 # Try:
-plotsurv(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-boxplotsurv(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+plot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(x = cv)
 
 }

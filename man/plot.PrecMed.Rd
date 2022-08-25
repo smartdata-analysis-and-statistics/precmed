@@ -127,10 +127,10 @@ cv_surv <- cv(response = "survival",
               plot.gbmperf = FALSE)
 
 # default setting, plot RMTL ratios in both training and validation sets
-plotsurv(x = cv_surv)
+plot(x = cv_surv)
 
 # plot hazard ratio
-plotsurv(x = cv_surv, plot.hr = TRUE)
+plot(x = cv_surv, plot.hr = TRUE)
 
 # Continuous outcome
 cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
