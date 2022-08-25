@@ -225,7 +225,7 @@
 #' and \code{\link{pmcount}()} function.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' cv <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
 #'              ps.model = trt ~ age + previous_treatment,
 #'              data = meanExample,
@@ -239,7 +239,8 @@
 #' # plot(x = cv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
 #' # boxplot(x = cv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
 #' # abc(x = cv)
-#'
+#' }
+#' @noRd
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
