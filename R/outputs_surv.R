@@ -270,8 +270,10 @@
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
 #' output_cv2 <- cv(response = "survival",
-#'                  cate.model = survival::Surv(y, d) ~ age + female
-#'                                                          + previous_cost + previous_number_relapses,
+#'                  cate.model = survival::Surv(y, d) ~ age +
+#'                                                      female +
+#'                                                      previous_cost +
+#'                                                      previous_number_relapses,
 #'                  ps.model = trt ~ age + previous_treatment,
 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
 #'                  data = survivalExample,
@@ -293,8 +295,14 @@
 #'
 #' # Continuous outcome
 #' output_cv3 <- cv(response = "continuous",
-#'                 cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'                 init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#'                 cate.model = y ~ age +
+#'                                  previous_treatment +
+#'                                  previous_cost +
+#'                                  previous_status_measure,
+#'                 init.model = y ~ age +
+#'                                  previous_treatment +
+#'                                  previous_cost +
+#'                                  previous_status_measure,
 #'                 ps.model = trt ~ previous_status_measure,
 #'                 data = meanExample,
 #'                 higher.y = FALSE,
@@ -536,8 +544,14 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'
 #' # Continuous outcome
 #' output_pm3 <- pm(response = "continuous",
-#'                 cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'                 init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#'                 cate.model = y ~ age +
+#'                                  previous_treatment +
+#'                                  previous_cost +
+#'                                  previous_status_measure,
+#'                 init.model = y ~ age +
+#'                                  previous_treatment +
+#'                                  previous_cost +
+#'                                  previous_status_measure,
 #'                 ps.model = trt ~ previous_treatment,
 #'                 data = meanExample,
 #'                 higher.y = FALSE,
@@ -689,7 +703,10 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #'
 #'# Continuous outcome
 #' output3 <- dr.inference(response = "continuous",
-#'                        cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#'                        cate.model = y ~ age +
+#'                                         previous_treatment +
+#'                                         previous_cost +
+#'                                         previous_status_measure,
 #'                        previous_cost + previous_number_relapses + offset(log(years)),
 #'                        ps.model = trt ~ previous_treatment,
 #'                        data = meanExample,
@@ -790,8 +807,14 @@ dr.inference <- function(response, cate.model, ps.model, data,
 #' abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'                   init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#' cv.mean <- cvmean(cate.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
+#'                   init.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
 #'                   ps.model = trt ~ previous_treatment,
 #'                   data = meanExample,
 #'                   higher.y = FALSE,
@@ -1779,13 +1802,16 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #'
 #' tau0 <- with(survivalExample, min(quantile(y[trt == 1], 0.95), quantile(y[trt == 0], 0.95)))
 #'
-#' pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-#'                            ps.model = trt ~ age + previous_treatment,
-#'                            ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                            data = survivalExample,
-#'                            tau0 = tau0,
-#'                            score.method = "randomForest",
-#'                            seed = 999)
+#' pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
+#'                                                  female +
+#'                                                  previous_cost +
+#'                                                  previous_number_relapses,
+#'                           ps.model = trt ~ age + previous_treatment,
+#'                           ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                           data = survivalExample,
+#'                           tau0 = tau0,
+#'                           score.method = "randomForest",
+#'                           seed = 999)
 #'
 #'
 #' @export
@@ -2065,8 +2091,14 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
 #' plot(x = cv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'                   init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#' cv.mean <- cvmean(cate.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
+#'                   init.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
 #'                   ps.model = trt ~ previous_treatment,
 #'                   data = meanExample,
 #'                   higher.y = FALSE,
@@ -2447,8 +2479,14 @@ plot.PrecMed <- function(x,
 #' boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #'
 #'# Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'                   init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#' cv.mean <- cvmean(cate.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
+#'                   init.model = y ~ age +
+#'                                    previous_treatment +
+#'                                    previous_cost +
+#'                                    previous_status_measure,
 #'                   ps.model = trt ~ previous_treatment,
 #'                   data = meanExample,
 #'                   higher.y = FALSE,
