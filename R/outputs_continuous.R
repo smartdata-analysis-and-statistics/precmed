@@ -240,7 +240,6 @@
 #' # boxplot(x = cv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
 #' # abc(x = cv)
 #' }
-#' @noRd
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar

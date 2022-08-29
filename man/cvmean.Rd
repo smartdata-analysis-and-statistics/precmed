@@ -267,7 +267,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
-
+\dontrun{
 cv <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
              ps.model = trt ~ age + previous_treatment,
              data = meanExample,
@@ -281,7 +281,7 @@ cv <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previo
 # plot(x = cv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
 # boxplot(x = cv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
 # abc(x = cv)
-
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
