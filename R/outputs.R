@@ -318,7 +318,7 @@
 #' and \code{\link{pmcount}()} function.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' cv <- cvcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
@@ -333,6 +333,7 @@
 #' # plot(x = cv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # boxplot(x = cv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # abc(x = cv)
+#' }
 #'
 #' @export
 #'

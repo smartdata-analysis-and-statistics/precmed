@@ -248,7 +248,7 @@
 #' \code{"PrecMed"} objects.
 #'
 #' @examples
-#' # Count outcome
+#' \dontrun{
 #' output_cv <- cv(response = "count",
 #'                 cate.model = y ~ age + female + previous_treatment +
 #'                                      previous_cost + previous_number_relapses + offset(log(years)),
@@ -317,6 +317,7 @@
 #' plot(x = output_cv3)
 #' boxplot(x = output_cv3)
 #' abc(x = output_cv3)
+#' }
 #'
 #' @export
 #'

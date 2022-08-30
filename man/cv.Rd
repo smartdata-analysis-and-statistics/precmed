@@ -215,7 +215,7 @@ For survival response, see details in \code{\link{cvsurv}()}.
 For continuous response, see details in \code{\link{cvmean}()}.
 }
 \examples{
-# Count outcome
+\dontrun{
 output_cv <- cv(response = "count",
                 cate.model = y ~ age + female + previous_treatment +
                                      previous_cost + previous_number_relapses + offset(log(years)),
@@ -284,6 +284,7 @@ output_cv3 <- cv(response = "continuous",
 plot(x = output_cv3)
 boxplot(x = output_cv3)
 abc(x = output_cv3)
+}
 
 }
 \references{

@@ -413,7 +413,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 
 
 
-    if (verbose == 2){
+    if (verbose == 2) {
       if (fit$best.iter == n.trees.boosting) {
         warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
       }
@@ -435,7 +435,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
     }
 
 
-    if (verbose == 2){
+    if (verbose == 2) {
       if (length(names(fit$err.fit)) != 0) {
         if (verbose == 2) cat(paste0('    Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '";\n    return NAs in the corresponding parameters'),'\n')
         warning(paste0('Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for the corresponding parameters; see 'errors/warnings'."))
