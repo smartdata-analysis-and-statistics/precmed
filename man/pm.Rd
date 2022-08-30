@@ -216,8 +216,14 @@ output_pm2$coefficients
 
 # Continuous outcome
 output_pm3 <- pm(response = "continuous",
-                cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-                init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+                cate.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
+                init.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
                 ps.model = trt ~ previous_treatment,
                 data = meanExample,
                 higher.y = FALSE,

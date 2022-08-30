@@ -254,13 +254,16 @@ validation to reduce optimism.
 
 tau0 <- with(survivalExample, min(quantile(y[trt == 1], 0.95), quantile(y[trt == 0], 0.95)))
 
-pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                           ps.model = trt ~ age + previous_treatment,
-                           ipcw.model = ~ age + previous_cost + previous_treatment,
-                           data = survivalExample,
-                           tau0 = tau0,
-                           score.method = "randomForest",
-                           seed = 999)
+pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
+                                                 female +
+                                                 previous_cost +
+                                                 previous_number_relapses,
+                          ps.model = trt ~ age + previous_treatment,
+                          ipcw.model = ~ age + previous_cost + previous_treatment,
+                          data = survivalExample,
+                          tau0 = tau0,
+                          score.method = "randomForest",
+                          seed = 999)
 
 
 }

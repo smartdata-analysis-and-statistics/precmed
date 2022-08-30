@@ -237,8 +237,10 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 output_cv2 <- cv(response = "survival",
-                 cate.model = survival::Surv(y, d) ~ age + female
-                                                         + previous_cost + previous_number_relapses,
+                 cate.model = survival::Surv(y, d) ~ age +
+                                                     female +
+                                                     previous_cost +
+                                                     previous_number_relapses,
                  ps.model = trt ~ age + previous_treatment,
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  data = survivalExample,
@@ -260,8 +262,14 @@ abc(x = output_cv2)
 
 # Continuous outcome
 output_cv3 <- cv(response = "continuous",
-                cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-                init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+                cate.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
+                init.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
                 ps.model = trt ~ previous_status_measure,
                 data = meanExample,
                 higher.y = FALSE,
