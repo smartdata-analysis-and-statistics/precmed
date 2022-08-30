@@ -115,13 +115,6 @@ boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
-
-\item{prop.multi}{A vector of numerical values (in [0, 1]) specifying percentiles of the
-estimated log CATE scores to define mutually exclusive subgroups.
-It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-Each element represents the cutoff to separate the observations into
-\code{length(prop.multi) - 1} mutually exclusive subgroups.
-Default is \code{c(0, 1/3, 2/3, 1)}.}
 }
 \value{
 Returns a list containing the following components:

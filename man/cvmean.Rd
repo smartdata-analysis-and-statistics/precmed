@@ -31,7 +31,6 @@ cvmean(
   Kfold = 6,
   plot.gbmperf = TRUE,
   error.maxNR = 0.001,
-  max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
   verbose = 2,
@@ -144,6 +143,15 @@ Default is \code{6}.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
+error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+Default is \code{0.001}.}
+
+\item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
+Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
+quantity to be added to diagonal of the slope matrix to prevent singularity.
+Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}

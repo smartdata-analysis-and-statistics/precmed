@@ -33,7 +33,8 @@ pm(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE
+  plot.gbmperf = TRUE,
+  verbose = 1
 )
 }
 \arguments{
@@ -163,6 +164,9 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{pmcount}()}.
@@ -216,8 +220,14 @@ output_pm2$coefficients
 
 # Continuous outcome
 output_pm3 <- pm(response = "continuous",
-                cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-                init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+                cate.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
+                init.model = y ~ age +
+                                 previous_treatment +
+                                 previous_cost +
+                                 previous_status_measure,
                 ps.model = trt ~ previous_treatment,
                 data = meanExample,
                 higher.y = FALSE,

@@ -133,8 +133,14 @@ plot(x = cv_surv)
 plot(x = cv_surv, plot.hr = TRUE)
 
 # Continuous outcome
-cv.mean <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-                  init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+cv.mean <- cvmean(cate.model = y ~ age +
+                                   previous_treatment +
+                                   previous_cost +
+                                   previous_status_measure,
+                  init.model = y ~ age +
+                                   previous_treatment +
+                                   previous_cost +
+                                   previous_status_measure,
                   ps.model = trt ~ previous_treatment,
                   data = meanExample,
                   higher.y = FALSE,

@@ -134,7 +134,10 @@ output2$plot
 
 # Continuous outcome
 output3 <- dr.inference(response = "continuous",
-                       cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+                       cate.model = y ~ age +
+                                        previous_treatment +
+                                        previous_cost +
+                                        previous_status_measure,
                        previous_cost + previous_number_relapses + offset(log(years)),
                        ps.model = trt ~ previous_treatment,
                        data = meanExample,

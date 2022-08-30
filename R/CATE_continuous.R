@@ -32,6 +32,7 @@
 #'
 #' @return Doubly robust estimators of the regression coefficients \code{beta_r} in the doubly robust estimating equation
 #' where \code{r = 0, 1} is treatment received; vector of size \code{p} + 1 (intercept included)
+#' @importFrom stats lm
 ##onearmglmmean.dr <- function(y, x.cate, trt, ps, f.predictor) {
 ##  f.predictor <- as.vector(f.predictor)
 
@@ -55,22 +56,22 @@
 ##}
 
 onearmglmmean.dr <- function(y, x.cate, trt, ps, f.predictor){
-  
+
   f.predictor <- as.vector(f.predictor)
-  
+
   # first, solve the weighted estimating equation in twin regression (second estimating equation with the weights). Because the weights are trt/ps, only patients who are treated are used (or untreated if trt=1-trt)
-  fit <- lm(y ~ f.predictor+x.cate, weight = trt/ps)
-  
+  fit <- lm(y ~ f.predictor+x.cate, weights = trt/ps)
+
   # second, derive the “calibrated” prediction
   coef.one <- fit$coef
-  
+
   x.aug.one <- cbind(1, f.predictor, x.cate)
   yhat <- x.aug.one[, is.na(coef.one) == FALSE] %*% coef.one[is.na(coef.one) == FALSE]
-  
+
   # solve the twin regression estimating equation (without weight)
   fit2  <- lm(yhat ~ x.cate)
   beta <- fit2$coef
-  
+
   return(beta)
 }
 
@@ -89,30 +90,31 @@ onearmglmmean.dr <- function(y, x.cate, trt, ps, f.predictor){
 #' conditioned on the covariates \code{x} for treatment group trt = 0; \code{mu_0(x)}, step 1 in the two regression; vector of size \code{n}
 #' @return coef: Doubly robust estimators of the regression coefficients \code{delta_0}; vector of size \code{p} + 1 (intercept included)
 #'         vcov: Variance-covariance matrix of the estimated coefficient \code{delta_0}; matrix of size \code{p} + 1 by \code{p} + 1
+#' @importFrom stats lm
 
 twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
-  
+
   #ps=resultcf$ps
   #f1.predictor=resultcf$f1.predictor
   #f0.predictor=resultcf$f0.predictor
   fbar.predictor <- (f1.predictor + f0.predictor) / 2
   resid <- y-fbar.predictor
-  
+
   x.aug <- cbind(1, x.cate)
   xaug.star <- x.aug * (trt + ps - 2 * trt * ps) / 2
   # (1-ps)/2 when trt = 0, ps/2 when trt = 1
-  
+
   outcome <- resid * (trt - ps) # (1-ps) when trt = 1, -ps when trt = 0
   fit <- lm(outcome ~ xaug.star - 1) # omitting intercept
   beta <- fit$coef
-  
+
   ###### estimate the variance of the weights in ITR score 4  sandwich estimator
   error <- fit$res
   slope <- t(xaug.star) %*% xaug.star
   #sigma=solve(slope)%*%(t(xaug.star*error^2)%*%xaug.star)%*%solve(slope)
   sigma <- MASS::ginv(slope) %*% (t(xaug.star*error^2) %*% xaug.star) %*% MASS::ginv(slope)
-  
-  return(list(coef=beta, vcov=sigma))
+
+  return(list(coef = beta, vcov = sigma))
 }
 
 
@@ -156,6 +158,8 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
+#' @param n.trees.rf A positive integer specifying the number of trees. Used only if
+#' \code{score.method = 'randomForest'}. Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
 #' (usually 100-1000). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
@@ -190,43 +194,43 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
                      initial.predictor.method = "boosting",
                      xvar.smooth.init, xvar.smooth.score,
                      tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ...) {
-  
+
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
-  
+
   N1 <- sum(trt)
   N0 <- sum(1 - trt)
   N <- N1 + N0
   p.aug <- ncol(x.cate) + 1
-  
+
   #datatot <- data.frame(y, x.cate, time)
   #colnames(datatot) <- c("y", colnames(x.cate), "time")
-  
+
   datatot <- data.frame(y, x.cate)
   colnames(datatot) <- c("y", colnames(x.cate))
-  
+
   datatot.init <- data.frame(y, x.init)
   colnames(datatot.init) <- c("y", colnames(x.init))
-  
+
   ######### cross-fitting  ---------------------------------------------------------------
-  
+
   index1 <- rep(1:Kfold, floor(N1 / Kfold))
   if (N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
-  
+
   index0 <- rep(1:Kfold, floor(N0 / Kfold))
   if (N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
-  
+
   delta.twoReg.mat <- delta.contrastReg.mat <- matrix(NA, B, p.aug)
   sigma.contrastReg.mat <- matrix(0, p.aug, p.aug)
   converge <- rep(NA, B)
   best.iter <- 0
   fgam.init <- NULL
-  
+
   #warn.high <- err.high <- vector("list", length = n.subgroup)
   #names(warn.high) <- names(err.high) <- paste("prop", round(prop, 2))
-  
+
   warn.fit <- err.fit <- list()
-  
+
   if (any(c("twoReg", "contrastReg") %in% score.method)) {
     for (bb in 1:B) {
       index1cv <- sample(x = index1, size = N1, replace = FALSE)
@@ -234,26 +238,26 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
       index <- rep(NA, N)
       index[trt == 1] <- index1cv
       index[trt == 0] <- index0cv
-      
+
       f1.predictcv <- f0.predictcv <- pscv <- rep(NA, N)
       for (k in 1:Kfold) {
         datatot_train <- datatot[index != k, ]
         datatot_train_init <- datatot.init[index != k, ]
         x_ps_train <- x.ps[index != k, , drop = FALSE]
         trt_train <- trt[index != k]
-        
+
         datatot_valid <- datatot[index == k, ]
         datatot_valid_init <- datatot.init[index == k,]
         x_ps_valid <- x.ps[index == k, , drop = FALSE]
-        
+
         data1 <- datatot_train[trt_train == 1, ]
         data0 <- datatot_train[trt_train == 0, ]
-        
+
         data1.init <- datatot_train_init[trt_train == 1, ]
         data0.init <- datatot_train_init[trt_train == 0, ]
-        
+
         if (initial.predictor.method == "boosting") {
-          
+
           # TODO: if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
           ## Removed offset
           fit1.boosting <- gbm(y ~ ., data = data1.init, distribution = "gaussian",
@@ -267,7 +271,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
             if (grepl("does not add the offset", conditionMessage(w)))
               invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
           })
-          
+
           fit0.boosting <- gbm(y ~ ., data = data0.init, distribution = "gaussian",
                                interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5)
           best0.iter <- max(10, gbm.perf(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
@@ -278,31 +282,31 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
             if (grepl("does not add the offset", conditionMessage(w)))
               invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
           })
-          
+
           best.iter <- max(best.iter, best1.iter, best0.iter)
-          
+
           ##Changed poisson to gaussian
         } else if (initial.predictor.method == "gaussian") {
-          
+
           fit1.gaus <- glm(y ~ ., data = data1.init, family = "gaussian")
-          
+
           datatot_valid_new <- datatot_valid_init
           datatot_valid_new[, "y"] <- rep(1, nrow(datatot_valid_new))
           names(datatot_valid_new[which(names(datatot_valid_new) == "y")]) <- "intercept"
-          
+
           f1.predictcv[index == k] <- as.matrix(datatot_valid_new[, is.na(fit1.gaus$coefficients) == FALSE]) %*% fit1.gaus$coefficients[is.na(fit1.gaus$coefficients) == FALSE]
-          
+
           fit0.gaus <- glm(y ~ ., data = data0.init, family = "gaussian")
-          
+
           datatot_valid_new <- datatot_valid_init
           datatot_valid_new[, "y"] <- rep(1, nrow(datatot_valid_new))
           names(datatot_valid_new[which(names(datatot_valid_new) == "y")]) <- "intercept"
-          
+
           f0.predictcv[index == k] <- as.matrix(datatot_valid_new[, is.na(fit0.gaus$coefficients) == FALSE]) %*% fit0.gaus$coefficients[is.na(fit0.gaus$coefficients) == FALSE]
-          
-          
+
+
         } else if (initial.predictor.method == "gam") {
-          
+
           xvars <- colnames(x.init)
           if (is.null(xvar.smooth.init) == TRUE){
             fgam.init <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
@@ -314,19 +318,19 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
           ## changed poisson to gaussian, removed offset option
           fit1.gam.init <- mgcv::gam(as.formula(fgam.init), data = data1.init, family = "gaussian")
           f1.predictcv[index == k] <- predict(object = fit1.gam.init, newdata = datatot_valid, type = "response")
-          
+
           fit0.gam.init <- mgcv::gam(as.formula(fgam.init), data = data0.init, family = "gaussian")
           f0.predictcv[index == k] <- predict(object = fit0.gam.init, newdata = datatot_valid, type = "response")
         }
-        
+
         if (ps.method == "glm") {
           pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
         } else {
           pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
         }
-        
+
       }#end of Kfold loops
-      
+
       if ("twoReg" %in% score.method) {
         ## bb-th cross fitting two regression estimator
         ## Replace count function to mean
@@ -334,7 +338,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
         beta0.final <- onearmglmmean.dr(y = y, x.cate = x.cate, trt = 1 - trt, ps = 1 - pscv, f.predictor = f0.predictcv)
         delta.twoReg.mat[bb, ] <- as.vector(beta1.final - beta0.final)
       }#end of if ("twoReg" %in% score.method)
-      
+
       ##      if ("contrastReg" %in% score.method) {
       ##        ## bb-th cross fitting contrast regression estimator
       ##        fit_two <- twoarmglmmean.dr(y = y, x.cate = x.cate, trt = trt, ps = pscv,
@@ -344,8 +348,8 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
       ##        converge[bb] <- fit_two$converge
       ##        if(converge[bb] == TRUE) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
       ##      }#end of if ("contrastReg" %in% score.method)
-      
-      
+
+
       if ("contrastReg" %in% score.method) {
         ## bb-th cross fitting contrast regression estimator
         fit_two <- twoarmglmmean.dr(y = y, x.cate = x.cate, trt = trt, ps = pscv,
@@ -355,17 +359,17 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
         #        if(converge[bb] == TRUE) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
         sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
       }#end of if ("contrastReg" %in% score.method)
-      
-      
+
+
     }#end of B loops
   }#end of if c("twoReg", "contrastReg") %in% score.method
-  
+
   if ("boosting" %in% score.method) {
     ## Boosting method based on the entire data (score 1)
     data1.boosting <- datatot[trt == 1, ]
     # TODO: if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
     ##Changed poisson to gaussian, removed offset term
-    
+
     fit1.boosting <- meanCatch(gbm(y ~ ., data = data1.boosting, distribution = "gaussian",
                                    interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5))
     if (length(fit1.boosting$errors) > 0){
@@ -373,27 +377,27 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
     } else{
       best1.iter <- max(10, gbm.perf(fit1.boosting$fit, method = "cv", plot.it = plot.gbmperf))
     }
-    
+
     data0.boosting <- datatot[trt == 0, ]
     fit0.boosting <- meanCatch( gbm(y ~ ., data = data0.boosting, distribution = "gaussian",
                                     interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5))
-    
+
     if (length(fit0.boosting$errors) > 0){
       best0.iter <- NA
     } else{
       best0.iter <- max(10, gbm.perf(fit0.boosting$fit, method = "cv", plot.it = plot.gbmperf))
     }
-    
+
     result$result.boosting <- list(fit1.boosting = fit1.boosting$fit, fit0.boosting = fit0.boosting$fit)
-    
+
     temp.iter <- c(best.iter, best1.iter, best0.iter)
     temp.iter <- temp.iter[!is.na(temp.iter)]
     if (length(temp.iter) == 0){best.iter <- NA} else {best.iter <- max(temp.iter)}
-    
+
     warn.fit[["boosting"]] <- append(fit1.boosting$warnings, fit0.boosting$warnings)
     err.fit[["boosting"]] <- append(fit1.boosting$errors, fit0.boosting$errors)
-    
-    
+
+
   }
   ##changed poisson to gaussian
   if ("gaussian" %in% score.method) {
@@ -404,11 +408,11 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
     names(delta.gaussian) <- c("(Intercept)", colnames(x.cate))
     result$result.gaussian <- delta.gaussian
   }
-  
-  
+
+
   ##TODO: Try to give message when there are not enough observations
   if ("gam" %in% score.method) {
-    
+
     xvars <- colnames(x.cate)
     if (is.null(xvar.smooth.score) == TRUE){
       fgam.score <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
@@ -417,42 +421,42 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
       xvar.linear.score <- setdiff(xvars, xvar.smooth2.score) # the remaining xvars in x.cate but not in xvar.smooth are linear predictors
       fgam.score <- paste0("y ~ ", paste0(xvar.linear.score, collapse = "+"), "+", paste0("s(", xvar.smooth2.score, ")", collapse = "+"))
     }
-    
+
     data1.gam.cate<- datatot[trt == 1, ]
     data0.gam.cate <- datatot[trt == 0, ]
-    
+
     fit1.gam.cate <- meanCatch( mgcv::gam(as.formula(fgam.score), data = data1.gam.cate, family = "gaussian"))
     fit0.gam.cate <- meanCatch( mgcv::gam(as.formula(fgam.score), data = data0.gam.cate, family = "gaussian"))
-    
+
     result$result.gam <- list(fit1.gam = fit1.gam.cate$fit, fit0.gam = fit0.gam.cate$fit)
-    
+
     warn.fit[["gam"]] <- append(fit1.gam.cate$warnings, fit0.gam.cate$warnings)
     err.fit[["gam"]] <- append(fit1.gam.cate$errors, fit0.gam.cate$errors)
-    
+
   }
-  
-  
+
+
   if ("randomForest" %in% score.method) {
-    
+
     data1.rf <- datatot[trt == 1, ]
     data0.rf <- datatot[trt == 0, ]
-    
+
     fit1.rf <- meanCatch(randomForestSRC::rfsrc(y ~ ., data = data1.rf, ntree = n.trees.rf))
     fit0.rf <- meanCatch(randomForestSRC::rfsrc(y ~ ., data = data0.rf, ntree = n.trees.rf))
-    
+
     result$result.randomForest <- list(fit1.rf = fit1.rf$fit, fit0.rf = fit0.rf$fit)
-    
+
     warn.fit[["randomForest"]] <- append(fit1.rf$warnings, fit0.rf$warnings)
     err.fit[["randomForest"]] <- append(fit1.rf$errors, fit0.rf$errors)
   }
-  
+
   if ("twoReg" %in% score.method) {
     ## Final two regression estimator (score 3)
     delta.twoReg <- colMeans(delta.twoReg.mat)
     names(delta.twoReg) <- c("(Intercept)", colnames(x.cate))
     result$result.twoReg <- delta.twoReg
   }
-  
+
   if ("contrastReg" %in% score.method) {
     ## Final contrast regression estimator (score 4)
     #    converge.contrastReg <- (sum(converge) > 0)
@@ -465,19 +469,19 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
     #    }
     delta.contrastReg <- colMeans(delta.contrastReg.mat[, , drop = FALSE])
     sigma.contrastReg <- sigma.contrastReg.mat/B
-    
+
     names(delta.contrastReg) <- colnames(sigma.contrastReg) <- rownames(sigma.contrastReg) <- c("(Intercept)", colnames(x.cate))
     result$result.contrastReg <- list(delta.contrastReg = delta.contrastReg,
                                       sigma.contrastReg = sigma.contrastReg
                                       #                                      #converge.contrastReg = converge.contrastReg
     )
   }
-  
+
   result$best.iter <- best.iter
   result$fgam <- fgam.init
   result$warn.fit <- warn.fit
   result$err.fit <- err.fit
-  
+
   return(result)
 }
 
@@ -502,69 +506,69 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
 #'         score = NA if the corresponding method is not called
 scoremean <- function(fit, x.cate,
                       score.method = c("boosting", "gaussian", "twoReg", "contrastReg", "randomForest", "gam")) {
-  
+
   result <- vector("list", length(score.method))
   names(result) <- paste0("score.", score.method)
   x.aug <- cbind(1, x.cate)
-  
+
   if ("boosting" %in% score.method) {
     fit0.boosting <- fit$result.boosting$fit0.boosting
     best0.iter <- fit$result.boosting$best0.iter
     fit1.boosting <- fit$result.boosting$fit1.boosting
     best1.iter <- fit$result.boosting$best1.iter
-    
+
     datanew <- data.frame(x = x.cate)
     colnames(datanew) <- c(colnames(x.cate))
     suppressMessages({
       predict0 <- predict(object = fit0.boosting, newdata = datanew, n.trees = best0.iter)
       predict1 <- predict(object = fit1.boosting, newdata = datanew, n.trees = best1.iter)
     },
-    class = "message")
+    classes = "message")
     result$score.boosting <- predict1 - predict0
   }
-  
+
   if ("gaussian" %in% score.method) {
     delta.gaussian <- fit$result.gaussian
     result$score.gaussian <- as.numeric(as.matrix(x.aug[,is.na(delta.gaussian) == FALSE]) %*% delta.gaussian[is.na(delta.gaussian) == FALSE])
   }
-  
+
   if ("twoReg" %in% score.method) {
     delta.twoReg <- fit$result.twoReg
     result$score.twoReg <- as.numeric(as.matrix(x.aug[,is.na(delta.twoReg) == FALSE]) %*% delta.twoReg[is.na(delta.twoReg) == FALSE])
   }
-  
+
   if ("contrastReg" %in% score.method) {
     delta.contrastReg <- fit$result.contrastReg$delta.contrastReg
     result$score.contrastReg <- as.numeric(as.matrix(x.aug[,is.na(delta.contrastReg) == FALSE]) %*% delta.contrastReg[is.na(delta.contrastReg) == FALSE])
   }
-  
+
   if ("gam" %in% score.method) {
-    
+
     fit0.gam <- fit$result.gam$fit0.gam
     fit1.gam <- fit$result.gam$fit1.gam
-    
+
     datanew <- data.frame(x = x.cate)
     colnames(datanew) <- c(colnames(x.cate))
-    
+
     predict0 <- predict(object = fit0.gam, newdata = datanew)
     predict1 <- predict(object = fit1.gam, newdata = datanew)
-    
+
     result$score.gam <- predict1 - predict0
   }
-  
+
   if ("randomForest" %in% score.method) {
-    
+
     fit0.rf <- fit$result.randomForest$fit0.rf
     fit1.rf <- fit$result.randomForest$fit1.rf
-    
+
     datanew <- data.frame(x = x.cate)
     colnames(datanew) <- c(colnames(x.cate))
-    
+
     predict0 <- predict(object = fit0.rf, newdata = datanew)$predicted
     predict1 <- predict(object = fit1.rf, newdata = datanew)$predicted
-    
+
     result$score.randomForest <- predict1 - predict0
   }
-  
+
   return(result)
 }

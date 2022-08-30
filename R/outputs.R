@@ -613,7 +613,7 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 
   }
 
-  if (verbose == 2){
+  if (verbose == 2) {
     if (any(is.na(unlist(result[str_replace(names(fit.score.train), "score", "ate")])))) {
       warning("Missing log rate ratio detected in the subgroups due to negative doubly robust estimator of
             the outcome for one or both treatment group(s).")
@@ -683,12 +683,6 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
-#' estimated log CATE scores to define mutually exclusive subgroups.
-#' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-#' Each element represents the cutoff to separate the observations into
-#' \code{length(prop.multi) - 1} mutually exclusive subgroups.
-#' Default is \code{c(0, 1/3, 2/3, 1)}.
 #' @param ps.method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
@@ -925,7 +919,7 @@ pmcount <- function(cate.model, ps.model, data, score.method,
 
     if ("poisson" %in% score.method) cf$poisson <- fit$result.poisson
 
-    if("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
 
     if ("contrastReg" %in% score.method) {
       cf$contrastReg <- fit$result.contrastReg$delta.contrastReg

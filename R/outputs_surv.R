@@ -492,6 +492,8 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param verbose An integer value indicating whether intermediate progress messages and histograms should
+#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
 #'
 #' @return For count response, see description of outputs in \code{\link{pmcount}()}.
 #' For survival response, see description of outputs in \code{\link{pmsurv}()}.
@@ -572,9 +574,9 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                initial.predictor.method = NULL,  xvar.smooth.score = NULL, xvar.smooth.init = NULL,
                tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
                error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-               seed = NULL, plot.gbmperf = TRUE) {
+               seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
 
-  if (response == "count"){
+  if (response == "count") {
     pmout <- pmcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                      higher.y = higher.y,
                      prop.cutoff = prop.cutoff,
@@ -584,7 +586,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                      error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
                      seed = seed, plot.gbmperf = plot.gbmperf)
   }
-  if (response == "survival"){
+  if (response == "survival") {
     pmout <- pmsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
                     surv.min = surv.min, ipcw.method = ipcw.method,
@@ -596,7 +598,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
                     seed = seed, plot.gbmperf = plot.gbmperf)
   }
-  if (response == "continuous"){
+  if (response == "continuous") {
     pmout <- pmmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model,
                     higher.y = higher.y, abc = abc,
@@ -1640,12 +1642,6 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
-#' estimated log CATE scores to define mutually exclusive subgroups.
-#' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-#' Each element represents the cutoff to separate the observations into
-#' \code{length(prop.multi) - 1} mutually exclusive subgroups.
-#' Default is \code{c(0, 1/3, 2/3, 1)}.
 #' @param ps.method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or

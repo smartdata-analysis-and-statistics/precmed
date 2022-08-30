@@ -2,7 +2,7 @@
 % Please edit documentation in R/outputs_continuous.R
 \name{drmean.inference}
 \alias{drmean.inference}
-\title{Doubly robust estimator of and inference for the average treatment effect for count data}
+\title{Doubly robust estimator of and inference for the average treatment effect for continuous data}
 \usage{
 drmean.inference(
   cate.model,
@@ -98,8 +98,8 @@ This helper function estimates the average treatment effect (ATE) between two
 }
 \examples{
 
-output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
-                               previous_cost + previous_number_relapses + offset(log(years)),
+output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
+                               previous_cost + previous_number_relapses,
                             ps.model = trt ~ age + previous_treatment,
                             data = countExample,
                             plot.boot = TRUE,

@@ -71,6 +71,7 @@
 #' @param surv.min Lower truncation limit for probability of being censored (positive and very close to 0).
 #'
 #' @return A vector of size \code{n} with the estimated probabilities \code{Pr(C > min(y, tau0) | x.ipcw)}
+#' @importFrom stats pnorm
 #'
 ipcw.surv <- function(y, d, x.ipcw, yf = NULL, ipcw.method = "breslow", tau0, surv.min = 0.025) {
 

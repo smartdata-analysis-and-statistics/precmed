@@ -76,6 +76,9 @@ Default is \code{NULL}, which uses all variables in \code{cate.model}.}
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 \code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
 
+\item{n.trees.rf}{A positive integer specifying the number of trees. Used only if
+\code{score.method = 'randomForest'}. Default is \code{1000}.}
+
 \item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
 (usually 100-1000). Used only if \code{score.method = 'boosting'} or
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and

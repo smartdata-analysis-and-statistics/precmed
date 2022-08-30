@@ -106,6 +106,13 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
+#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Default is \code{0.001}.
+#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
+#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
+#' quantity to be added to diagonal of the slope matrix to prevent singularity.
+#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
@@ -260,8 +267,8 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
                    train.prop = 3/4, cv.n = 10,
                    error.max = 0.1, max.iter = 5000,
                    initial.predictor.method = "boosting", xvar.smooth.score = NULL, xvar.smooth.init = NULL,
-                   tree.depth = 2,  n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
-                   error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
+                   tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
+                   error.maxNR = 1e-3, tune = c(0.5, 2),
                    seed = NULL, verbose = 2, ...) {
 
   # TODO: now score.method has no default (mandatory argument)
@@ -279,7 +286,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
     error.max = error.max, max.iter = max.iter,
     initial.predictor.method = initial.predictor.method,
     tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
-    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune
+    error.maxNR = error.maxNR, tune = tune
   )
 
   #### PRE-PROCESSING ####
@@ -450,7 +457,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
       score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
     } else {score.method.updated <- score.method}
     #    score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
-    if(length(score.method.updated) == 0) {stop("All methods produced error in fitting.")}
+    if (length(score.method.updated) == 0) {stop("All methods produced error in fitting.")}
 
     ####### Construct the score in training set ------------------------------------------
     fit.score.train <- scoremean(fit = fit, x.cate = x.cate.train,
@@ -654,6 +661,8 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
+#' @param n.trees.rf A positive integer specifying the number of trees. Used only if
+#' \code{score.method = 'randomForest'}. Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
 #' (usually 100-1000). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
@@ -667,6 +676,13 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #' in boosting. Used only if \code{score.method = 'boosting'} or if
 #' \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
+#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Default is \code{0.001}.
+#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
+#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
+#' quantity to be added to diagonal of the slope matrix to prevent singularity.
+#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param ... Additional arguments for \code{gbm()}
@@ -781,7 +797,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
                    initial.predictor.method = "boosting",
                    xvar.smooth.score = NULL, xvar.smooth.init = NULL,
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = FALSE,
-                   error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
+                   error.maxNR = 1e-3, tune = c(0.5, 2),
                    seed = NULL, ...) {
 
   # TODO: score.method is now a mandatory argument
@@ -795,7 +811,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
     initial.predictor.method = initial.predictor.method,
     tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
-    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune
+    error.maxNR = error.maxNR, tune = tune
   )
 
   #### PRE-PROCESSING ####
@@ -821,7 +837,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
                   xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
-                  error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
+                  error.maxNR = error.maxNR, tune = tune, ...)
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -845,7 +861,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
     score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
   } else {score.method.updated <- score.method}
   #    score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
-  if(length(score.method.updated) == 0) {stop("All methods produced error in fitting.")}
+  if (length(score.method.updated) == 0) {stop("All methods produced error in fitting.")}
 
   fit.score <- scoremean(fit = fit,
                          x.cate = x.cate,
@@ -871,7 +887,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 
     if ("gaussian" %in% score.method) cf$gaussian <- fit$result.gaussian
 
-    if("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
 
     if ("contrastReg" %in% score.method) {
       cf$contrastReg <- fit$result.contrastReg$delta.contrastReg
@@ -900,7 +916,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 }
 
 
-#' Doubly robust estimator of and inference for the average treatment effect for count data
+#' Doubly robust estimator of and inference for the average treatment effect for continuous data
 #'
 #' Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
 #' of treatment 1 over treatment 0 for count outcomes. Bootstrap is used for inference.
@@ -968,8 +984,8 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 #'
 #' @examples
 #'
-#' output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
-#'                                previous_cost + previous_number_relapses + offset(log(years)),
+#' output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
+#'                                previous_cost + previous_number_relapses,
 #'                             ps.model = trt ~ age + previous_treatment,
 #'                             data = countExample,
 #'                             plot.boot = TRUE,
@@ -990,10 +1006,18 @@ drmean.inference <- function(cate.model, ps.model, data,
 
   #### CHECK ARGUMENTS ####
   # TODO: Phoebe I think we removed the arg.check on interactions but here it is?
-  arg.checks(fun = "drinf", response = "continuous", data = data, ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions, n.boot = n.boot, plot.boot = plot.boot)
+  arg.checks(fun = "drinf", response = "continuous", data = data,
+             ps.method = ps.method,
+             minPS = minPS,
+             maxPS = maxPS,
+             interactions = interactions,
+             n.boot = n.boot,
+             plot.boot = plot.boot)
 
   #### PRE-PROCESSING ####
-  preproc <- data.preproc.mean(fun = "drinf", cate.model = cate.model, init.model = init.model, ps.model = ps.model,
+  preproc <- data.preproc.mean(fun = "drinf", cate.model = cate.model,
+                               init.model = NULL, #TODO: Needs to be specified
+                               ps.model = ps.model,
                                data = data, ps.method = ps.method)
   y <- preproc$y
   trt <- preproc$trt

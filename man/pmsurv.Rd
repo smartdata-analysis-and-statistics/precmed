@@ -138,13 +138,6 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{prop.multi}{A vector of numerical values (in [0, 1]) specifying percentiles of the
-estimated log CATE scores to define mutually exclusive subgroups.
-It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-Each element represents the cutoff to separate the observations into
-\code{length(prop.multi) - 1} mutually exclusive subgroups.
-Default is \code{c(0, 1/3, 2/3, 1)}.}
 }
 \value{
 Returns a list containing the following components:
@@ -254,13 +247,16 @@ validation to reduce optimism.
 
 tau0 <- with(survivalExample, min(quantile(y[trt == 1], 0.95), quantile(y[trt == 0], 0.95)))
 
-pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                           ps.model = trt ~ age + previous_treatment,
-                           ipcw.model = ~ age + previous_cost + previous_treatment,
-                           data = survivalExample,
-                           tau0 = tau0,
-                           score.method = "randomForest",
-                           seed = 999)
+pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
+                                                 female +
+                                                 previous_cost +
+                                                 previous_number_relapses,
+                          ps.model = trt ~ age + previous_treatment,
+                          ipcw.model = ~ age + previous_cost + previous_treatment,
+                          data = survivalExample,
+                          tau0 = tau0,
+                          score.method = "randomForest",
+                          seed = 999)
 
 
 }
