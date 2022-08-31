@@ -295,5 +295,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 }
 \seealso{
 \code{\link{pm}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
-\code{"PrecMed"} objects.
+\code{"precmed"} objects.
 }

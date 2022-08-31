@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plot.precmed}
 \alias{plot.precmed}
-\title{Two side-by-side line plots of validation curves from the \code{"PrecMed"} object}
+\title{Two side-by-side line plots of validation curves from the \code{"precmed"} object}
 \usage{
 \method{plot}{precmed}(
   x,
@@ -19,7 +19,7 @@
 )
 }
 \arguments{
-\item{x}{An object of class \code{"PrecMed"}.}
+\item{x}{An object of class \code{"precmed"}.}
 
 \item{cv.i}{A positive integer indicating the index of the CV iteration results to be plotted.
 Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{cv}()} or
@@ -160,5 +160,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{abc}()} and \code{\link{boxplot}()} for \code{"PrecMed"} objects.
+\code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 }

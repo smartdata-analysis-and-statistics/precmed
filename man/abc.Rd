@@ -2,19 +2,19 @@
 % Please edit documentation in R/outputs_main.R
 \name{abc}
 \alias{abc}
-\title{Compute the area between curves from the \code{"PrecMed"} object}
+\title{Compute the area between curves from the \code{"precmed"} object}
 \usage{
 abc(x)
 }
 \arguments{
-\item{x}{An object of class \code{"PrecMed"}.}
+\item{x}{An object of class \code{"precmed"}.}
 }
 \value{
 Returns a matrix of numeric values with number of columns equal to the number cross-validation
 iteration and number of rows equal to the number of scoring methods in \code{x}.
 }
 \description{
-Compute the area between curves (ABC) for each scoring method in the \code{"PrecMed"} object.
+Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
 This should be run only after results of \code{\link{cv}()} have been obtained.
 }
 \details{
@@ -75,7 +75,7 @@ cv.mean <- cvmean(cate.model = y ~ age +
                   plot.gbmperf = FALSE)
 
 
-abc(x = cv.mean)
+abc(x = cv.mean) # ABC of the validation curves for each method and each CV iteration
 }
 
 }
@@ -87,5 +87,5 @@ Journal of the American Statistical Association, 108(502), 527-539.}
 }
 \seealso{
 \code{\link{cv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
-\code{"PrecMed"} objects.
+\code{"precmed"} objects.
 }

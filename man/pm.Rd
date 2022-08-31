@@ -195,7 +195,7 @@ output_pm <- pm(response = "count",
                 seed = 999)
 
 # Try:
-output_pm$coefficients
+coef(output_pm)
 
 # Survival outcome
 tau0 <- with(survivalExample,
@@ -207,7 +207,7 @@ output_pm2 <- pm(response = "survival",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  data = survivalExample,
                  higher.y = TRUE,
-                 score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
+                 score.method = c("poisson", "boosting", "randomForest"),
                  followup.time = NULL,
                  tau0 = tau0,
                  surv.min = 0.025,
@@ -216,7 +216,8 @@ output_pm2 <- pm(response = "survival",
                  plot.gbmperf = FALSE)
 
 # Try:
-output_pm2$coefficients
+coef(output_pm2)
+
 
 # Continuous outcome
 output_pm3 <- pm(response = "continuous",
@@ -236,7 +237,8 @@ output_pm3 <- pm(response = "continuous",
                 seed = 999)
 
 # Try:
-output_pm3$coefficients
+coef(output_pm3)
+
 }
 }
 \references{

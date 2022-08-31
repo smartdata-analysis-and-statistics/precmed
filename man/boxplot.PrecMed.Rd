@@ -2,12 +2,12 @@
 % Please edit documentation in R/plots.R
 \name{boxplot.precmed}
 \alias{boxplot.precmed}
-\title{A set of box plots of estimated ATEs from the \code{"PrecMed"} object}
+\title{A set of box plots of estimated ATEs from the \code{"precmed"} object}
 \usage{
 \method{boxplot}{precmed}(x, ylab = NULL, plot.hr = FALSE, grayscale = FALSE, ...)
 }
 \arguments{
-\item{x}{An object of class \code{"PrecMed"}.}
+\item{x}{An object of class \code{"precmed"}.}
 
 \item{ylab}{A character value for the y-axis label to describe what the ATE is. Default is \code{NULL},
 which creates a default y-axis label based on available data.}
@@ -101,5 +101,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{plot}} and \code{\link{abc}()} for \code{"PrecMed"} objects.
+\code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 }
