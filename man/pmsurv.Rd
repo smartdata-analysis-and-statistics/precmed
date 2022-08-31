@@ -244,8 +244,9 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
-
-tau0 <- with(survivalExample, min(quantile(y[trt == 1], 0.95), quantile(y[trt == 0], 0.95)))
+\dontrun{
+tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
+                               quantile(y[trt == "drug0"], 0.95)))
 
 pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
                                                  female +
@@ -258,7 +259,7 @@ pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
                           score.method = "randomForest",
                           seed = 999)
 
-
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
