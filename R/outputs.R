@@ -647,19 +647,6 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 }
 
 
-# Build the generics
-## Overwrite standard generic
-# plot <- function(x, ...) UseMethod("plot")
-# boxplot <- function(x, ...)  UseMethod("boxplot")
-#
-# ## Default is standard generic
-# plot.default <- function(x, ...) graphics::plot(x, y, ...)
-# boxplot.default <- function(x, ...) graphics::boxplot(x, ...)
-
-## abc does not have a pre-defined generic
-# abc <- function(x, combine) UseMethod("abc")
-
-
 #' Estimation of the conditional average treatment effect (CATE) score for count data
 #'
 #' Provides singly robust and doubly robust estimation of CATE score with up to 5 scoring methods
