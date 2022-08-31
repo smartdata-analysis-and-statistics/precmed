@@ -113,7 +113,7 @@
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
-#' @return Returns a list containing the following components saved as a \code{"PrecMed"} object:
+#' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
 #'  \item{\code{ate.gaussian}: }{A list of results output if \code{score.method} includes
 #'  \code{'gaussian'}:}
@@ -221,7 +221,7 @@
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{plot.PrecMed}()}, \code{\link{boxplot.PrecMed}()}, \code{\link{abc}()} methods for \code{"PrecMed"} objects,
+#' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
 #' and \code{\link{pmcount}()} function.
 #'
 #' @examples

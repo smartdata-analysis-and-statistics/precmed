@@ -36,8 +36,7 @@ cvsurv(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 1,
-  ...
+  verbose = 1
 )
 }
 \arguments{
@@ -176,7 +175,7 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.}
 }
 \value{
-Returns a list containing the following components saved as a \code{"PrecMed"} object:
+Returns a list containing the following components saved as a \code{"precmed"} object:
 \itemize{
  \item{\code{ate.randomForest}: }{A list of ATE output measured by the RMTL ratio if
  \code{score.method} includes \code{'randomForest'}:}
@@ -371,5 +370,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 }
 \seealso{
 \code{\link{pmsurv}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
-\code{"PrecMed"} objects.
+\code{"precmed"} objects.
 }

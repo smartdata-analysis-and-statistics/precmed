@@ -123,7 +123,7 @@
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
 #'
-#' @return Returns a list containing the following components saved as a \code{"PrecMed"} object:
+#' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
 #'  \item{\code{ate.randomForest}: }{A list of ATE output measured by the RMTL ratio if
 #'  \code{score.method} includes \code{'randomForest'}:}
@@ -280,7 +280,7 @@
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
 #' @seealso \code{\link{pmsurv}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
-#' \code{"PrecMed"} objects.
+#' \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
@@ -330,7 +330,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
                    initial.predictor.method = "randomForest",
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
                    error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                   seed = NULL, plot.gbmperf = TRUE, verbose = 1, ...) {
+                   seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
 
   # Set seed for reproducibility
   set.seed(seed)

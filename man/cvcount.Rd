@@ -152,7 +152,7 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 \item{...}{Additional arguments for \code{gbm()}}
 }
 \value{
-Returns a list containing the following components saved as a \code{"PrecMed"} object:
+Returns a list containing the following components saved as a \code{"precmed"} object:
 \itemize{
  \item{\code{ate.poisson}: }{A list of results output if \code{score.method} includes
  \code{'poisson'}:}
@@ -294,6 +294,6 @@ observational data. Journal of the American Statistical Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{plot.PrecMed}()}, \code{\link{boxplot.PrecMed}()}, \code{\link{abc}()} methods for \code{"PrecMed"} objects,
+\code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
 and \code{\link{pmcount}()} function.
 }
