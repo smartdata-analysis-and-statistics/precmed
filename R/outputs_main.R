@@ -605,6 +605,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+#'
 #' output2 <- dr.inference(response = "survival",
 #'                         cate.model = survival::Surv(y, d) ~ age + female +
 #'                         previous_cost + previous_number_relapses,
@@ -724,7 +725,8 @@ dr.inference <- function(response, cate.model, ps.model, data,
 #' abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age +
+#' cv_mean <- cv(response = "continuous",
+#'                   cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -740,7 +742,7 @@ dr.inference <- function(response, cate.model, ps.model, data,
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' abc(x = cv.mean) # ABC of the validation curves for each method and each CV iteration
+#' abc(x = cv_mean) # ABC of the validation curves for each method and each CV iteration
 #' }
 #'
 #' @export

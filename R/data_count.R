@@ -36,6 +36,6 @@
 #' @examples
 #' data(countExample)
 #' str(countExample)
-#' rate <- countExample$y / countExample$year
+#' rate <- countExample$y / countExample$years
 "countExample"
 

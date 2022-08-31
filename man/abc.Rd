@@ -59,7 +59,8 @@ cv_surv <- cv(response = "survival",
 abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 
 # Continuous outcome
-cv.mean <- cvmean(cate.model = y ~ age +
+cv_mean <- cv(response = "continuous",
+                  cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,
@@ -75,7 +76,7 @@ cv.mean <- cvmean(cate.model = y ~ age +
                   plot.gbmperf = FALSE)
 
 
-abc(x = cv.mean) # ABC of the validation curves for each method and each CV iteration
+abc(x = cv_mean) # ABC of the validation curves for each method and each CV iteration
 }
 
 }

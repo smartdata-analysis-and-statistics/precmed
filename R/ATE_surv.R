@@ -44,7 +44,7 @@
 #'   \item{\code{log.rmtl.ratio}: } A numeric value of the estimated log rmtl ratio.
 #'   \item{\code{log.hazard.ratio}: } A numeric value of the estimated log hazard ratio.
 #' }
-#'
+#' @importFrom survival Surv coxph coxph.detail survreg
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025, ps.method = "glm",
                    minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow") {

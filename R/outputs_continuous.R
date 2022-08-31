@@ -227,10 +227,12 @@
 #' @examples
 #' \dontrun{
 #' cv <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'              ps.model = trt ~ age + previous_treatment,
+#'              init.model = y ~ age + previous_treatment + previous_cost + previous_status_measure,
+#'              ps.model = trt ~ previous_status_measure,
 #'              data = meanExample,
 #'              higher.y = FALSE,
-#'              score.method = "",
+#'              score.method = c("gaussian", "twoReg"),
+#'              initial.predictor.method = "gaussian",
 #'              cv.n = 5,
 #'              plot.gbmperf = FALSE,
 #'              seed = 999)
