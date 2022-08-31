@@ -1,10 +1,10 @@
-#' Simulated data with count outcome
+#' Simulated data with continuous outcome
 #'
-#' A dataset containing a count outcome, a length of follow-up and 6 baseline covariates
+#' A dataset containing a continuous outcome and 6 baseline covariates
 #'
 #' @docType data
 #'
-#' @usage data(countExample)
+#' @usage data(meanExample)
 #'
 #' @format A dataframe with 4000 rows (patients) and 9 variables:
 #' \describe{
@@ -15,15 +15,12 @@
 #'   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
 #'   \item{previous_number_relapses}{previous number of relapses}
 #'   \item{trt}{current treatment, "drug0" or "drug1"}
-#'   \item{y}{count oucome, current number of relapses}
-#'   \item{years}{length of follow-up, in years}
+#'   \item{y}{count oucome, current number of relapses}#'
 #' }
 #'
 #' @keywords datasets
 #'
 #' @examples
-#' data(countExample)
-#' str(countExample)
-#' rate <- countExample$y / countExample$year
-"countExample"
-
+#' data(meanExample)
+#' str(meanExample)
+"meanExample"
