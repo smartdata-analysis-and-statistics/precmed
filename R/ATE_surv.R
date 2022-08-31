@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
-# Purpose: ATE functions for Survival outcomes
+# Purpose: Average treatment effect (ATE) functions for Survival outcomes
 #
 # Platform: Windows
 # R Version: 4.1.0

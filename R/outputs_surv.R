@@ -1,13 +1,12 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
 # Purpose: Output functions for Survival outcomes
 #
 # Platform: Windows
 # R Version: 4.1.0
 #
-
 
 
 

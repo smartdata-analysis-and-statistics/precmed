@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
-# Purpose: Main output functions for PrecMed package
+# Purpose: Main output functions for precmed package
 #
 # Platform: Windows
 # R Version: 4.1.0
@@ -150,7 +150,7 @@
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
 #' @seealso \code{\link{pm}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
-#' \code{"PrecMed"} objects.
+#' \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
@@ -429,7 +429,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'                 seed = 999)
 #'
 #' # Try:
-#' output_pm$coefficients
+#' coef(output_pm)
 #'
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
@@ -441,7 +441,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
 #'                  data = survivalExample,
 #'                  higher.y = TRUE,
-#'                  score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
+#'                  score.method = c("poisson", "boosting", "randomForest"),
 #'                  followup.time = NULL,
 #'                  tau0 = tau0,
 #'                  surv.min = 0.025,
@@ -450,7 +450,8 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'                  plot.gbmperf = FALSE)
 #'
 #' # Try:
-#' output_pm2$coefficients
+#' coef(output_pm2)
+#'
 #'
 #' # Continuous outcome
 #' output_pm3 <- pm(response = "continuous",
@@ -470,7 +471,8 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'                 seed = 999)
 #'
 #' # Try:
-#' output_pm3$coefficients
+#' coef(output_pm3)
+#'
 #' }
 #' @export
 
@@ -663,12 +665,12 @@ dr.inference <- function(response, cate.model, ps.model, data,
 }
 
 
-#' Compute the area between curves from the \code{"PrecMed"} object
+#' Compute the area between curves from the \code{"precmed"} object
 #'
-#' Compute the area between curves (ABC) for each scoring method in the \code{"PrecMed"} object.
+#' Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
 #' This should be run only after results of \code{\link{cv}()} have been obtained.
 #'
-#' @param x An object of class \code{"PrecMed"}.
+#' @param x An object of class \code{"precmed"}.
 #'
 #' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
 #' iteration and number of rows equal to the number of scoring methods in \code{x}.
@@ -691,7 +693,7 @@ dr.inference <- function(response, cate.model, ps.model, data,
 #' \url{https://www.jstor.org/stable/24246461?seq=1}
 #'
 #' @seealso \code{\link{cv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
-#' \code{"PrecMed"} objects.
+#' \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
@@ -738,7 +740,7 @@ dr.inference <- function(response, cate.model, ps.model, data,
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' abc(x = cv.mean)
+#' abc(x = cv.mean) # ABC of the validation curves for each method and each CV iteration
 #' }
 #'
 #' @export
@@ -747,7 +749,7 @@ dr.inference <- function(response, cate.model, ps.model, data,
 
 abc <- function(x) {
 
-  # Check the value of abc (must have sbc values)
+  # Check the value of abc (must have area between curves values)
   if (x$abc == FALSE) {
     stop("Area between curves (ABC) must have been calculated in x by setting abc = TRUE in cv().")
   }

@@ -1,6 +1,6 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
 # Purpose: Utility functions for Survival outcomes
 #

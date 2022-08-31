@@ -1,3 +1,15 @@
+# ------------------------------------------------------------------
+#
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
+#
+# Purpose: Simulated data with Count outcomes
+#
+# Platform: Windows
+# R Version: 4.1.0
+#
+
+
+
 #' Simulated data with count outcome
 #'
 #' A dataset containing a count outcome, a length of follow-up and 6 baseline covariates

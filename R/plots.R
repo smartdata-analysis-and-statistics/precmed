@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
-# Purpose: Main output functions for PrecMed package
+# Purpose: Plot functions for precmed package
 #
 # Platform: Windows
 # R Version: 4.1.0
@@ -10,14 +10,14 @@
 
 
 
-#' Two side-by-side line plots of validation curves from the \code{"PrecMed"} object
+#' Two side-by-side line plots of validation curves from the \code{"precmed"} object
 #'
 #' Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
 #' of nested subgroups in the training set and validation set separately, where each line represents
 #' one scoring method specified in \code{\link{cv}()} or \code{\link{cvmean}()}. This should be run
 #' only after results of \code{\link{cv}()} or \code{\link{cvmean}()} have been obtained.
 #'
-#' @param x An object of class \code{"PrecMed"}.
+#' @param x An object of class \code{"precmed"}.
 #' @param cv.i A positive integer indicating the index of the CV iteration results to be plotted.
 #' Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{cv}()} or
 #' \code{NULL}. If \code{cv.i = NULL}, the results across all CV iterations are combined according
@@ -69,7 +69,7 @@
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"PrecMed"} objects.
+#' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
@@ -175,7 +175,7 @@ plot.precmed <- function(x,
   }
 
   # Check plot.hr and only available for survival data
-  if (plot.hr == TRUE & x$response != "survival") stop("Hazard ratio plot is only available for PrecMed object with x$response equals to 'survival'.")
+  if (plot.hr == TRUE & x$response != "survival") stop("Hazard ratio plot is only available for precmed object with x$response equals to 'survival'.")
   if (!(plot.hr %in% c(TRUE, FALSE))) stop("plot.hr has to be boolean.")
 
   # Retrieve proportion
@@ -439,7 +439,7 @@ plot.precmed <- function(x,
 }
 
 
-#' A set of box plots of estimated ATEs from the \code{"PrecMed"} object
+#' A set of box plots of estimated ATEs from the \code{"precmed"} object
 #'
 #' Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
 #' the validation set across all cross-validation iterations. The subgroups are mutually exclusive and
@@ -448,7 +448,7 @@ plot.precmed <- function(x,
 #' method specified in \code{\link{cv}()}. This should be run only after results of \code{\link{cv}()} or
 #' \code{\link{cvmean}()}) have been obtained.
 #'
-#' @param x An object of class \code{"PrecMed"}.
+#' @param x An object of class \code{"precmed"}.
 #' @param ylab A character value for the y-axis label to describe what the ATE is. Default is \code{NULL},
 #' which creates a default y-axis label based on available data.
 #' @param plot.hr A logical value indicating whether the hazard ratios should be plotted in the
@@ -477,7 +477,7 @@ plot.precmed <- function(x,
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"PrecMed"} objects.
+#' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
@@ -545,7 +545,7 @@ boxplot.precmed <- function(x, ylab = NULL,
 
   # Argument checks on plot.hr
   if (!(plot.hr %in% c(TRUE, FALSE))) stop("plot.hr has to be boolean.")
-  if (plot.hr == TRUE & x$response != "survival") stop("Hazard ratio plot is only available for PrecMed objects with x$response is \"survival\".")
+  if (plot.hr == TRUE & x$response != "survival") stop("Hazard ratio plot is only available for precmed objects with x$response is \"survival\".")
 
   # Grab number of CV iterations
   cv.n <- ncol(x[[1]]$ate.est.valid.group.cv)

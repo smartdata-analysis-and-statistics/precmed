@@ -1,8 +1,8 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
-# Purpose: Utility functions
+# Purpose: Utility functions for Count outcomes
 #
 # Platform: Windows
 # R Version: 4.1.0

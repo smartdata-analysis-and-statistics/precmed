@@ -1,12 +1,13 @@
 # ------------------------------------------------------------------
 #
-# Project: Precision Medicine MS - Comprehensive R package
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
 #
-# Purpose: Output functions
+# Purpose: Output functions for Count outcomes
 #
 # Platform: Windows
 # R Version: 4.1.0
 #
+
 
 
 #' Cross-validation of the conditional average treatment effect (CATE) score for count outcomes

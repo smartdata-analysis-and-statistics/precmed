@@ -1,3 +1,15 @@
+# ------------------------------------------------------------------
+#
+# Project: Precision Medicine MS (precmed) - Comprehensive R package
+#
+# Purpose: Simulated data with Survival outcomes
+#
+# Platform: Windows
+# R Version: 4.1.0
+#
+
+
+
 #' Simulated data with survival outcome
 #'
 #' A dataset containing a time-to-event outcome, an event indicator, treatment group, and 6 baseline covariates
