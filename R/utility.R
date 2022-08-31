@@ -5,55 +5,9 @@
 # Purpose: Utility functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  18SEP2020  gs      Start the script
-#  28SEP2020  pj      Revise glm.ps()
-#  30SEP2020  pj      Add balance.split()
-#  01OCT2020  gs      Minor changes to glm.ps()
-#  02OCT2020  gs      Fix balance.split()
-#  17OCT2020  pj      Add arguments "minPS", "maxPS", "ps.method" to balance.split() which calls for drcount()
-#                     Add max.iter and warning messages in balance.split() to avoid endless looping and obscure messages
-#  04JAN2021  gs      Add xnew to glm.simplereg.ps()
-#  18JAN2021  gs      Add error messages in balance.split()
-#  21JAN2021  gs      Remove ps.method argument from balance.split()
-#  04FEB2021  gs      Minor changes to arguments description
-#  22FEB2021  gs      Move sdx outside while loop in balance.split()
-#                     Add commented changes x.cate x.ps to balance.split, glm.simplereg.ps, glm.ps
-#  24FEB2021  gs      Add changes x.cate, x.ps and update argument descriptions
-#  04MAR2021  gs      Add arguments check and pre-processing function
-#  08MAR2021  gs      Correct offset to 0=log(1) when no offset supplied
-#                     Convert cate.model ps.model as formulas
-#                     Convert trt to numeric 0/1
-#  09MAR2021  gs      Update argument descriptions
-#  12APR2021  gs      Add drop = F for matrix manipulation to avoid losing name of columns
-#  14APR2021  pj      Add negBin to score.method
-#  21APR2021  pj      Add higher.y argument
-#  10MAY2021  gs      Change ps.method options
-#                     Remove set.seed in inside functions
-#  17MAY2021  gs      Fix warning(cat()) combo in data.preproc
-#  24MAY2021  pj      Change "test" to "valid" in code or "validation" in text
-#  26MAY2021  gs      Removed format.countdata and identifyXvars
-#  16JUN2021  pj      Update parameter documentation
-#  06JUL2021  gs      Remove leading column of 1 in xnew glm.ps()
-#  08JUL2021  gs      Updated arg.check and data.preproc to accommodate inputs from drcount.inference
-#  12JUL2021  pj      Minor changes
-#  14JUL2021  pj      Minor typo fixes
-#  26AUG2021  gs      Add arg.check for initial.predictor.method
-#  19NOV2021  gs      Save original labels of treatment variable to give more meaningful axis name to plot
-#  03DEC2021  gs      Update prop.multi check to define at least 2 subgroups
-#  04FEB2022  pj      Remove matrixStats::sd()
-#  04MAR2022  gs      Change all references to gbm to boosting (except plot.gbmperf)
-#                     Change n.trees to n.trees.boosting
-#  24MAR2022  pj      Create wrapper for arg.checks() to distinguish common and specific args based on outcome type
-#  06MAY2022  gs      Check argument & data.preproc with initial.predictor.method with default NULL
-#  10MAY2022  gs      Fixed default argument in data.preproc
-#  25MAY2022  gs      Output treatment recoding warning in data.preproc
-# ------------------------------------------------------------------
+
 
 #' Propensity score estimation with a linear model
 #'

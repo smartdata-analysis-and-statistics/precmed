@@ -7,53 +7,6 @@
 # Platform: Windows
 # R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	---------------------------------------
-#  14Jun2021  dl      Start the script
-#  25Jun2021  dl      Add survprd() and cox.rmst()
-#  29Jun2021  dl      Add balancesurv.split()
-#  07JUL2021  gs      Minor changes to survprd, cox.rmst and balancesurv.split()
-#  09JUL2021  dl      Minor changes to cox.rmst()
-#  12JUL2021  dl      Add max.iter argument and corresponding codes to balancesurv.split()
-#  13JUL2021  dl      Changed argument x to x.cate and x.ps in balancesurv.split();
-#                     balancesurv.split() returns x.cate.train, x.ps.train instead of x.train,
-#                     and x.cate.valid and x.ps.valid instead of x.valid.
-#                     Add data.preproc.surv()
-#  13JUL2021  gs      Minor edits to data.preproc.surv()
-#  14JUL2021  pj      Minor changes
-#  15JUL2021  gs      Update data preprocessing on event status
-#  15JUL2021  dl      Minor fix to data.preproc.surv - extra "}" was needed to close "if (response == "survival")"
-#  16JUL2021  dl      Add argument ipcw.model to data.process.surv();
-#                     Add argument x.ipw to balancesurv.split()
-#  19JUL2021  dl      Change argument x to x.ipw in survprd
-#  20JUL2021  dl      Check surv.min inside arg.check.surv;
-#                     Removed argument tau0 from balancesurv.split since unused;
-#                     Modified documentation
-#  28JUL2021  dl      Add tau0 in arg.check.surv
-#  04AUG2021  dl      Add survCatch()
-#  26AUG2021  gs      Add arg.check for initial.predictor.method
-#  09SEP2021  gs      Fix if condition in balancesplit() to accommodate error = NA
-#  14SEP2021  gs      Rename hr.ratio to hazard.ratio, rename x.ipw to x.ipcw
-#  05OCT2021  gs      Add AFT option to survprd(), modify args check to check ipcw.method
-#  15OCT2021  gs      Lower case ipcw.method argument names, change survprd to ipcw.surv
-#  20OCT2021  pj      Add prop.no1 in data.preproc.surv for "pm"
-#  22OCT2021  gs      Add initial.predictor logistic regression
-#  19NOV2021  gs      Save original labels of treatment variable to give more meaningful axis name to plot
-#  03DEC2021  gs      Update prop.multi check to define at least 2 subgroups
-#  04FEB2022  pj      Remove matrixStats::sd() and add missing argument to documentation
-#  03MAR2022  pj      Remove interactions arg from arg.checks.surv()
-#  04MAR2022  gs      Change all references to gbm to boosting (except plot.gbmperf)
-#  24MAR2022  pj      Create wrapper for arg.checks() to distinguish common and specific args based on outcome type
-#  06MAY2022  gs      Check argument & data.preproc with initial.predictor.method with default NULL
-#                     Check argument & data.preproc with tau0 default NULL
-#  10MAY2022  gs      Fixed default arguments in data.preproc.surv
-#  18MAY2022  gs      Fixed default arguments in args.check
-#  25MAY2022  gs      Output treatment recoding warning in data.preproc.surv
-#  13JUL2022  pj      Minor fix
-#  14JUL2022  pj      Keep x as matrix even for one covariate
-# ----------------------------------------------------------------------------
 
 
 #' Probability of being censored

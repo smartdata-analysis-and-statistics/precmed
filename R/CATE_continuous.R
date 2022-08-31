@@ -5,21 +5,10 @@
 # Purpose: CATE functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  05JUL2022  sk      Start the script
-#  05JUL2022  sk      Inserted "GAM" for score method
-#  18JUL2022  sk      Inserted "randomForest" for score method
-#  19JUL2022  sk      Removed negative binomial
-#  28JUL2022  sk      Replaced solve() to ginv() in twoarmglmmean.dr
-#  29JUL2022  sk      Modified yhat part in order to estimate with some NA coefficients in onearmglmmean.dr
-#  29JUL2022  sk      Modified the estimation of initial estimating method by linear regression in intxmean function
-#  12AUG2022  sk      Add suppressMessage when predicting in boosting method in scoremean()
-# ------------------------------------------------------------------
+
+
 
 #' Doubly robust estimators of the coefficients in the two regression
 #'

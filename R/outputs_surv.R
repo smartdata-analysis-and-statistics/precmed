@@ -1,4 +1,5 @@
 # ------------------------------------------------------------------
+#
 # Project: Precision Medicine MS - Comprehensive R package
 #
 # Purpose: Output functions for Survival outcomes
@@ -6,104 +7,7 @@
 # Platform: Windows
 # R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  14JUN2021  dl      Start the script
-#  09JUL2021  dl      Add cvsurv()
-#  12JUL2021  dl      Add pmsurv()
-#  13JUL2021  dl      Change cvsurv argument: 1) y, d, trt, x to cate.model and ps.model. y, d, trt, x.ps, x.cate are extracted
-#                     within the function using data.preproc. 2) prop.onlyhigh and prop.bi to prop.cutoff so that prop.onlyhigh
-#                     and prop.bi are also extracted from data.preproc;
-#                     Change pmsurv argument: 1) y, d, trt, x to cate.model and ps.model. y, d, trt, x.ps, x.cate are extracted
-#                     within the function using data.preproc. 2) prop to prop.cutoff so that data.preproc will extract prop.onlyhigh;
-#  13JUL2021  gs      Review cvsurv() with minor edits and pmsurv()
-#  14JUL2021  dl      Add an argument higher.y to cvsurv() and pmsurv();
-#                     Add an argument abc to cvsurv()
-#  15JUL2021  dl      Add plotsurv.PrecMed() and boxplotsurv.PrecMed();
-#                     Add drsurv.inference() as a separate function
-#  16JUL2021  dl      Add ipcw.model argument to cvsurv and pmsurv;
-#                     Change argument yf to followup.time;
-#                     Add arg.check.surv() inside cvsurv() and pmsurv() to check argument
-#  20JUL2021  dl      Removed tau0 from balancesurv.split since unused
-#  28JUL2021  dl      Add warning to cvsurv and pmsurv if tau0 is less than the median of the time (either observed or censored);
-#                     Minor updates in drsurv.inference
-#  04AUG2021  dl      Added error-handling code for subgroup ATE estimation
-#  05AUG2021  dl      Added plot.hr, valid.only, and legend.position option to plotsurv.PrecMed
-#  13AUG2021  dl      Added cvsurv2 function (see improvement document);
-#                     Added plotsurv.PrecMed2 function to handle cvsurv2 output;
-#                     Modified boxplotsurv.PrecMed and added boxplot.bi.surv.PrecMed
-#  26AUG2021  gs      Add initial.predictor.method in arg.check
-#  09SEP2021  gs      Add best.iter in cvsurv(), cvsurv2() and pmsurv()
-#                     Minor edits in cvsurv2() and plot2() (syntax, warning messages, line break)
-#  29SEP2021  pj      Remove argument seed.cf
-#  05OCT2021  gs      Add ipcw.method argument to survprd -> inherited in cvsurv, pmsurv, drsurv.inference
-#                     Add seed argument to pmsurv (like in pmcount)
-#  06OCT2021  pj      Remove set.seed functions inside and leave only one set.seed in cvsurv/pmsurv/drsurv.inference once
-#                     Change all seeds to NULL to be consistent
-#  13OCT2021  pj      Reward the warning messages (iteration [0-9]) and fix typos
-#  15OCT2021  gs      Lower case ipcw.method argument names
-#  20OCT2021  pj      Add error/warning results to outputed list in pmsurv
-#                     Calculate the ATE when prop = 1 only once so estsurv calculates prop.no1 in pmsurv to save time
-#  22OCT2021  gs      Add initial.predictor logistic regression
-#  03NOV2021  pj      Replace est.train with est.high in pm errors/warnings
-#  05NOV2021  gs      Fix ATE calculation for higher.y = TRUE vs FALSE in plot()
-#  12NOV2021  gs      Fix higher.y in abc calculation and in cv() documentation
-#                     Update documentation for cvsurv()
-#  19NOV2021  gs      Add formulas and original treatment labels in output of cvcount() for more meaningful y-axis in plot
-#                     Add more meaningful y-axis in plot() and boxplot() if default is used
-#  01DEC2021  pj      Update documentation of cvsurve() and pmsurv()
-#  03DEC2021  gs      Update prop.multi documentation
-#                     Fix y-axis title in plot when plot.hr = TRUE
-#                     Clarify subgroup label in boxplot
-#  09DEC2021  pj      Update plot documentation and minor changes
-#  13DEC2021  gs      Fix axes in boxplot, remove legend
-#                     Always extract overall ATE (RMTL or HR) by cv iterations in cvsurv() - to be used as overall ATE in boxplot
-#  15DEC2021  pj      Minor changes
-#  17DEC2021  gs      Always plot overall ATE in lineplot
-#  07JAN2022  pj      Revise plotsurv.PrecMed() so it accepts both count and survival outcomes
-#  19JAN2022  pj      Revise documentation for plotsurv.PrecMed() for both count and survival outcomes
-#                     Revise boxplotsurv.PrecMed() so it accepts both count and survival outcomes
-#  20JAN2022  gs      Revise plotsurv.PrecMed() to ensure that the ATE line is accurate
-#  27JAN2022  pj      Revise ylab, xlim, and abc results as well as documentation in plot and boxplot
-#  01FEB2022  gs      Output cv.n from cvsurv; update error message in plotsurv.PrecMed() when cv.i > cv.n
-#                     Location of plot.hr + count outcome argument check fixed in plotsurv.PrecMed()
-#  04FEB2022  pj      Add missing argument in documentation and fix \link and example in documentation
-#  07FEB2022  pj      Revise documentation examples to pass testing (fewer score method, small cv.n, rename plots)
-#  18FEB2022  gs      Edits in boxplot after testing
-#  22FEB2022  gs      Minor edits in boxplot() documentation
-#  23FEB2022  gs      Build skeleton of cv() based on cvsurv arguments
-#  03MAR2022  pj      Merge plot from surv and count to one plot.PrecMed()
-#  04MAR2022  gs      Skeleton pm() and dr.inference()
-#                     Update arguments and documentation cv(), pm(), dr.inference()
-#                     Change all references to gbm to boosting (except plot.gbmperf)
-#  09MAR2022  pj      Merge boxplot from surv and count to one boxplot.PrecMed()
-#                     Add response argument to cv/pm and fill in the cv()/pm() function
-#  11MAR2022  gs      Update return, detail, example in wrapper functions
-#                     Update cvsurv, pmsurv, drsurv.inf arguments & documentation to match wrapper
-#  16MAR2022  pj      Complete dr.inference wrapper
-#  24MAR2022  pj      Create wrapper for arg.checks() to distinguish common and specific args based on outcome type
-#  31MAR2022  gs      Reverse x-axis on boxplot
-#  13APR2022  pj      Minor edits in doc, add more examples to doc
-#  14APR2022  gs      Remove follow.up line of code at beginning of cvsurv
-#  28APR2022  gs      Change "ITR score" to "Estimated CATE" in the plots
-#  03MAY2022  pj      Revise cv and pm examples in doc
-#  06MAY2022  gs      Check argument & data.preproc with initial.predictor.method with default NULL
-#                     Check argument & data.preproc with tau0 default NULL
-#  10MAY2022  gs      Add tau0 argument to data.preproc
-#  18MAY2022  gs      Remove follow.up line of code at beginning of drsurv.inference
-#  25MAY2022  gs      Minor changes in dr.inference (output warning, change output)
-#  25MAY2022  pj      Revise verbose argument in cv() and dr.inference() to integer values
-#  30MAY2022  gs      Add survival example in dr.inference
-#  01JUn2022  pj      Fix dr.inference() verbose tp control only text outputs
-#  11JUL2022  gs      Minor edits to cvsurv() output
-#  13JUL2022  gs      Check pm() arguments
-#  05JUL2022  sk      Included continuous case in plot
-#  22JUL2022  gs      Update drinf function description
-#  02AUG2022  sk      Update cv() function, need to consider whether to include init.model (it is included for continuous case for now)
-#  15AUG2022  gs      Transfer abc() from output.R, documentation update
-# ------------------------------------------------------------------
+
 
 #' Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
 #'

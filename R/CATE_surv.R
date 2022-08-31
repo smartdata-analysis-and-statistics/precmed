@@ -7,36 +7,8 @@
 # Platform: Windows
 # R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  14Jun2021  dl      Start the script
-#  02Jul2021  dl      Add onearmsurv.dr() and twoarmsurv.dr()
-#  07Jul2021  dl      Add intxsurv() and scoresurv()
-#  08JUL2021  gs      Reviewed onearmsurv() and twoarmsurv()
-#  09JUL2021  dl      Minor changes to twoarmsurv.dr() and intxsurv()
-#  13JUL2021  dl      Changed x to x.cate in onearmsurv.dr(), twoarmsurv.dr(), and scoresurv();
-#                     Changed argument x to x.cate and x.ps in intxsurv();
-#  13JUL2021  gs      Reviewed intxsurv() and scoresurv() with minor edits
-#  14JUL2021  dl      Add argument x.ipw to intxsurv()
-#  23JUL2021  dl      Modify documentation
-#  08AUG2021  gs      Recover from NA coefficients in fit in onearmsurv.dr()
-#                     Move two and contrast reg empty vector definition inside loop
-#  13AUG2021  dl      Separate ntrees.rf and ntrees.gbm; minor changes
-#  09SEP2021  gs      Add best.iter output in intxsurv when initial.predictor = "boosting"
-#  14SEP2021  gs      Rename x.ipw to x.ipcw
-#  29SEP2021  pj      Remove argument seed.cf in intxsurv
-#  05OCT2021  gs      Add ipcw.method argument to survprd -> inherited in intxsurv
-#  06OCT2021  pj      Remove set.seed functions
-#                     Specify gam's gam function in intxsurv not to confuse with mgcv's gam
-#  13OCT2021  pj      Specify gam's s function in intxsurv
-#  15OCT2021  gs      Lower case ipcw.method argument names, change survprd to ipcw.surv
-#  22OCT2021  gs      Add initial.predictor logistic regression, wrap non-integer warning messages
-#  03NOV2021  pj      Change gam::gam to mgcv::gam and revise formula to have smoothed term on f.predict.ini and all other remaining covariates in data
-#  04FEB2022  pj      Add missing argument in documentation and change argument weight to weights
-#  04MAR2022  gs      Change n.trees to n.trees.boosting
-# ------------------------------------------------------------------
+
+
 
 #' Doubly robust estimators of the coefficients in the two regression
 #'

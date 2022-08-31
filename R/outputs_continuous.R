@@ -5,17 +5,9 @@
 # Purpose: Output functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  05JUL2022  sk      Start the script
-#  05JUL2022  sk      Removed time from all functions
-#  19JUL2022  sk      Removed negative binomial
-#  28JUL2022  sk      Inserted init.model for cvmean
-# ------------------------------------------------------------------
+
 
 #' Cross-validation of the conditional average treatment effect (CATE) score for continuous outcomes
 #'

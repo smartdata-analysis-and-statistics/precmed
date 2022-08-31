@@ -5,15 +5,9 @@
 # Purpose: ATE functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  05JUL2022  sk      Start the script
-#  05JUL2022  sk      Remove time from all functions
-# ------------------------------------------------------------------
+
 
 
 #' Doubly robust estimator of the average treatment effect for continuous data
@@ -53,9 +47,9 @@
 drmean <- function(y, trt, x.cate, x.ps,
                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                    interactions = TRUE) {
-  
+
   n <- length(y)
-  
+
   withCallingHandlers({
     if (ps.method == "lasso") {
       ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
@@ -67,7 +61,7 @@ drmean <- function(y, trt, x.cate, x.ps,
     if (grepl("numerically 0|1 occurred", conditionMessage(w)) | grepl("glm.fit: algorithm did not converge", conditionMessage(w)))
       invokeRestart("muffleWarning")  # suppress warning: "glm.fit: fitted probabilities/rates numerically 0 occurred." or "glm.fit: algorithm did not converge."
   })
-  
+
   if (min(sum(trt), n - sum(trt)) > 10 & interactions == TRUE) {
     withCallingHandlers({
       # Calculate rate by treatment arm by fitting two separate models
@@ -97,14 +91,14 @@ drmean <- function(y, trt, x.cate, x.ps,
   }
   mu1dr <- sum(y1hat + (y - y1hat) * trt / ps) / n
   mu0dr <- sum(y0hat + (y - y0hat) * (1 - trt) / (1 - ps)) / n
-  
+
   ###
   if (is.na(mu1dr - mu0dr) == FALSE) {
     md <- mu1dr - mu0dr
   } else {
     md <- NA
   }
-  
+
   return(list(mean.diff = md, mean.diff0 = mu0dr, mean.diff1 = mu1dr))
 }
 
@@ -147,7 +141,7 @@ drmean <- function(y, trt, x.cate, x.ps,
 estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
                                       prop, onlyhigh,
                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99) {
-  
+
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, 1 - prop)
   n.subgroup <- length(prop)
@@ -205,7 +199,7 @@ estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estmean.multilevel.subgroup <- function(y, x.cate, x.ps, trt, score, higher.y, prop,
                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99){
-  
+
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, prop)
   n.subgroup <- length(prop) - 1

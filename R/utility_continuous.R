@@ -5,16 +5,9 @@
 # Purpose: Utility functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  05JUL2022  sk      Start the script
-#  05JUL2022  sk      Remove offset part from data.preproc.mean, remove time from all functions
-#  27JUL2022  sk      Inserted init.model in data.preproc.mean, only available when contrastReg or twoReg is given as score.method
-# ------------------------------------------------------------------
+
 
 #' Split the given dataset into balanced training and validation sets (within a pre-specified tolerance)
 #' Balanced means 1) The ratio of treated and controls is maintained in the training and validation sets

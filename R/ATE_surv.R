@@ -7,34 +7,10 @@
 # Platform: Windows
 # R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  14Jun2021  dl      Start the script
-#  25Jun2021  dl      Add drsurv()
-#  28Jun2021  dl      Add estsurv.bilevel.subgroups() and estsurv.multilevel.subgroups()
-#  08JUL2021  gs      Reviewed cleaning of all functions
-#  12JUL2021  dl      Changed wt to weightc in drsurv()
-#  13JUL2021  dl      Changed argument x to x.cate and x.ps in drsurv(), estsurv.bilevel.subgroups() and estsurv.multilevel.subgroups()
-#  14JUL2021  dl      Add argument higher.y to estsurv.bilevel.subgroups() and estsurv.multilevel.subgroups()
-#  14JUL2021  pj      Minor changes
-#  15JUL2021  dl      Removed inference from drsurv;
-#                     Changed default ps.method from "lasso" to "glm";
-#                     Changed name of drsurv() outputs to be more intuitive; reflect these changes to estsurv.bilevel.subgroups()
-#                     and estsurv.multilevel.subgroups()
-#  16JUL2021  dl      Add argument x.ipw to estsurv.bilevel.subgroups(), estsurv.multilevel.subgroups(), drsurv()
-#  28JUL2021  dl      Update documentation
-#  14SEP2021  gs      Rename hr.ratio to hazard.ratio, rename x.ipw to x.ipcw
-#  30SEP2021  pj      Allow errors in drsurv and set to NA
-#  05OCT2021  gs      Add ipcw.method to drsurv and est() functions
-#  15OCT2021  gs      Lower case ipcw.method argument names, change survprd to ipcw.surv
-#  05NOV2021  gs      Fix ATE calculation for higher.y = TRUE vs FALSE in est.XX()
-#  04FEB2022  pj      Add missing argument in documentation
-#  14JUL2022  pj      Keep x as matrix even for one covariate
-# ------------------------------------------------------------------
-#
-#' Doubly Robust Estimator of the average treatment effect with Cox model for survival data
+
+
+
+#' Doubly robust estimator of the average treatment effect with Cox model for survival data
 #'
 #'
 #' Doubly robust estimator of the average treatment effect between two treatments, which is the restricted mean time lost (RMTL) ratio

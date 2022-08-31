@@ -5,46 +5,10 @@
 # Purpose: CATE functions
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  29SEP2020  pj      Start the script
-#  02OCT2020  gs      Add intxARR.function()
-#  08OCT2020  pj      Add scoreARR.data() and revise intxARR.function() and onearmglmARR.dr()
-#  15OCT2020  gs      Revise all functions
-#  23OCT2020  gs      Change ARR to count
-#                     Change default intx to same as in output functions
-#  03DEC2020  pj      Inherit glm.ps and twoarm parameters in intx()
-#  04JAN2021  gs      Add ps.method argument in intx(). Add best.iter in intx()
-#  18JAN2021  gs      Change argument max.iter to max.iterNR in intx() and twoarm() to distinguish from max.iter in balance.split()
-#  01FEB2021  gs      Change seed.cf to seed in intx
-#  22FEB2021  gs      Add commented changes x.cate x.ps to onearm, twoarm and intx
-#  23FEB2021  pj      Add score.method argument to intxcount(), score();
-#                     rename scorecount.data to scorecount;
-#                     rename trt. outputs in all output functions to ate. for more intuitive names
-#                     remove time from covariate in all gbm()
-#  24FEB2021  gs      Add changes x.cate, x.ps and update argument descriptions
-#  09MAR2021  gs      Update argument descriptions
-#  30MAR2021  gs      Add recovery option in onearmglm() in case some X have no variability
-#  30MAR2021  gs      Add recovery option in score() in case some coefficients of the score are NA
-#  31MAR2021  pj      Add poisson/GAM as initial.predictor.method in addition to GBM
-#  12APR2021  gs      Add drop = F for matrix manipulation to avoid losing name of columns
-#  14APR2021  pj      Modify xvar.smooth and add negBin to score.method
-#  21APR2021  pj      Revise result names from 1-5 to their actual method names so easier to distinguish
-#  10MAY2021  gs      Change ps.method options
-#                     Remove set.seed in inside functions
-#  24MAY2021  pj      Change "test" to "valid" in code or "validation" in text
-#  16JUN2021  pj      Update parameter documentation
-#  06JUL2021  gs      Deleted eta.max from twoarm()
-#  13JUL2021  gs      Changed xtot to x.aug in scorecount() to match with notation in surv script
-#  26JUL2021  pj      Minor changes
-#  08AUG2021  gs      Changed fit$coef to beta in yhat calculation in onearmcount.dr
-#  04MAR2022  gs      Change all references to gbm to boosting (except plot.gbmperf)
-#                     Change n.trees to n.trees.boosting
-# ------------------------------------------------------------------
+
+
 
 #' Doubly robust estimators of the coefficients in the two regression
 #'
