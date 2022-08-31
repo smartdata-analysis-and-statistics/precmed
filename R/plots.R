@@ -148,7 +148,7 @@
 #' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line labs scale_color_manual scale_linetype_manual scale_y_continuous theme theme_classic
 #' @importFrom tidyr fill
 
-plot.PrecMed <- function(x,
+plot.precmed <- function(x,
                          cv.i = NULL,
                          combine = "mean",
                          show.abc = TRUE,
@@ -535,9 +535,8 @@ plot.PrecMed <- function(x,
 #' @importFrom tidyr pivot_longer
 #' @importFrom rlang .data
 
-# Note: additional arguments ggplot scale, legend.position, nrow.plot (what does this mean?)
 
-boxplot.PrecMed <- function(x, ylab = NULL,
+boxplot.precmed <- function(x, ylab = NULL,
                             plot.hr = FALSE,
                             grayscale = FALSE, ...) {
 

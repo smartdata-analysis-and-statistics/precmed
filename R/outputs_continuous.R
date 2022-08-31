@@ -240,6 +240,8 @@
 #' # boxplot(x = cv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
 #' # abc(x = cv)
 #' }
+#' @export
+#'
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
@@ -262,12 +264,14 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
                    initial.predictor.method = "boosting", xvar.smooth.score = NULL, xvar.smooth.init = NULL,
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
                    error.maxNR = 1e-3, tune = c(0.5, 2),
-                   seed = NULL, verbose = 2, ...) {
+                   seed = NULL, verbose = 1, ...) {
 
   # TODO: now score.method has no default (mandatory argument)
 
   # Set seed for reproducibility
   set.seed(seed)
+
+  if (verbose >= 1) t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   ##TODO: Insert n.trees.rf
@@ -570,7 +574,12 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 
   }
 
-  if (verbose >= 1) close(pb)
+  if (verbose >= 1) {
+    close(pb)
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
 
   result$props$prop.onlyhigh <- prop.onlyhigh
   result$props$prop.bi <- prop.bi
@@ -582,23 +591,10 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
   result$response <- "continuous"
   result$formulas <- list(cate.model = cate.model, ps.model = ps.model, trt_labels = out$cat.trt)
 
-  class(result) <- "PrecMed"
+  class(result) <- "precmed"
 
   return(result)
 }
-
-
-# Build the generics
-## Overwrite standard generic
-# plot <- function(x, ...) UseMethod("plot")
-# boxplot <- function(x, ...)  UseMethod("boxplot")
-#
-# ## Default is standard generic
-# plot.default <- function(x, ...) graphics::plot(x, y, ...)
-# boxplot.default <- function(x, ...) graphics::boxplot(x, ...)
-
-## abc does not have a pre-defined generic
-# abc <- function(x, combine) UseMethod("abc")
 
 
 
@@ -783,6 +779,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #'              score.method = "gaussian",
 #'              seed = 999)
 #'}
+#'@export
 
 pmmean <- function(cate.model, init.model, ps.model, data, score.method,
                    higher.y = TRUE,
@@ -798,6 +795,8 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 
   # Set seed once for reproducibility
   set.seed(seed)
+
+  t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -906,6 +905,11 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
   if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
     fit$result.contrastReg$sigma.contrastReg
 
+  t.end <- Sys.time()
+  t.diff <- round(difftime(t.end, t.start),2)
+  cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+
+  class(result) <- "precmed"
   return(result)
 }
 
@@ -990,6 +994,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
+#' @export
 
 drmean.inference <- function(cate.model, ps.model, data,
                              ps.method = "glm", minPS = 0.01, maxPS = 0.99,

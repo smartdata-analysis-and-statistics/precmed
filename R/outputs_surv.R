@@ -330,7 +330,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
                    initial.predictor.method = "randomForest",
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
                    error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                   seed = NULL, plot.gbmperf = TRUE, verbose = 2) {
+                   seed = NULL, plot.gbmperf = TRUE, verbose = 1, ...) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -734,7 +734,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
   if (verbose >= 1) {
     close(pb)
     t.end <- Sys.time()
-    t.diff <- difftime(t.end, t.start)
+    t.diff <- round(difftime(t.end, t.start),2)
     cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
   }
   result$props$prop.onlyhigh <- prop.onlyhigh
@@ -746,7 +746,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
   result$response <- "survival"
   result$formulas <- list(cate.model = cate.model, ps.model = ps.model, trt_labels = out$cat.trt)
 
-  class(result) <- "PrecMed"
+  class(result) <- "precmed"
 
   return(result)
 }
@@ -977,7 +977,6 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
   set.seed(seed)
 
   t.start <- Sys.time()
-  # followup.time <- as.list(match.call()[-1])$followup.time
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -1121,8 +1120,10 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
     fit$result.contrastReg$converge.contrastReg
 
   t.end <- Sys.time()
-  t.diff <- difftime(t.end, t.start)
+  t.diff <- round(difftime(t.end, t.start),2)
   cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+
+  class(result) <- "precmed"
   return(result)
 }
 

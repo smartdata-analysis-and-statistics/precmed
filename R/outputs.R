@@ -259,12 +259,14 @@ cvcount <- function(cate.model, ps.model, data, score.method,
                     initial.predictor.method = "boosting", xvar.smooth = NULL,
                     tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 5,
                     error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                    seed = NULL, plot.gbmperf = TRUE, verbose = 2, ...) {
+                    seed = NULL, plot.gbmperf = TRUE, verbose = 1, ...) {
 
   # TODO: now score.method has no default (mandatory argument)
 
   # Set seed for reproducibility
   set.seed(seed)
+
+  if (verbose >= 1) t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -533,7 +535,12 @@ cvcount <- function(cate.model, ps.model, data, score.method,
     }
   }
 
-  if (verbose >= 1) close(pb)
+  if (verbose >= 1) {
+    close(pb)
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
 
   result$props$prop.onlyhigh <- prop.onlyhigh
   result$props$prop.bi <- prop.bi
@@ -545,7 +552,7 @@ cvcount <- function(cate.model, ps.model, data, score.method,
   result$response <- "count"
   result$formulas <- list(cate.model = cate.model, ps.model = ps.model, trt_labels = out$cat.trt)
 
-  class(result) <- "PrecMed"
+  class(result) <- "precmed"
 
   return(result)
 }
@@ -732,6 +739,8 @@ pmcount <- function(cate.model, ps.model, data, score.method,
   # Set seed once for reproducibility
   set.seed(seed)
 
+  t.start <- Sys.time()
+
   #### CHECK ARGUMENTS ####
   arg.checks(
     fun = "pm", response = "count", data = data, higher.y = higher.y, score.method = score.method, prop.cutoff = prop.cutoff,
@@ -834,6 +843,11 @@ pmcount <- function(cate.model, ps.model, data, score.method,
   if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
     fit$result.contrastReg$sigma.contrastReg
 
+  t.end <- Sys.time()
+  t.diff <- round(difftime(t.end, t.start),2)
+  cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+
+  class(result) <- "precmed"
   return(result)
 }
 
