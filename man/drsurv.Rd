@@ -2,7 +2,7 @@
 % Please edit documentation in R/ATE_surv.R
 \name{drsurv}
 \alias{drsurv}
-\title{Doubly Robust Estimator of the average treatment effect with Cox model for survival data}
+\title{Doubly robust estimator of the average treatment effect with Cox model for survival data}
 \usage{
 drsurv(
   y,

@@ -33,7 +33,7 @@ cvmean(
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
-  verbose = 2,
+  verbose = 1,
   ...
 )
 }

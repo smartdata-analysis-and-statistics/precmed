@@ -31,7 +31,7 @@ cvcount(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 2,
+  verbose = 1,
   ...
 )
 }

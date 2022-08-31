@@ -15,7 +15,7 @@ A dataframe with 4000 rows (patients) and 9 variables:
   \item{previous_number_relapses}{previous number of relapses}
   \item{trt}{current treatment, "drug0" or "drug1"}
   \item{y}{count oucome, current number of relapses}
-  \item{year}{length of follow-up, in years}
+  \item{years}{length of follow-up, in years}
 }
 }
 \usage{
