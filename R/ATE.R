@@ -2,39 +2,12 @@
 #
 # Project: Precision Medicine MS - Comprehensive R package
 #
-# Purpose: ATE functions
+# Purpose: ATE functions for Count outcomes
 #
 # Platform: Windows
-# R Version: 4.0.1
+# R Version: 4.1.0
 #
-#   Modifications:
-#
-#   Date			By			Description
-# --------		--------	-----------------------------
-#  18SEP2020  gs      Start the script
-#  28SEP2020  pj      Revise drARR()
-#  01OCT2020  gs      Revise drARR()
-#  23OCT2020  gs      Change ARR to count or RR
-#                     Add argument "interactions" in drcount to force fitting one model
-#                     Bug fix in drcount with inference = T
-#  17NOV2020  pj      Add arguments "minPS", "maxPS", "ps.method" to all functions that call for drcount()
-#  04JAN2021  gs      drcount: replaced 2 if by if else (efficiency) and added xnew argument to glm.simplereg.ps
-#  04FEB2021  gs      Minor changes to arguments description
-#  22FEB2021  gs      Add commented changes x.cate x.ps to drcount, estcount.bilevel.subgroups, estcount.multilevel.subgroup
-#  23FEB2021  pj      Renamed trt. results in est() to ate. for more intuitive names
-#  24FEB2021  gs      Add changes x.cate, x.ps and update argument descriptions
-#  09MAR2021  gs      Update argument descriptions
-#  21APR2021  pj      Add higher.y argument
-#  10MAY2021  gs      Change ps.method options
-#  16JUN2021  pj      Update parameter documentation
-#  30JUN2021  pj      Revise drcount @return documentation
-#  07JUL2021  pj      Revise drcount() inference, its documentation, and output
-#  08JUL2021  gs      Removed inference from drcount, changed name of outputs to be more intuitive
-#  14JUL2021  pj      Minor changes
-#  19JUL2021  gs      REmove rate.ratio output from drcount to avoid duplicate info
-#  26JUL2021  pj      Minor formatting
-#  06JUL2022  gs      Language fix
-# ------------------------------------------------------------------
+
 
 
 #' Doubly robust estimator of the average treatment effect for count data

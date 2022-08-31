@@ -2,7 +2,7 @@
 #
 # Project: Precision Medicine MS - Comprehensive R package
 #
-# Purpose: ATE functions
+# Purpose: ATE functions for Continuous outcomes
 #
 # Platform: Windows
 # R Version: 4.1.0
