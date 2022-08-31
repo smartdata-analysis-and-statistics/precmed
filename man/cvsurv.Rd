@@ -337,7 +337,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
-
+\dontrun{
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
@@ -360,7 +360,7 @@ cv <- cvsurv(cate.model = survival::Surv(y, d) ~ age + female
 plot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 boxplot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(x = cv)
-
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

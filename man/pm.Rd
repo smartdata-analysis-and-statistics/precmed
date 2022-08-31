@@ -183,7 +183,7 @@ For count response, see details in \code{\link{pmcount}()}.
 For survival response, see details in \code{\link{pmsurv}()}.
 }
 \examples{
-
+\dontrun{
 # Count outcome
 output_pm <- pm(response = "count",
                 cate.model = y ~ age + female + previous_treatment +
@@ -237,6 +237,7 @@ output_pm3 <- pm(response = "continuous",
 
 # Try:
 output_pm3$coefficients
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

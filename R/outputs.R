@@ -802,7 +802,7 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 #' @seealso \code{\link{cvcount}()}
 #'
 #' @examples
-#'
+#' \dontrun{
 #' pm <- pmcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
@@ -810,7 +810,7 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 #'               higher.y = FALSE,
 #'               score.method = "poisson",
 #'               seed = 999)
-#'
+#'}
 #' @export
 
 pmcount <- function(cate.model, ps.model, data, score.method,
@@ -991,7 +991,7 @@ pmcount <- function(cate.model, ps.model, data, score.method,
 #' the bootstrap estimates.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'                             ps.model = trt ~ age + previous_treatment,
@@ -1000,7 +1000,7 @@ pmcount <- function(cate.model, ps.model, data, score.method,
 #'                             seed = 999)
 #' print(output)
 #' output$plot
-#'
+#'}
 #' @export
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline

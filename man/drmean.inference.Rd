@@ -97,7 +97,7 @@ This helper function estimates the average treatment effect (ATE) between two
  95% confidence interval of the rate ratio, p-value, and a histogram of the log rate ratio.
 }
 \examples{
-
+\dontrun{
 output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
                                previous_cost + previous_number_relapses,
                             ps.model = trt ~ age + previous_treatment,
@@ -106,6 +106,6 @@ output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
                             seed = 999)
 print(output)
 output$plot
-
+}
 
 }

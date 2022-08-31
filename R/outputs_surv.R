@@ -510,7 +510,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #' @seealso \code{\link{cv}()}
 #'
 #' @examples
-#'
+#' \dontrun{
 #' # Count outcome
 #' output_pm <- pm(response = "count",
 #'                 cate.model = y ~ age + female + previous_treatment +
@@ -564,6 +564,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #'
 #' # Try:
 #' output_pm3$coefficients
+#' }
 #' @export
 
 pm <- function(response, cate.model, ps.model, data, score.method,
@@ -678,7 +679,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' For survival response, see details in \code{\link{drsurv.inference}()}.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' # Count outcome
 #' output <- dr.inference(response = "count",
 #'                        cate.model = y ~ age + female + previous_treatment +
@@ -717,7 +718,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #'                        seed = 999)
 #' print(output3)
 #' output$plot
-#'
+#'}
 #' @export
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
@@ -1134,7 +1135,7 @@ abc <- function(x) {
 #' \code{"PrecMed"} objects.
 #'
 #' @examples
-#'
+#' \dontrun{
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
@@ -1157,7 +1158,7 @@ abc <- function(x) {
 #' plot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #' boxplot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #' abc(x = cv)
-#'
+#'}
 #' @export
 #'
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.response na.omit optim pchisq predict qnorm quantile sd var
@@ -1811,7 +1812,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #'                           score.method = "randomForest",
 #'                           seed = 999)
 #'
-#'
+#'}
 #' @export
 
 pmsurv <- function(cate.model, ps.model, score.method, data,
@@ -2719,6 +2720,7 @@ boxplot.PrecMed <- function(x, ylab = NULL,
 #'  p-value, and a histogram of the bootstrap estimates.
 #'
 #' @examples
+#'\dontrun{
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
@@ -2733,7 +2735,7 @@ boxplot.PrecMed <- function(x, ylab = NULL,
 #'                            seed = 999)
 #' print(output)
 #' output$plot
-#'
+#'}
 #' @export
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline

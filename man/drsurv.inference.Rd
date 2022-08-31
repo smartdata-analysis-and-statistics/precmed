@@ -119,6 +119,7 @@ censoring weighting. For survival outcomes, the estimated ATE is the estimated b
  p-value, and a histogram of the bootstrap estimates.
 }
 \examples{
+\dontrun{
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
@@ -133,5 +134,5 @@ output <- drsurv.inference(cate.model = survival::Surv(y, d) ~ age +
                            seed = 999)
 print(output)
 output$plot
-
+}
 }

@@ -87,7 +87,7 @@ Additional outputs include standard error of the log rate ratio, 95% confidence 
 the bootstrap estimates.
 }
 \examples{
-
+\dontrun{
 output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
                                previous_cost + previous_number_relapses + offset(log(years)),
                             ps.model = trt ~ age + previous_treatment,
@@ -96,5 +96,5 @@ output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
                             seed = 999)
 print(output)
 output$plot
-
+}
 }

@@ -219,7 +219,7 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
-
+\dontrun{
 pm <- pmmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
              init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
              ps.model = trt ~ age,
@@ -227,6 +227,7 @@ pm <- pmmean(cate.model = y ~ age  + previous_treatment + previous_cost + previo
              higher.y = FALSE,
              score.method = "gaussian",
              seed = 999)
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

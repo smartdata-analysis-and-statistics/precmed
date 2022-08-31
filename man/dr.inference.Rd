@@ -106,7 +106,7 @@ For count response, see details in \code{\link{drcount.inference}()}.
 For survival response, see details in \code{\link{drsurv.inference}()}.
 }
 \examples{
-
+\dontrun{
 # Count outcome
 output <- dr.inference(response = "count",
                        cate.model = y ~ age + female + previous_treatment +
@@ -145,5 +145,5 @@ output3 <- dr.inference(response = "continuous",
                        seed = 999)
 print(output3)
 output$plot
-
+}
 }

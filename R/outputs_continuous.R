@@ -781,7 +781,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #' @seealso \code{\link{cvmean}()} function
 #'
 #' @examples
-#'
+#'\dontrun{
 #' pm <- pmmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
 #'              init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
 #'              ps.model = trt ~ age,
@@ -789,6 +789,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #'              higher.y = FALSE,
 #'              score.method = "gaussian",
 #'              seed = 999)
+#'}
 
 pmmean <- function(cate.model, init.model, ps.model, data, score.method,
                    higher.y = TRUE,
@@ -983,7 +984,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 #'  95% confidence interval of the rate ratio, p-value, and a histogram of the log rate ratio.
 #'
 #' @examples
-#'
+#'\dontrun{
 #' output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses,
 #'                             ps.model = trt ~ age + previous_treatment,
@@ -992,7 +993,7 @@ pmmean <- function(cate.model, init.model, ps.model, data, score.method,
 #'                             seed = 999)
 #' print(output)
 #' output$plot
-#'
+#'}
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
