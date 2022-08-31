@@ -252,6 +252,8 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
                error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
                seed = NULL, plot.gbmperf = TRUE, verbose = 2) {
 
+  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
+
   if (response == "count"){
     cvout <- cvcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                      higher.y = higher.y, abc = abc,
@@ -483,6 +485,8 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
                seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
 
+  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
+
   if (response == "count") {
     pmout <- pmcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                      higher.y = higher.y,
@@ -634,6 +638,8 @@ dr.inference <- function(response, cate.model, ps.model, data,
                          ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
                          ps.method = "glm", minPS = 0.01, maxPS = 0.99, interactions = TRUE,
                          n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
+
+  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
   if (response == "count"){
     drout <- drcount.inference(cate.model = cate.model, ps.model = ps.model, data = data,
