@@ -103,15 +103,26 @@
 #' plot(x = cv_count, valid.only = TRUE)
 #'
 #' # Survival outcome
+#' tau0 <- with(survivalExample,
+#'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #' cv_surv <- cv(response = "survival",
-#'               cate.model = survival::Surv(y, d) ~ age + female
-#'                                                   + previous_cost + previous_number_relapses,
-#'               ps.model = trt ~ age + previous_treatment,
-#'               data = survivalExample,
-#'               score.method = c("poisson", "randomForest"),
-#'               higher.y = FALSE,
-#'               cv.n = 5,
-#'               plot.gbmperf = FALSE)
+#'                  cate.model = survival::Surv(y, d) ~ age +
+#'                                                      female +
+#'                                                      previous_cost +
+#'                                                      previous_number_relapses,
+#'                  ps.model = trt ~ age + previous_treatment,
+#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                  data = survivalExample,
+#'                  score.method = c("poisson", "randomForest"),
+#'                  followup.time = NULL,
+#'                  tau0 = tau0,
+#'                  surv.min = 0.025,
+#'                  higher.y = TRUE,
+#'                  cv.n = 5,
+#'                  initial.predictor.method = "randomForest",
+#'                  plot.gbmperf = FALSE,
+#'                  seed = 999)
+#'
 #'
 #' # default setting, plot RMTL ratios in both training and validation sets
 #' plot(x = cv_surv)
@@ -120,7 +131,7 @@
 #' plot(x = cv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age +
+#' cv_mean <- cvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -136,7 +147,7 @@
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' plot(x = cv.mean)
+#' plot(x = cv_mean)
 #'}
 #'
 #' @export
@@ -495,20 +506,30 @@ plot.precmed <- function(x,
 #' boxplot(x = cv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #'
 #' # Survival outcome
+#' tau0 <- with(survivalExample,
+#'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #' cv_surv <- cv(response = "survival",
-#'               cate.model = survival::Surv(y, d) ~ age + female
-#'                                                   + previous_cost + previous_number_relapses,
-#'               ps.model = trt ~ age + previous_treatment,
-#'               data = survivalExample,
-#'               score.method = c("poisson", "randomForest"),
-#'               higher.y = FALSE,
-#'               cv.n = 5,
-#'               plot.gbmperf = FALSE)
+#'                  cate.model = survival::Surv(y, d) ~ age +
+#'                                                      female +
+#'                                                      previous_cost +
+#'                                                      previous_number_relapses,
+#'                  ps.model = trt ~ age + previous_treatment,
+#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                  data = survivalExample,
+#'                  score.method = c("poisson", "randomForest"),
+#'                  followup.time = NULL,
+#'                  tau0 = tau0,
+#'                  surv.min = 0.025,
+#'                  higher.y = TRUE,
+#'                  cv.n = 5,
+#'                  initial.predictor.method = "randomForest",
+#'                  plot.gbmperf = FALSE,
+#'                  seed = 999)
 #'
 #' boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #'
 #'# Continuous outcome
-#' cv.mean <- cvmean(cate.model = y ~ age +
+#' cv_mean <- cvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -524,7 +545,7 @@ plot.precmed <- function(x,
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' boxplot(x = cv.mean)
+#' boxplot(x = cv_mean)
 #'}
 #'
 #' @export

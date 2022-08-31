@@ -27,6 +27,6 @@ A dataset containing a count outcome, a length of follow-up and 6 baseline covar
 \examples{
 data(countExample)
 str(countExample)
-rate <- countExample$y / countExample$year
+rate <- countExample$y / countExample$years
 }
 \keyword{datasets}
