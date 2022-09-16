@@ -29,9 +29,9 @@ subgroups. A gray horizontal dashed line of the overall ATE is included as a ref
 Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
 the validation set across all cross-validation iterations. The subgroups are mutually exclusive and
 are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{cv}()} or
-\code{\link{cvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
+\code{\link{catecvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
 method specified in \code{\link{cv}()}. This should be run only after results of \code{\link{cv}()} or
-\code{\link{cvmean}()}) have been obtained.
+\code{\link{catecvmean}()}) have been obtained.
 }
 \details{
 \code{\link{boxplot}()} takes in outputs from \code{\link{cv}()} and generates
@@ -84,7 +84,7 @@ cv_surv <- cv(response = "survival",
 boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
 # Continuous outcome
-cv_mean <- cvmean(cate.model = y ~ age +
+cv_mean <- catecvmean(cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,

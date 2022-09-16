@@ -14,8 +14,8 @@
 #'
 #' Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
 #' of nested subgroups in the training set and validation set separately, where each line represents
-#' one scoring method specified in \code{\link{cv}()} or \code{\link{cvmean}()}. This should be run
-#' only after results of \code{\link{cv}()} or \code{\link{cvmean}()} have been obtained.
+#' one scoring method specified in \code{\link{cv}()} or \code{\link{catecvmean}()}. This should be run
+#' only after results of \code{\link{cv}()} or \code{\link{catecvmean}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
 #' @param cv.i A positive integer indicating the index of the CV iteration results to be plotted.
@@ -55,7 +55,7 @@
 #' @details \code{\link{plot}()} takes in outputs from \code{\link{cv}()} and generates two plots
 #' of validation curves side-by-side, one for the training set and one for validation set.
 #' Separate validation curves are produced for each scoring method specified via \code{score.method}
-#' in \code{\link{cv}()} or \code{\link{cvmean}()}.
+#' in \code{\link{cv}()} or \code{\link{catecvmean}()}.
 #'
 #' The validation curves (and ABC statistics, if applicable) can help compare the performance of
 #' different scoring methods in terms of discerning potential treatment heterogeneity in subgroups
@@ -131,7 +131,7 @@
 #' plot(x = cv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
-#' cv_mean <- cvmean(cate.model = y ~ age +
+#' cv_mean <- catecvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -455,9 +455,9 @@ plot.precmed <- function(x,
 #' Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
 #' the validation set across all cross-validation iterations. The subgroups are mutually exclusive and
 #' are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{cv}()} or
-#' \code{\link{cvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
+#' \code{\link{catecvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
 #' method specified in \code{\link{cv}()}. This should be run only after results of \code{\link{cv}()} or
-#' \code{\link{cvmean}()}) have been obtained.
+#' \code{\link{catecvmean}()}) have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
 #' @param ylab A character value for the y-axis label to describe what the ATE is. Default is \code{NULL},
@@ -529,7 +529,7 @@ plot.precmed <- function(x,
 #' boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #'
 #'# Continuous outcome
-#' cv_mean <- cvmean(cate.model = y ~ age +
+#' cv_mean <- catecvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,

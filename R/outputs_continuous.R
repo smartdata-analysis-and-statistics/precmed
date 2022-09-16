@@ -226,8 +226,14 @@
 #'
 #' @examples
 #' \dontrun{
-#' cv <- cvmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'              init.model = y ~ age + previous_treatment + previous_cost + previous_status_measure,
+#' cv <- catecvmean(cate.model = y ~ age  +
+#'                               previous_treatment +
+#'                               previous_cost +
+#'                               previous_status_measure,
+#'              init.model = y ~ age +
+#'                           previous_treatment +
+#'                           previous_cost +
+#'                           previous_status_measure,
 #'              ps.model = trt ~ previous_status_measure,
 #'              data = meanExample,
 #'              higher.y = FALSE,
@@ -255,7 +261,7 @@
 #' @importFrom MASS glm.nb ginv
 #' @importFrom randomForestSRC rfsrc predict.rfsrc
 
-cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
+catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
                    higher.y = TRUE,
                    abc = TRUE,
                    prop.cutoff = seq(0.5, 1, length = 6),
@@ -748,19 +754,19 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #' treatment group or with two doubly robust estimators, two regressions and contrast regression
 #' (Yadlowsky, 2020) applied to the entire dataset.
 #'
-#' \code{\link{pmmean}()} provides the coefficients of the CATE score for each scoring method requested
+#' \code{\link{catefitmean}()} provides the coefficients of the CATE score for each scoring method requested
 #' through \code{score.method}. Currently, contrast regression is the only method which allows
 #' for inference of the CATE coefficients by providing standard errors of the coefficients.
 #' The coefficients can be used to learn the effect size of each variable and predict the
 #' CATE score for a new observation.
 #'
-#' \code{\link{pmmean}()} also provides the predicted CATE score of each observation in the data set,
+#' \code{\link{catefitmean}()} also provides the predicted CATE score of each observation in the data set,
 #' for each scoring method. The predictions allow ranking the observations from potentially
 #' high responders to the treatment to potentially low or standard responders.
 #'
 #' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
-#' Note that the ATEs in \code{\link{pmmean}()} are derived based on the CATE score which is estimated
-#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{pmmean}()} is more
+#' Note that the ATEs in \code{\link{catefitmean}()} are derived based on the CATE score which is estimated
+#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catefitmean}()} is more
 #' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
 #' validation to reduce optimism.
 #'
@@ -769,12 +775,18 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{cvmean}()} function
+#' @seealso \code{\link{catecvmean}()} function
 #'
 #' @examples
 #'\dontrun{
-#' pm <- pmmean(cate.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
-#'              init.model = y ~ age  + previous_treatment + previous_cost + previous_status_measure,
+#' pm <- catefitmean(cate.model = y ~ age  +
+#'                   previous_treatment +
+#'                   previous_cost +
+#'                   previous_status_measure,
+#'              init.model = y ~ age  +
+#'                           previous_treatment +
+#'                           previous_cost +
+#'                           previous_status_measure,
 #'              ps.model = trt ~ age,
 #'              data = meanExample,
 #'              higher.y = FALSE,
@@ -783,7 +795,7 @@ cvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
 #'}
 #'@export
 
-pmmean <- function(cate.model, init.model, ps.model, data, score.method,
+catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
                    higher.y = TRUE,
                    prop.cutoff = seq(0.5, 1, length = 6),
                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,

@@ -118,9 +118,9 @@ balancemean.split <- function(y, trt, x.cate, x.ps,
 
 
 #' Data preprocessing
-#' Apply at the beginning of \code{pmmean()} and \code{cvmean()}, after \code{arg.checks()}
+#' Apply at the beginning of \code{catefitmean()} and \code{catecvmean()}, after \code{arg.checks()}
 #'
-#' @param fun A function for which argument check is needed; "pm" for \code{pmmean()}, "cv" for \code{cvmean()},
+#' @param fun A function for which argument check is needed; "pm" for \code{catefitmean()}, "cv" for \code{catecvmean()},
 #' and "drinf" for \code{drmean.inference()}. No default.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.

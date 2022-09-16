@@ -45,7 +45,7 @@ cv(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{cvsurv}()}) and "continuous" (see \code{\link{cvmean}()}) .}
+"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
@@ -201,8 +201,8 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 }
 \value{
 For count response, see description of outputs in \code{\link{cvcount}()}.
-For survival response, see description of outputs in \code{\link{cvsurv}()}.
-For continuous response, see description of outputs in \code{\link{cvmean}()}.
+For survival response, see description of outputs in \code{\link{catecvsurv}()}.
+For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 }
 \description{
 Provides (doubly robust) estimation of the average treatment effect (ATE) for count, survival or continuous
@@ -211,8 +211,8 @@ average treatment effect (CATE) score via cross-validation (CV).
 }
 \details{
 For count response, see details in \code{\link{cvcount}()}.
-For survival response, see details in \code{\link{cvsurv}()}.
-For continuous response, see details in \code{\link{cvmean}()}.
+For survival response, see details in \code{\link{catecvsurv}()}.
+For continuous response, see details in \code{\link{catecvmean}()}.
 }
 \examples{
 \dontrun{

@@ -3,7 +3,7 @@
 \name{data.preproc.surv}
 \alias{data.preproc.surv}
 \title{Data preprocessing
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{pmsurv()}, and \code{cvsurv()}, after \code{arg.checks()}}
+Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}}
 \usage{
 data.preproc.surv(
   fun,
@@ -20,7 +20,7 @@ data.preproc.surv(
 )
 }
 \arguments{
-\item{fun}{A function for which argument check is needed; "pm" for \code{pmcount()} and \code{pmsurv()}, "cv" for \code{cvcount()} and \code{cvsurv()},
+\item{fun}{A function for which argument check is needed; "pm" for \code{pmcount()} and \code{catefitsurv()}, "cv" for \code{cvcount()} and \code{catecvsurv()},
 and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
@@ -90,5 +90,5 @@ A list of elements:
 }
 \description{
 Data preprocessing
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{pmsurv()}, and \code{cvsurv()}, after \code{arg.checks()}
+Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}
 }

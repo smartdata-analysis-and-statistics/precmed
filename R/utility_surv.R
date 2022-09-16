@@ -380,9 +380,9 @@ arg.checks.common <- function(fun,
 
 #' Check arguments
 #' Catered to all types of outcome
-#' Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{pmsurv()}, \code{cvsurv()}, and \code{drsurv.inference()}
+#' Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{catefitsurv()}, \code{catecvsurv()}, and \code{drsurv.inference()}
 #'
-#' @param fun A function for which argument check is needed; "pm" for \code{pmcount()} and \code{pmsurv()}, "cv" for \code{cvcount()} and \code{cvsurv()},
+#' @param fun A function for which argument check is needed; "pm" for \code{pmcount()} and \code{catefitsurv()}, "cv" for \code{cvcount()} and \code{catecvsurv()},
 #' and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.
 #' @param response The type of response. Always 'survival' for this function.
 #' @param data A data frame containing the variables in the outcome and propensity score models;
@@ -554,9 +554,9 @@ arg.checks <- function(fun, response, data,
 
 
 #' Data preprocessing
-#' Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{pmsurv()}, and \code{cvsurv()}, after \code{arg.checks()}
+#' Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}
 #'
-#' @param fun A function for which argument check is needed; "pm" for \code{pmcount()} and \code{pmsurv()}, "cv" for \code{cvcount()} and \code{cvsurv()},
+#' @param fun A function for which argument check is needed; "pm" for \code{pmcount()} and \code{catefitsurv()}, "cv" for \code{cvcount()} and \code{catecvsurv()},
 #' and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.

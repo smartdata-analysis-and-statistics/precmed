@@ -39,7 +39,7 @@ pm(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{cvsurv}()}) and "continuous" (see \code{\link{cvmean}()}) .}
+"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
@@ -170,7 +170,7 @@ be printed. \code{1} indicates messages are printed and \code{0} otherwise. Defa
 }
 \value{
 For count response, see description of outputs in \code{\link{pmcount}()}.
-For survival response, see description of outputs in \code{\link{pmsurv}()}.
+For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 }
 \description{
 Provides singly robust and doubly robust estimation of CATE score for count, survival and continuous data with
@@ -180,7 +180,7 @@ linear regression (continuous only), and generalized additive model (continuous 
 }
 \details{
 For count response, see details in \code{\link{pmcount}()}.
-For survival response, see details in \code{\link{pmsurv}()}.
+For survival response, see details in \code{\link{catefitsurv}()}.
 }
 \examples{
 \dontrun{

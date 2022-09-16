@@ -17,7 +17,7 @@
 #' average treatment effect (CATE) score via cross-validation (CV).
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{cvsurv}()}) and "continuous" (see \code{\link{cvmean}()}) .
+#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -137,12 +137,12 @@
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
 #'
 #' @return For count response, see description of outputs in \code{\link{cvcount}()}.
-#' For survival response, see description of outputs in \code{\link{cvsurv}()}.
-#' For continuous response, see description of outputs in \code{\link{cvmean}()}.
+#' For survival response, see description of outputs in \code{\link{catecvsurv}()}.
+#' For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 #'
 #' @details For count response, see details in \code{\link{cvcount}()}.
-#' For survival response, see details in \code{\link{cvsurv}()}.
-#' For continuous response, see details in \code{\link{cvmean}()}.
+#' For survival response, see details in \code{\link{catecvsurv}()}.
+#' For continuous response, see details in \code{\link{catecvmean}()}.
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
@@ -266,7 +266,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
                      seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
   }
   if (response == "survival"){
-    cvout <- cvsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
+    cvout <- catecvsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
                     surv.min = surv.min, ipcw.method = ipcw.method,
                     higher.y = higher.y, abc = abc,
@@ -279,7 +279,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
                     seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
   }
   if (response == "continuous"){
-    cvout <- cvmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
+    cvout <- catecvmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model,
                     higher.y = higher.y, abc = abc,
                     prop.cutoff = prop.cutoff, prop.multi = prop.multi,
@@ -303,7 +303,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #' linear regression (continuous only), and generalized additive model (continuous only).
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{cvsurv}()}) and "continuous" (see \code{\link{cvmean}()}) .
+#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -404,10 +404,10 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
 #'
 #' @return For count response, see description of outputs in \code{\link{pmcount}()}.
-#' For survival response, see description of outputs in \code{\link{pmsurv}()}.
+#' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 #'
 #' @details For count response, see details in \code{\link{pmcount}()}.
-#' For survival response, see details in \code{\link{pmsurv}()}.
+#' For survival response, see details in \code{\link{catefitsurv}()}.
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
@@ -500,7 +500,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                      seed = seed, plot.gbmperf = plot.gbmperf)
   }
   if (response == "survival") {
-    pmout <- pmsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
+    pmout <- catefitsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
                     surv.min = surv.min, ipcw.method = ipcw.method,
                     higher.y = higher.y,
@@ -512,7 +512,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
                     seed = seed, plot.gbmperf = plot.gbmperf)
   }
   if (response == "continuous") {
-    pmout <- pmmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
+    pmout <- catefitmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
                     ipcw.model = ipcw.model,
                     higher.y = higher.y, abc = abc,
                     prop.cutoff = prop.cutoff,
@@ -533,7 +533,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' inference.
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{cvsurv}()}) and "continuous" (see \code{\link{cvmean}()}).
+#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -592,7 +592,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' output <- dr.inference(response = "count",
+#' output <- atefit(response = "count",
 #'                        cate.model = y ~ age + female + previous_treatment +
 #'                        previous_cost + previous_number_relapses + offset(log(years)),
 #'                        ps.model = trt ~ age + previous_treatment,
@@ -606,7 +606,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' tau0 <- with(survivalExample,
 #'                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
-#' output2 <- dr.inference(response = "survival",
+#' output2 <- atefit(response = "survival",
 #'                         cate.model = survival::Surv(y, d) ~ age + female +
 #'                         previous_cost + previous_number_relapses,
 #'                         ps.model = trt ~ age + previous_treatment,
@@ -618,7 +618,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' output2$plot
 #'
 #'# Continuous outcome
-#' output3 <- dr.inference(response = "continuous",
+#' output3 <- atefit(response = "continuous",
 #'                        cate.model = y ~ age +
 #'                                         previous_treatment +
 #'                                         previous_cost +
@@ -637,7 +637,7 @@ pm <- function(response, cate.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #' @importFrom tidyr gather
 
-dr.inference <- function(response, cate.model, ps.model, data,
+atefit <- function(response, cate.model, ps.model, data,
                          ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
                          ps.method = "glm", minPS = 0.01, maxPS = 0.99, interactions = TRUE,
                          n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {

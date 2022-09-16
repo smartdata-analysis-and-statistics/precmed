@@ -4,7 +4,7 @@
 \alias{arg.checks}
 \title{Check arguments
 Catered to all types of outcome
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{pmsurv()}, \code{cvsurv()}, and \code{drsurv.inference()}}
+Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{catefitsurv()}, \code{catecvsurv()}, and \code{drsurv.inference()}}
 \usage{
 arg.checks(
   fun,
@@ -42,7 +42,7 @@ arg.checks(
 )
 }
 \arguments{
-\item{fun}{A function for which argument check is needed; "pm" for \code{pmcount()} and \code{pmsurv()}, "cv" for \code{cvcount()} and \code{cvsurv()},
+\item{fun}{A function for which argument check is needed; "pm" for \code{pmcount()} and \code{catefitsurv()}, "cv" for \code{cvcount()} and \code{catecvsurv()},
 and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.}
 
 \item{response}{The type of response. Always 'survival' for this function.}
@@ -172,5 +172,5 @@ Nothing. Will stop if arguments are incorrect.
 \description{
 Check arguments
 Catered to all types of outcome
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{pmsurv()}, \code{cvsurv()}, and \code{drsurv.inference()}
+Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{drcount.inference()}, \code{catefitsurv()}, \code{catecvsurv()}, and \code{drsurv.inference()}
 }

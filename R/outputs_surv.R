@@ -278,7 +278,7 @@
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{pmsurv}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
+#' @seealso \code{\link{catefitsurv}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
 #'
 #' @examples
@@ -286,7 +286,7 @@
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
-#' cv <- cvsurv(cate.model = survival::Surv(y, d) ~ age + female
+#' cv <- catecvsurv(cate.model = survival::Surv(y, d) ~ age + female
 #'                                                      + previous_cost + previous_number_relapses,
 #'              ps.model = trt ~ age + previous_treatment,
 #'              ipcw.model = ~ age + previous_cost + previous_treatment,
@@ -319,7 +319,7 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom dplyr %>%
 
-cvsurv <- function(cate.model, ps.model, data, score.method,
+catecvsurv <- function(cate.model, ps.model, data, score.method,
                    ipcw.model = NULL, tau0 = NULL, followup.time = NULL,
                    surv.min = 0.025, ipcw.method = "breslow",
                    higher.y = TRUE, abc = TRUE,
@@ -920,19 +920,19 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #' or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
 #' to the entire data set.
 #'
-#' \code{\link{pmsurv}()} provides the coefficients of the CATE score for each scoring method requested
+#' \code{\link{catefitsurv}()} provides the coefficients of the CATE score for each scoring method requested
 #' through \code{score.method}. Currently, contrast regression is the only method which allows
 #' for inference of the CATE coefficients by providing standard errors of the coefficients.
 #' The coefficients can be used to learn the effect size of each variable and predict the
 #' CATE score for a new observation.
 #'
-#' \code{\link{pmsurv}()} also provides the predicted CATE score of each observation in the data set,
+#' \code{\link{catefitsurv}()} also provides the predicted CATE score of each observation in the data set,
 #' for each scoring method. The predictions allow ranking the observations from potentially
 #' high responders to the treatment to potentially low or standard responders.
 #'
 #' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
-#' Note that the ATEs in \code{\link{pmsurv}()} are derived based on the CATE score which is estimated
-#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{cvsurv}()} is more
+#' Note that the ATEs in \code{\link{catefitsurv}()} are derived based on the CATE score which is estimated
+#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catecvsurv}()} is more
 #' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
 #' validation to reduce optimism.
 #'
@@ -941,14 +941,14 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{cvsurv}()}
+#' @seealso \code{\link{catecvsurv}()}
 #'
 #' @examples
 #' \dontrun{
 #' tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
 #'                                quantile(y[trt == "drug0"], 0.95)))
 #'
-#' pm <- pmsurv(cate.model = survival::Surv(y, d) ~ age +
+#' pm <- catefitsurv(cate.model = survival::Surv(y, d) ~ age +
 #'                                                  female +
 #'                                                  previous_cost +
 #'                                                  previous_number_relapses,
@@ -962,7 +962,7 @@ cvsurv <- function(cate.model, ps.model, data, score.method,
 #'}
 #' @export
 
-pmsurv <- function(cate.model, ps.model, score.method, data,
+catefitsurv <- function(cate.model, ps.model, score.method, data,
                    ipcw.model = NULL, followup.time = NULL, tau0 = NULL,
                    surv.min = 0.025, ipcw.method = "breslow",
                    higher.y = TRUE,
@@ -1040,7 +1040,7 @@ pmsurv <- function(cate.model, ps.model, score.method, data,
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
   }
 
-  ####### Construct the score in the whole dataset (no training or validation for pmsurv) ------------------------------------------
+  ####### Construct the score in the whole dataset (no training or validation for catefitsurv) ------------------------------------------
   fit.score <- scoresurv(fit = fit, x.cate = x.cate, tau0 = tau0, score.method = score.method)
 
   ####### Estimate the treatment effect in the whole dataset --------------------------------

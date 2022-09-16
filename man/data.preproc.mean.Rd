@@ -3,7 +3,7 @@
 \name{data.preproc.mean}
 \alias{data.preproc.mean}
 \title{Data preprocessing
-Apply at the beginning of \code{pmmean()} and \code{cvmean()}, after \code{arg.checks()}}
+Apply at the beginning of \code{catefitmean()} and \code{catecvmean()}, after \code{arg.checks()}}
 \usage{
 data.preproc.mean(
   fun,
@@ -19,7 +19,7 @@ data.preproc.mean(
 )
 }
 \arguments{
-\item{fun}{A function for which argument check is needed; "pm" for \code{pmmean()}, "cv" for \code{cvmean()},
+\item{fun}{A function for which argument check is needed; "pm" for \code{catefitmean()}, "cv" for \code{catecvmean()},
 and "drinf" for \code{drmean.inference()}. No default.}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
@@ -82,5 +82,5 @@ A list of 6 elements:
 }
 \description{
 Data preprocessing
-Apply at the beginning of \code{pmmean()} and \code{cvmean()}, after \code{arg.checks()}
+Apply at the beginning of \code{catefitmean()} and \code{catecvmean()}, after \code{arg.checks()}
 }
