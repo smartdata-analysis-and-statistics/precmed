@@ -224,7 +224,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' cv <- cvcount(cate.model = y ~ age + female + previous_treatment +
+#' catecv <- cvcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
 #'               data = countExample,

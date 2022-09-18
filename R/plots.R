@@ -14,12 +14,12 @@
 #'
 #' Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
 #' of nested subgroups in the training set and validation set separately, where each line represents
-#' one scoring method specified in \code{\link{cv}()} or \code{\link{catecvmean}()}. This should be run
-#' only after results of \code{\link{cv}()} or \code{\link{catecvmean}()} have been obtained.
+#' one scoring method specified in \code{\link{catecv}()} or \code{\link{catecvmean}()}. This should be run
+#' only after results of \code{\link{catecv}()} or \code{\link{catecvmean}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
 #' @param cv.i A positive integer indicating the index of the CV iteration results to be plotted.
-#' Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{cv}()} or
+#' Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{catecv}()} or
 #' \code{NULL}. If \code{cv.i = NULL}, the results across all CV iterations are combined according
 #' to \code{combine} and then plotted. Default is \code{NULL}.
 #' @param combine A character value indicating how to combine the estimated ATEs across all CV
@@ -52,10 +52,10 @@
 #' overall ATE is included as a reference. ABC statistics will be added to the legend if
 #' \code{show.abc = TRUE}.
 #'
-#' @details \code{\link{plot}()} takes in outputs from \code{\link{cv}()} and generates two plots
+#' @details \code{\link{plot}()} takes in outputs from \code{\link{catecv}()} and generates two plots
 #' of validation curves side-by-side, one for the training set and one for validation set.
 #' Separate validation curves are produced for each scoring method specified via \code{score.method}
-#' in \code{\link{cv}()} or \code{\link{catecvmean}()}.
+#' in \code{\link{catecv}()} or \code{\link{catecvmean}()}.
 #'
 #' The validation curves (and ABC statistics, if applicable) can help compare the performance of
 #' different scoring methods in terms of discerning potential treatment heterogeneity in subgroups
@@ -74,7 +74,7 @@
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' cv_count <- cv(response = "count",
+#' cv_count <- catecv(response = "count",
 #'                cate.model = y ~ age + female + previous_treatment +
 #'                                 previous_cost + previous_number_relapses + offset(log(years)),
 #'                ps.model = trt ~ age + previous_treatment,
@@ -105,7 +105,7 @@
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' cv_surv <- cv(response = "survival",
+#' cv_surv <- catecv(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +
@@ -454,9 +454,9 @@ plot.precmed <- function(x,
 #'
 #' Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
 #' the validation set across all cross-validation iterations. The subgroups are mutually exclusive and
-#' are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{cv}()} or
+#' are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{catecv}()} or
 #' \code{\link{catecvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
-#' method specified in \code{\link{cv}()}. This should be run only after results of \code{\link{cv}()} or
+#' method specified in \code{\link{catecv}()}. This should be run only after results of \code{\link{catecv}()} or
 #' \code{\link{catecvmean}()}) have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
@@ -472,7 +472,7 @@ plot.precmed <- function(x,
 #' @return Returns sets of box plots, one set for each scoring method, over each of the multi-category
 #' subgroups. A gray horizontal dashed line of the overall ATE is included as a reference.
 #'
-#' @details \code{\link{boxplot}()} takes in outputs from \code{\link{cv}()} and generates
+#' @details \code{\link{boxplot}()} takes in outputs from \code{\link{catecv}()} and generates
 #' the box plots of estimated ATEs for multi-category subgroups of the validation set.
 #' The box plots together with the overall ATE reference line can help compare the scoring methods'
 #' ability to distinguish subgroups of patients with different treatment effects.
@@ -493,7 +493,7 @@ plot.precmed <- function(x,
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' cv_count <- cv(response = "count",
+#' cv_count <- catecv(response = "count",
 #'                cate.model = y ~ age + female + previous_treatment +
 #'                                 previous_cost + previous_number_relapses + offset(log(years)),
 #'                ps.model = trt ~ age + previous_treatment,
@@ -508,7 +508,7 @@ plot.precmed <- function(x,
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' cv_surv <- cv(response = "survival",
+#' cv_surv <- catecv(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +

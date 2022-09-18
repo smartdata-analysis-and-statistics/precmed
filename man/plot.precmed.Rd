@@ -22,7 +22,7 @@
 \item{x}{An object of class \code{"precmed"}.}
 
 \item{cv.i}{A positive integer indicating the index of the CV iteration results to be plotted.
-Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{cv}()} or
+Allowed values are: a positive integer \eqn{<=} \code{cv.n} in \code{\link{catecv}()} or
 \code{NULL}. If \code{cv.i = NULL}, the results across all CV iterations are combined according
 to \code{combine} and then plotted. Default is \code{NULL}.}
 
@@ -68,14 +68,14 @@ overall ATE is included as a reference. ABC statistics will be added to the lege
 \description{
 Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
 of nested subgroups in the training set and validation set separately, where each line represents
-one scoring method specified in \code{\link{cv}()} or \code{\link{catecvmean}()}. This should be run
-only after results of \code{\link{cv}()} or \code{\link{catecvmean}()} have been obtained.
+one scoring method specified in \code{\link{catecv}()} or \code{\link{catecvmean}()}. This should be run
+only after results of \code{\link{catecv}()} or \code{\link{catecvmean}()} have been obtained.
 }
 \details{
-\code{\link{plot}()} takes in outputs from \code{\link{cv}()} and generates two plots
+\code{\link{plot}()} takes in outputs from \code{\link{catecv}()} and generates two plots
 of validation curves side-by-side, one for the training set and one for validation set.
 Separate validation curves are produced for each scoring method specified via \code{score.method}
-in \code{\link{cv}()} or \code{\link{catecvmean}()}.
+in \code{\link{catecv}()} or \code{\link{catecvmean}()}.
 
 The validation curves (and ABC statistics, if applicable) can help compare the performance of
 different scoring methods in terms of discerning potential treatment heterogeneity in subgroups
@@ -87,7 +87,7 @@ to capture it).
 \examples{
 \dontrun{
 # Count outcome
-cv_count <- cv(response = "count",
+cv_count <- catecv(response = "count",
                cate.model = y ~ age + female + previous_treatment +
                                 previous_cost + previous_number_relapses + offset(log(years)),
                ps.model = trt ~ age + previous_treatment,
@@ -118,7 +118,7 @@ plot(x = cv_count, valid.only = TRUE)
 # Survival outcome
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-cv_surv <- cv(response = "survival",
+cv_surv <- catecv(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +

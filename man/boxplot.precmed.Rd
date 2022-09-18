@@ -28,13 +28,13 @@ subgroups. A gray horizontal dashed line of the overall ATE is included as a ref
 \description{
 Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
 the validation set across all cross-validation iterations. The subgroups are mutually exclusive and
-are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{cv}()} or
+are categorized by the CATE score percentiles (\code{prop.multi} specified in \code{\link{catecv}()} or
 \code{\link{catecvmean}()}). Box plots of mutually exclusive subgroups are constructed separately by scoring
-method specified in \code{\link{cv}()}. This should be run only after results of \code{\link{cv}()} or
+method specified in \code{\link{catecv}()}. This should be run only after results of \code{\link{catecv}()} or
 \code{\link{catecvmean}()}) have been obtained.
 }
 \details{
-\code{\link{boxplot}()} takes in outputs from \code{\link{cv}()} and generates
+\code{\link{boxplot}()} takes in outputs from \code{\link{catecv}()} and generates
 the box plots of estimated ATEs for multi-category subgroups of the validation set.
 The box plots together with the overall ATE reference line can help compare the scoring methods'
 ability to distinguish subgroups of patients with different treatment effects.
@@ -48,7 +48,7 @@ effect heterogeneity (or the inability of the scoring method to capture it).
 \examples{
 \dontrun{
 # Count outcome
-cv_count <- cv(response = "count",
+cv_count <- catecv(response = "count",
                cate.model = y ~ age + female + previous_treatment +
                                 previous_cost + previous_number_relapses + offset(log(years)),
                ps.model = trt ~ age + previous_treatment,
@@ -63,7 +63,7 @@ boxplot(x = cv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 # Survival outcome
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-cv_surv <- cv(response = "survival",
+cv_surv <- catecv(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +

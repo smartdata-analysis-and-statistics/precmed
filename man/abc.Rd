@@ -15,7 +15,7 @@ iteration and number of rows equal to the number of scoring methods in \code{x}.
 }
 \description{
 Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
-This should be run only after results of \code{\link{cv}()} have been obtained.
+This should be run only after results of \code{\link{catecv}()} have been obtained.
 }
 \details{
 The ABC is the area between a validation curve and the overall ATE in the validation set.
@@ -33,7 +33,7 @@ the validation curves in the validation set in \code{\link{plot}()}.
 \examples{
 \dontrun{
 # Count outcome
-cv_count <- cv(response = "count",
+cv_count <- catecv(response = "count",
                cate.model = y ~ age + female + previous_treatment +
                                 previous_cost + previous_number_relapses + offset(log(years)),
                ps.model = trt ~ age + previous_treatment,
@@ -46,7 +46,7 @@ cv_count <- cv(response = "count",
 abc(x = cv_count) # ABC of the validation curves for each method and each CV iteration
 
 # Survival outcome
-cv_surv <- cv(response = "survival",
+cv_surv <- catecv(response = "survival",
               cate.model = survival::Surv(y, d) ~ age + female
                                                   + previous_cost + previous_number_relapses,
               ps.model = trt ~ age + previous_treatment,
@@ -59,7 +59,7 @@ cv_surv <- cv(response = "survival",
 abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 
 # Continuous outcome
-cv_mean <- cv(response = "continuous",
+cv_mean <- catecv(response = "continuous",
                   cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
@@ -87,6 +87,6 @@ Journal of the American Statistical Association, 108(502), 527-539.}
 \url{https://www.jstor.org/stable/24246461?seq=1}
 }
 \seealso{
-\code{\link{cv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
+\code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
 \code{"precmed"} objects.
 }

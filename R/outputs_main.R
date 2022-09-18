@@ -154,7 +154,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' output_cv <- cv(response = "count",
+#' output_cv <- catecv(response = "count",
 #'                 cate.model = y ~ age + female + previous_treatment +
 #'                                      previous_cost + previous_number_relapses + offset(log(years)),
 #'                 ps.model = trt ~ age + previous_treatment,
@@ -174,7 +174,7 @@
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
-#' output_cv2 <- cv(response = "survival",
+#' output_cv2 <- catecv(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +
@@ -199,7 +199,7 @@
 #'
 #'
 #' # Continuous outcome
-#' output_cv3 <- cv(response = "continuous",
+#' output_cv3 <- catecv(response = "continuous",
 #'                 cate.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
@@ -239,7 +239,7 @@
 #' @importFrom survival Surv coxph coxph.detail survreg
 #' @importFrom utils setTxtProgressBar txtProgressBar
 
-cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory arguments (count & survival & continuous)
+catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory arguments (count & survival & continuous)
                init.model = NULL, # This is used in continuous data, when contrast/two regression is used
                ipcw.model = NULL, followup.time = NULL, tau0 = NULL, # Non-mandatory arguments survival only
                surv.min = 0.025, ipcw.method = "breslow",
@@ -414,7 +414,7 @@ cv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory 
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{cv}()}
+#' @seealso \code{\link{catecv}()}
 #'
 #' @examples
 #' \dontrun{
@@ -669,7 +669,7 @@ atefit <- function(response, cate.model, ps.model, data,
 #' Compute the area between curves from the \code{"precmed"} object
 #'
 #' Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
-#' This should be run only after results of \code{\link{cv}()} have been obtained.
+#' This should be run only after results of \code{\link{catecv}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
 #'
@@ -693,13 +693,13 @@ atefit <- function(response, cate.model, ps.model, data,
 #' Journal of the American Statistical Association, 108(502), 527-539.}
 #' \url{https://www.jstor.org/stable/24246461?seq=1}
 #'
-#' @seealso \code{\link{cv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
+#' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
 #' \code{"precmed"} objects.
 #'
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' cv_count <- cv(response = "count",
+#' cv_count <- catecv(response = "count",
 #'                cate.model = y ~ age + female + previous_treatment +
 #'                                 previous_cost + previous_number_relapses + offset(log(years)),
 #'                ps.model = trt ~ age + previous_treatment,
@@ -712,7 +712,7 @@ atefit <- function(response, cate.model, ps.model, data,
 #' abc(x = cv_count) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Survival outcome
-#' cv_surv <- cv(response = "survival",
+#' cv_surv <- catecv(response = "survival",
 #'               cate.model = survival::Surv(y, d) ~ age + female
 #'                                                   + previous_cost + previous_number_relapses,
 #'               ps.model = trt ~ age + previous_treatment,
@@ -725,7 +725,7 @@ atefit <- function(response, cate.model, ps.model, data,
 #' abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Continuous outcome
-#' cv_mean <- cv(response = "continuous",
+#' cv_mean <- catecv(response = "continuous",
 #'                   cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
@@ -753,7 +753,7 @@ abc <- function(x) {
 
   # Check the value of abc (must have area between curves values)
   if (x$abc == FALSE) {
-    stop("Area between curves (ABC) must have been calculated in x by setting abc = TRUE in cv().")
+    stop("Area between curves (ABC) must have been calculated in x by setting abc = TRUE in catecv().")
   }
 
   # Detect the number of score methods

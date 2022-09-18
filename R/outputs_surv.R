@@ -286,7 +286,7 @@
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
-#' cv <- catecvsurv(cate.model = survival::Surv(y, d) ~ age + female
+#' catecv <- catecvsurv(cate.model = survival::Surv(y, d) ~ age + female
 #'                                                      + previous_cost + previous_number_relapses,
 #'              ps.model = trt ~ age + previous_treatment,
 #'              ipcw.model = ~ age + previous_cost + previous_treatment,

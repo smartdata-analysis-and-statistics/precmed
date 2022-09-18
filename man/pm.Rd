@@ -248,5 +248,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{cv}()}
+\code{\link{catecv}()}
 }
