@@ -185,7 +185,7 @@ For survival response, see details in \code{\link{catefitsurv}()}.
 \examples{
 \dontrun{
 # Count outcome
-output_pm <- catefit(response = "count",
+output_catefit <- catefit(response = "count",
                 cate.model = y ~ age + female + previous_treatment +
                                      previous_cost + previous_number_relapses + offset(log(years)),
                 ps.model = trt ~ age + previous_treatment,
@@ -195,12 +195,12 @@ output_pm <- catefit(response = "count",
                 seed = 999)
 
 # Try:
-coef(output_pm)
+coef(output_catefit)
 
 # Survival outcome
 tau0 <- with(survivalExample,
                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-output_pm2 <- catefit(response = "survival",
+output_catefit2 <- catefit(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age + female
                  + previous_cost + previous_number_relapses,
                  ps.model = trt ~ age + previous_treatment,
@@ -216,11 +216,11 @@ output_pm2 <- catefit(response = "survival",
                  plot.gbmperf = FALSE)
 
 # Try:
-coef(output_pm2)
+coef(output_catefit2)
 
 
 # Continuous outcome
-output_pm3 <- catefit(response = "continuous",
+output_catefit3 <- catefit(response = "continuous",
                 cate.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
@@ -237,7 +237,7 @@ output_pm3 <- catefit(response = "continuous",
                 seed = 999)
 
 # Try:
-coef(output_pm3)
+coef(output_catefit3)
 
 }
 }

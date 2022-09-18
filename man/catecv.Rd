@@ -216,7 +216,7 @@ For continuous response, see details in \code{\link{catecvmean}()}.
 }
 \examples{
 \dontrun{
-output_cv <- catecv(response = "count",
+output_catecv <- catecv(response = "count",
                 cate.model = y ~ age + female + previous_treatment +
                                      previous_cost + previous_number_relapses + offset(log(years)),
                 ps.model = trt ~ age + previous_treatment,
@@ -228,15 +228,15 @@ output_cv <- catecv(response = "count",
                 seed = 999)
 
 # Try:
-plot(x = output_cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-boxplot(x = output_cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-abc(x = output_cv)
+plot(x = output_catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = output_catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+abc(x = output_catecv)
 
 # Survival outcome
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-output_cv2 <- catecv(response = "survival",
+output_catecv2 <- catecv(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +
@@ -255,13 +255,13 @@ output_cv2 <- catecv(response = "survival",
                  seed = 999)
 
 # Try:
-plot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-boxplot(x = output_cv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-abc(x = output_cv2)
+plot(x = output_catecv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = output_catecv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+abc(x = output_catecv2)
 
 
 # Continuous outcome
-output_cv3 <- catecv(response = "continuous",
+output_catecv3 <- catecv(response = "continuous",
                 cate.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
@@ -281,9 +281,9 @@ output_cv3 <- catecv(response = "continuous",
                 seed = 999)
 
 # Try:
-plot(x = output_cv3)
-boxplot(x = output_cv3)
-abc(x = output_cv3)
+plot(x = output_catecv3)
+boxplot(x = output_catecv3)
+abc(x = output_catecv3)
 }
 
 }
