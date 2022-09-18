@@ -294,6 +294,6 @@ observational data. Journal of the American Statistical Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{pm}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
+\code{\link{catefit}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 \code{"precmed"} objects.
 }

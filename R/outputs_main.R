@@ -149,7 +149,7 @@
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{pm}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
+#' @seealso \code{\link{catefit}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
 #'
 #' @examples
@@ -419,7 +419,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' output_pm <- pm(response = "count",
+#' output_pm <- catefit(response = "count",
 #'                 cate.model = y ~ age + female + previous_treatment +
 #'                                      previous_cost + previous_number_relapses + offset(log(years)),
 #'                 ps.model = trt ~ age + previous_treatment,
@@ -434,7 +434,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' output_pm2 <- pm(response = "survival",
+#' output_pm2 <- catefit(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age + female
 #'                  + previous_cost + previous_number_relapses,
 #'                  ps.model = trt ~ age + previous_treatment,
@@ -454,7 +454,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #'
 #'
 #' # Continuous outcome
-#' output_pm3 <- pm(response = "continuous",
+#' output_pm3 <- catefit(response = "continuous",
 #'                 cate.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
@@ -476,7 +476,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' }
 #' @export
 
-pm <- function(response, cate.model, ps.model, data, score.method,
+catefit <- function(response, cate.model, ps.model, data, score.method,
                init.model = NULL, # This is used in continuous data, when contrast/two regression is used
                ipcw.model = NULL, followup.time = NULL, tau0 = NULL,
                surv.min = 0.025, ipcw.method = "breslow",

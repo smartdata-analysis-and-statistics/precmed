@@ -779,7 +779,7 @@ catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.meth
 #'
 #' @examples
 #'\dontrun{
-#' pm <- catefitmean(cate.model = y ~ age  +
+#' catefit <- catefitmean(cate.model = y ~ age  +
 #'                   previous_treatment +
 #'                   previous_cost +
 #'                   previous_status_measure,

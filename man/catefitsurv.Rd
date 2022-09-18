@@ -248,7 +248,7 @@ validation to reduce optimism.
 tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
                                quantile(y[trt == "drug0"], 0.95)))
 
-pm <- catefitsurv(cate.model = survival::Surv(y, d) ~ age +
+catefit <- catefitsurv(cate.model = survival::Surv(y, d) ~ age +
                                                  female +
                                                  previous_cost +
                                                  previous_number_relapses,
