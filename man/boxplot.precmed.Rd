@@ -48,7 +48,7 @@ effect heterogeneity (or the inability of the scoring method to capture it).
 \examples{
 \dontrun{
 # Count outcome
-cv_count <- catecv(response = "count",
+catecv_count <- catecv(response = "count",
                cate.model = y ~ age + female + previous_treatment +
                                 previous_cost + previous_number_relapses + offset(log(years)),
                ps.model = trt ~ age + previous_treatment,
@@ -58,12 +58,12 @@ cv_count <- catecv(response = "count",
                cv.n = 5,
                plot.gbmperf = FALSE)
 
-boxplot(x = cv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = catecv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 
 # Survival outcome
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-cv_surv <- catecv(response = "survival",
+catecv_surv <- catecv(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +
@@ -81,10 +81,10 @@ cv_surv <- catecv(response = "survival",
                  plot.gbmperf = FALSE,
                  seed = 999)
 
-boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+boxplot(x = catecv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
 # Continuous outcome
-cv_mean <- catecvmean(cate.model = y ~ age +
+catecv_mean <- catecvmean(cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,
@@ -100,7 +100,7 @@ cv_mean <- catecvmean(cate.model = y ~ age +
                   plot.gbmperf = FALSE)
 
 
-boxplot(x = cv_mean)
+boxplot(x = catecv_mean)
 }
 
 }

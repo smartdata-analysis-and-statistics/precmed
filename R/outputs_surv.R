@@ -1214,7 +1214,7 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
-#' output <- drsurv.inference(cate.model = survival::Surv(y, d) ~ age +
+#' output <- atefitsurv(cate.model = survival::Surv(y, d) ~ age +
 #'                                                                female +
 #'                                                                previous_cost +
 #'                                                                previous_number_relapses,
@@ -1232,7 +1232,7 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
 #' @importFrom dplyr mutate
 #' @importFrom tidyr gather
 
-drsurv.inference <- function(cate.model, ps.model, data, ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
+atefitsurv <- function(cate.model, ps.model, data, ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
                              ps.method = "glm", minPS = 0.01, maxPS = 0.99, n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
 
   # Set seed once for reproducibility

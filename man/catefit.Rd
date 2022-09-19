@@ -39,7 +39,7 @@ catefit(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
+"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
@@ -169,7 +169,7 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
 }
 \value{
-For count response, see description of outputs in \code{\link{pmcount}()}.
+For count response, see description of outputs in \code{\link{catefitcount}()}.
 For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 }
 \description{
@@ -179,7 +179,7 @@ poisson regression (count, survival only), two regressions, contrast regression,
 linear regression (continuous only), and generalized additive model (continuous only).
 }
 \details{
-For count response, see details in \code{\link{pmcount}()}.
+For count response, see details in \code{\link{catefitcount}()}.
 For survival response, see details in \code{\link{catefitsurv}()}.
 }
 \examples{

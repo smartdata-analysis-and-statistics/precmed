@@ -45,7 +45,7 @@ catecv(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
+"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
@@ -200,7 +200,7 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.}
 }
 \value{
-For count response, see description of outputs in \code{\link{cvcount}()}.
+For count response, see description of outputs in \code{\link{catecvcount}()}.
 For survival response, see description of outputs in \code{\link{catecvsurv}()}.
 For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 }
@@ -210,7 +210,7 @@ outcomes in nested and mutually exclusive subgroups of patients defined by an es
 average treatment effect (CATE) score via cross-validation (CV).
 }
 \details{
-For count response, see details in \code{\link{cvcount}()}.
+For count response, see details in \code{\link{catecvcount}()}.
 For survival response, see details in \code{\link{catecvsurv}()}.
 For continuous response, see details in \code{\link{catecvmean}()}.
 }

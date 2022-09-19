@@ -17,7 +17,7 @@
 #' average treatment effect (CATE) score via cross-validation (CV).
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
+#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -136,11 +136,11 @@
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
 #'
-#' @return For count response, see description of outputs in \code{\link{cvcount}()}.
+#' @return For count response, see description of outputs in \code{\link{catecvcount}()}.
 #' For survival response, see description of outputs in \code{\link{catecvsurv}()}.
 #' For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 #'
-#' @details For count response, see details in \code{\link{cvcount}()}.
+#' @details For count response, see details in \code{\link{catecvcount}()}.
 #' For survival response, see details in \code{\link{catecvsurv}()}.
 #' For continuous response, see details in \code{\link{catecvmean}()}.
 #'
@@ -255,7 +255,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
   if (response == "count"){
-    cvout <- cvcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
+    cvout <- catecvcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                      higher.y = higher.y, abc = abc,
                      prop.cutoff = prop.cutoff, prop.multi = prop.multi,
                      ps.method = ps.method, minPS = minPS, maxPS = maxPS,
@@ -303,7 +303,7 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' linear regression (continuous only), and generalized additive model (continuous only).
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
+#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -403,10 +403,10 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
 #'
-#' @return For count response, see description of outputs in \code{\link{pmcount}()}.
+#' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 #'
-#' @details For count response, see details in \code{\link{pmcount}()}.
+#' @details For count response, see details in \code{\link{catefitcount}()}.
 #' For survival response, see details in \code{\link{catefitsurv}()}.
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
@@ -490,7 +490,7 @@ catefit <- function(response, cate.model, ps.model, data, score.method,
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
   if (response == "count") {
-    pmout <- pmcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
+    pmout <- catefitcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
                      higher.y = higher.y,
                      prop.cutoff = prop.cutoff,
                      ps.method = ps.method, minPS = minPS, maxPS = maxPS,
@@ -533,7 +533,7 @@ catefit <- function(response, cate.model, ps.model, data, score.method,
 #' inference.
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
+#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
@@ -583,11 +583,11 @@ catefit <- function(response, cate.model, ps.model, data, score.method,
 #' every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
 #' only taken into account if \code{verbose = 1}. Default is \code{FALSE}.
 #'
-#' @return For count response, see description of outputs in \code{\link{drcount.inference}()}.
-#' For survival response, see description of outputs in \code{\link{drsurv.inference}()}.
+#' @return For count response, see description of outputs in \code{\link{atefitcount}()}.
+#' For survival response, see description of outputs in \code{\link{atefitsurv}()}.
 #'
-#' @details For count response, see details in \code{\link{drcount.inference}()}.
-#' For survival response, see details in \code{\link{drsurv.inference}()}.
+#' @details For count response, see details in \code{\link{atefitcount}()}.
+#' For survival response, see details in \code{\link{atefitsurv}()}.
 #'
 #' @examples
 #' \dontrun{
@@ -645,19 +645,19 @@ atefit <- function(response, cate.model, ps.model, data,
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
   if (response == "count"){
-    drout <- drcount.inference(cate.model = cate.model, ps.model = ps.model, data = data,
+    drout <- atefitcount(cate.model = cate.model, ps.model = ps.model, data = data,
                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions,
                                n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
   }
   if (response == "survival"){
-    drout <- drsurv.inference(cate.model = cate.model, ps.model = ps.model, data = data,
+    drout <- atefitsurv(cate.model = cate.model, ps.model = ps.model, data = data,
                               ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
                               surv.min = surv.min, ipcw.method = ipcw.method,
                               ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                               n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
   }
   if (response == "continuous"){
-    drout <- drmean.inference(cate.model = cate.model, ps.model = ps.model, data = data,
+    drout <- atefitmean(cate.model = cate.model, ps.model = ps.model, data = data,
                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions,
                               n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
   }

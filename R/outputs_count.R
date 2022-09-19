@@ -220,11 +220,10 @@
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
 #' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
-#' and \code{\link{pmcount}()} function.
+#' and \code{\link{catefitcount}()} function.
 #'
 #' @examples
-#' \dontrun{
-#' catecv <- cvcount(cate.model = y ~ age + female + previous_treatment +
+#' catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
 #'               data = countExample,
@@ -238,7 +237,6 @@
 #' # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # boxplot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # abc(x = catecv)
-#' }
 #'
 #' @export
 #'
@@ -252,7 +250,7 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom MASS glm.nb
 
-cvcount <- function(cate.model, ps.model, data, score.method,
+catecvcount <- function(cate.model, ps.model, data, score.method,
                     higher.y = TRUE, abc = TRUE,
                     prop.cutoff = seq(0.5, 1, length = 6), prop.multi = c(0, 1/3, 2/3, 1),
                     ps.method = "glm", minPS = 0.01, maxPS = 0.99,
@@ -690,19 +688,19 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 #' treatment group or with two doubly robust estimators, two regressions and contrast regression
 #' (Yadlowsky, 2020) applied to the entire dataset.
 #'
-#' \code{\link{pmcount}()} provides the coefficients of the CATE score for each scoring method requested
+#' \code{\link{catefitcount}()} provides the coefficients of the CATE score for each scoring method requested
 #' through \code{score.method}. Currently, contrast regression is the only method which allows
 #' for inference of the CATE coefficients by providing standard errors of the coefficients.
 #' The coefficients can be used to learn the effect size of each variable and predict the
 #' CATE score for a new observation.
 #'
-#' \code{\link{pmcount}()} also provides the predicted CATE score of each observation in the data set,
+#' \code{\link{catefitcount}()} also provides the predicted CATE score of each observation in the data set,
 #' for each scoring method. The predictions allow ranking the observations from potentially
 #' high responders to the treatment to potentially low or standard responders.
 #'
 #' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
-#' Note that the ATEs in \code{\link{pmcount}()} are derived based on the CATE score which is estimated
-#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{cvcount}()} is more
+#' Note that the ATEs in \code{\link{catefitcount}()} are derived based on the CATE score which is estimated
+#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catecvcount}()} is more
 #' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
 #' validation to reduce optimism.
 #'
@@ -711,21 +709,19 @@ cvcount <- function(cate.model, ps.model, data, score.method,
 #' observational data. Journal of the American Statistical Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{cvcount}()}
+#' @seealso \code{\link{catecvcount}()}
 #'
 #' @examples
-#' \dontrun{
-#' catefit <- pmcount(cate.model = y ~ age + female + previous_treatment +
+#' catefit <- catefitcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
 #'               data = countExample,
 #'               higher.y = FALSE,
 #'               score.method = "poisson",
 #'               seed = 999)
-#'}
 #' @export
 
-pmcount <- function(cate.model, ps.model, data, score.method,
+catefitcount <- function(cate.model, ps.model, data, score.method,
                     higher.y = TRUE,
                     prop.cutoff = seq(0.5, 1, length = 6),
                     ps.method = "glm", minPS = 0.01, maxPS = 0.99,
@@ -911,7 +907,7 @@ pmcount <- function(cate.model, ps.model, data, score.method,
 #'
 #' @examples
 #' \dontrun{
-#' output <- drcount.inference(cate.model = y ~ age + female + previous_treatment +
+#' output <- atefitcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'                             ps.model = trt ~ age + previous_treatment,
 #'                             data = countExample,
@@ -926,7 +922,7 @@ pmcount <- function(cate.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #'
 
-drcount.inference <- function(cate.model, ps.model, data,
+atefitcount <- function(cate.model, ps.model, data,
                               ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                               interactions = TRUE, n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
 

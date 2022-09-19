@@ -118,7 +118,7 @@ plot(x = cv_count, valid.only = TRUE)
 # Survival outcome
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-cv_surv <- catecv(response = "survival",
+catecv_surv <- catecv(response = "survival",
                  cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +
@@ -138,13 +138,13 @@ cv_surv <- catecv(response = "survival",
 
 
 # default setting, plot RMTL ratios in both training and validation sets
-plot(x = cv_surv)
+plot(x = catecv_surv)
 
 # plot hazard ratio
-plot(x = cv_surv, plot.hr = TRUE)
+plot(x = catecv_surv, plot.hr = TRUE)
 
 # Continuous outcome
-cv_mean <- catecvmean(cate.model = y ~ age +
+catecv_mean <- catecvmean(cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,
@@ -160,7 +160,7 @@ cv_mean <- catecvmean(cate.model = y ~ age +
                   plot.gbmperf = FALSE)
 
 
-plot(x = cv_mean)
+plot(x = catecv_mean)
 }
 
 }

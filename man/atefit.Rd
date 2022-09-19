@@ -26,7 +26,7 @@ atefit(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{cvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).}
+"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
@@ -93,8 +93,8 @@ every \code{n.boot/10}-th iteration and whether the final histogram should be ou
 only taken into account if \code{verbose = 1}. Default is \code{FALSE}.}
 }
 \value{
-For count response, see description of outputs in \code{\link{drcount.inference}()}.
-For survival response, see description of outputs in \code{\link{drsurv.inference}()}.
+For count response, see description of outputs in \code{\link{atefitcount}()}.
+For survival response, see description of outputs in \code{\link{atefitsurv}()}.
 }
 \description{
 Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
@@ -102,8 +102,8 @@ for count outcomes, the restricted mean time lost ratio for survival outcomes an
 inference.
 }
 \details{
-For count response, see details in \code{\link{drcount.inference}()}.
-For survival response, see details in \code{\link{drsurv.inference}()}.
+For count response, see details in \code{\link{atefitcount}()}.
+For survival response, see details in \code{\link{atefitsurv}()}.
 }
 \examples{
 \dontrun{

@@ -222,7 +222,7 @@
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
 #' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
-#' and \code{\link{pmcount}()} function.
+#' and \code{\link{catefitmean}()} function.
 #'
 #' @examples
 #' \dontrun{
@@ -1000,7 +1000,7 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
 #'
 #' @examples
 #'\dontrun{
-#' output <- drmean.inference(cate.model = y ~ age + female + previous_treatment +
+#' output <- atefitmean(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses,
 #'                             ps.model = trt ~ age + previous_treatment,
 #'                             data = countExample,
@@ -1014,7 +1014,7 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #' @export
 
-drmean.inference <- function(cate.model, ps.model, data,
+atefitmean <- function(cate.model, ps.model, data,
                              ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                              interactions = TRUE, n.boot = 500, verbose = 1, plot.boot = FALSE, seed = NULL) {
 

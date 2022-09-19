@@ -294,9 +294,9 @@ catecv <- catecvmean(cate.model = y ~ age  +
              seed = 999)
 
 # Try:
-# plot(x = cv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
-# boxplot(x = cv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
-# abc(x = cv)
+# plot(x = catecv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
+# boxplot(x = catecv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
+# abc(x = catecv)
 }
 }
 \references{
@@ -307,5 +307,5 @@ observational data. Journal of the American Statistical Association, 1-18.}
 }
 \seealso{
 \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
-and \code{\link{pmcount}()} function.
+and \code{\link{catefitmean}()} function.
 }
