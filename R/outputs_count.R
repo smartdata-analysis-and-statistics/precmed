@@ -235,9 +235,9 @@
 #'               seed = 999)
 #'
 #' # Try:
-#' # plot(x = cv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
-#' # boxplot(x = cv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
-#' # abc(x = cv)
+#' # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+#' # boxplot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+#' # abc(x = catecv)
 #' }
 #'
 #' @export

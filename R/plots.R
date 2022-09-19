@@ -105,7 +105,7 @@
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' cv_surv <- catecv(response = "survival",
+#' catecv_surv <- catecv(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +
@@ -125,13 +125,13 @@
 #'
 #'
 #' # default setting, plot RMTL ratios in both training and validation sets
-#' plot(x = cv_surv)
+#' plot(x = catecv_surv)
 #'
 #' # plot hazard ratio
-#' plot(x = cv_surv, plot.hr = TRUE)
+#' plot(x = catecv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
-#' cv_mean <- catecvmean(cate.model = y ~ age +
+#' catecv_mean <- catecvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -147,7 +147,7 @@
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' plot(x = cv_mean)
+#' plot(x = catecv_mean)
 #'}
 #'
 #' @export
@@ -492,7 +492,7 @@ plot.precmed <- function(x,
 #' @examples
 #' \dontrun{
 #' # Count outcome
-#' cv_count <- catecv(response = "count",
+#' catecv_count <- catecv(response = "count",
 #'                cate.model = y ~ age + female + previous_treatment +
 #'                                 previous_cost + previous_number_relapses + offset(log(years)),
 #'                ps.model = trt ~ age + previous_treatment,
@@ -502,12 +502,12 @@ plot.precmed <- function(x,
 #'                cv.n = 5,
 #'                plot.gbmperf = FALSE)
 #'
-#' boxplot(x = cv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+#' boxplot(x = catecv_count, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #'
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' cv_surv <- catecv(response = "survival",
+#' catecv_surv <- catecv(response = "survival",
 #'                  cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +
@@ -525,10 +525,10 @@ plot.precmed <- function(x,
 #'                  plot.gbmperf = FALSE,
 #'                  seed = 999)
 #'
-#' boxplot(x = cv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' boxplot(x = catecv_surv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #'
 #'# Continuous outcome
-#' cv_mean <- catecvmean(cate.model = y ~ age +
+#' catecv_mean <- catecvmean(cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
@@ -544,7 +544,7 @@ plot.precmed <- function(x,
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' boxplot(x = cv_mean)
+#' boxplot(x = catecv_mean)
 #'}
 #'
 #' @export

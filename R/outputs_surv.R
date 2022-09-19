@@ -302,9 +302,9 @@
 #'              seed = 999)
 #'
 #' # Try:
-#' plot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#' boxplot(x = cv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#' abc(x = cv)
+#' plot(x = catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' boxplot(x = catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
+#' abc(x = catecv)
 #'}
 #' @export
 #'
