@@ -215,25 +215,24 @@ plot.precmed <- function(x,
   # Define y-axis if default is NULL
   if (is.null(ylab)){
     if (x$response == "count"){
-      what.ratio <- "Rate ratio"
+      plot.ratio <- "Rate ratio"
     } else if (x$response == "survival"){
       if (plot.hr == TRUE){
-        what.ratio <- "Hazard ratio"
+        plot.ratio <- "Hazard ratio"
       } else {
-        what.ratio <- "RMTL ratio"
+        plot.ratio <- "RMTL ratio"
       }
     } else if (x$response == "continuous"){
-      ##TODO: what.ratio? correct name?
-      what.ratio <- "Mean difference"
+      plot.ratio <- "Mean difference"
     }
 
     if (is.null(x$formulas$trt_labels) == TRUE & x$response == "continuous"){
-      ylab <- paste0(what.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
 
     } else if (is.null(x$formulas$trt_labels) == TRUE & x$response != "continuous") {
-      ylab <- paste0(what.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
     } else {
-      ylab <- paste0(what.ratio, " ", trt, "=", x$formulas$trt_labels[2], " - ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], " - ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
     }
   }
 
@@ -588,25 +587,24 @@ boxplot.precmed <- function(x, ylab = NULL,
   # Define y-axis if default is NULL
   if (is.null(ylab)){
     if (x$response == "count"){
-      what.ratio = "Rate ratio"
+      plot.ratio = "Rate ratio"
     } else if (x$response == "survival"){
       if (plot.hr == TRUE){
-        what.ratio = "Hazard ratio"
+        plot.ratio = "Hazard ratio"
       } else {
-        what.ratio = "RMTL ratio"
+        plot.ratio = "RMTL ratio"
       }
     } else if (x$response == "continuous"){
-      ##TODO: what.ratio? correct name?
-      what.ratio = "Mean difference"
+      plot.ratio = "Mean difference"
     }
 
     if (is.null(x$formulas$trt_labels) == TRUE & x$response == "continuous"){
-      ylab <- paste0(what.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
 
     } else if (is.null(x$formulas$trt_labels) == TRUE & x$response != "continuous") {
-      ylab <- paste0(what.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=1 - ", trt, "=0\nin each subgroup")
     } else {
-      ylab <- paste0(what.ratio, " ", trt, "=", x$formulas$trt_labels[2], " - ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], " - ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
     }
   }
 
