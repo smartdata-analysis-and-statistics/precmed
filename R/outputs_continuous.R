@@ -274,6 +274,8 @@ catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.meth
                    error.maxNR = 1e-3, tune = c(0.5, 2),
                    seed = NULL, verbose = 1, ...) {
 
+  stop("This functionality is not implemented yet")
+
   # TODO: now score.method has no default (mandatory argument)
 
   # Set seed for reproducibility
@@ -805,6 +807,8 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
                    error.maxNR = 1e-3, tune = c(0.5, 2),
                    seed = NULL, ...) {
 
+  stop("This functionality is not implemented yet")
+
   # TODO: score.method is now a mandatory argument
 
   # Set seed once for reproducibility
@@ -1013,6 +1017,8 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
 drmean.inference <- function(cate.model, ps.model, data,
                              ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                              interactions = TRUE, n.boot = 500, verbose = 1, plot.boot = FALSE, seed = NULL) {
+
+  stop("This functionality is not implemented yet")
 
   # Set seed once for reproducibility
   set.seed(seed)
