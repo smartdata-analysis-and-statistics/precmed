@@ -254,44 +254,20 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
-  if (response == "count"){
-    cvout <- catecvcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
-                     higher.y = higher.y, abc = abc,
-                     prop.cutoff = prop.cutoff, prop.multi = prop.multi,
-                     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                     train.prop = train.prop, cv.n = cv.n, error.max = error.max, max.iter = max.iter,
-                     initial.predictor.method = initial.predictor.method, xvar.smooth = xvar.smooth.score,
-                     tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                     seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
-  }
-  if (response == "survival"){
-    cvout <- catecvsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
-                    ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
-                    surv.min = surv.min, ipcw.method = ipcw.method,
-                    higher.y = higher.y, abc = abc,
-                    prop.cutoff = prop.cutoff, prop.multi = prop.multi,
-                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                    train.prop = train.prop, cv.n = cv.n, error.max = error.max, max.iter = max.iter,
-                    initial.predictor.method = initial.predictor.method,
-                    tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
-  }
-  if (response == "continuous"){
-    cvout <- catecvmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
-                    ipcw.model = ipcw.model,
-                    higher.y = higher.y, abc = abc,
-                    prop.cutoff = prop.cutoff, prop.multi = prop.multi,
-                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                    train.prop = train.prop, cv.n = cv.n, error.max = error.max, max.iter = max.iter,
-                    initial.predictor.method = initial.predictor.method,
-                    xvar.smooth.score = xvar.smooth.score, xvar.smooth.init = xvar.smooth.init,
-                    tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
-  }
+  .args <- as.list(match.call())[-1]
+  .args$response <- NULL
 
+  switch(response,
+         count ={
+           cvout <- do.call(catecvcount, .args)
+         },
+         survival = {
+           cvout <- do.call(catecvsurv, .args)
+         },
+         continuous = {
+           cvout <- do.call(catecvmean, .args)
+         }
+  )
   return(cvout)
 }
 
@@ -488,42 +464,20 @@ catefit <- function(response, cate.model, ps.model, data, score.method,
                seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
-
-  if (response == "count") {
-    pmout <- catefitcount(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
-                     higher.y = higher.y,
-                     prop.cutoff = prop.cutoff,
-                     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                     initial.predictor.method = initial.predictor.method, xvar.smooth = xvar.smooth.score,
-                     tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                     seed = seed, plot.gbmperf = plot.gbmperf)
-  }
-  if (response == "survival") {
-    pmout <- catefitsurv(cate.model = cate.model, ps.model = ps.model, data = data, score.method = score.method,
-                    ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
-                    surv.min = surv.min, ipcw.method = ipcw.method,
-                    higher.y = higher.y,
-                    prop.cutoff = prop.cutoff,
-                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                    initial.predictor.method = initial.predictor.method,
-                    tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    seed = seed, plot.gbmperf = plot.gbmperf)
-  }
-  if (response == "continuous") {
-    pmout <- catefitmean(cate.model = cate.model, init.model = init.model, ps.model = ps.model, data = data, score.method = score.method,
-                    ipcw.model = ipcw.model,
-                    higher.y = higher.y, abc = abc,
-                    prop.cutoff = prop.cutoff,
-                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                    initial.predictor.method = initial.predictor.method,
-                    xvar.smooth.score = xvar.smooth.score, xvar.smooth.init = xvar.smooth.init,
-                    tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold,
-                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    seed = seed, plot.gbmperf = plot.gbmperf, verbose = verbose)
-  }
-  return(pmout)
+  .args <- as.list(match.call())[-1]
+  .args$response <- NULL
+  switch(response,
+         count= {
+           fitout <- do.call(catefitcount, .args)
+         },
+         survival = {
+           fitout <- do.call(catefitsurv, .args)
+         },
+         continuous = {
+           fitout <- do.call(catefitmean, .args)
+         }
+  )
+  return(fitout)
 }
 
 #' Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data
@@ -643,25 +597,20 @@ atefit <- function(response, cate.model, ps.model, data,
                          n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
-
-  if (response == "count"){
-    drout <- atefitcount(cate.model = cate.model, ps.model = ps.model, data = data,
-                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions,
-                               n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
-  }
-  if (response == "survival"){
-    drout <- atefitsurv(cate.model = cate.model, ps.model = ps.model, data = data,
-                              ipcw.model = ipcw.model, followup.time = followup.time, tau0 = tau0,
-                              surv.min = surv.min, ipcw.method = ipcw.method,
-                              ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                              n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
-  }
-  if (response == "continuous"){
-    drout <- atefitmean(cate.model = cate.model, ps.model = ps.model, data = data,
-                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions,
-                              n.boot = n.boot, verbose = verbose, plot.boot = plot.boot, seed = seed)
-  }
-  return(drout)
+  .args <- as.list(match.call())[-1]
+  .args$response <- NULL
+    switch(response,
+         count ={
+           atefitout <- do.call(atefitcount, .args)
+         },
+         survival = {
+           atefitout <- do.call(atefitsurv, .args)
+         },
+         continuous = {
+           atefitout <- do.call(atefitmean, .args)
+         }
+  )
+  return(atefitout)
 
 }
 
