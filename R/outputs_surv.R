@@ -120,7 +120,7 @@
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
+#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{1}.
 #'
 #' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
@@ -835,6 +835,9 @@ catecvsurv <- function(cate.model, ps.model, data, score.method,
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating what kind of intermediate progress messages should
+#' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+#' \code{2} means progress, run time, and all errors and warnings. Default is \code{1}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
@@ -970,12 +973,12 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                    initial.predictor.method = "randomForest",
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5, plot.gbmperf = TRUE,
-                   error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2), seed = NULL) {
+                   error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2), seed = NULL, verbose = 1) {
 
   # Set seed for reproducibility
   set.seed(seed)
 
-  t.start <- Sys.time()
+  if (verbose >= 1) t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -1118,9 +1121,11 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
   if ("contrastReg" %in% score.method) result$fit$result.contrastReg$converge.contrastReg <-
     fit$result.contrastReg$converge.contrastReg
 
-  t.end <- Sys.time()
-  t.diff <- round(difftime(t.end, t.start),2)
-  cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  if (verbose >= 1) {
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
 
   class(result) <- "precmed"
   return(result)

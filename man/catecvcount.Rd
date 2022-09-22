@@ -147,7 +147,7 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-\code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.}
+\code{2} means progress bar, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

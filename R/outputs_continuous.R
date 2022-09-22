@@ -684,6 +684,9 @@ catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.meth
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating what kind of intermediate progress messages should
+#' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+#' \code{2} means progress, run time, and all errors and warnings. Default is \code{1}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
 #' @return Returns a list containing the following components:
@@ -805,7 +808,7 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
                    xvar.smooth.score = NULL, xvar.smooth.init = NULL,
                    tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = FALSE,
                    error.maxNR = 1e-3, tune = c(0.5, 2),
-                   seed = NULL, ...) {
+                   seed = NULL, verbose = 1, ...) {
 
   stop("This functionality is not implemented yet")
 
@@ -814,7 +817,7 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
   # Set seed once for reproducibility
   set.seed(seed)
 
-  t.start <- Sys.time()
+  if (verbose >= 1) t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -923,9 +926,11 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
   if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
     fit$result.contrastReg$sigma.contrastReg
 
-  t.end <- Sys.time()
-  t.diff <- round(difftime(t.end, t.start),2)
-  cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  if (verbose >= 1) {
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
 
   class(result) <- "precmed"
   return(result)

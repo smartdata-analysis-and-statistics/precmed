@@ -27,6 +27,7 @@ catefitmean(
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
+  verbose = 1,
   ...
 )
 }
@@ -122,6 +123,10 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

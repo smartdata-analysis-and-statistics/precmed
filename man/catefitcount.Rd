@@ -25,6 +25,7 @@ catefitcount(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = FALSE,
+  verbose = 1,
   ...
 )
 }
@@ -113,6 +114,10 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }
