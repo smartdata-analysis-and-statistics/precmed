@@ -444,14 +444,14 @@ catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.meth
 
     if (verbose == 2) {
       if (length(names(fit$err.fit)) != 0) {
-        if (verbose == 2) cat(paste0('    Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '";\n    return NAs in the corresponding parameters'),'\n')
-        warning(paste0('Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for the corresponding parameters; see 'errors/warnings'."))
+        if (verbose == 2) cat(paste0('    Warning: Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '";\n    return NAs in the corresponding parameters'),'\n')
+        warning(paste0('Warning: Error(s) occurred when fitting "', paste0(names(fit$err.fit), collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for the corresponding parameters; see 'errors/warnings'."))
         result[['errors/warnings']][[names(fit$err.fit)]][[paste0("cv", cv.i)]]$errors <- fit$err.fit
       }
 
       if (length(names(fit$warn.fit)) != 0) {
-        if (verbose == 2) cat(paste0('    Warning(s) occurred when fitting "', paste0(names(fit$warn.fit), collapse = '", "'), '"'),'\n')
-        warning(paste0('Warning(s) occurred when fitting "', paste0(names(fit$warn.fit), collapse = '", "'), '" in cross-validation iteration ', cv.i, "; see 'errors/warnings'."))
+        if (verbose == 2) cat(paste0('    Warning: Warning(s) occurred when fitting "', paste0(names(fit$warn.fit), collapse = '", "'), '"'),'\n')
+        warning(paste0('Warning: Warning(s) occurred when fitting "', paste0(names(fit$warn.fit), collapse = '", "'), '" in cross-validation iteration ', cv.i, "; see 'errors/warnings'."))
         result[['errors/warnings']][[names(fit$warn.fit)]][[paste0("cv", cv.i)]]$warnings <- fit$warn.fit
       }
     }

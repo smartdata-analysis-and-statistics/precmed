@@ -587,12 +587,12 @@ catecvsurv <- function(cate.model, ps.model, data, score.method,
 
     if (verbose == 2){
       if (length(errors.train) != 0) {
-        if (verbose == 2) cat(paste0('    Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors.train, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
+        if (verbose == 2) cat(paste0('    Warning: Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors.train, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
         warning(paste0('Error(s) occurred when estimating the ATEs in the nested subgroup in the training set using "', paste0(errors.train, collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for RMTL ratio and HR in the corresponding subgroup; see 'errors/warnings'."))
       }
 
       if (length(warnings.train) != 0) {
-        if (verbose == 2) cat(paste0('    Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings.train, collapse = '", "'), '"'),'\n')
+        if (verbose == 2) cat(paste0('     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings.train, collapse = '", "'), '"'),'\n')
         warning(paste0('Warning(s) occurred when estimating the ATEs in the nested subgroup in the training set using "', paste0(warnings.train, collapse = '", "'), '" in cross-validation iteration ', cv.i, "; see 'errors/warnings'."))
       }
     }
@@ -688,12 +688,12 @@ catecvsurv <- function(cate.model, ps.model, data, score.method,
 
     if (verbose == 2){
       if (length(errors.valid) != 0) {
-        if (verbose == 2) cat(paste0('    Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors.valid, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
+        if (verbose == 2) cat(paste0('     Warning: Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors.valid, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
         warning(paste0('Error(s) occurred when estimating the ATEs in the nested subgroup in the validation set using "', paste0(errors.valid, collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for RMTL ratio and HR in the corresponding subgroup; see 'errors/warnings'."))
       }
 
       if (length(warnings.valid) != 0) {
-        if (verbose == 2) cat(paste0('    Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings.valid, collapse = '", "'), '"'),'\n')
+        if (verbose == 2) cat(paste0('     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings.valid, collapse = '", "'), '"'),'\n')
         warning(paste0('Warning(s) occurred when estimating the ATEs in the nested subgroup in the validation set using "', paste0(warnings.valid, collapse = '", "'), '" in cross-validation iteration ', cv.i, "; see 'errors/warnings'."))
       }
     }
@@ -1086,13 +1086,13 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
   }# end of for (name in names(fit.score)) {}
 
   if (length(errors) != 0) {
-    cat(paste0('    Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
-    warning(paste0('Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors, collapse = '", "'), "\". NAs are returned for RMTL ratio and HR in the corresponding subgroup; see 'errors/warnings'."))
+    cat(paste0('    Warning: Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
+    warning(paste0('Warning: Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors, collapse = '", "'), "\". NAs are returned for RMTL ratio and HR in the corresponding subgroup; see 'errors/warnings'."))
   }
 
   if (length(warnings) != 0) {
-    cat(paste0('    Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings, collapse = '", "'), '"'),'\n')
-    warning(paste0('Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings, collapse = '", "'), "\"; see 'errors/warnings'."))
+    cat(paste0('    Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings, collapse = '", "'), '"'),'\n')
+    warning(paste0('Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(warnings, collapse = '", "'), "\"; see 'errors/warnings'."))
   }
 
   if (sum(score.method %in% c("poisson", "twoReg", "contrastReg")) > 0) {
