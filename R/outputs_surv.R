@@ -319,17 +319,38 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom dplyr %>%
 
-catecvsurv <- function(cate.model, ps.model, data, score.method,
-                   ipcw.model = NULL, tau0 = NULL, followup.time = NULL,
-                   surv.min = 0.025, ipcw.method = "breslow",
-                   higher.y = TRUE, abc = TRUE,
-                   prop.cutoff = seq(0.5, 1, length = 6), prop.multi = c(0, 1/3, 2/3, 1),
-                   ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                   train.prop = 3/4, cv.n = 10, error.max = 0.1, max.iter = 5000,
-                   initial.predictor.method = "randomForest",
-                   tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
-                   error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                   seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
+catecvsurv <- function(data,
+                       score.method,
+                       cate.model,
+                       ps.model,
+                       ps.method = "glm",
+                       initial.predictor.method = "randomForest",
+                       ipcw.model = NULL,
+                       ipcw.method = "breslow",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       verbose = 1,
+                       followup.time = NULL,
+                       tau0 = NULL,
+                       higher.y = TRUE,
+                       prop.cutoff = seq(0.5, 1, length = 6),
+                       prop.multi = c(0, 1/3, 2/3, 1),
+                       abc = TRUE,
+                       train.prop = 3/4,
+                       cv.n = 10,
+                       error.max = 0.1,
+                       max.iter = 5000,
+                       surv.min = 0.025,
+                       tree.depth = 2,
+                       n.trees.rf = 1000,
+                       n.trees.boosting = 200,
+                       B = 3,
+                       Kfold = 5,
+                       error.maxNR = 1e-3,
+                       max.iterNR = 150,
+                       tune = c(0.5, 2),
+                       seed = NULL,
+                       plot.gbmperf = TRUE) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -965,15 +986,32 @@ catecvsurv <- function(cate.model, ps.model, data, score.method,
 #'}
 #' @export
 
-catefitsurv <- function(cate.model, ps.model, score.method, data,
-                   ipcw.model = NULL, followup.time = NULL, tau0 = NULL,
-                   surv.min = 0.025, ipcw.method = "breslow",
-                   higher.y = TRUE,
-                   prop.cutoff = seq(0.5, 1, length = 6),
-                   ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                   initial.predictor.method = "randomForest",
-                   tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5, plot.gbmperf = TRUE,
-                   error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2), seed = NULL, verbose = 1) {
+catefitsurv <- function(data,
+                        score.method,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        initial.predictor.method = "randomForest",
+                        ipcw.model = NULL,
+                        ipcw.method = "breslow",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        verbose = 1,
+                        followup.time = NULL,
+                        tau0 = NULL,
+                        higher.y = TRUE,
+                        prop.cutoff = seq(0.5, 1, length = 6),
+                        surv.min = 0.025,
+                        tree.depth = 2,
+                        n.trees.rf = 1000,
+                        n.trees.boosting = 200,
+                        B = 3,
+                        Kfold = 5,
+                        plot.gbmperf = TRUE,
+                        error.maxNR = 1e-3,
+                        max.iterNR = 100,
+                        tune = c(0.5, 2),
+                        seed = NULL) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -1237,8 +1275,21 @@ catefitsurv <- function(cate.model, ps.model, score.method, data,
 #' @importFrom dplyr mutate
 #' @importFrom tidyr gather
 
-atefitsurv <- function(cate.model, ps.model, data, ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
-                             ps.method = "glm", minPS = 0.01, maxPS = 0.99, n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
+atefitsurv <- function(data,
+                       cate.model,
+                       ps.model,
+                       ps.method = "glm",
+                       ipcw.model = NULL,
+                       ipcw.method = "breslow",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       verbose = 1,
+                       followup.time = NULL,
+                       tau0 = NULL,
+                       surv.min = 0.025,
+                       n.boot = 500,
+                       seed = NULL,
+                       plot.boot = FALSE) {
 
   # Set seed once for reproducibility
   set.seed(seed)

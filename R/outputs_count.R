@@ -250,15 +250,34 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom MASS glm.nb
 
-catecvcount <- function(cate.model, ps.model, data, score.method,
-                    higher.y = TRUE, abc = TRUE,
-                    prop.cutoff = seq(0.5, 1, length = 6), prop.multi = c(0, 1/3, 2/3, 1),
-                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                    train.prop = 3/4, cv.n = 10, error.max = 0.1, max.iter = 5000,
-                    initial.predictor.method = "boosting", xvar.smooth = NULL,
-                    tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 5,
-                    error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                    seed = NULL, plot.gbmperf = TRUE, verbose = 1, ...) {
+catecvcount <- function(data,
+                        score.method,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        initial.predictor.method = "boosting",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        verbose = 1,
+                        higher.y = TRUE,
+                        prop.cutoff = seq(0.5, 1, length = 6),
+                        prop.multi = c(0, 1/3, 2/3, 1),
+                        abc = TRUE,
+                        train.prop = 3/4,
+                        cv.n = 10,
+                        error.max = 0.1,
+                        max.iter = 5000,
+                        xvar.smooth = NULL,
+                        tree.depth = 2,
+                        n.trees.boosting = 200,
+                        B = 3,
+                        Kfold = 5,
+                        error.maxNR = 1e-3,
+                        max.iterNR = 150,
+                        tune = c(0.5, 2),
+                        seed = NULL,
+                        plot.gbmperf = TRUE,
+                        ...) {
 
   # TODO: now score.method has no default (mandatory argument)
 
@@ -724,15 +743,28 @@ catecvcount <- function(cate.model, ps.model, data, score.method,
 #'               seed = 999)
 #' @export
 
-catefitcount <- function(cate.model, ps.model, data, score.method,
-                    higher.y = TRUE,
-                    prop.cutoff = seq(0.5, 1, length = 6),
-                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                    initial.predictor.method = "boosting",
-                    xvar.smooth = NULL,
-                    tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6,
-                    error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-                    seed = NULL, plot.gbmperf = FALSE, verbose = 1, ...) {
+catefitcount <- function(data,
+                         score.method,
+                         cate.model,
+                         ps.model,
+                         ps.method = "glm",
+                         initial.predictor.method = "boosting",
+                         minPS = 0.01,
+                         maxPS = 0.99,
+                         verbose = 1,
+                         higher.y = TRUE,
+                         prop.cutoff = seq(0.5, 1, length = 6),
+                         xvar.smooth = NULL,
+                         tree.depth = 2,
+                         n.trees.boosting = 200,
+                         B = 3,
+                         Kfold = 6,
+                         error.maxNR = 1e-3,
+                         max.iterNR = 150,
+                         tune = c(0.5, 2),
+                         seed = NULL,
+                         plot.gbmperf = FALSE,
+                         ...) {
 
 
   # Set seed once for reproducibility
@@ -926,9 +958,17 @@ catefitcount <- function(cate.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #'
 
-atefitcount <- function(cate.model, ps.model, data,
-                              ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                              interactions = TRUE, n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
+atefitcount <- function(data,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        verbose = 1,
+                        interactions = TRUE,
+                        n.boot = 500,
+                        seed = NULL,
+                        plot.boot = FALSE) {
 
   # Set seed once for reproducibility
   set.seed(seed)

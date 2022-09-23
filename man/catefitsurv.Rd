@@ -5,21 +5,22 @@
 \title{Estimation of the conditional average treatment effect (CATE) score for survival data}
 \usage{
 catefitsurv(
+  data,
+  score.method,
   cate.model,
   ps.model,
-  score.method,
-  data,
-  ipcw.model = NULL,
-  followup.time = NULL,
-  tau0 = NULL,
-  surv.min = 0.025,
-  ipcw.method = "breslow",
-  higher.y = TRUE,
-  prop.cutoff = seq(0.5, 1, length = 6),
   ps.method = "glm",
+  initial.predictor.method = "randomForest",
+  ipcw.model = NULL,
+  ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  initial.predictor.method = "randomForest",
+  verbose = 1,
+  followup.time = NULL,
+  tau0 = NULL,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.5, 1, length = 6),
+  surv.min = 0.025,
   tree.depth = 2,
   n.trees.rf = 1000,
   n.trees.boosting = 200,
@@ -29,11 +30,17 @@ catefitsurv(
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
-  seed = NULL,
-  verbose = 1
+  seed = NULL
 )
 }
 \arguments{
+\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
+probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+
+\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
+Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
+\code{'contrastReg'}.}
+
 \item{cate.model}{A standard \code{Surv} formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
@@ -41,17 +48,39 @@ The outcome must appear on the left-hand side.}
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
-\code{'contrastReg'}.}
+\item{ps.method}{A character value for the method to estimate the propensity score.
+Allowed values include one of:
+\code{'glm'} for logistic regression with main effects only (default), or
+\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+Relevant only when \code{ps.model} has more than one variable.}
 
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{initial.predictor.method}{A character vector for the method used to get initial
+outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
+one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
+Default is \code{'randomForest'}.}
 
 \item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
 model to be fitted. The left-hand side must be empty. Default is \code{ipcw.model = NULL},
 which corresponds to specifying the IPCW model with the same covariates as the outcome model
 \code{cate.model} plus the treatment.}
+
+\item{ipcw.method}{A character value for the censoring model. Allowed values are:
+\code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
+\code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
+or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
+y variable). Default is \code{'breslow'}.}
+
+\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+truncated. Default is \code{0.01}.}
+
+\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Default is \code{followup.time = NULL},
@@ -59,15 +88,6 @@ which corresponds to unknown potential censoring time.}
 
 \item{tau0}{The truncation time for defining restricted mean time lost. Default is \code{NULL},
 which corresponds to setting the truncation time as the maximum survival time in the data.}
-
-\item{surv.min}{Lower truncation limit for the probability of being censored.
-It must be a positive value and should be chosen close to 0. Default is \code{0.025}.}
-
-\item{ipcw.method}{A character value for the censoring model. Allowed values are:
-\code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
-\code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
-or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
-y variable). Default is \code{'breslow'}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
@@ -79,24 +99,8 @@ The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
-
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
-
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
-one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
-Default is \code{'randomForest'}.}
+\item{surv.min}{Lower truncation limit for the probability of being censored.
+It must be a positive value and should be chosen close to 0. Default is \code{0.025}.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
@@ -139,10 +143,6 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 }
 \value{
 Returns a list containing the following components:

@@ -5,29 +5,29 @@
 \title{Doubly robust estimator of and inference for the average treatment effect for count data}
 \usage{
 atefitcount(
+  data,
   cate.model,
   ps.model,
-  data,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
+  verbose = 1,
   interactions = TRUE,
   n.boot = 500,
   seed = NULL,
-  verbose = 1,
   plot.boot = FALSE
 )
 }
 \arguments{
+\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
+probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
 \item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
-
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
 \item{ps.method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
@@ -42,6 +42,9 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
+\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
+
 \item{interactions}{A logical value indicating whether the outcome model should assume interactions
 between \code{x} and \code{trt}. If \code{TRUE}, interactions will be assumed only if at least 10 patients
 received each treatment option. Default is \code{TRUE}.}
@@ -50,9 +53,6 @@ received each treatment option. Default is \code{TRUE}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
 
 \item{plot.boot}{A logical value indicating whether histograms of the bootstrapped log(rate ratio)
 (for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at

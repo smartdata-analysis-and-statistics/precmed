@@ -5,29 +5,29 @@
 \title{Doubly robust estimator of and inference for the average treatment effect for continuous data}
 \usage{
 atefitmean(
+  data,
   cate.model,
   ps.model,
-  data,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
+  verbose = 1,
   interactions = TRUE,
   n.boot = 500,
-  verbose = 1,
   plot.boot = FALSE,
   seed = NULL
 )
 }
 \arguments{
+\item{data}{A data frame containing the variables in the outcome and propensity score models;
+a data frame with \code{n} rows (1 row per observation).}
+
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
 \item{ps.model}{A formula describing the propensity score model to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
-
-\item{data}{A data frame containing the variables in the outcome and propensity score models;
-a data frame with \code{n} rows (1 row per observation).}
 
 \item{ps.method}{A character value for the method to estimate the propensity score. Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
@@ -41,6 +41,9 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
+\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
+
 \item{interactions}{A logical value indicating whether the outcome model should be fitted separately by treatment arm
 with the variables in \code{cate.model}, which is equivalent to assuming interaction terms between \code{trt} and
 all the variables in \code{cate.model} in a model fitted with both treatment arms. If \code{TRUE}, the outcome
@@ -48,9 +51,6 @@ model will be fitted separately by treatment arms only if at least 10 patients r
 Default is \code{TRUE}.}
 
 \item{n.boot}{A numeric value indicating the number of bootstrap samples used. Default is \code{500}.}
-
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
 
 \item{plot.boot}{A logical value indicating whether histograms of the bootstrapped log(rate ratio) should
 be produced at every \code{n.boot/10}-th iteration and whether the final histogram should be outputted.

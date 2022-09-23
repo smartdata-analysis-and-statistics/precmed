@@ -239,18 +239,42 @@
 #' @importFrom survival Surv coxph coxph.detail survreg
 #' @importFrom utils setTxtProgressBar txtProgressBar
 
-catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandatory arguments (count & survival & continuous)
-               init.model = NULL, # This is used in continuous data, when contrast/two regression is used
-               ipcw.model = NULL, followup.time = NULL, tau0 = NULL, # Non-mandatory arguments survival only
-               surv.min = 0.025, ipcw.method = "breslow",
-               higher.y = TRUE, abc = TRUE, # Non-mandatory arguments survival & count & continuous (except xvar.smooth)
-               prop.cutoff = seq(0.5, 1, length = 6), prop.multi = c(0, 1/3, 2/3, 1),
-               ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-               train.prop = 3/4, cv.n = 10, error.max = 0.1, max.iter = 5000,
-               initial.predictor.method = NULL, xvar.smooth.score = NULL, xvar.smooth.init = NULL,
-               tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
-               error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-               seed = NULL, plot.gbmperf = TRUE, verbose = 2) {
+catecv <- function(response,
+                   data,
+                   score.method,  # Mandatory arguments (count & survival & continuous)
+                   cate.model,
+                   ps.model,
+                   ps.method = "glm",
+                   init.model = NULL, # This is used in continuous data, when contrast/two regression is used
+                   initial.predictor.method = NULL,
+                   ipcw.model = NULL,
+                   ipcw.method = "breslow",
+                   minPS = 0.01,
+                   maxPS = 0.99,
+                   verbose = 2,
+                   followup.time = NULL,
+                   tau0 = NULL, # Non-mandatory arguments survival only
+                   higher.y = TRUE,
+                   prop.cutoff = seq(0.5, 1, length = 6),
+                   prop.multi = c(0, 1/3, 2/3, 1),
+                   abc = TRUE, # Non-mandatory arguments survival & count & continuous (except xvar.smooth)
+                   train.prop = 3/4,
+                   cv.n = 10,
+                   error.max = 0.1,
+                   max.iter = 5000,
+                   surv.min = 0.025,
+                   xvar.smooth.score = NULL,
+                   xvar.smooth.init = NULL,
+                   tree.depth = 2,
+                   n.trees.rf = 1000,
+                   n.trees.boosting = 200,
+                   B = 3,
+                   Kfold = 5,
+                   error.maxNR = 1e-3,
+                   max.iterNR = 150,
+                   tune = c(0.5, 2),
+                   seed = NULL,
+                   plot.gbmperf = TRUE) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
@@ -452,16 +476,36 @@ catecv <- function(response, cate.model, ps.model, data, score.method,  # Mandat
 #' }
 #' @export
 
-catefit <- function(response, cate.model, ps.model, data, score.method,
-               init.model = NULL, # This is used in continuous data, when contrast/two regression is used
-               ipcw.model = NULL, followup.time = NULL, tau0 = NULL,
-               surv.min = 0.025, ipcw.method = "breslow",
-               higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6),
-               ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-               initial.predictor.method = NULL,  xvar.smooth.score = NULL, xvar.smooth.init = NULL,
-               tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 5,
-               error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2),
-               seed = NULL, plot.gbmperf = TRUE, verbose = 1) {
+catefit <- function(response,
+                    data,
+                    score.method,
+                    cate.model,
+                    ps.model,
+                    ps.method = "glm",
+                    init.model = NULL, # This is used in continuous data, when contrast/two regression is used
+                    initial.predictor.method = NULL,
+                    ipcw.model = NULL,
+                    ipcw.method = "breslow",
+                    minPS = 0.01,
+                    maxPS = 0.99,
+                    verbose = 1,
+                    followup.time = NULL,
+                    tau0 = NULL,
+                    higher.y = TRUE,
+                    prop.cutoff = seq(0.5, 1, length = 6),
+                    surv.min = 0.025,
+                    xvar.smooth.score = NULL,
+                    xvar.smooth.init = NULL,
+                    tree.depth = 2,
+                    n.trees.rf = 1000,
+                    n.trees.boosting = 200,
+                    B = 3,
+                    Kfold = 5,
+                    error.maxNR = 1e-3,
+                    max.iterNR = 150,
+                    tune = c(0.5, 2),
+                    seed = NULL,
+                    plot.gbmperf = TRUE) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]
@@ -591,10 +635,23 @@ catefit <- function(response, cate.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #' @importFrom tidyr gather
 
-atefit <- function(response, cate.model, ps.model, data,
-                         ipcw.model = NULL, followup.time = NULL, tau0 = NULL, surv.min = 0.025, ipcw.method = "breslow",
-                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, interactions = TRUE,
-                         n.boot = 500, seed = NULL, verbose = 1, plot.boot = FALSE) {
+atefit <- function(response,
+                   data,
+                   cate.model,
+                   ps.model,
+                   ps.method = "glm",
+                   ipcw.model = NULL,
+                   ipcw.method = "breslow",
+                   minPS = 0.01,
+                   maxPS = 0.99,
+                   verbose = 1,
+                   followup.time = NULL,
+                   tau0 = NULL,
+                   surv.min = 0.025,
+                   interactions = TRUE,
+                   n.boot = 500,
+                   seed = NULL,
+                   plot.boot = FALSE) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]

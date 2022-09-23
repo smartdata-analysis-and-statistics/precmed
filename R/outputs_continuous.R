@@ -261,18 +261,36 @@
 #' @importFrom MASS glm.nb ginv
 #' @importFrom randomForestSRC rfsrc predict.rfsrc
 
-catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.method,
-                   higher.y = TRUE,
-                   abc = TRUE,
-                   prop.cutoff = seq(0.5, 1, length = 6),
-                   prop.multi = c(0, 1/3, 2/3, 1),
-                   ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                   train.prop = 3/4, cv.n = 10,
-                   error.max = 0.1, max.iter = 5000,
-                   initial.predictor.method = "boosting", xvar.smooth.score = NULL, xvar.smooth.init = NULL,
-                   tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
-                   error.maxNR = 1e-3, tune = c(0.5, 2),
-                   seed = NULL, verbose = 1, ...) {
+catecvmean <- function(data,
+                       score.method,
+                       cate.model,
+                       ps.model,
+                       ps.method = "glm",
+                       init.model = NULL,
+                       initial.predictor.method = "boosting",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       verbose = 1,
+                       higher.y = TRUE,
+                       prop.cutoff = seq(0.5, 1, length = 6),
+                       prop.multi = c(0, 1/3, 2/3, 1),
+                       abc = TRUE,
+                       train.prop = 3/4,
+                       cv.n = 10,
+                       error.max = 0.1,
+                       max.iter = 5000,
+                       xvar.smooth.score = NULL,
+                       xvar.smooth.init = NULL,
+                       tree.depth = 2,
+                       n.trees.rf = 1000,
+                       n.trees.boosting = 200,
+                       B = 3,
+                       Kfold = 6,
+                       plot.gbmperf = TRUE,
+                       error.maxNR = 1e-3,
+                       tune = c(0.5, 2),
+                       seed = NULL,
+                       ...) {
 
   stop("This functionality is not implemented yet")
 
@@ -800,15 +818,30 @@ catecvmean <- function(cate.model, init.model = NULL, ps.model, data, score.meth
 #'}
 #'@export
 
-catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
-                   higher.y = TRUE,
-                   prop.cutoff = seq(0.5, 1, length = 6),
-                   ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                   initial.predictor.method = "boosting",
-                   xvar.smooth.score = NULL, xvar.smooth.init = NULL,
-                   tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = FALSE,
-                   error.maxNR = 1e-3, tune = c(0.5, 2),
-                   seed = NULL, verbose = 1, ...) {
+catefitmean <- function(data,
+                        score.method,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        init.model=NULL,
+                        initial.predictor.method = "boosting",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        verbose = 1,
+                        higher.y = TRUE,
+                        prop.cutoff = seq(0.5, 1, length = 6),
+                        xvar.smooth.score = NULL,
+                        xvar.smooth.init = NULL,
+                        tree.depth = 2,
+                        n.trees.rf = 1000,
+                        n.trees.boosting = 200,
+                        B = 3,
+                        Kfold = 6,
+                        plot.gbmperf = FALSE,
+                        error.maxNR = 1e-3,
+                        tune = c(0.5, 2),
+                        seed = NULL,
+                        ...) {
 
   stop("This functionality is not implemented yet")
 
@@ -1019,9 +1052,17 @@ catefitmean <- function(cate.model, init.model, ps.model, data, score.method,
 #' @importFrom dplyr mutate
 #' @export
 
-atefitmean <- function(cate.model, ps.model, data,
-                             ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                             interactions = TRUE, n.boot = 500, verbose = 1, plot.boot = FALSE, seed = NULL) {
+atefitmean <- function(data,
+                       cate.model,
+                       ps.model,
+                       ps.method = "glm",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       verbose = 1,
+                       interactions = TRUE,
+                       n.boot = 500,
+                       plot.boot = FALSE,
+                       seed = NULL) {
 
   stop("This functionality is not implemented yet")
 

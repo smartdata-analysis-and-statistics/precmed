@@ -5,16 +5,17 @@
 \title{Estimation of the conditional average treatment effect (CATE) score for count data}
 \usage{
 catefitcount(
-  cate.model,
-  ps.model,
   data,
   score.method,
-  higher.y = TRUE,
-  prop.cutoff = seq(0.5, 1, length = 6),
+  cate.model,
+  ps.model,
   ps.method = "glm",
+  initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
-  initial.predictor.method = "boosting",
+  verbose = 1,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.5, 1, length = 6),
   xvar.smooth = NULL,
   tree.depth = 2,
   n.trees.boosting = 200,
@@ -25,11 +26,17 @@ catefitcount(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = FALSE,
-  verbose = 1,
   ...
 )
 }
 \arguments{
+\item{data}{A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
+(1 row per observation).}
+
+\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
+Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
+and \code{'negBin'}.}
+
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
@@ -37,12 +44,28 @@ The outcome must appear on the left-hand side.}
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.}
 
-\item{data}{A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
-(1 row per observation).}
+\item{ps.method}{A character value for the method to estimate the propensity score.
+Allowed values include one of:
+\code{'glm'} for logistic regression with main effects only (default), or
+\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+Relevant only when \code{ps.model} has more than one variable.}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
-and \code{'negBin'}.}
+\item{initial.predictor.method}{A character vector for the method used to get initial
+outcome predictions conditional on the covariates in \code{cate.model}. Only applies
+when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
+include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
+Default is \code{'boosting'}.}
+
+\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+truncated. Default is \code{0.01}.}
+
+\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
@@ -53,25 +76,6 @@ separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
-
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
-
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
-
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{cate.model}. Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
-include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-Default is \code{'boosting'}.}
 
 \item{xvar.smooth}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
@@ -114,10 +118,6 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

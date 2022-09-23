@@ -6,28 +6,29 @@
 \usage{
 catecv(
   response,
-  cate.model,
-  ps.model,
   data,
   score.method,
-  init.model = NULL,
-  ipcw.model = NULL,
-  followup.time = NULL,
-  tau0 = NULL,
-  surv.min = 0.025,
-  ipcw.method = "breslow",
-  higher.y = TRUE,
-  abc = TRUE,
-  prop.cutoff = seq(0.5, 1, length = 6),
-  prop.multi = c(0, 1/3, 2/3, 1),
+  cate.model,
+  ps.model,
   ps.method = "glm",
+  init.model = NULL,
+  initial.predictor.method = NULL,
+  ipcw.model = NULL,
+  ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
+  verbose = 2,
+  followup.time = NULL,
+  tau0 = NULL,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.5, 1, length = 6),
+  prop.multi = c(0, 1/3, 2/3, 1),
+  abc = TRUE,
   train.prop = 3/4,
   cv.n = 10,
   error.max = 0.1,
   max.iter = 5000,
-  initial.predictor.method = NULL,
+  surv.min = 0.025,
   xvar.smooth.score = NULL,
   xvar.smooth.init = NULL,
   tree.depth = 2,
@@ -39,21 +40,12 @@ catecv(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE,
-  verbose = 2
+  plot.gbmperf = TRUE
 )
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
 "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
-
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-must be used to describe the outcome.}
-
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
-appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
 \item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
 probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
@@ -63,13 +55,52 @@ Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \c
 \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
 \code{'gaussian'} (continuous outcomes only).}
 
+\item{cate.model}{A formula describing the outcome model to be fitted.
+The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
+must be used to describe the outcome.}
+
+\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
+appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
+If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+
+\item{ps.method}{A character value for the method to estimate the propensity score.
+Allowed values include one of:
+\code{'glm'} for logistic regression with main effects only (default), or
+\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+Relevant only when \code{ps.model} has more than one variable.}
+
 \item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
+
+\item{initial.predictor.method}{A character vector for the method used to get initial
+outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
+\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+(survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
+\code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
+for count outcomes and \code{'randomForest'} for survival outcomes.}
 
 \item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
 model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
 Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
 as the outcome model \code{cate.model}, plus the treatment.}
+
+\item{ipcw.method}{A character value for the censoring model. Only applies for survival
+outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
+he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
+\code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
+with different distributions for y variable). Default is \code{'breslow'}.}
+
+\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+truncated. Default is \code{0.01}.}
+
+\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
+\code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
@@ -79,21 +110,8 @@ Default is \code{NULL}, which corresponds to unknown potential censoring time.}
 survival outcomes. Default is \code{NULL}, which corresponds to setting the truncation time as the
 maximum survival time in the data.}
 
-\item{surv.min}{Lower truncation limit for the probability of being censored.
-It must be a positive value and should be chosen close to 0. Only applies for survival
-outcomes. Default is \code{0.025}.}
-
-\item{ipcw.method}{A character value for the censoring model. Only applies for survival
-outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-\code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-with different distributions for y variable). Default is \code{'breslow'}.}
-
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
-
-\item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
 
 \item{prop.cutoff}{A vector of numerical values (in (0, 1]) specifying percentiles of the
 estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
@@ -109,18 +127,8 @@ Each element represents the cutoff to separate the observations into
 \code{length(prop.multi) - 1} mutually exclusive subgroups.
 Default is \code{c(0, 1/3, 2/3, 1)}.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
-
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
-
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+\item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
+at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
 
 \item{train.prop}{A numerical value (in (0, 1)) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
@@ -136,13 +144,9 @@ to define a balanced training-validation splitting. Default is \code{0.1}.}
 \item{max.iter}{A positive integer value indicating the maximum number of iterations when
 searching for a balanced training-validation split. Default is \code{5,000}.}
 
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
-(survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-\code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-for count outcomes and \code{'randomForest'} for survival outcomes.}
+\item{surv.min}{Lower truncation limit for the probability of being censored.
+It must be a positive value and should be chosen close to 0. Only applies for survival
+outcomes. Default is \code{0.025}.}
 
 \item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{score.method = 'gam'}. The variables must be selected
@@ -194,10 +198,6 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-\code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{catecvcount}()}.

@@ -5,17 +5,18 @@
 \title{Estimation of the conditional average treatment effect (CATE) score for continuous data}
 \usage{
 catefitmean(
-  cate.model,
-  init.model,
-  ps.model,
   data,
   score.method,
-  higher.y = TRUE,
-  prop.cutoff = seq(0.5, 1, length = 6),
+  cate.model,
+  ps.model,
   ps.method = "glm",
+  init.model = NULL,
+  initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
-  initial.predictor.method = "boosting",
+  verbose = 1,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.5, 1, length = 6),
   xvar.smooth.score = NULL,
   xvar.smooth.init = NULL,
   tree.depth = 2,
@@ -27,28 +28,48 @@ catefitmean(
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
-  verbose = 1,
   ...
 )
 }
 \arguments{
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
-
-\item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
-
-\item{ps.model}{A formula describing the propensity score model to be fitted.
-The treatment must appear on the left-hand side.
-The treatment must be a numeric vector coded as 0/1.
-If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
-
 \item{data}{A data frame containing the variables in the outcome and propensity score models;
 a data frame with \code{n} rows (1 row per observation).}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'},
 \code{'contrastReg'}, \code{'randomForest'}, \code{'gam'}.}
+
+\item{cate.model}{A formula describing the outcome model to be fitted.
+The outcome must appear on the left-hand side.}
+
+\item{ps.model}{A formula describing the propensity score model to be fitted.
+The treatment must appear on the left-hand side.
+The treatment must be a numeric vector coded as 0/1.
+If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
+
+\item{ps.method}{A character value for the method to estimate the propensity score.
+Allowed values include one of: \code{'glm'} for logistic regression with main effects only
+(default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
+on two-way interactions (added to the model if not specified in \code{ps.model}).}
+
+\item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
+It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
+
+\item{initial.predictor.method}{A character vector for the method used to get initial outcome
+predictions conditional on the covariates in \code{init.model} in
+\code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include one of
+\code{'gaussian'} (fastest), \code{'boosting'} and \code{'gam'}.
+Default is \code{'boosting'}.}
+
+\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+truncated. Default is \code{0.01}.}
+
+\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
@@ -59,23 +80,6 @@ cutoff to separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
-
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of: \code{'glm'} for logistic regression with main effects only
-(default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
-on two-way interactions (added to the model if not specified in \code{ps.model}).}
-
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
-
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{initial.predictor.method}{A character vector for the method used to get initial outcome
-predictions conditional on the covariates in \code{init.model} in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include one of
-\code{'gaussian'} (fastest), \code{'boosting'} and \code{'gam'}.
-Default is \code{'boosting'}.}
 
 \item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as the
 smooth terms if \code{score.method = 'gam'}. The variables must be selected from
@@ -123,10 +127,6 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }
