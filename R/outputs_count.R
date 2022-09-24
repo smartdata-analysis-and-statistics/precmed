@@ -251,7 +251,7 @@
 #' @importFrom MASS glm.nb
 
 catecvcount <- function(data,
-                        score.method,
+                        score.method, # Mandatory argument that needs to be specified
                         cate.model,
                         ps.model,
                         ps.method = "glm",
@@ -278,8 +278,6 @@ catecvcount <- function(data,
                         seed = NULL,
                         plot.gbmperf = TRUE,
                         ...) {
-
-  # TODO: now score.method has no default (mandatory argument)
 
   # Set seed for reproducibility
   set.seed(seed)
