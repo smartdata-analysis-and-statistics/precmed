@@ -120,7 +120,7 @@
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{1}.
+#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
 #'
 #' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
@@ -329,7 +329,7 @@ catecvsurv <- function(data,
                        ipcw.method = "breslow",
                        minPS = 0.01,
                        maxPS = 0.99,
-                       verbose = 1,
+                       verbose = 0,
                        followup.time = NULL,
                        tau0 = NULL,
                        higher.y = TRUE,
@@ -858,7 +858,7 @@ catecvsurv <- function(data,
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-#' \code{2} means progress, run time, and all errors and warnings. Default is \code{1}.
+#' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
@@ -996,7 +996,7 @@ catefitsurv <- function(data,
                         ipcw.method = "breslow",
                         minPS = 0.01,
                         maxPS = 0.99,
-                        verbose = 1,
+                        verbose = 0,
                         followup.time = NULL,
                         tau0 = NULL,
                         higher.y = TRUE,
@@ -1217,7 +1217,7 @@ catefitsurv <- function(data,
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
-#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
+#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param plot.boot A logical value indicating whether histograms of the bootstrapped log(rate ratio)
 #' (for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
 #' every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
@@ -1283,7 +1283,7 @@ atefitsurv <- function(data,
                        ipcw.method = "breslow",
                        minPS = 0.01,
                        maxPS = 0.99,
-                       verbose = 1,
+                       verbose = 0,
                        followup.time = NULL,
                        tau0 = NULL,
                        surv.min = 0.025,
