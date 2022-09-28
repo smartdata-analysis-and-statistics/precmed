@@ -632,12 +632,14 @@ boxplot.precmed <- function(x, ylab = NULL,
 
   for (i in 1:m) {
     ate <- x[[paste0(prefix, score.method[i])]]
-    if (cv.n == 1) { # TODO: Temporary solutions as cbind not working when cv.n = 1
-      results[((i - 1) * cv.n + 1):((i - 1) * cv.n + cv.n),] <- c(t(ate[[paste0(prefix, "est.valid.group.cv")]])[l:1],
+    if (cv.n == 1) {
+      results[((i - 1) * cv.n + 1):((i - 1) * cv.n + cv.n),] <- c(
+                                                                  t(ate[[paste0(prefix, "est.valid.group.cv")]])[l:1],
                                                                   1,
                                                                   unname(mapped.method[i]))
     } else {
-      results[((i - 1) * cv.n + 1):((i - 1) * cv.n + cv.n),] <- cbind(t(ate[[paste0(prefix, "est.valid.group.cv")]])[,l:1],
+      results[((i - 1) * cv.n + 1):((i - 1) * cv.n + cv.n),] <- cbind(
+                                                                      t(ate[[paste0(prefix, "est.valid.group.cv")]])[,l:1],
                                                                       1:cv.n,
                                                                       unname(mapped.method[i]))
     }
