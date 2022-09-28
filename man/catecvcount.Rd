@@ -13,7 +13,7 @@ catecvcount(
   initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 1,
+  verbose = 0,
   higher.y = TRUE,
   prop.cutoff = seq(0.5, 1, length = 6),
   prop.multi = c(0, 1/3, 2/3, 1),
@@ -71,7 +71,7 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-\code{2} means progress bar, run time, and all errors and warnings. Default is \code{1}.}
+\code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}

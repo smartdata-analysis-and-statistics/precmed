@@ -134,7 +134,7 @@
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{2}.
+#' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
 #'
 #' @return For count response, see description of outputs in \code{\link{catecvcount}()}.
 #' For survival response, see description of outputs in \code{\link{catecvsurv}()}.
@@ -251,7 +251,7 @@ catecv <- function(response,
                    ipcw.method = "breslow",
                    minPS = 0.01,
                    maxPS = 0.99,
-                   verbose = 2,
+                   verbose = 0,
                    followup.time = NULL,
                    tau0 = NULL, # Non-mandatory arguments survival only
                    higher.y = TRUE,
@@ -401,7 +401,7 @@ catecv <- function(response,
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
-#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
+#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #'
 #' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
@@ -463,7 +463,6 @@ catecv <- function(response,
 #'                                  previous_treatment +
 #'                                  previous_cost +
 #'                                  previous_status_measure,
-#'                 ps.model = trt ~ previous_treatment,
 #'                 data = meanExample,
 #'                 higher.y = FALSE,
 #'                 score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
@@ -488,7 +487,7 @@ catefit <- function(response,
                     ipcw.method = "breslow",
                     minPS = 0.01,
                     maxPS = 0.99,
-                    verbose = 1,
+                    verbose = 0,
                     followup.time = NULL,
                     tau0 = NULL,
                     higher.y = TRUE,
@@ -575,7 +574,7 @@ catefit <- function(response,
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
-#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.
+#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param plot.boot A logical value indicating whether histograms of the bootstrapped log(rate ratio)
 #' (for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
 #' every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
@@ -644,7 +643,7 @@ atefit <- function(response,
                    ipcw.method = "breslow",
                    minPS = 0.01,
                    maxPS = 0.99,
-                   verbose = 1,
+                   verbose = 0,
                    followup.time = NULL,
                    tau0 = NULL,
                    surv.min = 0.025,

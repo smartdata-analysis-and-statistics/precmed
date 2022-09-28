@@ -17,7 +17,7 @@ catefit(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 1,
+  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   higher.y = TRUE,
@@ -93,7 +93,7 @@ truncated. Default is \code{0.01}.}
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
@@ -229,7 +229,6 @@ output_catefit3 <- catefit(response = "continuous",
                                  previous_treatment +
                                  previous_cost +
                                  previous_status_measure,
-                ps.model = trt ~ previous_treatment,
                 data = meanExample,
                 higher.y = FALSE,
                 score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),

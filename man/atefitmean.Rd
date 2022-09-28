@@ -11,7 +11,7 @@ atefitmean(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 1,
+  verbose = 0,
   interactions = TRUE,
   n.boot = 500,
   plot.boot = FALSE,
@@ -42,7 +42,7 @@ truncated. Default is \code{0.01}.}
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{1}.}
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 
 \item{interactions}{A logical value indicating whether the outcome model should be fitted separately by treatment arm
 with the variables in \code{cate.model}, which is equivalent to assuming interaction terms between \code{trt} and

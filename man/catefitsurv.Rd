@@ -15,7 +15,7 @@ catefitsurv(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 1,
+  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   higher.y = TRUE,
@@ -80,7 +80,7 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{1}.}
+\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Default is \code{followup.time = NULL},
