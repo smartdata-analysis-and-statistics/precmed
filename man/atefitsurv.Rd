@@ -18,8 +18,7 @@ atefitsurv(
   tau0 = NULL,
   surv.min = 0.025,
   n.boot = 500,
-  seed = NULL,
-  plot.boot = FALSE
+  seed = NULL
 )
 }
 \arguments{
@@ -77,14 +76,9 @@ outcomes. Default is \code{0.025}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{plot.boot}{A logical value indicating whether histograms of the bootstrapped log(rate ratio)
-(for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
-every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
-only taken into account if \code{verbose = 1}. Default is \code{FALSE}.}
 }
 \value{
-Return a list of 6 elements:
+Return an object of class \code{atefit} with 6 elements:
 \itemize{
   \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
   lower and upper limits of 95% confidence interval, and the p-value in the group \code{trt=1}.
@@ -96,12 +90,11 @@ Return a list of 6 elements:
   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence
   interval, and the p-value.
+  \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
+  \code{log.rmtl.ratio} and \code{log.hazard.ratio} in each bootstrap sample.
   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
   the interpretation of the remaining of the output.
-  \item{\code{plot}: } If \code{plot.boot} is \code{TRUE}, a histogram displaying the distribution of the
-  bootstrapped rmst1, rmst0, log.rmtl.ratio and log.hazard.ratio. The red vertical reference line in the
-  histogram represents the estimates.
 }
 }
 \description{
@@ -130,9 +123,9 @@ output <- atefitsurv(cate.model = survival::Surv(y, d) ~ age +
                            ps.model = trt ~ age + previous_treatment,
                            data = survivalExample,
                            tau0 = tau0,
-                           plot.boot = TRUE,
-                           seed = 999)
-print(output)
-output$plot
+                           seed = 999,
+                           verbose = 1)
+output
+plot(output)
 }
 }

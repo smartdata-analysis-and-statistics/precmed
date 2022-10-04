@@ -14,8 +14,7 @@ atefitcount(
   verbose = 0,
   interactions = TRUE,
   n.boot = 500,
-  seed = NULL,
-  plot.boot = FALSE
+  seed = NULL
 )
 }
 \arguments{
@@ -42,7 +41,7 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+\item{verbose}{An integer value indicating whether intermediate progress messages should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 
 \item{interactions}{A logical value indicating whether the outcome model should assume interactions
@@ -53,24 +52,18 @@ received each treatment option. Default is \code{TRUE}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
-
-\item{plot.boot}{A logical value indicating whether histograms of the bootstrapped log(rate ratio)
-(for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
-every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
-only taken into account if \code{verbose = 1}. Default is \code{FALSE}.}
 }
 \value{
-Return a list of 5 elements:
+Return an item of the class \code{atefit} with the following elements:
 \itemize{
   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated log rate ratio of \code{trt=1}
   over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence interval, and the p-value.
   \item{\code{rate0}: } A numeric value of the estimated rate in the group \code{trt=0}.
   \item{\code{rate1}: } A numeric value of the estimated rate in the group \code{trt=1}.
+  \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap sample.
   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1. The key
   to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate the
   interpretation of the remaining of the output.
-  \item{\code{plot}: } If \code{plot.boot} is \code{TRUE}, a histogram displaying the distribution of the bootstrapped
-  log rate ratios. The red vertical reference line in the histogram represents the estimated log rate ratio.
 }
 }
 \description{
@@ -92,9 +85,8 @@ output <- atefitcount(cate.model = y ~ age + female + previous_treatment +
                                previous_cost + previous_number_relapses + offset(log(years)),
                             ps.model = trt ~ age + previous_treatment,
                             data = countExample,
-                            plot.boot = TRUE,
-                            seed = 999)
-print(output)
-output$plot
+                            seed = 999, verbose = 1)
+output
+plot(output)
 }
 }

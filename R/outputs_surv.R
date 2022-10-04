@@ -1218,12 +1218,8 @@ catefitsurv <- function(data,
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
-#' @param plot.boot A logical value indicating whether histograms of the bootstrapped log(rate ratio)
-#' (for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
-#' every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
-#' only taken into account if \code{verbose = 1}. Default is \code{FALSE}.
 #'
-#' @return Return a list of 6 elements:
+#' @return Return an object of class \code{atefit} with 6 elements:
 #' \itemize{
 #'   \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
 #'   lower and upper limits of 95% confidence interval, and the p-value in the group \code{trt=1}.
@@ -1235,12 +1231,11 @@ catefitsurv <- function(data,
 #'   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
 #'   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence
 #'   interval, and the p-value.
+#'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
+#'   \code{log.rmtl.ratio} and \code{log.hazard.ratio} in each bootstrap sample.
 #'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
 #'   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
 #'   the interpretation of the remaining of the output.
-#'   \item{\code{plot}: } If \code{plot.boot} is \code{TRUE}, a histogram displaying the distribution of the
-#'   bootstrapped rmst1, rmst0, log.rmtl.ratio and log.hazard.ratio. The red vertical reference line in the
-#'   histogram represents the estimates.
 #' }
 #'
 #' @details This helper function estimates the average treatment effect (ATE) for survival data between two
@@ -1264,14 +1259,13 @@ catefitsurv <- function(data,
 #'                            ps.model = trt ~ age + previous_treatment,
 #'                            data = survivalExample,
 #'                            tau0 = tau0,
-#'                            plot.boot = TRUE,
-#'                            seed = 999)
-#' print(output)
-#' output$plot
+#'                            seed = 999,
+#'                            verbose = 1)
+#' output
+#' plot(output)
 #'}
 #' @export
 #'
-#' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
 #' @importFrom tidyr gather
 
@@ -1288,15 +1282,14 @@ atefitsurv <- function(data,
                        tau0 = NULL,
                        surv.min = 0.025,
                        n.boot = 500,
-                       seed = NULL,
-                       plot.boot = FALSE) {
+                       seed = NULL) {
 
   # Set seed once for reproducibility
   set.seed(seed)
 
   #### CHECK ARGUMENTS ####
   arg.checks(fun = "drinf", response = "survival", data = data, followup.time = followup.time, tau0 = tau0, surv.min = surv.min,
-             ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, n.boot = n.boot, plot.boot = plot.boot)
+             ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, n.boot = n.boot, plot.boot = FALSE)
 
   #### PRE-PROCESSING ####
   preproc <- data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, ipcw.model = ipcw.model, tau0 = tau0,
@@ -1320,20 +1313,27 @@ atefitsurv <- function(data,
 
   #### FUNCTION STARTS HERE ####
   # Point estimate
-  est <- drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
-                tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
-  if (plot.boot == TRUE) {
-    est.df <- data.frame(est) %>%
-      gather() %>%
-      mutate(key = factor(.data$key, levels = c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio")))
-  }
+  est <- drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw,
+                trt = trt, yf = yf,
+                tau0 = tau0,
+                surv.min = surv.min,
+                ps.method = ps.method,
+                minPS = minPS,
+                maxPS = maxPS,
+                ipcw.method = ipcw.method)
+
   est <- unlist(est)
 
   # Apply bootstrap
   n <- length(y)
   save.boot <- matrix(NA, nrow = n.boot, ncol = length(est))
   colnames(save.boot) <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio")
-  for (i in 1:n.boot) {
+
+  pb   <- txtProgressBar(min = 1,
+                         max = n.boot,
+                         style = 3)
+
+  for (i in seq(n.boot)) {
     idsub.boot <- sample(n, size = n, replace  = TRUE)
     est.boot <- drsurv(y = y[idsub.boot],
                        d = d[idsub.boot],
@@ -1345,21 +1345,10 @@ atefitsurv <- function(data,
                        tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
     save.boot[i,] <- unlist(est.boot)
 
-    if (i %% (n.boot %/% 10) == 0) {
-      if (verbose == 1) cat("Bootstrap iteration", i, "\n")
-      if (plot.boot == TRUE) {
-        p <- save.boot %>% as.data.frame() %>% gather(key = "key", value = "value") %>% na.omit() %>%
-          mutate(key = factor(.data$key, levels = c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio"))) %>%
-          ggplot(aes(x = .data$value)) + geom_histogram(bins = 50, alpha = 0.7) +
-          facet_wrap(. ~ .data$key, scales = "free") +
-          geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "red") +
-          theme_classic() +
-          labs(x = "Bootstrap values", y = "Frequency", title = paste0(i, " bootstrap iterations"))
-        print(p)
+    if (verbose == 1) setTxtProgressBar(pb, i)
+  }
 
-      } # end of if (plot.boot == TRUE)
-    } # end of if (i %% (n.boot %/% 10) == 0)
-  } # end of for (i in 1:n.boot)
+  close(pb)
 
   se.est <- apply(save.boot, 2, sd)
   cil.est <- est - qnorm(0.975) * se.est
@@ -1369,22 +1358,15 @@ atefitsurv <- function(data,
   est.all <- data.frame(estimate = est, SE = se.est, CI.lower = cil.est, CI.upper = ciu.est, pvalue = p.est)
 
   out <- c()
+  out$response <- "survival"
   out$rmst1 <- data.frame(est.all[1, ])
   out$rmst0 <- data.frame(est.all[2, ])
   out$log.rmtl.ratio <- data.frame(est.all[3, ])
   out$log.hazard.ratio <- data.frame(est.all[4, ])
+  out$trt.boot <- save.boot
   out$warning <- preproc$warning
 
-  if (plot.boot == TRUE) {
-    plot <- save.boot %>% as.data.frame() %>% gather(key = "key", value = "value") %>% na.omit() %>%
-      mutate(key = factor(.data$key, levels = c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio"))) %>%
-      ggplot(aes(x = .data$value)) + geom_histogram(bins = 50, alpha = 0.7) +
-      facet_wrap(. ~ .data$key, scales = "free") +
-      geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "red") +
-      theme_classic() +
-      labs(x = "Bootstrap values", y = "Frequency", title = paste0(n.boot, " bootstrap iterations"))
-    out$plot <- plot
-  }
+  class(out) <- "atefit"
 
   return(out)
 }

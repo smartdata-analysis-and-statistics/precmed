@@ -911,24 +911,19 @@ catefitcount <- function(data,
 #' @param n.boot A numeric value indicating the number of bootstrap samples used. Default is \code{500}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
-#' @param verbose An integer value indicating whether intermediate progress messages and histograms should
+#' @param verbose An integer value indicating whether intermediate progress messages should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
-#' @param plot.boot A logical value indicating whether histograms of the bootstrapped log(rate ratio)
-#' (for count outcomes) log(restricted mean time lost ratio) (for survival outcomes) should be produced at
-#' every \code{n.boot/10}-th iteration and whether the final histogram should be outputted. This argument is
-#' only taken into account if \code{verbose = 1}. Default is \code{FALSE}.
 #'
-#' @return Return a list of 5 elements:
+#' @return Return an item of the class \code{atefit} with the following elements:
 #' \itemize{
 #'   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated log rate ratio of \code{trt=1}
 #'   over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence interval, and the p-value.
 #'   \item{\code{rate0}: } A numeric value of the estimated rate in the group \code{trt=0}.
 #'   \item{\code{rate1}: } A numeric value of the estimated rate in the group \code{trt=1}.
+#'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap sample.
 #'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1. The key
 #'   to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate the
 #'   interpretation of the remaining of the output.
-#'   \item{\code{plot}: } If \code{plot.boot} is \code{TRUE}, a histogram displaying the distribution of the bootstrapped
-#'   log rate ratios. The red vertical reference line in the histogram represents the estimated log rate ratio.
 #' }
 #'
 #' @details This helper function estimates the average treatment effect (ATE) between two treatment groups in a given
@@ -945,14 +940,12 @@ catefitcount <- function(data,
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'                             ps.model = trt ~ age + previous_treatment,
 #'                             data = countExample,
-#'                             plot.boot = TRUE,
-#'                             seed = 999)
-#' print(output)
-#' output$plot
+#'                             seed = 999, verbose = 1)
+#' output
+#' plot(output)
 #'}
 #' @export
 #'
-#' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
 #'
 
@@ -965,14 +958,21 @@ atefitcount <- function(data,
                         verbose = 0,
                         interactions = TRUE,
                         n.boot = 500,
-                        seed = NULL,
-                        plot.boot = FALSE) {
+                        seed = NULL) {
 
   # Set seed once for reproducibility
   set.seed(seed)
 
   #### CHECK ARGUMENTS ####
-  arg.checks(fun = "drinf", response = "count", data = data, ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions, n.boot = n.boot, plot.boot = plot.boot)
+  arg.checks(fun = "drinf",
+             response = "count",
+             data = data,
+             ps.method = ps.method,
+             minPS = minPS,
+             maxPS = maxPS,
+             interactions = interactions,
+             n.boot = n.boot,
+             plot.boot = FALSE)
 
   #### PRE-PROCESSING ####
   preproc <- data.preproc(fun = "drinf", cate.model = cate.model, ps.model = ps.model,
@@ -984,54 +984,63 @@ atefitcount <- function(data,
   time <- preproc$time
 
   # Point estimate
-  est <- drcount(y = y, x.cate = x.cate, x.ps = x.ps, trt = trt, time = time, ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions)
+  est <- drcount(y = y,
+                 x.cate = x.cate,
+                 x.ps = x.ps,
+                 trt = trt,
+                 time = time,
+                 ps.method = ps.method,
+                 minPS = minPS,
+                 maxPS = maxPS,
+                 interactions = interactions)
   logrr <- est$log.rate.ratio
 
   # Apply bootstrap
   n <- length(y)
-  if (is.na(logrr) == TRUE) {
+  if (is.na(logrr)) {
     stop("Impossible to use bootstrap, log(RR)=NA.")
   } else {
     trt.boot <- rep(0, n.boot)
-    for (i in 1:n.boot) {
-      idsub.boot <- sample(n, size = n, replace = TRUE)
-      trt.boot[i] <- drcount(y = y[idsub.boot], x.cate = x.cate[idsub.boot, , drop = FALSE], x.ps = x.ps[idsub.boot, , drop = FALSE], trt = trt[idsub.boot], time = time[idsub.boot], ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions)$log.rate.ratio
 
-      if (i %% (n.boot %/% 10) == 0) {
-        if (verbose == 1) cat("Bootstrap iteration", i, "\n")
-        if (plot.boot == TRUE) {
-          p <- trt.boot %>%
-            as.data.frame() %>%
-            ggplot(aes(x = .data$.)) +
-            geom_histogram(bins = 50) +
-            theme_classic() +
-            geom_vline(xintercept = logrr, linetype = 1, color = "red") +
-            labs(x = "Bootstrap values of log rate ratio", y = "Frequency", title = paste0(i, " bootstrap iterations"))
-          print(p)
-        } # end of if (plot.boot == TRUE)
-      } # end of if (i %% (n.boot %/% 10) == 0)
-    } # end of for (i in 1:n.boot)
+    pb   <- txtProgressBar(min = 1,
+                           max = n.boot,
+                           style = 3)
+
+    for (i in seq(n.boot)) {
+      idsub.boot <- sample(n, size = n, replace = TRUE)
+      trt.boot[i] <- drcount(y = y[idsub.boot],
+                             x.cate = x.cate[idsub.boot, , drop = FALSE],
+                             x.ps = x.ps[idsub.boot, , drop = FALSE],
+                             trt = trt[idsub.boot],
+                             time = time[idsub.boot],
+                             ps.method = ps.method,
+                             minPS = minPS,
+                             maxPS = maxPS,
+                             interactions = interactions)$log.rate.ratio
+
+      if (verbose == 1) setTxtProgressBar(pb, i)
+    }
+    close(pb)
 
     out <- c()
+    out$response <- "count"
     se.est <- sd(trt.boot, na.rm = TRUE)
-    out$log.rate.ratio <- data.frame(estimate = logrr, SE = se.est, CI.lower = logrr - qnorm(0.975) * se.est, CI.upper = logrr + qnorm(0.975) * se.est, pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
+    out$log.rate.ratio <- data.frame(estimate = logrr, SE = se.est,
+                                     CI.lower = logrr - qnorm(0.975) * se.est,
+                                     CI.upper = logrr + qnorm(0.975) * se.est,
+                                     pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
     rownames(out$log.rate.ratio) <- "log.rate.ratio"
     out$rate0 <- data.frame(estimate = est$rate0)
     rownames(out$rate0) <- "rate0"
     out$rate1 <- data.frame(estimate = est$rate1)
     rownames(out$rate1) <- "rate1"
+    out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
     out$warning <- preproc$warning
 
-    if (plot.boot == TRUE) {
-      plot <- trt.boot %>% as.data.frame() %>%
-        ggplot(aes(x = .data$.)) +
-        geom_histogram(bins = 50) +
-        theme_classic() +
-        geom_vline(xintercept = logrr, linetype = 1, color = "red") +
-        labs(x = "Bootstrap values of log rate ratio", y = "Frequency", title = paste0(n.boot, " bootstrap iterations"))
-      out$plot <- plot
-    }
+
   }
+
+  class(out) <- "atefit"
 
   return(out)
 }

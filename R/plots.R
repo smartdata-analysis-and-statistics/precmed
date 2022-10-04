@@ -685,3 +685,5 @@ boxplot.precmed <- function(x, ylab = NULL,
 
   return(p)
 }
+
+
