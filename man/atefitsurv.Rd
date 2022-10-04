@@ -57,7 +57,7 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+\item{verbose}{An integer value indicating whether intermediate progress messages should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,

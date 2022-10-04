@@ -3,8 +3,27 @@ Type: Package
 Title: A doubly robust precision medicine approach to estimate and
         validate conditional average treatment effects
 Version: 0.1.2
-Author: Lu Tian, Phoebe Jiang and Gabrielle Simoneau 
-Maintainer: Phoebe Jiang <phoebe.jiang@biogen.com>
+Authors@R: c(person(given = "Lu", 
+                    family = "Tian", 
+                    role = "aut"), 
+            person(given = "Phoebe", 
+                   family = "Jiang", 
+                   role = "aut"),
+            person(given = "Gabrielle", 
+                   family = "Simoneau", 
+                   role = "aut", 
+                   comment="https://orcid.org/0000-0001-9310-6274"),
+            person(given = "Thomas", 
+                   family = "Debray", 
+                   role = c("ctb", "cre"), 
+                   email = "thomas.debray@gmail.com",
+                   comment="https://orcid.org/0000-0002-1790-2719"),
+            person(given = "Stan", 
+                   family = "Wijn", 
+                   role = "ctb"),
+            person(given = "Joana", 
+                   family = "Caldas", 
+                   role = "ctb"))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 Depends: R (>= 3.5.0)

@@ -1086,7 +1086,7 @@ catefitsurv <- function(data,
 
   ####### Estimate the treatment effect in the whole dataset --------------------------------
   errors <- warnings <- c()
-  if (prop[length(prop)] == 1){
+  if (prop[length(prop)] == 1) {
     est.prop1 <- survCatch(drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
                                   tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                                   ipcw.method = ipcw.method))
@@ -1143,7 +1143,7 @@ catefitsurv <- function(data,
 
     if ("poisson" %in% score.method) cf$poisson <- fit$result.poisson
 
-    if("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
 
     if ("contrastReg" %in% score.method) {
       cf$contrastReg <- fit$result.contrastReg$delta.contrastReg
@@ -1216,7 +1216,7 @@ catefitsurv <- function(data,
 #' @param n.boot A numeric value indicating the number of bootstrap samples used. Default is \code{500}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
-#' @param verbose An integer value indicating whether intermediate progress messages and histograms should
+#' @param verbose An integer value indicating whether intermediate progress messages should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #'
 #' @return Return an object of class \code{atefit} with 6 elements:
