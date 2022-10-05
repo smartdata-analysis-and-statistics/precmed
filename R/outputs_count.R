@@ -1019,50 +1019,51 @@ atefitcount <- function(data,
   n <- length(y)
   if (is.na(logrr)) {
     stop("Impossible to use bootstrap, log(RR)=NA.")
-  } else {
-    trt.boot <- rep(0, n.boot)
-
-    pb   <- txtProgressBar(min = 1,
-                           max = n.boot,
-                           style = 3)
-
-    for (i in seq(n.boot)) {
-      idsub.boot <- sample(n, size = n, replace = TRUE)
-      trt.boot[i] <- drcount(y = y[idsub.boot],
-                             x.cate = x.cate[idsub.boot, , drop = FALSE],
-                             x.ps = x.ps[idsub.boot, , drop = FALSE],
-                             trt = trt[idsub.boot],
-                             time = time[idsub.boot],
-                             ps.method = ps.method,
-                             minPS = minPS,
-                             maxPS = maxPS,
-                             interactions = interactions)$log.rate.ratio
-
-      if (verbose == 1) setTxtProgressBar(pb, i)
-    }
-    close(pb)
-
-    out <- c()
-    out$response <- "count"
-    se.est <- sd(trt.boot, na.rm = TRUE)
-    out$log.rate.ratio <- data.frame(estimate = logrr,
-                                     SE = se.est,
-                                     CI.lower = logrr - qnorm(0.975) * se.est,
-                                     CI.upper = logrr + qnorm(0.975) * se.est,
-                                     pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
-    rownames(out$log.rate.ratio) <- "log.rate.ratio"
-    out$rate0 <- data.frame(estimate = est$rate0)
-    rownames(out$rate0) <- "rate0"
-    out$rate1 <- data.frame(estimate = est$rate1)
-    rownames(out$rate1) <- "rate1"
-    out$n.boot <- n.boot # Number of  bootstrap samples
-    out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
-    out$warning <- preproc$warning
-
-
   }
 
+  trt.boot <- rep(NA, n.boot)
+
+  pb   <- txtProgressBar(min = 1,
+                         max = n.boot,
+                         style = 3)
+
+  for (i.boot in seq(n.boot)) {
+    idsub.boot <- sample(n, size = n, replace = TRUE)
+    trt.boot[i.boot] <- drcount(y = y[idsub.boot],
+                           x.cate = x.cate[idsub.boot, , drop = FALSE],
+                           x.ps = x.ps[idsub.boot, , drop = FALSE],
+                           trt = trt[idsub.boot],
+                           time = time[idsub.boot],
+                           ps.method = ps.method,
+                           minPS = minPS,
+                           maxPS = maxPS,
+                           interactions = interactions)$log.rate.ratio
+
+    if (verbose == 1) setTxtProgressBar(pb, i.boot)
+  }
+  close(pb)
+
+  out <- c()
+  out$response <- "count"
+  se.est <- sd(trt.boot, na.rm = TRUE)
+  out$log.rate.ratio <- data.frame(estimate = logrr,
+                                   SE = se.est,
+                                   CI.lower = logrr - qnorm(0.975) * se.est,
+                                   CI.upper = logrr + qnorm(0.975) * se.est,
+                                   pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
+  rownames(out$log.rate.ratio) <- "log.rate.ratio"
+
+  out$rate0 <- data.frame(estimate = est$rate0)
+  rownames(out$rate0) <- "rate0"
+  out$rate1 <- data.frame(estimate = est$rate1)
+  rownames(out$rate1) <- "rate1"
+
+  out$n.boot <- n.boot # Number of  bootstrap samples
+  out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
+  out$warning <- preproc$warning
+
   class(out) <- "atefit"
+
 
   return(out)
 }
