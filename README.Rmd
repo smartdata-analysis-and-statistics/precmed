@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 options(width = 60, digits = 3)
 ```
 
-# precmed <img src='man/figures/precmed_sticker' align="right" height="139" />
+# precmed <img src='https://github.com/smartdata-analysis-and-statistics/precmed/tree/main/man/figures/precmed_sticker' align="right" height="139" />
 
 ## Precision Medicine
 
