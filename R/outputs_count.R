@@ -1025,7 +1025,8 @@ atefitcount <- function(data,
     out <- c()
     out$response <- "count"
     se.est <- sd(trt.boot, na.rm = TRUE)
-    out$log.rate.ratio <- data.frame(estimate = logrr, SE = se.est,
+    out$log.rate.ratio <- data.frame(estimate = logrr,
+                                     SE = se.est,
                                      CI.lower = logrr - qnorm(0.975) * se.est,
                                      CI.upper = logrr + qnorm(0.975) * se.est,
                                      pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
@@ -1034,6 +1035,7 @@ atefitcount <- function(data,
     rownames(out$rate0) <- "rate0"
     out$rate1 <- data.frame(estimate = est$rate1)
     rownames(out$rate1) <- "rate1"
+    out$n.boot <- n.boot # Number of  bootstrap samples
     out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
     out$warning <- preproc$warning
 

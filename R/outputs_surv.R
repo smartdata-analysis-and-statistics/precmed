@@ -1363,6 +1363,7 @@ atefitsurv <- function(data,
   out$rmst0 <- data.frame(est.all[2, ])
   out$log.rmtl.ratio <- data.frame(est.all[3, ])
   out$log.hazard.ratio <- data.frame(est.all[4, ])
+  out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
   out$warning <- preproc$warning
 
