@@ -1,6 +1,6 @@
 <!-- README.md is generated from README.Rmd using knitr. Please edit that file -->
 
-# precmed <img src='https://github.com/smartdata-analysis-and-statistics/precmed/tree/main/man/figures/precmed_sticker' align="right" height="139" />
+# precmed <img src='https://www.fromdatatowisdom.com/images/precmed_sticker' align="right" height="139" />
 
 ## Precision Medicine
 
