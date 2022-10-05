@@ -21,3 +21,18 @@ options(width = 60, digits = 3)
 ## Precision Medicine
 
 A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
+
+## Installation
+
+The `precmed` package can be installed from CRAN as follows:
+
+```{r eval = FALSE}
+install.packages("precmed")
+```
+
+The latest version can be installed from GitHub as follows: 
+
+```{r eval = FALSE}
+install.packages("devtools")
+devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
+```

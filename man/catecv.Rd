@@ -44,8 +44,10 @@ catecv(
 )
 }
 \arguments{
-\item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
+\item{response}{A string describing the type of outcome in the data.
+Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
+(see \code{\link{catecvsurv}()}) and "continuous" (see
+\code{\link{catecvmean}()}) .}
 
 \item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
 probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
@@ -56,8 +58,8 @@ Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \c
 \code{'gaussian'} (continuous outcomes only).}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-must be used to describe the outcome.}
+The outcome must appear on the left-hand side. For survival outcomes, a
+\code{Surv} object must be used to describe the outcome.}
 
 \item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.

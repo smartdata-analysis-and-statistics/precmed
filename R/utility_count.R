@@ -115,7 +115,8 @@ glm.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99) {
 }
 
 
-#' Split the given dataset into balanced training and validation sets (within a pre-specified tolerance)
+#' Split the given dataset into balanced training and validation sets
+#' (within a pre-specified tolerance)
 #' Balanced means 1) The ratio of treated and controls is maintained in the training and validation sets
 #'                2) The covariate distributions are balanced between the training and validation sets
 #'
@@ -205,7 +206,7 @@ balance.split <- function(y, trt, x.cate, x.ps, time,
 
   if (all(is.na(bestid.valid)) == TRUE) stop("No balanced data split found.")
 
-  if(iter == max.iter + 1){
+  if (iter == max.iter + 1) {
     y.valid <- y[bestid.valid]
     trt.valid <- trt[bestid.valid]
     x.cate.valid <- x.cate[bestid.valid, , drop = FALSE]
@@ -313,8 +314,8 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL, pr
 
   ## Check treatment binary numeric and coded as 0/1
   cat <- warn.dr <- NULL
-  if (as.numeric(length(unique(trt))) > 2) {
-    stop("trt must be binary.")
+  if (as.numeric(length(unique(trt))) != 2) {
+    stop("trt should describe two distinct treatments.")
   } else if (!all(unique(trt) %in% c(0, 1))) {
     cat <- sort(unique(trt))
     trt <- ifelse(trt == cat[1], 0, 1)

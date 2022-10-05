@@ -2,7 +2,8 @@
 % Please edit documentation in R/ATE_count.R
 \name{estcount.bilevel.subgroups}
 \alias{estcount.bilevel.subgroups}
-\title{Estimate the ATE of the log RR ratio in multiple bi-level subgroups defined by the proportions}
+\title{Estimate the Average Treatment Effect of the log risk ratio in multiple
+bi-level subgroups defined by the proportions}
 \usage{
 estcount.bilevel.subgroups(
   y,

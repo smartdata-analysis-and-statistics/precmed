@@ -2,7 +2,8 @@
 % Please edit documentation in R/outputs_count.R
 \name{atefitcount}
 \alias{atefitcount}
-\title{Doubly robust estimator of and inference for the average treatment effect for count data}
+\title{Doubly robust estimator of and inference for the average treatment effect
+for count data}
 \usage{
 atefitcount(
   data,
@@ -18,67 +19,79 @@ atefitcount(
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome, propensity
+score, and inverse probability of censoring models (if specified); a data
+frame with \code{n} rows (1 row per observation).}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
-appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+\item{ps.model}{A formula describing the propensity score (PS) model to be
+fitted. The treatment must appear on the left-hand side. The treatment must
+be a numeric vector coded as 0 or 1. If data are from a randomized controlled
+trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+\item{ps.method}{A character value for the method to estimate the propensity
+score. Allowed values include one of: \code{'glm'} for logistic regression
+with main effects only (default), or \code{'lasso'} for a logistic regression
+with main effects and LASSO penalization on two-way interactions (added to
+the model if interactions are not specified in \code{ps.model}). Relevant
+only when \code{ps.model} has more than one variable.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
+\item{minPS}{A numerical value between 0 and 1 below which estimated
+propensity scores should be truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+\item{maxPS}{A numerical value between 0 and 1 above which estimated
+propensity scores should be truncated. Must be strictly greater than
+\code{minPS}. Default is \code{0.99}.}
 
-\item{verbose}{An integer value indicating whether intermediate progress messages should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
+\item{verbose}{An integer value indicating whether intermediate progress
+messages should be printed. \code{1} indicates messages are printed and
+\code{0} otherwise. Default is \code{0}.}
 
-\item{interactions}{A logical value indicating whether the outcome model should assume interactions
-between \code{x} and \code{trt}. If \code{TRUE}, interactions will be assumed only if at least 10 patients
-received each treatment option. Default is \code{TRUE}.}
+\item{interactions}{A logical value indicating whether the outcome model
+should assume treatment-covariate interaction by \code{x}. If \code{TRUE},
+interactions will be assumed only if at least 10 patients received each
+treatment option. Default is \code{TRUE}.}
 
-\item{n.boot}{A numeric value indicating the number of bootstrap samples used. Default is \code{500}.}
+\item{n.boot}{A numeric value indicating the number of bootstrap samples
+used. Default is \code{500}.}
 
-\item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
-Default is \code{NULL}, corresponding to no seed.}
+\item{seed}{An optional integer specifying an initial randomization seed for
+reproducibility. Default is \code{NULL}, corresponding to no seed.}
 }
 \value{
-Return an item of the class \code{atefit} with the following elements:
+Return an item of the class \code{atefit} with the following
+elements:
 \itemize{
   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
-  log rate ratio of \code{trt=1} over \code{trt=0}, bootstrap standard error,
-  lower and upper limits of 95\% confidence interval, and the p-value.
-  \item{\code{rate0}: } A numeric value of the estimated rate in the group \code{trt=0}.
-  \item{\code{rate1}: } A numeric value of the estimated rate in the group \code{trt=1}.
-  \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap sample.
-  \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1. The key
-  to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate the
+  ATE (expressed as a log rate ratio of \code{trt=1} over \code{trt=0}),
+  the bootstrap standard error, the lower and upper limits of 95\% confidence
+  interval, and the p-value.
+  \item{\code{rate0}: } A numeric value of the estimated rate in the group
+  \code{trt=0}.
+  \item{\code{rate1}: } A numeric value of the estimated rate in the group
+  \code{trt=1}.
+  \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
+  sample.
+  \item{\code{warning}: } A warning message produced if the treatment
+  variable was not coded as 0 or 1. The key to map the original coding of the
+  variable to a 0-1 coding is displayed in the warning to facilitate the
   interpretation of the remaining of the output.
 }
 }
 \description{
-Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
-for count outcomes. Bootstrap is used for inference.
+Doubly robust estimator of the average treatment effect between two
+treatments, which is the rate ratio for count outcomes. Bootstrap is used for
+inference.
 }
 \details{
-This helper function estimates the average treatment effect (ATE) between two treatment groups in a given
-dataset. The ATE is estimated with a doubly robust estimator that accounts for imbalances in covariate distributions
-between the two treatment groups with inverse probability treatment weighting. For count outcomes, the estimated ATE
-is the estimated rate ratio between treatment 1 versus treatment 0. The log-transformed ATEs are returned, as well
-as the rate in either treatment group. The variability of the estimated rate ratio is also calculated using bootstrap.
-Additional outputs include standard error of the log rate ratio, 95\% confidence interval, p-value, and a histogram of
-the bootstrap estimates.
+This helper function estimates the average treatment effect (ATE)
+between two treatment groups in a given dataset. The ATE is estimated with a
+doubly robust estimator that accounts for imbalances in covariate
+distributions between the two treatment groups with inverse probability
+treatment weighting. For count outcomes, the estimated ATE is the estimated
+rate ratio between treatment 1 versus treatment 0.
 }
 \examples{
 output <- atefitcount(data = countExample,

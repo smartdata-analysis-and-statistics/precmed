@@ -1,15 +1,3 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Simulated data with Survival outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Simulated data with survival outcome
 #'
 #' A dataset containing a time-to-event outcome, an event indicator, treatment group, and 6 baseline covariates
@@ -27,8 +15,8 @@
 #'   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
 #'   \item{previous_number_relapses}{previous number of relapses}
 #'   \item{trt}{current treatment, "drug0" or "drug1"}
-#'   \item{y}{time-to-event outcome, observed time to first relapse}
-#'   \item{d}{event indicator, 1: event, 0: censoring}
+#'   \item{y}{time to first relapse or censoring}
+#'   \item{d}{event indicator, 1: relapse, 0: censored}
 #' }
 #'
 #' @keywords datasets

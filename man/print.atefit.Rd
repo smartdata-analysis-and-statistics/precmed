@@ -15,8 +15,8 @@
 Print function for atefit
 }
 \details{
-Display the estimated treatment effects for survival outcomes (log restricted
-mean time lost ratio and log hazard ratio) and count outcomes
+Display the estimated treatment effects for survival outcomes (log
+restricted mean time lost ratio and log hazard ratio) and count outcomes
 (the log rate ratio).
 }
 \author{

@@ -1,74 +1,72 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Output functions for Count outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
-#' Cross-validation of the conditional average treatment effect (CATE) score for count outcomes
+#' Cross-validation of the conditional average treatment effect (CATE) score
+#' for count outcomes
 #'
-#' Provides doubly robust estimation of the average treatment effect (ATE) in nested and
-#' mutually exclusive subgroups of patients defined by an estimated conditional average
-#' treatment effect (CATE) score via cross-validation (CV). The CATE score can be estimated
-#' with up to 5 methods among the following: Poisson regression, boosting, two regressions,
-#' contrast regression, and negative binomial (see \code{score.method}).
+#' Provides doubly robust estimation of the average treatment effect (ATE) in
+#' nested and mutually exclusive subgroups of patients defined by an estimated
+#' conditional average treatment effect (CATE) score via cross-validation (CV).
+#' The CATE score can be estimated with up to 5 methods among the following:
+#' Poisson regression, boosting, two regressions, contrast regression, and
+#' negative binomial (see \code{score.method}).
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
 #' @param ps.model A formula describing the propensity score model to be fitted.
-#' The treatment must appear on the left-hand side. The treatment must be a numeric vector
-#' coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
-#' (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
-#' and \code{'negBin'}.
+#' The treatment must appear on the left-hand side. The treatment must be a
+#' numeric vector coded as 0 or 1. If data are from a randomized trial, specify
+#' \code{ps.model} as an intercept-only model.
+#' @param data A data frame containing the variables in the outcome and
+#' propensity score model; a data frame with \code{n} rows (1 row per
+#' observation).
+#' @param score.method A vector of one or multiple methods to estimate the CATE
+#' score. Allowed values are: \code{'boosting'}, \code{'poisson'},
+#' \code{'twoReg'}, \code{'contrastReg'}, and \code{'negBin'}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
-#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
-#' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
-#' separate observations in nested subgroups (below vs above cutoff).
-#' The length of \code{prop.cutoff} is the number of nested subgroups.
-#' An equally-spaced sequence of proportions ending with 1 is recommended.
-#' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
-#' estimated log CATE scores to define mutually exclusive subgroups.
-#' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-#' Each element represents the cutoff to separate the observations into
-#' \code{length(prop.multi) - 1} mutually exclusive subgroups.
-#' Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
-#' for training. Default is \code{3/4}.
-#' @param cv.n A positive integer value indicating the number of cross-validation iterations.
-#' Default is \code{10}.
-#' @param error.max A numerical value > 0 indicating the tolerance (maximum value of error)
-#' for the largest standardized absolute difference in the covariate distributions or in the
-#' doubly robust estimated rate ratios between the training and validation sets. This is used
-#' to define a balanced training-validation splitting. Default is \code{0.1}.
-#' @param max.iter A positive integer value indicating the maximum number of iterations when
-#' searching for a balanced training-validation split. Default is \code{5,000}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{cate.model}. Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
-#' include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-#' Default is \code{'boosting'}.
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is
+#' \code{TRUE}.
+#' @param abc A logical value indicating whether the area between curves (ABC)
+#' should be calculated at each cross-validation iterations, for each
+#' \code{score.method}. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values between 0 and 1 specifying
+#' percentiles of the estimated log CATE scores to define nested subgroups. Each
+#' element represents the cutoff to separate observations in nested subgroups
+#' (below vs above cutoff). The length of \code{prop.cutoff} is the number of
+#' nested subgroups. An equally-spaced sequence of proportions ending with 1 is
+#' recommended. Default is \code{seq(0.5, 1, length = 6)}.
+#' @param prop.multi A vector of numerical values between 0 and 1 specifying
+#' percentiles of the estimated log CATE scores to define mutually exclusive
+#' subgroups. It should start with 0, end with 1, and be of
+#' \code{length(prop.multi) > 2}. Each element represents the cutoff to separate
+#' the observations into \code{length(prop.multi) - 1} mutually exclusive
+#' subgroups. Default is \code{c(0, 1/3, 2/3, 1)}.
+#' @param ps.method A character value for the method to estimate the propensity
+#' score. Allowed values include one of: \code{'glm'} for logistic regression
+#' with main effects only (default), or \code{'lasso'} for a logistic regression
+#' with main effects and LASSO penalization on two-way interactions (added to
+#' the model if interactions are not specified in \code{ps.model}). Relevant
+#' only when \code{ps.model} has more than one variable.
+#' @param minPS A numerical value between 0 and 1 below which estimated
+#' propensity scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value between 0 and 1 above which estimated
+#' propensity scores should be truncated. Must be strictly greater than
+#' \code{minPS}. Default is \code{0.99}.
+#' @param train.prop A numerical value between 0 and 1 indicating the proportion
+#' of total data used for training. Default is \code{3/4}.
+#' @param cv.n A positive integer value indicating the number of
+#' cross-validation iterations. Default is \code{10}.
+#' @param error.max A numerical value > 0 indicating the tolerance (maximum
+#' value of error) for the largest standardized absolute difference in the
+#' covariate distributions or in the doubly robust estimated rate ratios between
+#' the training and validation sets. This is used to define a balanced
+#' training-validation splitting. Default is \code{0.1}.
+#' @param max.iter A positive integer value indicating the maximum number of
+#' iterations when searching for a balanced training-validation split. Default
+#' is \code{5,000}.
+#' @param initial.predictor.method A character vector for the method used to get
+#' initial outcome predictions conditional on the covariates in
+#' \code{cate.model}. Only applies when \code{score.method} includes
+#' \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
+#' \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
+#' \code{'boosting'}.
 #' @param xvar.smooth A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{cate.model}.
@@ -214,25 +212,31 @@
 #'  subgroups are built by splitting the estimated CATE scores according to \code{prop.multi}.
 #' }
 #'
-#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
-#' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
+#' @references
+#' Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
+#' \emph{Estimation and validation of ratio-based conditional average treatment
+#' effects using observational data. Journal of the American Statistical
+#' Association, 1-18.}
 #' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 #'
-#' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
+#' @seealso
+#' \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()},
+#' \code{\link{abc}()} methods for \code{"precmed"} objects,
 #' and \code{\link{catefitcount}()} function.
 #'
 #' @examples
 #' \dontrun{
-#' catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
-#'                                previous_cost + previous_number_relapses + offset(log(years)),
-#'               ps.model = trt ~ age + previous_treatment,
-#'               data = countExample,
-#'               higher.y = FALSE,
-#'               score.method = "poisson",
-#'               cv.n = 5,
-#'               plot.gbmperf = FALSE,
-#'               seed = 999)
+#' catecv <- catecvcount(data = countExample,
+#'                       score.method = "poisson",
+#'                       cate.model = y ~ age + female + previous_treatment +
+#'                                    previous_cost + previous_number_relapses +
+#'                                    offset(log(years)),
+#'                       ps.model = trt ~ age + previous_treatment,
+#'                       verbose = 1,
+#'                       higher.y = FALSE,
+#'                       cv.n = 5,
+#'                       plot.gbmperf = FALSE,
+#'                       seed = 999)
 #'
 #' # Try:
 #' # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
@@ -299,8 +303,9 @@ catecvcount <- function(data,
 
   #### PRE-PROCESSING ####
   out <- data.preproc(fun = "cv", cate.model = cate.model, ps.model = ps.model,
-                      data = data, prop.cutoff = prop.cutoff, prop.multi = prop.multi,
-                      ps.method = ps.method, initial.predictor.method = initial.predictor.method)
+                      data = data, prop.cutoff = prop.cutoff,
+                      prop.multi = prop.multi, ps.method = ps.method,
+                      initial.predictor.method = initial.predictor.method)
   y <- out$y
   trt <- out$trt
   x.ps <- out$x.ps
@@ -320,6 +325,7 @@ catecvcount <- function(data,
 
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("ate.", score.method), "props")
+
   for (name in paste0("ate.", score.method)) {
     result[[name]] <- vector("list", 6)
     names(result[[name]]) <- c("ate.est.train.high.cv", "ate.est.train.low.cv",
@@ -884,57 +890,70 @@ catefitcount <- function(data,
 }
 
 
-#' Doubly robust estimator of and inference for the average treatment effect for count data
+#' Doubly robust estimator of and inference for the average treatment effect
+#' for count data
 #'
-#' Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
-#' for count outcomes. Bootstrap is used for inference.
+#' Doubly robust estimator of the average treatment effect between two
+#' treatments, which is the rate ratio for count outcomes. Bootstrap is used for
+#' inference.
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model should assume interactions
-#' between \code{x} and \code{trt}. If \code{TRUE}, interactions will be assumed only if at least 10 patients
-#' received each treatment option. Default is \code{TRUE}.
-#' @param n.boot A numeric value indicating the number of bootstrap samples used. Default is \code{500}.
-#' @param seed An optional integer specifying an initial randomization seed for reproducibility.
-#' Default is \code{NULL}, corresponding to no seed.
-#' @param verbose An integer value indicating whether intermediate progress messages should
-#' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
+#' @param ps.model A formula describing the propensity score (PS) model to be
+#' fitted. The treatment must appear on the left-hand side. The treatment must
+#' be a numeric vector coded as 0 or 1. If data are from a randomized controlled
+#' trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' @param data A data frame containing the variables in the outcome, propensity
+#' score, and inverse probability of censoring models (if specified); a data
+#' frame with \code{n} rows (1 row per observation).
+#' @param ps.method A character value for the method to estimate the propensity
+#' score. Allowed values include one of: \code{'glm'} for logistic regression
+#' with main effects only (default), or \code{'lasso'} for a logistic regression
+#' with main effects and LASSO penalization on two-way interactions (added to
+#' the model if interactions are not specified in \code{ps.model}). Relevant
+#' only when \code{ps.model} has more than one variable.
+#' @param minPS A numerical value between 0 and 1 below which estimated
+#' propensity scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value between 0 and 1 above which estimated
+#' propensity scores should be truncated. Must be strictly greater than
+#' \code{minPS}. Default is \code{0.99}.
+#' @param interactions A logical value indicating whether the outcome model
+#' should assume treatment-covariate interaction by \code{x}. If \code{TRUE},
+#' interactions will be assumed only if at least 10 patients received each
+#' treatment option. Default is \code{TRUE}.
+#' @param n.boot A numeric value indicating the number of bootstrap samples
+#' used. Default is \code{500}.
+#' @param seed An optional integer specifying an initial randomization seed for
+#' reproducibility. Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating whether intermediate progress
+#' messages should be printed. \code{1} indicates messages are printed and
+#' \code{0} otherwise. Default is \code{0}.
 #'
-#' @return Return an item of the class \code{atefit} with the following elements:
+#' @return Return an item of the class \code{atefit} with the following
+#' elements:
 #' \itemize{
 #'   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
-#'   log rate ratio of \code{trt=1} over \code{trt=0}, bootstrap standard error,
-#'   lower and upper limits of 95\% confidence interval, and the p-value.
-#'   \item{\code{rate0}: } A numeric value of the estimated rate in the group \code{trt=0}.
-#'   \item{\code{rate1}: } A numeric value of the estimated rate in the group \code{trt=1}.
-#'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap sample.
-#'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1. The key
-#'   to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate the
+#'   ATE (expressed as a log rate ratio of \code{trt=1} over \code{trt=0}),
+#'   the bootstrap standard error, the lower and upper limits of 95\% confidence
+#'   interval, and the p-value.
+#'   \item{\code{rate0}: } A numeric value of the estimated rate in the group
+#'   \code{trt=0}.
+#'   \item{\code{rate1}: } A numeric value of the estimated rate in the group
+#'   \code{trt=1}.
+#'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
+#'   sample.
+#'   \item{\code{warning}: } A warning message produced if the treatment
+#'   variable was not coded as 0 or 1. The key to map the original coding of the
+#'   variable to a 0-1 coding is displayed in the warning to facilitate the
 #'   interpretation of the remaining of the output.
 #' }
 #'
-#' @details This helper function estimates the average treatment effect (ATE) between two treatment groups in a given
-#' dataset. The ATE is estimated with a doubly robust estimator that accounts for imbalances in covariate distributions
-#' between the two treatment groups with inverse probability treatment weighting. For count outcomes, the estimated ATE
-#' is the estimated rate ratio between treatment 1 versus treatment 0. The log-transformed ATEs are returned, as well
-#' as the rate in either treatment group. The variability of the estimated rate ratio is also calculated using bootstrap.
-#' Additional outputs include standard error of the log rate ratio, 95\% confidence interval, p-value, and a histogram of
-#' the bootstrap estimates.
+#' @details This helper function estimates the average treatment effect (ATE)
+#' between two treatment groups in a given dataset. The ATE is estimated with a
+#' doubly robust estimator that accounts for imbalances in covariate
+#' distributions between the two treatment groups with inverse probability
+#' treatment weighting. For count outcomes, the estimated ATE is the estimated
+#' rate ratio between treatment 1 versus treatment 0.
 #'
 #' @examples
 #' output <- atefitcount(data = countExample,

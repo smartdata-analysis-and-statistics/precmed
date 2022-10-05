@@ -1,26 +1,16 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Main output functions for precmed package
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
 #'
 #' Provides (doubly robust) estimation of the average treatment effect (ATE) for count, survival or continuous
 #' outcomes in nested and mutually exclusive subgroups of patients defined by an estimated conditional
 #' average treatment effect (CATE) score via cross-validation (CV).
 #'
-#' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
+#' @param response A string describing the type of outcome in the data.
+#' Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
+#' (see \code{\link{catecvsurv}()}) and "continuous" (see
+#' \code{\link{catecvmean}()}) .
 #' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-#' must be used to describe the outcome.
+#' The outcome must appear on the left-hand side. For survival outcomes, a
+#' \code{Surv} object must be used to describe the outcome.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 #' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
 #' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
@@ -629,7 +619,7 @@ abc <- function(x) {
 
   # Value of ABC
   value.abc <- matrix(NA, nrow = m, ncol = x$cv.n)
-  for (i in seq(m)){
+  for (i in seq(m)) {
     value.abc[i,] <- x[[paste0("ate.", score.method[i])]]$abc.valid
   }
   rownames(value.abc) <- score.method

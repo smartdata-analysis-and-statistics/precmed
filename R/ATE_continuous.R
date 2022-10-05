@@ -1,46 +1,44 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Average treatment effect (ATE) functions for Continuous outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Doubly robust estimator of the average treatment effect for continuous data
 #'
-#' Doubly robust estimator of the average treatment effect between two treatments, which is the mean difference
-#' of treatment 1 over treatment 0 for continuous outcomes.
+#' Doubly robust estimator of the average treatment effect between two
+#' treatments, which is the mean difference of treatment 1 over treatment 0 for
+#' continuous outcomes.
 #'
-#' @param y A numeric vector of size \code{n} with each element representing the observed continuous outcome for each subject.
-#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element representing the treatment received
-#' for each subject.
-#' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with each column representing
-#' each baseline covariate specified in the outcome model for all subjects.
-#' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with a leading column of 1 as
-#' the intercept and each remaining column representing each baseline covariate specified in the propensity
-#' score model for all subjects
-#' @param ps.method A character value for the method to estimate the propensity score. Allowed values include one of:
+#' @param y A numeric vector of size \code{n} with each element representing
+#' the observed continuous outcome for each subject.
+#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element
+#' representing the treatment received for each subject.
+#' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with
+#' each column representing each baseline covariate specified in the outcome
+#' model for all subjects.
+#' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
+#' a leading column of 1 as the intercept and each remaining column representing
+#' each baseline covariate specified in the propensity score model for all
+#' subjects
+#' @param ps.method A character value for the method to estimate the propensity
+#' score. Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model should assume interactions
-#' between \code{x} and \code{trt}. If \code{TRUE}, interactions will be assumed only if at least 10 patients
-#' received each treatment option. Default is \code{TRUE}.
+#' \code{'lasso'} for a logistic regression with main effects and LASSO
+#' penalization on two-way interactions (added to the model if interactions are
+#' not specified in \code{ps.model}). Relevant only when \code{ps.model} has
+#' more than one variable.
+#' @param minPS A numerical value (in [0, 1]) below which estimated propensity
+#' scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity
+#' scores should be truncated. Must be strictly greater than \code{minPS}.
+#' Default is \code{0.99}.
+#' @param interactions A logical value indicating whether the outcome model
+#' should assume interactions between \code{x} and \code{trt}. If \code{TRUE},
+#' interactions will be assumed only if at least 10 patients received each
+#' treatment option. Default is \code{TRUE}.
 #'
 #' @return Return a list of 4 elements:
 #' \itemize{
 #'   \item{\code{mean.diff}: } A numeric value of the estimated mean difference.
-#'   \item{\code{mean.diff0}: } A numeric value of the estimated mean difference in the group trt=0.
-#'   \item{\code{mean.diff1}: } A numeric value of the estimated mean difference in the group trt=1.
+#'   \item{\code{mean.diff0}: } A numeric value of the estimated mean difference
+#'   in treatment group 0.
+#'   \item{\code{mean.diff1}: } A numeric value of the estimated mean difference
+#'   in treatment group 1.
 #' }
 #'
 
@@ -103,12 +101,15 @@ drmean <- function(y, trt, x.cate, x.ps,
 }
 
 
-#' Estimate the ATE of the mean difference in multiple bi-level subgroups defined by the proportions
+#' Estimate the ATE of the mean difference in multiple bi-level subgroups
+#' defined by the proportions
 #'
-#' If only care about the higher subgroup (above cutoff), only need trt.est.high so set \code{onlyhigh} to be TRUE
-#' Scores are adjusted to the opposite sign if \code{higher.y} == FALSE; scores stay the same if \code{higher.y} == TRUE;
-#'  this is because estcount.bilevel.subgroups() always takes the subgroup of the top highest adjusted scores,
-#'  and higher adjusted scores should always represent high responders of trt=1
+#' If only care about the higher subgroup (above cutoff), only need
+#' trt.est.high so set \code{onlyhigh} to be TRUE. Scores are adjusted to the
+#' opposite sign if \code{higher.y} == FALSE; scores stay the same if
+#' \code{higher.y} == TRUE. This is because \code{estcount.bilevel.subgroups}()
+#' always takes the subgroup of the top highest adjusted scores,and higher
+#' adjusted scores should always represent high responders in treatment group 1.
 #'
 #' @param y Observed outcome; vector of size \code{n} (observations)
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1

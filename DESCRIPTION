@@ -1,7 +1,7 @@
 Package: precmed
 Type: Package
-Title: A doubly robust precision medicine approach to estimate and
-        validate conditional average treatment effects
+Title: A Doubly Robust Precision Medicine Approach to Estimate and 
+        Validate Conditional Average Treatment Effects
 Version: 0.1.2
 Authors@R: c(person(given = "Lu", 
                     family = "Tian", 

@@ -2,7 +2,8 @@
 % Please edit documentation in R/ATE_continuous.R
 \name{estmean.bilevel.subgroups}
 \alias{estmean.bilevel.subgroups}
-\title{Estimate the ATE of the mean difference in multiple bi-level subgroups defined by the proportions}
+\title{Estimate the ATE of the mean difference in multiple bi-level subgroups
+defined by the proportions}
 \usage{
 estmean.bilevel.subgroups(
   y,
@@ -60,8 +61,10 @@ vector of size equal to the length of prop; always returned
         vector of size equal to the length of prop; returned only when \code{onlyhigh} == TRUE
 }
 \description{
-If only care about the higher subgroup (above cutoff), only need trt.est.high so set \code{onlyhigh} to be TRUE
-Scores are adjusted to the opposite sign if \code{higher.y} == FALSE; scores stay the same if \code{higher.y} == TRUE;
- this is because estcount.bilevel.subgroups() always takes the subgroup of the top highest adjusted scores,
- and higher adjusted scores should always represent high responders of trt=1
+If only care about the higher subgroup (above cutoff), only need
+trt.est.high so set \code{onlyhigh} to be TRUE. Scores are adjusted to the
+opposite sign if \code{higher.y} == FALSE; scores stay the same if
+\code{higher.y} == TRUE. This is because \code{estcount.bilevel.subgroups}()
+always takes the subgroup of the top highest adjusted scores,and higher
+adjusted scores should always represent high responders in treatment group 1.
 }

@@ -2,7 +2,8 @@
 % Please edit documentation in R/utility_count.R
 \name{balance.split}
 \alias{balance.split}
-\title{Split the given dataset into balanced training and validation sets (within a pre-specified tolerance)
+\title{Split the given dataset into balanced training and validation sets
+(within a pre-specified tolerance)
 Balanced means 1) The ratio of treated and controls is maintained in the training and validation sets
                2) The covariate distributions are balanced between the training and validation sets}
 \usage{
@@ -63,7 +64,8 @@ A list of 10 objects, 5 training and 5 validation of y, trt, x.cate, x.ps, time:
             time.valid       - log-transformed person-years of follow-up in the validation set; vector of size \code{n-m}
 }
 \description{
-Split the given dataset into balanced training and validation sets (within a pre-specified tolerance)
+Split the given dataset into balanced training and validation sets
+(within a pre-specified tolerance)
 Balanced means 1) The ratio of treated and controls is maintained in the training and validation sets
                2) The covariate distributions are balanced between the training and validation sets
 }

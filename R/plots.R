@@ -1,15 +1,3 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Plot functions for precmed package
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Two side-by-side line plots of validation curves from the \code{"precmed"} object
 #'
 #' Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
@@ -85,22 +73,23 @@
 #'                plot.gbmperf = FALSE)
 #'
 #' # default setting
-#' plot(x = cv_count)
+#' plot(cv_count)
 #'
 #' # turn off ABC annotation
-#' plot(x = cv_count, show.abc = FALSE)
+#' plot(cv_count, show.abc = FALSE)
 #'
 #' # grayscale
-#' plot(x = cv_count, grayscale = TRUE)
+#' plot(cv_count, grayscale = TRUE)
 #'
-#' # plot the validation curves from the 2nd CV iteration instead of the mean of all validation curves
-#' plot(x = cv_count, cv.i = 2)
+#' # plot the validation curves from the 2nd CV iteration instead of the mean
+#' # of all validation curves
+#' plot(cv_count, cv.i = 2)
 #'
 #' # median of the validation curves
-#' plot(x = cv_count, combine = "median")
+#' plot(cv_count, combine = "median")
 #'
 #' # plot validation curves in validation set only
-#' plot(x = cv_count, valid.only = TRUE)
+#' plot(cv_count, valid.only = TRUE)
 #'
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
@@ -125,10 +114,10 @@
 #'
 #'
 #' # default setting, plot RMTL ratios in both training and validation sets
-#' plot(x = catecv_surv)
+#' plot(catecv_surv)
 #'
 #' # plot hazard ratio
-#' plot(x = catecv_surv, plot.hr = TRUE)
+#' plot(catecv_surv, plot.hr = TRUE)
 #'
 #' # Continuous outcome
 #' catecv_mean <- catecvmean(cate.model = y ~ age +
@@ -147,7 +136,7 @@
 #'                   plot.gbmperf = FALSE)
 #'
 #'
-#' plot(x = catecv_mean)
+#' plot(catecv_mean)
 #'}
 #'
 #' @export

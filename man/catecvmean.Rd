@@ -298,6 +298,7 @@ catecv <- catecvmean(cate.model = y ~ age  +
 # boxplot(x = catecv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
 # abc(x = catecv)
 }
+
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

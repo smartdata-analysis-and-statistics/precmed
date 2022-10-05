@@ -2,7 +2,8 @@
 % Please edit documentation in R/outputs_count.R
 \name{catecvcount}
 \alias{catecvcount}
-\title{Cross-validation of the conditional average treatment effect (CATE) score for count outcomes}
+\title{Cross-validation of the conditional average treatment effect (CATE) score
+for count outcomes}
 \usage{
 catecvcount(
   data,
@@ -36,76 +37,84 @@ catecvcount(
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
-(1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome and
+propensity score model; a data frame with \code{n} rows (1 row per
+observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
-and \code{'negBin'}.}
+\item{score.method}{A vector of one or multiple methods to estimate the CATE
+score. Allowed values are: \code{'boosting'}, \code{'poisson'},
+\code{'twoReg'}, \code{'contrastReg'}, and \code{'negBin'}.}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
 \item{ps.model}{A formula describing the propensity score model to be fitted.
-The treatment must appear on the left-hand side. The treatment must be a numeric vector
-coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.}
+The treatment must appear on the left-hand side. The treatment must be a
+numeric vector coded as 0 or 1. If data are from a randomized trial, specify
+\code{ps.model} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+\item{ps.method}{A character value for the method to estimate the propensity
+score. Allowed values include one of: \code{'glm'} for logistic regression
+with main effects only (default), or \code{'lasso'} for a logistic regression
+with main effects and LASSO penalization on two-way interactions (added to
+the model if interactions are not specified in \code{ps.model}). Relevant
+only when \code{ps.model} has more than one variable.}
 
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{cate.model}. Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
-include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-Default is \code{'boosting'}.}
+\item{initial.predictor.method}{A character vector for the method used to get
+initial outcome predictions conditional on the covariates in
+\code{cate.model}. Only applies when \code{score.method} includes
+\code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
+\code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
+\code{'boosting'}.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
-truncated. Default is \code{0.01}.}
+\item{minPS}{A numerical value between 0 and 1 below which estimated
+propensity scores should be truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
-truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+\item{maxPS}{A numerical value between 0 and 1 above which estimated
+propensity scores should be truncated. Must be strictly greater than
+\code{minPS}. Default is \code{0.99}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
-lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
+lower (\code{FALSE}) values of the outcome are more desirable. Default is
+\code{TRUE}.}
 
-\item{prop.cutoff}{A vector of numerical values (in (0, 1]) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
-separate observations in nested subgroups (below vs above cutoff).
-The length of \code{prop.cutoff} is the number of nested subgroups.
-An equally-spaced sequence of proportions ending with 1 is recommended.
-Default is \code{seq(0.5, 1, length = 6)}.}
+\item{prop.cutoff}{A vector of numerical values between 0 and 1 specifying
+percentiles of the estimated log CATE scores to define nested subgroups. Each
+element represents the cutoff to separate observations in nested subgroups
+(below vs above cutoff). The length of \code{prop.cutoff} is the number of
+nested subgroups. An equally-spaced sequence of proportions ending with 1 is
+recommended. Default is \code{seq(0.5, 1, length = 6)}.}
 
-\item{prop.multi}{A vector of numerical values (in [0, 1]) specifying percentiles of the
-estimated log CATE scores to define mutually exclusive subgroups.
-It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
-Each element represents the cutoff to separate the observations into
-\code{length(prop.multi) - 1} mutually exclusive subgroups.
-Default is \code{c(0, 1/3, 2/3, 1)}.}
+\item{prop.multi}{A vector of numerical values between 0 and 1 specifying
+percentiles of the estimated log CATE scores to define mutually exclusive
+subgroups. It should start with 0, end with 1, and be of
+\code{length(prop.multi) > 2}. Each element represents the cutoff to separate
+the observations into \code{length(prop.multi) - 1} mutually exclusive
+subgroups. Default is \code{c(0, 1/3, 2/3, 1)}.}
 
-\item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
+\item{abc}{A logical value indicating whether the area between curves (ABC)
+should be calculated at each cross-validation iterations, for each
+\code{score.method}. Default is \code{TRUE}.}
 
-\item{train.prop}{A numerical value (in (0, 1)) indicating the proportion of total data used
-for training. Default is \code{3/4}.}
+\item{train.prop}{A numerical value between 0 and 1 indicating the proportion
+of total data used for training. Default is \code{3/4}.}
 
-\item{cv.n}{A positive integer value indicating the number of cross-validation iterations.
-Default is \code{10}.}
+\item{cv.n}{A positive integer value indicating the number of
+cross-validation iterations. Default is \code{10}.}
 
-\item{error.max}{A numerical value > 0 indicating the tolerance (maximum value of error)
-for the largest standardized absolute difference in the covariate distributions or in the
-doubly robust estimated rate ratios between the training and validation sets. This is used
-to define a balanced training-validation splitting. Default is \code{0.1}.}
+\item{error.max}{A numerical value > 0 indicating the tolerance (maximum
+value of error) for the largest standardized absolute difference in the
+covariate distributions or in the doubly robust estimated rate ratios between
+the training and validation sets. This is used to define a balanced
+training-validation splitting. Default is \code{0.1}.}
 
-\item{max.iter}{A positive integer value indicating the maximum number of iterations when
-searching for a balanced training-validation split. Default is \code{5,000}.}
+\item{max.iter}{A positive integer value indicating the maximum number of
+iterations when searching for a balanced training-validation split. Default
+is \code{5,000}.}
 
 \item{xvar.smooth}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
@@ -224,11 +233,12 @@ Returns a list containing the following components saved as a \code{"precmed"} o
 }
 }
 \description{
-Provides doubly robust estimation of the average treatment effect (ATE) in nested and
-mutually exclusive subgroups of patients defined by an estimated conditional average
-treatment effect (CATE) score via cross-validation (CV). The CATE score can be estimated
-with up to 5 methods among the following: Poisson regression, boosting, two regressions,
-contrast regression, and negative binomial (see \code{score.method}).
+Provides doubly robust estimation of the average treatment effect (ATE) in
+nested and mutually exclusive subgroups of patients defined by an estimated
+conditional average treatment effect (CATE) score via cross-validation (CV).
+The CATE score can be estimated with up to 5 methods among the following:
+Poisson regression, boosting, two regressions, contrast regression, and
+negative binomial (see \code{score.method}).
 }
 \details{
 The CATE score represents an individual-level treatment effect expressed as a
@@ -270,15 +280,17 @@ following steps \code{cv.n} times:
 }
 \examples{
 \dontrun{
-catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
-                               previous_cost + previous_number_relapses + offset(log(years)),
-              ps.model = trt ~ age + previous_treatment,
-              data = countExample,
-              higher.y = FALSE,
-              score.method = "poisson",
-              cv.n = 5,
-              plot.gbmperf = FALSE,
-              seed = 999)
+catecv <- catecvcount(data = countExample,
+                      score.method = "poisson",
+                      cate.model = y ~ age + female + previous_treatment +
+                                   previous_cost + previous_number_relapses +
+                                   offset(log(years)),
+                      ps.model = trt ~ age + previous_treatment,
+                      verbose = 1,
+                      higher.y = FALSE,
+                      cv.n = 5,
+                      plot.gbmperf = FALSE,
+                      seed = 999)
 
 # Try:
 # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
@@ -288,11 +300,13 @@ catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
-\emph{Estimation and validation of ratio-based conditional average treatment effects using
-observational data. Journal of the American Statistical Association, 1-18.}
+\emph{Estimation and validation of ratio-based conditional average treatment
+effects using observational data. Journal of the American Statistical
+Association, 1-18.}
 \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
 }
 \seealso{
-\code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
+\code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()},
+\code{\link{abc}()} methods for \code{"precmed"} objects,
 and \code{\link{catefitcount}()} function.
 }

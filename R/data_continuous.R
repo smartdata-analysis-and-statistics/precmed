@@ -1,16 +1,4 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Simulated data with Continuous outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
-#' Simulated data with continuous outcome
+#' Simulated data with a continuous outcome
 #'
 #' A dataset containing a continuous outcome and 6 baseline covariates
 #'

@@ -3,7 +3,7 @@
 \docType{data}
 \name{meanExample}
 \alias{meanExample}
-\title{Simulated data with continuous outcome}
+\title{Simulated data with a continuous outcome}
 \format{
 A dataframe with 4000 rows (patients) and 9 variables:
 \describe{

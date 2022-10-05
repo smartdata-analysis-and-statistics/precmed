@@ -163,7 +163,7 @@ atefit <- function(response,
 plot.atefit <- function(x, bins, alpha = 0.7, title, theme = theme_classic(), ...) {
 
   if (missing(bins)) {
-    bins <- min(50, x$n.boot/10)
+    bins <- max(1, min(50, floor(x$n.boot/10))) # need at least one bin
   }
   if (missing(title)) {
     title <- paste0(x$n.boot, " bootstrap iterations")
@@ -202,9 +202,10 @@ plot.atefit <- function(x, bins, alpha = 0.7, title, theme = theme_classic(), ..
 #' @param x An object of class \code{"atefit"}.
 #' @param ... Other parameters
 #'
-#' @details Display the estimated treatment effects for survival outcomes (log restricted
-#' mean time lost ratio and log hazard ratio) and count outcomes
+#' @details Display the estimated treatment effects for survival outcomes (log
+#' restricted mean time lost ratio and log hazard ratio) and count outcomes
 #' (the log rate ratio).
+#'
 #' @author Thomas Debray
 #'
 #' @export

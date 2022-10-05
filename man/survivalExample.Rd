@@ -14,8 +14,8 @@ A dataframe with 4000 rows (patients) and 9 variables:
   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
   \item{previous_number_relapses}{previous number of relapses}
   \item{trt}{current treatment, "drug0" or "drug1"}
-  \item{y}{time-to-event outcome, observed time to first relapse}
-  \item{d}{event indicator, 1: event, 0: censoring}
+  \item{y}{time to first relapse or censoring}
+  \item{d}{event indicator, 1: relapse, 0: censored}
 }
 }
 \usage{

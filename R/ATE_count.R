@@ -1,42 +1,37 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Average treatment effect (ATE) functions for Count outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Doubly robust estimator of the average treatment effect for count data
 #'
-#' Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
-#' of treatment 1 over treatment 0 for count outcomes.
+#' Doubly robust estimator of the average treatment effect between two
+#' treatments, which is the rate ratio of treatment 1 over treatment 0 for
+#' count outcomes.
 #'
-#' @param y A numeric vector of size \code{n} with each element representing the observed count outcome for each subject.
-#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element representing the treatment received
-#' for each subject.
-#' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with each column representing
-#' each baseline covariate specified in the outcome model for all subjects.
-#' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with a leading column of 1 as
-#' the intercept and each remaining column representing each baseline covariate specified in the propensity
-#' score model for all subjects
-#' @param time A numeric vector of size \code{n} with each element representing the log-transformed person-years
-#' of follow-up for each subject.
-#' @param ps.method A character value for the method to estimate the propensity score. Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model should assume interactions
-#' between \code{x} and \code{trt}. If \code{TRUE}, interactions will be assumed only if at least 10 patients
-#' received each treatment option. Default is \code{TRUE}.
+#' @param y A numeric vector of size \code{n} with each element representing
+#' the observed count outcome for each subject.
+#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element
+#' representing the treatment received for each subject.
+#' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with
+#' each column representing each baseline covariate specified in the outcome
+#' model for all subjects.
+#' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
+#' a leading column of 1 as the intercept and each remaining column
+#' representing each baseline covariate specified in the propensity score model
+#' for all subjects.
+#' @param time A numeric vector of size \code{n} with each element representing
+#' the log-transformed person-years of follow-up for each subject.
+#' @param ps.method A character value for the method to estimate the propensity
+#' score. Allowed values include one of: \code{'glm'} for logistic regression
+#' with main effects only (default), or \code{'lasso'} for a logistic regression
+#' with main effects and LASSO penalization on two-way interactions (added to
+#' the model if interactions are not specified in \code{ps.model}). Relevant
+#' only when \code{ps.model} has more than one variable.
+#' @param minPS A numerical value between 0 and 1 below which estimated
+#' propensity scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value between 0 and 1 above which estimated
+#' propensity scores should be truncated. Must be strictly greater than
+#' \code{minPS}. Default is \code{0.99}.
+#' @param interactions A logical value indicating whether the outcome model
+#' should allow for treatment-covariate interaction by \code{x}. If \code{TRUE},
+#' interactions will be assumed only if at least 10 patients received each
+#' treatment option. Default is \code{TRUE}.
 #'
 #' @return Return a list of 4 elements:
 #' \itemize{
@@ -104,7 +99,8 @@ drcount <- function(y, trt, x.cate, x.ps, time,
 }
 
 
-#' Estimate the ATE of the log RR ratio in multiple bi-level subgroups defined by the proportions
+#' Estimate the Average Treatment Effect of the log risk ratio in multiple
+#' bi-level subgroups defined by the proportions
 #'
 #' If only care about the higher subgroup (above cutoff), only need trt.est.high so set \code{onlyhigh} to be TRUE
 #' Scores are adjusted to the opposite sign if \code{higher.y} == FALSE; scores stay the same if \code{higher.y} == TRUE;
