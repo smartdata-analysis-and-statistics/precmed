@@ -56,8 +56,9 @@ Default is \code{NULL}, corresponding to no seed.}
 \value{
 Return an item of the class \code{atefit} with the following elements:
 \itemize{
-  \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated log rate ratio of \code{trt=1}
-  over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence interval, and the p-value.
+  \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
+  log rate ratio of \code{trt=1} over \code{trt=0}, bootstrap standard error,
+  lower and upper limits of 95\% confidence interval, and the p-value.
   \item{\code{rate0}: } A numeric value of the estimated rate in the group \code{trt=0}.
   \item{\code{rate1}: } A numeric value of the estimated rate in the group \code{trt=1}.
   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap sample.
@@ -80,13 +81,12 @@ Additional outputs include standard error of the log rate ratio, 95% confidence 
 the bootstrap estimates.
 }
 \examples{
-\dontrun{
-output <- atefitcount(cate.model = y ~ age + female + previous_treatment +
-                               previous_cost + previous_number_relapses + offset(log(years)),
-                            ps.model = trt ~ age + previous_treatment,
-                            data = countExample,
-                            seed = 999, verbose = 1)
+output <- atefitcount(data = countExample,
+                      cate.model = y ~ age + female + previous_treatment +
+                                   previous_cost + previous_number_relapses +
+                                   offset(log(years)),
+                      ps.model = trt ~ age + previous_treatment,
+                      verbose = 1, n.boot = 50, seed = 999)
 output
 plot(output)
-}
 }

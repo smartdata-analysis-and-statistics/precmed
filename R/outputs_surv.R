@@ -1222,14 +1222,14 @@ catefitsurv <- function(data,
 #' @return Return an object of class \code{atefit} with 6 elements:
 #' \itemize{
 #'   \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
-#'   lower and upper limits of 95% confidence interval, and the p-value in the group \code{trt=1}.
+#'   lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=1}.
 #'   \item{\code{rmst0}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
-#'   lower and upper limits of 95% confidence interval, and the p-value in the group \code{trt=0}.
+#'   lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=0}.
 #'   \item{\code{log.rmtl.ratio}: } A vector of numeric values of the estimated log RMTL ratio of
-#'   \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence
+#'   \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
 #'   interval, and the p-value.
 #'   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
-#'   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95% confidence
+#'   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
 #'   interval, and the p-value.
 #'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
 #'   \code{log.rmtl.ratio} and \code{log.hazard.ratio} in each bootstrap sample.
