@@ -77,7 +77,7 @@ dataset. The ATE is estimated with a doubly robust estimator that accounts for i
 between the two treatment groups with inverse probability treatment weighting. For count outcomes, the estimated ATE
 is the estimated rate ratio between treatment 1 versus treatment 0. The log-transformed ATEs are returned, as well
 as the rate in either treatment group. The variability of the estimated rate ratio is also calculated using bootstrap.
-Additional outputs include standard error of the log rate ratio, 95% confidence interval, p-value, and a histogram of
+Additional outputs include standard error of the log rate ratio, 95\% confidence interval, p-value, and a histogram of
 the bootstrap estimates.
 }
 \examples{

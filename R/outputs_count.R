@@ -223,6 +223,7 @@
 #' and \code{\link{catefitcount}()} function.
 #'
 #' @examples
+#' \dontrun{
 #' catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
 #'                                previous_cost + previous_number_relapses + offset(log(years)),
 #'               ps.model = trt ~ age + previous_treatment,
@@ -237,7 +238,7 @@
 #' # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # boxplot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #' # abc(x = catecv)
-#'
+#' }
 #' @export
 #'
 #' @importFrom graphics hist lines
@@ -355,7 +356,7 @@ catecvcount <- function(data,
   if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
 
   # Begin CV iteration
-  for (cv.i in 1:cv.n) {
+  for (cv.i in seq(cv.n)) {
 
     ##### Split the data ------------------------------------------------------------------------------
     if (verbose >= 1) {
@@ -932,7 +933,7 @@ catefitcount <- function(data,
 #' between the two treatment groups with inverse probability treatment weighting. For count outcomes, the estimated ATE
 #' is the estimated rate ratio between treatment 1 versus treatment 0. The log-transformed ATEs are returned, as well
 #' as the rate in either treatment group. The variability of the estimated rate ratio is also calculated using bootstrap.
-#' Additional outputs include standard error of the log rate ratio, 95% confidence interval, p-value, and a histogram of
+#' Additional outputs include standard error of the log rate ratio, 95\% confidence interval, p-value, and a histogram of
 #' the bootstrap estimates.
 #'
 #' @examples

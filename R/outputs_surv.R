@@ -1244,7 +1244,7 @@ catefitsurv <- function(data,
 #' censoring weighting. For survival outcomes, the estimated ATE is the estimated by RMTL ratio between treatment
 #' 1 versus treatment 0. The log-transformed ATEs and log-transformed adjusted hazard ratios are returned, as well
 #'  as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
-#'  using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95% confidence interval,
+#'  using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 #'  p-value, and a histogram of the bootstrap estimates.
 #'
 #' @examples

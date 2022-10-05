@@ -4,7 +4,7 @@
 \alias{plot.atefit}
 \title{Histogram of bootstrap estimates}
 \usage{
-\method{plot}{atefit}(x, bins, alpha = 0.7, title, theme = theme_grey(), ...)
+\method{plot}{atefit}(x, bins, alpha = 0.7, title, theme = theme_classic(), ...)
 }
 \arguments{
 \item{x}{An object of class \code{"atefit"}.}
@@ -15,7 +15,7 @@
 
 \item{title}{The text for the title}
 
-\item{theme}{Defaults to \code{theme_grey()}. Other options include \code{theme_classic()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
+\item{theme}{Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
 
 \item{...}{Other parameters}
 }

@@ -269,6 +269,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
+\dontrun{
 catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
                                previous_cost + previous_number_relapses + offset(log(years)),
               ps.model = trt ~ age + previous_treatment,
@@ -283,7 +284,7 @@ catecv <- catecvcount(cate.model = y ~ age + female + previous_treatment +
 # plot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 # boxplot(x = catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 # abc(x = catecv)
-
+}
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

@@ -148,7 +148,7 @@ atefit <- function(response,
 #' @param bins Number of bins
 #' @param alpha Opacity
 #' @param title The text for the title
-#' @param theme Defaults to \code{theme_grey()}. Other options include \code{theme_classic()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
+#' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
 #' @param ... Other parameters
 #'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
@@ -156,11 +156,11 @@ atefit <- function(response,
 #' @author Thomas Debray
 #'
 #' @importFrom dplyr %>% add_row mutate
-#' @importFrom ggplot2 ggplot geom_histogram geom_vline theme_grey
+#' @importFrom ggplot2 ggplot geom_histogram geom_vline theme_classic
 #' @importFrom tidyr gather
 #' @export
 #'
-plot.atefit <- function(x, bins, alpha = 0.7, title, theme = theme_grey(), ...) {
+plot.atefit <- function(x, bins, alpha = 0.7, title, theme = theme_classic(), ...) {
 
   if (missing(bins)) {
     bins <- min(50, x$n.boot/10)
