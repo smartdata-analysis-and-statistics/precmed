@@ -1,15 +1,3 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Conditional average treatment effect (CATE) functions for Survival outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Doubly robust estimators of the coefficients in the two regression
 #'
 #' @param ynew Truncated survival or censoring time; vector of size \code{n}.
@@ -106,7 +94,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
     score <- colSums(x.aug * weightc * error)
     slopewt <- (y + f0.predictor * (trt / ps - 1) / 2 + f1.predictor * ((1 - trt) / (1 - ps) - 1) / 2) * eta * ps * (1 - ps) / (eta * ps + (1 - ps))^2
     slope <- crossprod(x.aug * weightc * slopewt, x.aug)
-    if(iter == 0) {
+    if (iter == 0) {
       epsilon.min <- eigen(slope, only.values = TRUE)$value[p.aug]
       epsilon0 <- epsilon.min + epsilon.min * (epsilon.min < 0)
     }
@@ -119,7 +107,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
   converge2 <- 0
 
   # If NP did not converge, solve for minimizing the L2-norm (sum of squares) of the score function to avoid inversing the slope inverse (generally slower than NP)
-  if(converge1 == 0) {
+  if (converge1 == 0) {
     lossf <- function(beta) {
       eta <- as.numeric(exp(x.aug %*% beta))
       error <- (trt * (y - eta * f0.predictor / 2 - f1.predictor / 2) * (1 - ps) - (1 - trt) * (eta * y - eta * f0.predictor / 2 - f1.predictor / 2) * ps) / (eta * ps + (1 - ps))
@@ -239,10 +227,10 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
   ######## Cross fitting ------------------------------------------------------------------
 
   index1 <- rep(1:Kfold, floor(N1 / Kfold))
-  if(N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
+  if (N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
 
   index0 <- rep(1:Kfold, floor(N0 / Kfold))
-  if(N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
+  if (N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
 
   best.iter <- 0
 
@@ -251,7 +239,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
     delta.twoReg.mat <- delta.contrastReg.mat <- matrix(NA, B, p.aug)
     converge <- rep(NA, B)
 
-    for(bb in 1:B) {
+    for (bb in seq(B)) {
       index1cv <- sample(x = index1, size = N1, replace = FALSE)
       index0cv <- sample(x = index0, size = N0, replace = FALSE)
       index <- rep(NA, N)
@@ -259,12 +247,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
       index[trt == 0] <- index0cv
 
       f1.predictcv <- f0.predictcv <- pscv <- rep(NA, N)
-      for (k in 1:Kfold) {
-        if (initial.predictor.method == "randomForest"){
+      for (k in seq(Kfold)) {
+        if (initial.predictor.method == "randomForest") {
 
           datatot_train <- datatotrf[index != k, ]
           x_ps_train <- x.ps[index != k, , drop = FALSE]
-          trt_train=trt[index != k]
+          trt_train <- trt[index != k]
 
           datatot_valid <- datatotrf[index == k, ]
           x_ps_valid <- x.ps[index == k, , drop = FALSE]
@@ -275,7 +263,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
           time1 <- fit1$time
           m1 <- length(time1)
           timegap1 <- time1 - c(0, time1[-m1])
-          f1.predictcv[index == k] <- colSums(timegap1 * rbind(1, t(surv1.prd[, - m1]))) / tau0
+          f1.predictcv[index == k] <- colSums(timegap1 * rbind(1, t(surv1.prd[, -m1]))) / tau0
 
           data0rf <- datatot_train[trt_train == 0,]
           fit0 <- rfsrc(Surv(y, d) ~ ., data = data0rf, ntree = n.trees.rf)
@@ -283,7 +271,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
           time0 <- fit0$time
           m0 <- length(time0)
           timegap0 <- time0 - c(0, time0[-m0])
-          f0.predictcv[index == k] <- colSums(timegap0 * rbind(1, t(surv0.prd[, - m0]))) / tau0
+          f0.predictcv[index == k] <- colSums(timegap0 * rbind(1, t(surv0.prd[, -m0]))) / tau0
 
         } else if (initial.predictor.method == "boosting") {
 
@@ -473,7 +461,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
   if ("contrastReg" %in% score.method) {
     ## Final contrast regression estimator (score 4)
     converge.contrastReg <- (sum(converge) > 0)
-    if(converge.contrastReg == TRUE) {
+    if (converge.contrastReg == TRUE) {
       delta.contrastReg <- colMeans(delta.contrastReg.mat[converge == TRUE, , drop = FALSE])
     } else {
       delta.contrastReg <- colMeans(delta.contrastReg.mat)

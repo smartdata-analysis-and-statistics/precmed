@@ -1,15 +1,3 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Average treatment effect (ATE) functions for Survival outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Doubly robust estimator of the average treatment effect with Cox model for survival data
 #'
 #'
@@ -146,7 +134,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
     names(warn.low) <- names(err.low) <- paste("prop", round(1 - prop, 2))
   }
 
-  for(b in 1:n.subgroup) {
+  for (b in seq(n.subgroup)) {
     idsub1 <- (score >= cut[b])
     fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, ], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
                                  trt = trt[idsub1], yf = yf[idsub1],
