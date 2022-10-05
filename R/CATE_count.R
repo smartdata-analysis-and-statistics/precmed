@@ -1,15 +1,3 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Conditional average treatment effect (CATE) functions for Count outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
-
-
-
 #' Doubly robust estimators of the coefficients in the two regression
 #'
 #' @param y Observed outcome; vector of size \code{n}
@@ -229,7 +217,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   fgam <- NULL
 
   if (any(c("twoReg", "contrastReg") %in% score.method)) {
-    for (bb in 1:B) {
+    for (bb in seq(B)) {
       index1cv <- sample(x = index1, size = N1, replace = FALSE)
       index0cv <- sample(x = index0, size = N0, replace = FALSE)
       index <- rep(NA, N)
@@ -250,7 +238,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
         if (initial.predictor.method == "boosting") {
           # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
-          cate.cvfold <- if(ncol(x.cate) == 1){0} else {5}
+          cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
           fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
                                  interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
           best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
@@ -292,7 +280,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
         } else if (initial.predictor.method == "gam") {
 
           xvars <- colnames(x.cate)
-          if (is.null(xvar.smooth) == TRUE){
+          if (is.null(xvar.smooth)) {
             fgam <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
           } else {
             xvar.smooth2 <- xvars[str_detect(xvars, paste(paste0(xvar.smooth, "$"), collapse = "|"))] # conver to the preprocessed names
@@ -328,7 +316,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
                                      error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune)
         delta.contrastReg.mat[bb, ] <- fit_two$coef
         converge[bb] <- fit_two$converge
-        if(converge[bb] == TRUE) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
+        if (converge[bb]) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
       }#end of if ("contrastReg" %in% score.method)
     }#end of B loops
   }#end of if c("twoReg", "contrastReg") %in% score.method
@@ -337,9 +325,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
     ## Boosting method based on the entire data (score 1)
     data1 <- datatot[trt == 1, ]
     # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
-    cate.cvfold <- if(ncol(x.cate) == 1){0} else {5}
-    cate.gbmmethod <- if(ncol(x.cate) == 1){"OOB"} else {"cv"}
-    if(cate.gbmmethod == "OOB") warning("If the model has a single predictor, GBM must use OOB")
+    cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
+    cate.gbmmethod <- ifelse(ncol(x.cate) == 1, "OOB", "cv")
+    if (cate.gbmmethod == "OOB") warning("If the model has a single predictor, GBM must use OOB")
 
     fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
                            interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
@@ -373,7 +361,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   if ("contrastReg" %in% score.method) {
     ## Final contrast regression estimator (score 4)
     converge.contrastReg <- (sum(converge) > 0)
-    if(converge.contrastReg == TRUE){
+    if (converge.contrastReg) {
       delta.contrastReg <- colMeans(delta.contrastReg.mat[converge == TRUE, , drop = FALSE])
       sigma.contrastReg <- sigma.contrastReg.mat/sum(converge)
     } else {
