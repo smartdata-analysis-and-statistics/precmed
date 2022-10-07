@@ -17,7 +17,6 @@ catecv(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   higher.y = TRUE,
@@ -40,7 +39,8 @@ catecv(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE
+  plot.gbmperf = TRUE,
+  verbose = 0
 )
 }
 \arguments{
@@ -99,10 +99,6 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-\code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
@@ -200,6 +196,10 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
+\code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{catecvcount}()}.
@@ -219,15 +219,15 @@ For continuous response, see details in \code{\link{catecvmean}()}.
 \examples{
 \dontrun{
 output_catecv <- catecv(response = "count",
-                cate.model = y ~ age + female + previous_treatment +
-                                     previous_cost + previous_number_relapses + offset(log(years)),
-                ps.model = trt ~ age + previous_treatment,
-                data = countExample,
-                higher.y = FALSE,
-                score.method = "poisson",
-                cv.n = 5,
-                plot.gbmperf = FALSE,
-                seed = 999)
+                        data = countExample,
+                        score.method = "poisson",
+                        cate.model = y ~ age + female + previous_treatment + previous_cost +
+                                     previous_number_relapses + offset(log(years)),
+                        ps.model = trt ~ age + previous_treatment,
+                        higher.y = FALSE,
+                        cv.n = 5,
+                        plot.gbmperf = FALSE,
+                        seed = 999)
 
 # Try:
 plot(x = output_catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -239,22 +239,22 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 output_catecv2 <- catecv(response = "survival",
-                 cate.model = survival::Surv(y, d) ~ age +
+                         data = survivalExample,
+                         score.method = c("poisson", "randomForest"),
+                         cate.model = survival::Surv(y, d) ~ age +
                                                      female +
                                                      previous_cost +
                                                      previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
-                 data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 followup.time = NULL,
-                 tau0 = tau0,
-                 surv.min = 0.025,
-                 higher.y = TRUE,
-                 cv.n = 5,
-                 initial.predictor.method = "randomForest",
-                 plot.gbmperf = FALSE,
-                 seed = 999)
+                         ps.model = trt ~ age + previous_treatment,
+                         initial.predictor.method = "randomForest",
+                         ipcw.model = ~ age + previous_cost + previous_treatment,
+                         followup.time = NULL,
+                         tau0 = tau0,
+                         higher.y = TRUE,
+                         surv.min = 0.025,
+                         cv.n = 5,
+                         seed = 999,
+                         plot.gbmperf = FALSE)
 
 # Try:
 plot(x = output_catecv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -264,23 +264,23 @@ abc(x = output_catecv2)
 
 # Continuous outcome
 output_catecv3 <- catecv(response = "continuous",
-                cate.model = y ~ age +
+                         data = meanExample,
+                         score.method = c("gaussian", "twoReg"),
+                         cate.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
                                  previous_status_measure,
-                init.model = y ~ age +
+                         ps.model = trt ~ previous_status_measure,
+                         init.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
                                  previous_status_measure,
-                ps.model = trt ~ previous_status_measure,
-                data = meanExample,
-                higher.y = FALSE,
-                score.method = c("gaussian", "twoReg"),
-                xvar.smooth.score = c("age", "previous_cost"),
-                initial.predictor.method = "gaussian",
-                cv.n = 5,
-                plot.gbmperf = FALSE,
-                seed = 999)
+                         initial.predictor.method = "gaussian",
+                         higher.y = FALSE,
+                         cv.n = 5,
+                         xvar.smooth.score = c("age", "previous_cost"),
+                         seed = 999,
+                         plot.gbmperf = FALSE)
 
 # Try:
 plot(x = output_catecv3)

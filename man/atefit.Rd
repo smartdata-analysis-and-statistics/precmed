@@ -14,13 +14,13 @@ atefit(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   surv.min = 0.025,
   interactions = TRUE,
   n.boot = 500,
-  seed = NULL
+  seed = NULL,
+  verbose = 0
 )
 }
 \arguments{
@@ -63,9 +63,6 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
-
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
 Default is \code{NULL}, which corresponds to unknown potential censoring time.}
@@ -86,6 +83,9 @@ be assumed only if at least 10 patients received each treatment option. Default 
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
+
+\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{atefitcount}()}.
@@ -109,8 +109,8 @@ output <- atefit(response = "count",
                               previous_cost + previous_number_relapses +
                               offset(log(years)),
                  ps.model = trt ~ age + previous_treatment,
-                 verbose = 1,
-                 n.boot = 50, seed = 999)
+                 n.boot = 50,
+                 seed = 999)
 output
 plot(output)
 

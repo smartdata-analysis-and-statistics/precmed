@@ -5,18 +5,24 @@ Title: A Doubly Robust Precision Medicine Approach to Estimate and
 Version: 0.1.2
 Authors@R: c(person(given = "Lu", 
                     family = "Tian", 
-                    role = "aut"), 
-            person(given = "Phoebe", 
-                   family = "Jiang", 
-                   role = "aut"),
+                    email = "lutian@stanford.edu",
+                    role = "aut",
+                    comment="https://orcid.org/0000-0002-5893-0169"),
+            person(given = "Xiaotong",  
+                   family = "Jiang",
+                   email = "xiaotong.phoebe.jiang@gmail.com",
+                   role = "aut",
+                   comment="https://orcid.org/0000-0003-3698-4526"),
             person(given = "Gabrielle", 
-                   family = "Simoneau", 
+                   family = "Simoneau",
+                   email = "gabrielle.simoneau@mail.mcgill.ca",
                    role = "aut", 
                    comment="https://orcid.org/0000-0001-9310-6274"),
+            person("Biogen  MA  Inc.", role="cph"),
             person(given = "Thomas", 
                    family = "Debray", 
                    role = c("ctb", "cre"), 
-                   email = "thomas.debray@gmail.com",
+                   email = "tdebray@fromdatatowisdom.com",
                    comment="https://orcid.org/0000-0002-1790-2719"),
             person(given = "Stan", 
                    family = "Wijn", 
@@ -24,8 +30,7 @@ Authors@R: c(person(given = "Lu",
             person(given = "Joana", 
                    family = "Caldas", 
                    role = "ctb"))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Fit, cross-validate and visualize the outputs of different models, including doubly-robust and machine learning methods, for the conditional average treatment effect based on count or survival outcomes.
 Depends: R (>= 3.5.0)
 License: Apache License (== 2.0)
 Encoding: UTF-8

@@ -86,7 +86,7 @@
 #' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{cate.model}.
-#' #' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
+#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{init.model}.
 #' Default is \code{NULL}, which uses all variables in \code{init.model}.

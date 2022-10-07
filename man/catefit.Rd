@@ -17,7 +17,6 @@ catefit(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   higher.y = TRUE,
@@ -34,12 +33,13 @@ catefit(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE
+  plot.gbmperf = TRUE,
+  verbose = 0
 )
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .}
+"count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).}
 
 \item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
 probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
@@ -91,9 +91,6 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
@@ -167,6 +164,9 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{catefitcount}()}.
@@ -186,13 +186,13 @@ For survival response, see details in \code{\link{catefitsurv}()}.
 \dontrun{
 # Count outcome
 output_catefit <- catefit(response = "count",
-                cate.model = y ~ age + female + previous_treatment +
+                          data = countExample,
+                          score.method = "poisson",
+                          cate.model = y ~ age + female + previous_treatment +
                                      previous_cost + previous_number_relapses + offset(log(years)),
-                ps.model = trt ~ age + previous_treatment,
-                data = countExample,
-                higher.y = TRUE,
-                score.method = "poisson",
-                seed = 999)
+                          ps.model = trt ~ age + previous_treatment,
+                          higher.y = TRUE,
+                          seed = 999)
 
 # Try:
 coef(output_catefit)
@@ -200,20 +200,21 @@ coef(output_catefit)
 # Survival outcome
 tau0 <- with(survivalExample,
                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+
 output_catefit2 <- catefit(response = "survival",
-                 cate.model = survival::Surv(y, d) ~ age + female
-                 + previous_cost + previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
-                 data = survivalExample,
-                 higher.y = TRUE,
-                 score.method = c("poisson", "boosting", "randomForest"),
-                 followup.time = NULL,
-                 tau0 = tau0,
-                 surv.min = 0.025,
-                 initial.predictor.method = "logistic",
-                 seed = 999,
-                 plot.gbmperf = FALSE)
+                           data = survivalExample,
+                           score.method = c("poisson", "boosting", "randomForest"),
+                           cate.model = survival::Surv(y, d) ~ age + female
+                                         + previous_cost + previous_number_relapses,
+                           ps.model = trt ~ age + previous_treatment,
+                           initial.predictor.method = "logistic",
+                           ipcw.model = ~ age + previous_cost + previous_treatment,
+                           followup.time = NULL,
+                           tau0 = tau0,
+                           higher.y = TRUE,
+                           surv.min = 0.025,
+                           seed = 999,
+                           plot.gbmperf = FALSE)
 
 # Try:
 coef(output_catefit2)
@@ -221,19 +222,20 @@ coef(output_catefit2)
 
 # Continuous outcome
 output_catefit3 <- catefit(response = "continuous",
-                cate.model = y ~ age +
+                           data = meanExample,
+                           score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
+                           cate.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
                                  previous_status_measure,
-                init.model = y ~ age +
+                           ps.model = trt ~ age + previous_treatment,
+                           init.model = y ~ age +
                                  previous_treatment +
                                  previous_cost +
                                  previous_status_measure,
-                data = meanExample,
-                higher.y = FALSE,
-                score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
-                initial.predictor.method = "gaussian",
-                seed = 999)
+                           initial.predictor.method = "gaussian",
+                           higher.y = FALSE,
+                           seed = 999)
 
 # Try:
 coef(output_catefit3)

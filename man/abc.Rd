@@ -34,44 +34,44 @@ the validation curves in the validation set in \code{\link{plot}()}.
 \dontrun{
 # Count outcome
 cv_count <- catecv(response = "count",
-               cate.model = y ~ age + female + previous_treatment +
+                   data = countExample,
+                   score.method = "poisson",
+                   cate.model = y ~ age + female + previous_treatment +
                                 previous_cost + previous_number_relapses + offset(log(years)),
-               ps.model = trt ~ age + previous_treatment,
-               data = countExample,
-               higher.y = FALSE,
-               score.method = "poisson",
-               cv.n = 5,
-               plot.gbmperf = FALSE)
+                   ps.model = trt ~ age + previous_treatment,
+                   higher.y = FALSE,
+                   cv.n = 5,
+                   plot.gbmperf = FALSE)
 
 abc(x = cv_count) # ABC of the validation curves for each method and each CV iteration
 
 # Survival outcome
 cv_surv <- catecv(response = "survival",
-              cate.model = survival::Surv(y, d) ~ age + female
+                  data = survivalExample,
+                  score.method = c("poisson", "randomForest"),
+                  cate.model = survival::Surv(y, d) ~ age + female
                                                   + previous_cost + previous_number_relapses,
-              ps.model = trt ~ age + previous_treatment,
-              data = survivalExample,
-              score.method = c("poisson", "randomForest"),
-              higher.y = FALSE,
-              cv.n = 5,
-              plot.gbmperf = FALSE)
+                  ps.model = trt ~ age + previous_treatment,
+                  higher.y = FALSE,
+                  cv.n = 5,
+                  plot.gbmperf = FALSE)
 
 abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 
 # Continuous outcome
 cv_mean <- catecv(response = "continuous",
+                  data = meanExample,
+                  score.method = "gaussian",
                   cate.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,
+                  ps.model = trt ~ previous_treatment,
                   init.model = y ~ age +
                                    previous_treatment +
                                    previous_cost +
                                    previous_status_measure,
-                  ps.model = trt ~ previous_treatment,
-                  data = meanExample,
                   higher.y = FALSE,
-                  score.method = "gaussian",
                   cv.n = 5,
                   plot.gbmperf = FALSE)
 

@@ -13,7 +13,6 @@ catefitcount(
   initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   higher.y = TRUE,
   prop.cutoff = seq(0.5, 1, length = 6),
   xvar.smooth = NULL,
@@ -26,6 +25,7 @@ catefitcount(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = FALSE,
+  verbose = 0,
   ...
 )
 }
@@ -62,10 +62,6 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
@@ -118,6 +114,10 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

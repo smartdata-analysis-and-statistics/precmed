@@ -15,7 +15,6 @@ catefitsurv(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   higher.y = TRUE,
@@ -30,7 +29,8 @@ catefitsurv(
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
-  seed = NULL
+  seed = NULL,
+  verbose = 0
 )
 }
 \arguments{
@@ -77,10 +77,6 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Default is \code{followup.time = NULL},
@@ -143,6 +139,10 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
 }
 \value{
 Returns a list containing the following components:

@@ -297,7 +297,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
         } else if (initial.predictor.method == "gam") {
 
           xvars <- colnames(x.init)
-          if (is.null(xvar.smooth.init) == TRUE){
+          if (is.null(xvar.smooth.init)){
             fgam.init <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
           } else {
             xvar.smooth2.init <- xvars[stringr::str_detect(xvars, paste(paste0(xvar.smooth.init, "$"), collapse = "|"))] # conver to the preprocessed names

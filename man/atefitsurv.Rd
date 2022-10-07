@@ -13,12 +13,12 @@ atefitsurv(
   ipcw.method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   followup.time = NULL,
   tau0 = NULL,
   surv.min = 0.025,
   n.boot = 500,
-  seed = NULL
+  seed = NULL,
+  verbose = 0
 )
 }
 \arguments{
@@ -57,9 +57,6 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
-\item{verbose}{An integer value indicating whether intermediate progress messages should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
-
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,
 interpreted as the potential censoring time. Only applies for survival outcomes.
 Default is \code{NULL}, which corresponds to unknown potential censoring time.}
@@ -76,6 +73,9 @@ outcomes. Default is \code{0.025}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
+
+\item{verbose}{An integer value indicating whether intermediate progress messages should
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
 }
 \value{
 Return an object of class \code{atefit} with 6 elements:

@@ -14,7 +14,6 @@ catecvmean(
   initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
-  verbose = 0,
   higher.y = TRUE,
   prop.cutoff = seq(0.5, 1, length = 6),
   prop.multi = c(0, 1/3, 2/3, 1),
@@ -34,6 +33,7 @@ catecvmean(
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
+  verbose = 0,
   ...
 )
 }
@@ -73,10 +73,6 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
-
-\item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
-\code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
 values of the outcome are more desirable. Default is \code{TRUE}.}
@@ -159,6 +155,10 @@ Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
+
+\item{verbose}{An integer value indicating what kind of intermediate progress messages should
+be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
+\code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }
