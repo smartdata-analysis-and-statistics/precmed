@@ -84,7 +84,7 @@ abc(x = cv_mean) # ABC of the validation curves for each method and each CV iter
 Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
 \emph{Effectively selecting a target population for a future comparative study.
 Journal of the American Statistical Association, 108(502), 527-539.}
-\url{https://www.jstor.org/stable/24246461?seq=1}
+\url{https://www.jstor.org/stable/24246461}
 }
 \seealso{
 \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for

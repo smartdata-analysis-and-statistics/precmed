@@ -107,25 +107,24 @@ treatment groups in a given dataset. The ATE is estimated with a doubly robust e
 imbalances in covariate distributions between the two treatment groups with inverse probability treatment and
 censoring weighting. For survival outcomes, the estimated ATE is the estimated by RMTL ratio between treatment
 1 versus treatment 0. The log-transformed ATEs and log-transformed adjusted hazard ratios are returned, as well
- as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
- using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
- p-value, and a histogram of the bootstrap estimates.
+as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
+using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
+p-value, and a histogram of the bootstrap estimates.
 }
 \examples{
-\dontrun{
+library(survival)
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-output <- atefitsurv(cate.model = survival::Surv(y, d) ~ age +
-                                                               female +
-                                                               previous_cost +
-                                                               previous_number_relapses,
-                           ps.model = trt ~ age + previous_treatment,
-                           data = survivalExample,
-                           tau0 = tau0,
-                           seed = 999,
-                           verbose = 1)
+output <- atefitsurv(data = survivalExample,
+                     cate.model = Surv(y, d) ~ age + female +
+                                  previous_cost + previous_number_relapses,
+                     ps.model = trt ~ age + previous_treatment,
+                     tau0 = tau0,
+                     n.boot = 50,
+                     seed = 999,
+                     verbose = 1)
 output
 plot(output)
-}
+
 }
