@@ -263,7 +263,7 @@ catecvcount <- function(data,
                         initial.predictor.method = "boosting",
                         minPS = 0.01,
                         maxPS = 0.99,
-                        verbose = 0,
+
                         higher.y = TRUE,
                         prop.cutoff = seq(0.5, 1, length = 6),
                         prop.multi = c(0, 1/3, 2/3, 1),
@@ -282,6 +282,7 @@ catecvcount <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         plot.gbmperf = TRUE,
+                        verbose = 0,
                         ...) {
 
   # Set seed for reproducibility
@@ -756,7 +757,6 @@ catefitcount <- function(data,
                          initial.predictor.method = "boosting",
                          minPS = 0.01,
                          maxPS = 0.99,
-                         verbose = 0,
                          higher.y = TRUE,
                          prop.cutoff = seq(0.5, 1, length = 6),
                          xvar.smooth = NULL,
@@ -769,6 +769,7 @@ catefitcount <- function(data,
                          tune = c(0.5, 2),
                          seed = NULL,
                          plot.gbmperf = FALSE,
+                         verbose = 0,
                          ...) {
 
 
@@ -975,10 +976,10 @@ atefitcount <- function(data,
                         ps.method = "glm",
                         minPS = 0.01,
                         maxPS = 0.99,
-                        verbose = 0,
                         interactions = TRUE,
                         n.boot = 500,
-                        seed = NULL) {
+                        seed = NULL,
+                        verbose = 0) {
 
   # Set seed once for reproducibility
   set.seed(seed)

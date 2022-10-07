@@ -329,7 +329,6 @@ catecvsurv <- function(data,
                        ipcw.method = "breslow",
                        minPS = 0.01,
                        maxPS = 0.99,
-                       verbose = 0,
                        followup.time = NULL,
                        tau0 = NULL,
                        higher.y = TRUE,
@@ -350,7 +349,8 @@ catecvsurv <- function(data,
                        max.iterNR = 150,
                        tune = c(0.5, 2),
                        seed = NULL,
-                       plot.gbmperf = TRUE) {
+                       plot.gbmperf = TRUE,
+                       verbose = 0) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -996,7 +996,6 @@ catefitsurv <- function(data,
                         ipcw.method = "breslow",
                         minPS = 0.01,
                         maxPS = 0.99,
-                        verbose = 0,
                         followup.time = NULL,
                         tau0 = NULL,
                         higher.y = TRUE,
@@ -1011,7 +1010,8 @@ catefitsurv <- function(data,
                         error.maxNR = 1e-3,
                         max.iterNR = 100,
                         tune = c(0.5, 2),
-                        seed = NULL) {
+                        seed = NULL,
+                        verbose = 0) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -1277,12 +1277,12 @@ atefitsurv <- function(data,
                        ipcw.method = "breslow",
                        minPS = 0.01,
                        maxPS = 0.99,
-                       verbose = 0,
                        followup.time = NULL,
                        tau0 = NULL,
                        surv.min = 0.025,
                        n.boot = 500,
-                       seed = NULL) {
+                       seed = NULL,
+                       verbose = 0) {
 
   # Set seed once for reproducibility
   set.seed(seed)
