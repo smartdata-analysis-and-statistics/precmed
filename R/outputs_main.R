@@ -240,8 +240,7 @@ catecv <- function(response,
                    ipcw.model = NULL,
                    ipcw.method = "breslow",
                    minPS = 0.01,
-                   maxPS = 0.99,
-                   verbose = 0,
+                   maxPS = 0.99,                   
                    followup.time = NULL,
                    tau0 = NULL, # Non-mandatory arguments survival only
                    higher.y = TRUE,
@@ -264,7 +263,8 @@ catecv <- function(response,
                    max.iterNR = 150,
                    tune = c(0.5, 2),
                    seed = NULL,
-                   plot.gbmperf = TRUE) {
+                   plot.gbmperf = TRUE,
+                   verbose = 0) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
 
@@ -476,8 +476,7 @@ catefit <- function(response,
                     ipcw.model = NULL,
                     ipcw.method = "breslow",
                     minPS = 0.01,
-                    maxPS = 0.99,
-                    verbose = 0,
+                    maxPS = 0.99,                    
                     followup.time = NULL,
                     tau0 = NULL,
                     higher.y = TRUE,
@@ -494,7 +493,8 @@ catefit <- function(response,
                     max.iterNR = 150,
                     tune = c(0.5, 2),
                     seed = NULL,
-                    plot.gbmperf = TRUE) {
+                    plot.gbmperf = TRUE,
+                    verbose = 0) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]
