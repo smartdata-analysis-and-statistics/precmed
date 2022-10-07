@@ -8,42 +8,54 @@
 #' Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
 #' (see \code{\link{catecvsurv}()}) and "continuous" (see
 #' \code{\link{catecvmean}()}) .
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes, a
-#' \code{Surv} object must be used to describe the outcome.
-#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome, propensity score, and inverse
 #' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 #' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
 #' \code{'gaussian'} (continuous outcomes only).
+#' @param cate.model A formula describing the outcome model to be fitted.
+#' The outcome must appear on the left-hand side. For survival outcomes, a
+#' \code{Surv} object must be used to describe the outcome.
+#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
+#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' @param ps.method A character value for the method to estimate the propensity score.
+#' Allowed values include one of:
+#' \code{'glm'} for logistic regression with main effects only (default), or
+#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+#' Relevant only when \code{ps.model} has more than one variable.
+#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
+#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' @param initial.predictor.method A character vector for the method used to get initial
+#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
+#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+#' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
+#' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
+#' for count outcomes and \code{'randomForest'} for survival outcomes.
 #' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
 #' model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
 #' as the outcome model \code{cate.model}, plus the treatment.
+#' @param ipcw.method A character value for the censoring model. Only applies for survival
+#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
+#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
+#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
+#' with different distributions for y variable). Default is \code{'breslow'}.
+#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to unknown potential censoring time.
 #' @param tau0 The truncation time for defining restricted mean time lost. Only applies for
 #' survival outcomes. Default is \code{NULL}, which corresponds to setting the truncation time as the
 #' maximum survival time in the data.
-#' @param surv.min Lower truncation limit for the probability of being censored.
-#' It must be a positive value and should be chosen close to 0. Only applies for survival
-#' outcomes. Default is \code{0.025}.
-#' @param ipcw.method A character value for the censoring model. Only applies for survival
-#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-#' with different distributions for y variable). Default is \code{'breslow'}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
@@ -56,16 +68,8 @@
 #' Each element represents the cutoff to separate the observations into
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
+#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
 #' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
@@ -76,20 +80,16 @@
 #' to define a balanced training-validation splitting. Default is \code{0.1}.
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
 #' searching for a balanced training-validation split. Default is \code{5,000}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
-#' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-#' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-#' for count outcomes and \code{'randomForest'} for survival outcomes.
-#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{init.model}.
-#' Default is \code{NULL}, which uses all variables in \code{init.model}.
+#' @param surv.min Lower truncation limit for the probability of being censored.
+#' It must be a positive value and should be chosen close to 0. Only applies for survival
+#' outcomes. Default is \code{0.025}.
 #' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{cate.model}.
+#' #' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
+#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
+#' from the variables listed in \code{init.model}.
+#' Default is \code{NULL}, which uses all variables in \code{init.model}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
@@ -145,15 +145,15 @@
 #' @examples
 #' \dontrun{
 #' output_catecv <- catecv(response = "count",
-#'                 cate.model = y ~ age + female + previous_treatment +
-#'                                      previous_cost + previous_number_relapses + offset(log(years)),
-#'                 ps.model = trt ~ age + previous_treatment,
-#'                 data = countExample,
-#'                 higher.y = FALSE,
-#'                 score.method = "poisson",
-#'                 cv.n = 5,
-#'                 plot.gbmperf = FALSE,
-#'                 seed = 999)
+#'                         data = countExample,
+#'                         score.method = "poisson",
+#'                         cate.model = y ~ age + female + previous_treatment + previous_cost +
+#'                                      previous_number_relapses + offset(log(years)),
+#'                         ps.model = trt ~ age + previous_treatment,
+#'                         higher.y = FALSE,
+#'                         cv.n = 5,
+#'                         plot.gbmperf = FALSE,
+#'                         seed = 999)
 #'
 #' # Try:
 #' plot(x = output_catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -165,22 +165,22 @@
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
 #' output_catecv2 <- catecv(response = "survival",
-#'                  cate.model = survival::Surv(y, d) ~ age +
+#'                          data = survivalExample,
+#'                          score.method = c("poisson", "randomForest"),
+#'                          cate.model = survival::Surv(y, d) ~ age +
 #'                                                      female +
 #'                                                      previous_cost +
 #'                                                      previous_number_relapses,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                  data = survivalExample,
-#'                  score.method = c("poisson", "randomForest"),
-#'                  followup.time = NULL,
-#'                  tau0 = tau0,
-#'                  surv.min = 0.025,
-#'                  higher.y = TRUE,
-#'                  cv.n = 5,
-#'                  initial.predictor.method = "randomForest",
-#'                  plot.gbmperf = FALSE,
-#'                  seed = 999)
+#'                          ps.model = trt ~ age + previous_treatment,
+#'                          initial.predictor.method = "randomForest",
+#'                          ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                          followup.time = NULL,
+#'                          tau0 = tau0,
+#'                          higher.y = TRUE,
+#'                          surv.min = 0.025,
+#'                          cv.n = 5,
+#'                          seed = 999,
+#'                          plot.gbmperf = FALSE)
 #'
 #' # Try:
 #' plot(x = output_catecv2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -190,23 +190,23 @@
 #'
 #' # Continuous outcome
 #' output_catecv3 <- catecv(response = "continuous",
-#'                 cate.model = y ~ age +
+#'                          data = meanExample,
+#'                          score.method = c("gaussian", "twoReg"),
+#'                          cate.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
 #'                                  previous_status_measure,
-#'                 init.model = y ~ age +
+#'                          ps.model = trt ~ previous_status_measure,
+#'                          init.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
 #'                                  previous_status_measure,
-#'                 ps.model = trt ~ previous_status_measure,
-#'                 data = meanExample,
-#'                 higher.y = FALSE,
-#'                 score.method = c("gaussian", "twoReg"),
-#'                 xvar.smooth.score = c("age", "previous_cost"),
-#'                 initial.predictor.method = "gaussian",
-#'                 cv.n = 5,
-#'                 plot.gbmperf = FALSE,
-#'                 seed = 999)
+#'                          initial.predictor.method = "gaussian",
+#'                          higher.y = FALSE,
+#'                          cv.n = 5,
+#'                          xvar.smooth.score = c("age", "previous_cost"),
+#'                          seed = 999,
+#'                          plot.gbmperf = FALSE)
 #'
 #' # Try:
 #' plot(x = output_catecv3)
@@ -240,7 +240,7 @@ catecv <- function(response,
                    ipcw.model = NULL,
                    ipcw.method = "breslow",
                    minPS = 0.01,
-                   maxPS = 0.99,                   
+                   maxPS = 0.99,
                    followup.time = NULL,
                    tau0 = NULL, # Non-mandatory arguments survival only
                    higher.y = TRUE,
@@ -293,39 +293,53 @@ catecv <- function(response,
 #' linear regression (continuous only), and generalized additive model (continuous only).
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}) .
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-#' must be used to describe the outcome.
-#'@param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
 #' @param data A data frame containing the variables in the outcome, propensity score, and inverse
 #' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 #' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
 #' \code{'gaussian'} (continuous outcomes only).
+#' @param cate.model A formula describing the outcome model to be fitted.
+#' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
+#' must be used to describe the outcome.
+#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
+#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' @param ps.method A character value for the method to estimate the propensity score.
+#' Allowed values include one of:
+#' \code{'glm'} for logistic regression with main effects only (default), or
+#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+#' Relevant only when \code{ps.model} has more than one variable.
+#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
+#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' @param initial.predictor.method A character vector for the method used to get initial
+#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
+#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+#' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
+#' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
+#' for count outcomes and \code{'randomForest'} for survival outcomes.
 #' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
 #' model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
 #' as the outcome model \code{cate.model}, plus the treatment.
+#' @param ipcw.method A character value for the censoring model. Only applies for survival
+#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
+#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
+#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
+#' with different distributions for y variable). Default is \code{'breslow'}.
+#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to unknown potential censoring time.
 #' @param tau0 The truncation time for defining restricted mean time lost. Only applies for
 #' survival outcomes. Default is \code{NULL}, which corresponds to setting the truncation time as the
 #' maximum survival time in the data.
-#' @param surv.min Lower truncation limit for the probability of being censored.
-#' It must be a positive value and should be chosen close to 0. Only applies for survival
-#' outcomes. Default is \code{0.025}.
-#' @param ipcw.method A character value for the censoring model. Only applies for survival
-#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-#' with different distributions for y variable). Default is \code{'breslow'}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
@@ -334,30 +348,16 @@ catecv <- function(response,
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
-#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
-#' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-#' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-#' for count outcomes and \code{'randomForest'} for survival outcomes.
+#' @param surv.min Lower truncation limit for the probability of being censored.
+#' It must be a positive value and should be chosen close to 0. Only applies for survival
+#' outcomes. Default is \code{0.025}.
+#' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
+#' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
+#' from the variables listed in \code{cate.model}.
 #' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{init.model}.
 #' Default is \code{NULL}, which uses all variables in \code{init.model}.
-#' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
@@ -410,13 +410,13 @@ catecv <- function(response,
 #' \dontrun{
 #' # Count outcome
 #' output_catefit <- catefit(response = "count",
-#'                 cate.model = y ~ age + female + previous_treatment +
+#'                           data = countExample,
+#'                           score.method = "poisson",
+#'                           cate.model = y ~ age + female + previous_treatment +
 #'                                      previous_cost + previous_number_relapses + offset(log(years)),
-#'                 ps.model = trt ~ age + previous_treatment,
-#'                 data = countExample,
-#'                 higher.y = TRUE,
-#'                 score.method = "poisson",
-#'                 seed = 999)
+#'                           ps.model = trt ~ age + previous_treatment,
+#'                           higher.y = TRUE,
+#'                           seed = 999)
 #'
 #' # Try:
 #' coef(output_catefit)
@@ -424,20 +424,21 @@ catecv <- function(response,
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
 #'                  min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+#'
 #' output_catefit2 <- catefit(response = "survival",
-#'                  cate.model = survival::Surv(y, d) ~ age + female
-#'                  + previous_cost + previous_number_relapses,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                  data = survivalExample,
-#'                  higher.y = TRUE,
-#'                  score.method = c("poisson", "boosting", "randomForest"),
-#'                  followup.time = NULL,
-#'                  tau0 = tau0,
-#'                  surv.min = 0.025,
-#'                  initial.predictor.method = "logistic",
-#'                  seed = 999,
-#'                  plot.gbmperf = FALSE)
+#'                            data = survivalExample,
+#'                            score.method = c("poisson", "boosting", "randomForest"),
+#'                            cate.model = survival::Surv(y, d) ~ age + female
+#'                                          + previous_cost + previous_number_relapses,
+#'                            ps.model = trt ~ age + previous_treatment,
+#'                            initial.predictor.method = "logistic",
+#'                            ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                            followup.time = NULL,
+#'                            tau0 = tau0,
+#'                            higher.y = TRUE,
+#'                            surv.min = 0.025,
+#'                            seed = 999,
+#'                            plot.gbmperf = FALSE)
 #'
 #' # Try:
 #' coef(output_catefit2)
@@ -445,19 +446,20 @@ catecv <- function(response,
 #'
 #' # Continuous outcome
 #' output_catefit3 <- catefit(response = "continuous",
-#'                 cate.model = y ~ age +
+#'                            data = meanExample,
+#'                            score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
+#'                            cate.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
 #'                                  previous_status_measure,
-#'                 init.model = y ~ age +
+#'                            ps.model = trt ~ age + previous_treatment,
+#'                            init.model = y ~ age +
 #'                                  previous_treatment +
 #'                                  previous_cost +
 #'                                  previous_status_measure,
-#'                 data = meanExample,
-#'                 higher.y = FALSE,
-#'                 score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
-#'                 initial.predictor.method = "gaussian",
-#'                 seed = 999)
+#'                            initial.predictor.method = "gaussian",
+#'                            higher.y = FALSE,
+#'                            seed = 999)
 #'
 #' # Try:
 #' coef(output_catefit3)
@@ -476,7 +478,7 @@ catefit <- function(response,
                     ipcw.model = NULL,
                     ipcw.method = "breslow",
                     minPS = 0.01,
-                    maxPS = 0.99,                    
+                    maxPS = 0.99,
                     followup.time = NULL,
                     tau0 = NULL,
                     higher.y = TRUE,
@@ -550,44 +552,44 @@ catefit <- function(response,
 #' \dontrun{
 #' # Count outcome
 #' cv_count <- catecv(response = "count",
-#'                cate.model = y ~ age + female + previous_treatment +
+#'                    data = countExample,
+#'                    score.method = "poisson",
+#'                    cate.model = y ~ age + female + previous_treatment +
 #'                                 previous_cost + previous_number_relapses + offset(log(years)),
-#'                ps.model = trt ~ age + previous_treatment,
-#'                data = countExample,
-#'                higher.y = FALSE,
-#'                score.method = "poisson",
-#'                cv.n = 5,
-#'                plot.gbmperf = FALSE)
+#'                    ps.model = trt ~ age + previous_treatment,
+#'                    higher.y = FALSE,
+#'                    cv.n = 5,
+#'                    plot.gbmperf = FALSE)
 #'
 #' abc(x = cv_count) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Survival outcome
 #' cv_surv <- catecv(response = "survival",
-#'               cate.model = survival::Surv(y, d) ~ age + female
+#'                   data = survivalExample,
+#'                   score.method = c("poisson", "randomForest"),
+#'                   cate.model = survival::Surv(y, d) ~ age + female
 #'                                                   + previous_cost + previous_number_relapses,
-#'               ps.model = trt ~ age + previous_treatment,
-#'               data = survivalExample,
-#'               score.method = c("poisson", "randomForest"),
-#'               higher.y = FALSE,
-#'               cv.n = 5,
-#'               plot.gbmperf = FALSE)
+#'                   ps.model = trt ~ age + previous_treatment,
+#'                   higher.y = FALSE,
+#'                   cv.n = 5,
+#'                   plot.gbmperf = FALSE)
 #'
 #' abc(x = cv_surv) # ABC of the validation curves for each method and each CV iteration
 #'
 #' # Continuous outcome
 #' cv_mean <- catecv(response = "continuous",
+#'                   data = meanExample,
+#'                   score.method = "gaussian",
 #'                   cate.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
+#'                   ps.model = trt ~ previous_treatment,
 #'                   init.model = y ~ age +
 #'                                    previous_treatment +
 #'                                    previous_cost +
 #'                                    previous_status_measure,
-#'                   ps.model = trt ~ previous_treatment,
-#'                   data = meanExample,
 #'                   higher.y = FALSE,
-#'                   score.method = "gaussian",
 #'                   cv.n = 5,
 #'                   plot.gbmperf = FALSE)
 #'

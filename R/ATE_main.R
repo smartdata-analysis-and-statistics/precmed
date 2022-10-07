@@ -67,8 +67,8 @@
 #'                               previous_cost + previous_number_relapses +
 #'                               offset(log(years)),
 #'                  ps.model = trt ~ age + previous_treatment,
-#'                  verbose = 1,
-#'                  n.boot = 50, seed = 999)
+#'                  n.boot = 50,
+#'                  seed = 999)
 #' output
 #' plot(output)
 #'
@@ -116,13 +116,13 @@ atefit <- function(response,
                    ipcw.method = "breslow",
                    minPS = 0.01,
                    maxPS = 0.99,
-                   verbose = 0,
                    followup.time = NULL,
                    tau0 = NULL,
                    surv.min = 0.025,
                    interactions = TRUE,
                    n.boot = 500,
-                   seed = NULL) {
+                   seed = NULL,
+                   verbose = 0) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]
