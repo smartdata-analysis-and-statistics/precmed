@@ -112,6 +112,7 @@ using bootstrap. Additional outputs include standard error of the log RMTL ratio
 p-value, and a histogram of the bootstrap estimates.
 }
 \examples{
+\dontrun{
 library(survival)
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
@@ -126,5 +127,6 @@ output <- atefitsurv(data = survivalExample,
                      verbose = 1)
 output
 plot(output)
+}
 
 }

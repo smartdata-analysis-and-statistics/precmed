@@ -2252,7 +2252,6 @@ catecvmean <- function(data,
 #' @references Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
 #' \emph{Effectively selecting a target population for a future comparative study.
 #' Journal of the American Statistical Association, 108(502), 527-539.}
-#' \url{https://www.jstor.org/stable/24246461}
 #'
 #' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
 #' \code{"precmed"} objects.

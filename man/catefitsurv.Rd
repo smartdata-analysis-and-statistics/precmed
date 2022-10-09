@@ -249,6 +249,7 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
+\dontrun{
 library(survival)
 
 tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
@@ -264,6 +265,8 @@ fit <- catefitsurv(data = survivalExample,
                    seed = 999)
 
 coef(fit)
+}
+
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

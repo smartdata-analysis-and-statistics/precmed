@@ -194,6 +194,7 @@
 #' @seealso \code{\link{catecvsurv}()}
 #'
 #' @examples
+#' \dontrun{
 #' library(survival)
 #'
 #' tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
@@ -209,6 +210,8 @@
 #'                    seed = 999)
 #'
 #' coef(fit)
+#' }
+#'
 #' @export
 
 catefitsurv <- function(data,
