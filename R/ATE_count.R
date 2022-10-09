@@ -1,3 +1,181 @@
+#' Doubly robust estimator of and inference for the average treatment effect
+#' for count data
+#'
+#' Doubly robust estimator of the average treatment effect between two
+#' treatments, which is the rate ratio for count outcomes. Bootstrap is used for
+#' inference.
+#'
+#' @param cate.model A formula describing the outcome model to be fitted.
+#' The outcome must appear on the left-hand side.
+#' @param ps.model A formula describing the propensity score (PS) model to be
+#' fitted. The treatment must appear on the left-hand side. The treatment must
+#' be a numeric vector coded as 0 or 1. If data are from a randomized controlled
+#' trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' @param data A data frame containing the variables in the outcome, propensity
+#' score, and inverse probability of censoring models (if specified); a data
+#' frame with \code{n} rows (1 row per observation).
+#' @param ps.method A character value for the method to estimate the propensity
+#' score. Allowed values include one of: \code{'glm'} for logistic regression
+#' with main effects only (default), or \code{'lasso'} for a logistic regression
+#' with main effects and LASSO penalization on two-way interactions (added to
+#' the model if interactions are not specified in \code{ps.model}). Relevant
+#' only when \code{ps.model} has more than one variable.
+#' @param minPS A numerical value between 0 and 1 below which estimated
+#' propensity scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value between 0 and 1 above which estimated
+#' propensity scores should be truncated. Must be strictly greater than
+#' \code{minPS}. Default is \code{0.99}.
+#' @param interactions A logical value indicating whether the outcome model
+#' should assume treatment-covariate interaction by \code{x}. If \code{TRUE},
+#' interactions will be assumed only if at least 10 patients received each
+#' treatment option. Default is \code{TRUE}.
+#' @param n.boot A numeric value indicating the number of bootstrap samples
+#' used. Default is \code{500}.
+#' @param seed An optional integer specifying an initial randomization seed for
+#' reproducibility. Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating whether intermediate progress
+#' messages should be printed. \code{1} indicates messages are printed and
+#' \code{0} otherwise. Default is \code{0}.
+#'
+#' @return Return an item of the class \code{atefit} with the following
+#' elements:
+#' \itemize{
+#'   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
+#'   ATE (expressed as a log rate ratio of \code{trt=1} over \code{trt=0}),
+#'   the bootstrap standard error, the lower and upper limits of 95\% confidence
+#'   interval, and the p-value.
+#'   \item{\code{rate0}: } A numeric value of the estimated rate in the group
+#'   \code{trt=0}.
+#'   \item{\code{rate1}: } A numeric value of the estimated rate in the group
+#'   \code{trt=1}.
+#'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
+#'   sample.
+#'   \item{\code{warning}: } A warning message produced if the treatment
+#'   variable was not coded as 0 or 1. The key to map the original coding of the
+#'   variable to a 0-1 coding is displayed in the warning to facilitate the
+#'   interpretation of the remaining of the output.
+#' }
+#'
+#' @details This helper function estimates the average treatment effect (ATE)
+#' between two treatment groups in a given dataset. The ATE is estimated with a
+#' doubly robust estimator that accounts for imbalances in covariate
+#' distributions between the two treatment groups with inverse probability
+#' treatment weighting. For count outcomes, the estimated ATE is the estimated
+#' rate ratio between treatment 1 versus treatment 0.
+#'
+#' @examples
+#' output <- atefitcount(data = countExample,
+#'                       cate.model = y ~ age + female + previous_treatment +
+#'                                    previous_cost + previous_number_relapses +
+#'                                    offset(log(years)),
+#'                       ps.model = trt ~ age + previous_treatment,
+#'                       verbose = 1, n.boot = 50, seed = 999)
+#' output
+#' plot(output)
+#' @export
+#'
+#' @importFrom dplyr mutate
+#'
+
+atefitcount <- function(data,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        interactions = TRUE,
+                        n.boot = 500,
+                        seed = NULL,
+                        verbose = 0) {
+
+  # Set seed once for reproducibility
+  set.seed(seed)
+
+  #### CHECK ARGUMENTS ####
+  arg.checks(fun = "drinf",
+             response = "count",
+             data = data,
+             ps.method = ps.method,
+             minPS = minPS,
+             maxPS = maxPS,
+             interactions = interactions,
+             n.boot = n.boot,
+             plot.boot = FALSE)
+
+  #### PRE-PROCESSING ####
+  preproc <- data.preproc(fun = "drinf", cate.model = cate.model, ps.model = ps.model,
+                          data = data, ps.method = ps.method)
+  y <- preproc$y
+  trt <- preproc$trt
+  x.ps <- preproc$x.ps
+  x.cate <- preproc$x.cate
+  time <- preproc$time
+
+  # Point estimate
+  est <- drcount(y = y,
+                 x.cate = x.cate,
+                 x.ps = x.ps,
+                 trt = trt,
+                 time = time,
+                 ps.method = ps.method,
+                 minPS = minPS,
+                 maxPS = maxPS,
+                 interactions = interactions)
+  logrr <- est$log.rate.ratio
+
+  # Apply bootstrap
+  n <- length(y)
+  if (is.na(logrr)) {
+    stop("Impossible to use bootstrap, log(RR)=NA.")
+  }
+
+  trt.boot <- rep(NA, n.boot)
+
+  pb   <- txtProgressBar(min = 1,
+                         max = n.boot,
+                         style = 3)
+
+  for (i.boot in seq(n.boot)) {
+    idsub.boot <- sample(n, size = n, replace = TRUE)
+    trt.boot[i.boot] <- drcount(y = y[idsub.boot],
+                                x.cate = x.cate[idsub.boot, , drop = FALSE],
+                                x.ps = x.ps[idsub.boot, , drop = FALSE],
+                                trt = trt[idsub.boot],
+                                time = time[idsub.boot],
+                                ps.method = ps.method,
+                                minPS = minPS,
+                                maxPS = maxPS,
+                                interactions = interactions)$log.rate.ratio
+
+    if (verbose == 1) setTxtProgressBar(pb, i.boot)
+  }
+  close(pb)
+
+  out <- c()
+  out$response <- "count"
+  se.est <- sd(trt.boot, na.rm = TRUE)
+  out$log.rate.ratio <- data.frame(estimate = logrr,
+                                   SE = se.est,
+                                   CI.lower = logrr - qnorm(0.975) * se.est,
+                                   CI.upper = logrr + qnorm(0.975) * se.est,
+                                   pvalue = 1 - pchisq(logrr^2 / se.est^2, 1))
+  rownames(out$log.rate.ratio) <- "log.rate.ratio"
+
+  out$rate0 <- data.frame(estimate = est$rate0)
+  rownames(out$rate0) <- "rate0"
+  out$rate1 <- data.frame(estimate = est$rate1)
+  rownames(out$rate1) <- "rate1"
+
+  out$n.boot <- n.boot # Number of  bootstrap samples
+  out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
+  out$warning <- preproc$warning
+
+  class(out) <- "atefit"
+
+
+  return(out)
+}
+
 #' Doubly robust estimator of the average treatment effect for count data
 #'
 #' Doubly robust estimator of the average treatment effect between two
@@ -140,7 +318,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
                                        prop, onlyhigh,
                                        ps.method = "glm", minPS = 0.01, maxPS = 0.99) {
 
-  if (higher.y == FALSE) score <- -score
+  if (!higher.y) score <- -score
   cut <- quantile(score, 1 - prop)
   n.subgroup <- length(prop)
   ate.est.high <- rep(0, n.subgroup)
@@ -157,11 +335,10 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
                                   interactions = FALSE)$log.rate.ratio
       }
   }
-  if (onlyhigh == TRUE) {
+  if (onlyhigh) {
     return(exp(ate.est.high))
-  } else {
-    return(list(ate.est.high = exp(ate.est.high), ate.est.low = exp(ate.est.low)))
   }
+  return(list(ate.est.high = exp(ate.est.high), ate.est.low = exp(ate.est.low)))
 }
 
 

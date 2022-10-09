@@ -1,3 +1,318 @@
+#' Estimation of the conditional average treatment effect (CATE) score for count data
+#'
+#' Provides singly robust and doubly robust estimation of CATE score with up to 5 scoring methods
+#' among the following: Poisson regression, boosting, two regressions, contrast regression, and
+#' negative binomial.
+#'
+#' @param data A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
+#' (1 row per observation).
+#' @param score.method A vector of one or multiple methods to estimate the CATE score.
+#' Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
+#' and \code{'negBin'}.
+#' @param cate.model A formula describing the outcome model to be fitted.
+#' The outcome must appear on the left-hand side.
+#' @param ps.model A formula describing the propensity score model to be fitted.
+#' The treatment must appear on the left-hand side. The treatment must be a numeric vector
+#' coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.
+#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+#' separate observations in nested subgroups (below vs above cutoff).
+#' The length of \code{prop.cutoff} is the number of nested subgroups.
+#' An equally-spaced sequence of proportions ending with 1 is recommended.
+#' Default is \code{seq(0.5, 1, length = 6)}.
+#' @param ps.method A character value for the method to estimate the propensity score.
+#' Allowed values include one of:
+#' \code{'glm'} for logistic regression with main effects only (default), or
+#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
+#' Relevant only when \code{ps.model} has more than one variable.
+#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param initial.predictor.method A character vector for the method used to get initial
+#' outcome predictions conditional on the covariates in \code{cate.model}. Only applies
+#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
+#' include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
+#' Default is \code{'boosting'}.
+#' @param xvar.smooth A vector of characters indicating the name of the variables used as
+#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
+#' from the variables listed in \code{cate.model}.
+#' Default is \code{NULL}, which uses all variables in \code{cate.model}.
+#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
+#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
+#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
+#' \code{'contrastReg'}. Default is 2.
+#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
+#' (usually 100-1000). Used if \code{score.method = 'boosting'} or
+#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
+#' \code{'contrastReg'}. Default is \code{200}.
+#' @param B A positive integer specifying the number of time cross-fitting is repeated in
+#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
+#' @param Kfold A positive integer specifying the number of folds used in cross-fitting
+#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+#' Default is \code{5}.
+#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
+#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Default is \code{0.001}.
+#' @param max.iterNR A positive integer indicating the maximum number of iterations in the
+#' Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Default is \code{150}.
+#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
+#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
+#' quantity to be added to diagonal of the slope matrix to prevent singularity.
+#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param seed An optional integer specifying an initial randomization seed for reproducibility.
+#' Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating what kind of intermediate progress messages should
+#' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+#' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
+#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
+#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param ... Additional arguments for \code{gbm()}
+#'
+#' @return Returns a list containing the following components:
+#' \itemize{
+#'  \item{\code{ate.poisson}: }{A vector of numerical values of length \code{prop.cutoff}
+#'  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
+#'  constructed based on the estimated CATE scores with poisson regression.
+#'  Only provided if \code{score.method} includes \code{'poisson'}.}
+#'  \item{\code{ate.boosting}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
+#'  includes \code{'boosting'}.}
+#'  \item{\code{ate.twoReg}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+#'  the estimated CATE scores with two regressions.
+#'  Only provided if \code{score.method} includes \code{'twoReg'}.}
+#'  \item{\code{ate.contrastReg}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+#'  the estimated CATE scores with contrast regression.
+#'  Only provided if \code{score.method} includes \code{'contrastReg'}.}
+#'  \item{\code{ate.negBin}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+#'  the estimated CATE scores with negative binomial regression.
+#'  Only provided if \code{score.method} includes \code{'negBin'}.}
+#'  \item{\code{score.poisson}: }{A vector of numerical values of length n
+#'  (number of observations in \code{data}) containing the estimated log-CATE scores
+#'  according to the Poisson regression. Only provided if \code{score.method}
+#'  includes \code{'poisson'}.}
+#'  \item{\code{score.boosting}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+#'  according to boosting. Only provided if \code{score.method} includes
+#'  \code{'boosting'}.}
+#'  \item{\code{score.twoReg}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+#'  according to two regressions. Only provided if \code{score.method} includes
+#'  \code{'twoReg'}.}
+#'  \item{\code{score.contrastReg}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+#'  according to contrast regression. Only provided if \code{score.method} includes
+#'  \code{'contrastReg'}.}
+#'  \item{\code{score.negBin}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+#'  according to negative binomial regression. Only provided if \code{score.method}
+#'  includes \code{'negBin'}.}
+#'  \item{\code{fit}: }{Additional details on model fitting if \code{score.method}
+#'  includes 'boosting' or 'contrastReg':}
+#'  \itemize{
+#'    \item{\code{result.boosting}: }{Details on the boosting model fitted to observations
+#'    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
+#'    Only provided if \code{score.method} includes \code{'boosting'}.}
+#'    \item{\code{result.contrastReg$sigma.contrastReg}: }{Variance-covariance matrix of
+#'    the estimated log-CATE coefficients in contrast regression.
+#'    Only provided if \code{score.method} includes \code{'contrastReg'}.}
+#'  }
+#'  \item{\code{coefficients}: }{A data frame with the coefficients of the estimated log-CATE
+#'  score by \code{score.method}. The data frame has number of rows equal to the number of
+#'  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
+#'  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
+#'  column containing the standard errors of the coefficients estimated with contrast regression.
+#'  \code{'boosting'} does not have coefficient results because tree-based methods typically do not
+#'  express the log-CATE as a linear combination of coefficients and covariates.}
+#' }
+#'
+#' @details The CATE score represents an individual-level treatment effect, estimated with
+#' either Poisson regression, boosting or negative binomial regression applied separately by
+#' treatment group or with two doubly robust estimators, two regressions and contrast regression
+#' (Yadlowsky, 2020) applied to the entire dataset.
+#'
+#' \code{\link{catefitcount}()} provides the coefficients of the CATE score for each scoring method requested
+#' through \code{score.method}. Currently, contrast regression is the only method which allows
+#' for inference of the CATE coefficients by providing standard errors of the coefficients.
+#' The coefficients can be used to learn the effect size of each variable and predict the
+#' CATE score for a new observation.
+#'
+#' \code{\link{catefitcount}()} also provides the predicted CATE score of each observation in the data set,
+#' for each scoring method. The predictions allow ranking the observations from potentially
+#' high responders to the treatment to potentially low or standard responders.
+#'
+#' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
+#' Note that the ATEs in \code{\link{catefitcount}()} are derived based on the CATE score which is estimated
+#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catecvcount}()} is more
+#' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
+#' validation to reduce optimism.
+#'
+#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
+#' \emph{Estimation and validation of ratio-based conditional average treatment effects using
+#' observational data. Journal of the American Statistical Association, 1-18.}
+#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#'
+#' @seealso \code{\link{catecvcount}()}
+#'
+#' @examples
+#' fit <- catefitcount(data = countExample,
+#'                     score.method = "poisson",
+#'                     cate.model = y ~ age + female + previous_treatment +
+#'                                  previous_cost + previous_number_relapses +
+#'                                  offset(log(years)),
+#'                     ps.model = trt ~ age + previous_treatment,
+#'                     higher.y = FALSE,
+#'                     seed = 999, verbose = 1)
+#' @export
+
+catefitcount <- function(data,
+                         score.method,
+                         cate.model,
+                         ps.model,
+                         ps.method = "glm",
+                         initial.predictor.method = "boosting",
+                         minPS = 0.01,
+                         maxPS = 0.99,
+                         higher.y = TRUE,
+                         prop.cutoff = seq(0.5, 1, length = 6),
+                         xvar.smooth = NULL,
+                         tree.depth = 2,
+                         n.trees.boosting = 200,
+                         B = 3,
+                         Kfold = 5,
+                         error.maxNR = 1e-3,
+                         max.iterNR = 150,
+                         tune = c(0.5, 2),
+                         seed = NULL,
+                         plot.gbmperf = FALSE,
+                         verbose = 0,
+                         ...) {
+
+
+  # Set seed once for reproducibility
+  set.seed(seed)
+
+  if (verbose >= 1) t.start <- Sys.time()
+
+  #### CHECK ARGUMENTS ####
+  arg.checks(
+    fun = "catefit", response = "count", data = data, higher.y = higher.y, score.method = score.method, prop.cutoff = prop.cutoff,
+    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
+    initial.predictor.method = initial.predictor.method,
+    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
+    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune
+  )
+
+  #### PRE-PROCESSING ####
+  out <- data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model,
+                      data = data, prop.cutoff = prop.cutoff, ps.method = ps.method)
+  y <- out$y
+  trt <- out$trt
+  x.ps <- out$x.ps
+  x.cate <- out$x.cate
+  time <- out$time
+  prop <- out$prop
+
+  #### FUNCTION STARTS HERE ####
+  result <- vector("list", length(score.method) * 2 + 2)
+  names(result) <- c(paste0("ate.", score.method),
+                     paste0("score.", score.method), "fit", "coefficients")
+
+  fit <- intxcount(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time,
+                   score.method = score.method,
+                   ps.method = ps.method, minPS = minPS, maxPS = maxPS,
+                   initial.predictor.method = initial.predictor.method,
+                   xvar.smooth = xvar.smooth,
+                   tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
+                   Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
+                   error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
+
+  if (fit$best.iter == n.trees.boosting) {
+    warning(paste0("The best boosting iteration was iteration number",
+                   n.trees.boosting, " out of ", n.trees.boosting,
+                   ". Consider increasing the maximum number of trees and
+                  turning on boosting performance plot (plot.gbmperf = TRUE)."))
+  }
+
+  # Check NA in coefficients of the score
+  if ("poisson" %in% score.method & sum(is.na(fit$result.poisson)) > 0) {
+    warning("One or more coefficients in the score (Poisson) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+  if ("twoReg" %in% score.method & sum(is.na(fit$result.twoReg)) > 0) {
+    warning("One or more coefficients in the score (two regressions) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+  if ("contrastReg" %in% score.method & sum(is.na(fit$result.contrastReg)) > 0) {
+    warning("One or more coefficients in the score (contrast regression) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+  if ("negBin" %in% score.method & sum(is.na(fit$result.negBin)) > 0) {
+    warning("One or more coefficients in the score (negative binomial) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+
+  fit.score <- scorecount(fit = fit,
+                          x.cate = x.cate, time = time,
+                          score.method = score.method)
+
+  for (name in names(fit.score)) {
+    score <- fit.score[[name]]
+    result[[name]] <- score
+    ate <- estcount.bilevel.subgroups(y = y,
+                                      x.cate = x.cate, x.ps = x.ps,
+                                      time = time, trt = trt,
+                                      score = score, higher.y = higher.y,
+                                      prop = prop, onlyhigh = TRUE,
+                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+    result[[str_replace(name, "score", "ate")]] <- ate
+    names(result[[str_replace(name, "score", "ate")]]) <- paste0("prop", round(prop, 2))
+  }
+
+  if (sum(score.method %in% c("poisson", "twoReg", "contrastReg", "negBin")) > 0) {
+    cf <- data.frame(matrix(NA, nrow = ncol(x.cate) + 1, ncol = 5))
+    colnames(cf) <- c("poisson", "twoReg", "contrastReg", "SE_contrastReg", "negBin")
+    rownames(cf) <- c("(Intercept)", colnames(x.cate))
+
+    if ("poisson" %in% score.method) cf$poisson <- fit$result.poisson
+
+    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+
+    if ("contrastReg" %in% score.method) {
+      cf$contrastReg <- fit$result.contrastReg$delta.contrastReg
+      cf$SE_contrastReg <- sqrt(diag(fit$result.contrastReg$sigma.contrastReg))
+    }
+
+    if ("negBin" %in% score.method) cf$negBin <- fit$result.negBin
+
+    result$coefficients <- cf[, colSums(is.na(cf)) != nrow(cf), drop = FALSE]
+  }
+
+
+  if (any(is.na(unlist(result[str_replace(names(fit.score), "score", "ate")])))) {
+    warning("Missing log rate ratio detected due to negative doubly robust estimator of y|x
+            for one or both treatment group(s).")
+  }
+
+  if ("boosting" %in% score.method) result$fit$result.boosting <-
+    fit$result.boosting
+  if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
+    fit$result.contrastReg$sigma.contrastReg
+
+  if (verbose >= 1) {
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
+
+  result$response <- "count"
+  result$score.method <- score.method
+
+  class(result) <- "catefit"
+  return(result)
+}
+
 #' Doubly robust estimators of the coefficients in the two regression
 #'
 #' @param y Observed outcome; vector of size \code{n}

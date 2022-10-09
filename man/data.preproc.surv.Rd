@@ -3,7 +3,7 @@
 \name{data.preproc.surv}
 \alias{data.preproc.surv}
 \title{Data preprocessing
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}}
+Apply at the beginning of \code{catefitcount()}, \code{catecvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}}
 \usage{
 data.preproc.surv(
   fun,
@@ -20,7 +20,8 @@ data.preproc.surv(
 )
 }
 \arguments{
-\item{fun}{A function for which argument check is needed; "pm" for \code{pmcount()} and \code{catefitsurv()}, "cv" for \code{cvcount()} and \code{catecvsurv()},
+\item{fun}{A function for which argument check is needed; "catefit" for \code{catefitcount()} and \code{catefitsurv()},
+"crossv" for \code{catecvcount()} and \code{catecvsurv()},
 and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
@@ -80,15 +81,15 @@ A list of elements:
            - x.cate: matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}
            - x.ipcw: matrix of \code{p.ipw} baseline covarites specified in inverse probability of censoring weighting model; dimension \code{n} by \code{p.ipw}
            - time: offset; vector of length \code{n}; only if \code{response = "count"}
-           - if \code{fun = "pm"}:
+           - if \code{fun = "catefit"}:
                - prop: formatted \code{prop.cutoff}
                - prop.no1: formatted \code{prop.cutoff} with 1 removed if applicable; otherwise prop.no1 is the same as prop
-           - if \code{fun = "cv"}
+           - if \code{fun = "crossv"}
                - prop.onlyhigh: formatted \code{prop.cutoff} with 0 removed if applicable
                - prop.bi; formatted \code{prop.cutoff} with 0 and 1 removed if applicable
                - prop.multi: formatted \code{prop.multi}, starting with 0 and ending with 1
 }
 \description{
 Data preprocessing
-Apply at the beginning of \code{pmcount()}, \code{cvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}
+Apply at the beginning of \code{catefitcount()}, \code{catecvcount()}, \code{catefitsurv()}, and \code{catecvsurv()}, after \code{arg.checks()}
 }

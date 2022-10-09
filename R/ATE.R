@@ -124,7 +124,7 @@ atefit <- function(response,
                    seed = NULL,
                    verbose = 0) {
 
-  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response== c("count", "survival", "continuous")))
+  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
   switch(response,
@@ -156,17 +156,14 @@ atefit <- function(response,
 #' @author Thomas Debray
 #'
 #' @importFrom dplyr %>% add_row mutate
-#' @importFrom ggplot2 ggplot geom_histogram geom_vline theme_classic
+#' @importFrom ggplot2 ggplot geom_histogram geom_vline theme_classic waiver
 #' @importFrom tidyr gather
 #' @export
 #'
-plot.atefit <- function(x, bins, alpha = 0.7, title, theme = theme_classic(), ...) {
+plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...) {
 
   if (missing(bins)) {
     bins <- max(1, min(50, floor(x$n.boot/10))) # need at least one bin
-  }
-  if (missing(title)) {
-    title <- paste0(x$n.boot, " bootstrap iterations")
   }
 
   if (x$response == "count") {
@@ -229,5 +226,4 @@ print.atefit <- function(x, ...) {
     cat("\n")
     warning(x$warning)
   }
-
 }

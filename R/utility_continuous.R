@@ -237,7 +237,7 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
   ## Assign default to initial.predictor.method if NULL
   if (is.null(initial.predictor.method) == TRUE & fun %in% c("pm", "cv")) initial.predictor.method <- "boosting"
 
-  if (fun == "pm") {
+  if (fun == "catefit") {
     ## Check values of prop
     prop <- sort(prop.cutoff) # sort the proportions from small to large
     if (prop[1] == 0) {
@@ -251,7 +251,7 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
       return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, prop = prop))
     }
 
-  } else if (fun == "cv") {
+  } else if (fun == "crossv") {
     ## Check values of prop.cutoff and prop.multi
     prop.onlyhigh <- prop.bi <- sort(prop.cutoff)
     prop.multi <- sort(prop.multi)

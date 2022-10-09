@@ -1,13 +1,346 @@
-# ------------------------------------------------------------------
-#
-# Project: Precision Medicine MS (precmed) - Comprehensive R package
-#
-# Purpose: Conditional average treatment effect (CATE) functions for Continuous outcomes
-#
-# Platform: Windows
-# R Version: 4.1.0
-#
+#' Estimation of the conditional average treatment effect (CATE) score for continuous data
+#'
+#' Provides singly robust and doubly robust estimation of CATE score with up to 6 scoring methods
+#' among the following: Linear regression, boosting, two regressions, contrast regression, random forest and
+#' generalized additive model.
+#'
+#' @param cate.model A formula describing the outcome model to be fitted.
+#' The outcome must appear on the left-hand side.
+#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
+#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' @param ps.model A formula describing the propensity score model to be fitted.
+#' The treatment must appear on the left-hand side.
+#' The treatment must be a numeric vector coded as 0/1.
+#' If data are from a RCT, specify \code{ps.model} as an intercept-only model.
+#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' a data frame with \code{n} rows (1 row per observation).
+#' @param score.method A vector of one or multiple methods to estimate the CATE score.
+#' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'},
+#' \code{'contrastReg'}, \code{'randomForest'}, \code{'gam'}.
+#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of
+#' the estimated log CATE scores to define nested subgroups. Each element represents the
+#' cutoff to separate observations in nested subgroups (below vs above cutoff).
+#' The length of \code{prop.cutoff} is the number of nested subgroups.
+#' An equally-spaced sequence of proportions ending with 1 is recommended.
+#' Default is \code{seq(0.5, 1, length = 6)}.
+#' @param ps.method A character value for the method to estimate the propensity score.
+#' Allowed values include one of: \code{'glm'} for logistic regression with main effects only
+#' (default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
+#' on two-way interactions (added to the model if not specified in \code{ps.model}).
+#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param initial.predictor.method A character vector for the method used to get initial outcome
+#' predictions conditional on the covariates in \code{init.model} in
+#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include one of
+#' \code{'gaussian'} (fastest), \code{'boosting'} and \code{'gam'}.
+#' Default is \code{'boosting'}.
+#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as the
+#' smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected from
+#' the variables listed in \code{init.model}. Default is \code{NULL}, which uses all variables
+#' in \code{init.model}.
+#' @param xvar.smooth.score A vector of characters indicating the name of the variables used as the
+#' smooth terms if \code{score.method = 'gam'}. The variables must be selected from
+#' the variables listed in \code{cate.model}. Default is \code{NULL}, which uses all variables
+#' in \code{cate.model}.
+#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
+#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
+#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
+#' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
+#' @param n.trees.rf A positive integer specifying the number of trees. Used only if
+#' \code{score.method = 'randomForest'}. Default is \code{1000}.
+#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
+#' (usually 100-1000). Used only if \code{score.method = 'boosting'} or
+#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
+#' \code{initial.predictor.method = 'boosting'}. Default is \code{200}.
+#' @param B A positive integer specifying the number of time cross-fitting is repeated in
+#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
+#' @param Kfold A positive integer specifying the number of folds (parts) used in cross-fitting
+#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+#' Default is \code{6}.
+#' @param plot.gbmperf A logical value indicating whether to plot the performance measures
+#' in boosting. Used only if \code{score.method = 'boosting'} or if
+#' \code{score.method = 'twoReg'} or \code{'contrastReg'} and
+#' \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
+#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Default is \code{0.001}.
+#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
+#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
+#' quantity to be added to diagonal of the slope matrix to prevent singularity.
+#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param seed An optional integer specifying an initial randomization seed for reproducibility.
+#' Default is \code{NULL}, corresponding to no seed.
+#' @param verbose An integer value indicating what kind of intermediate progress messages should
+#' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
+#' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
+#' @param ... Additional arguments for \code{gbm()}
+#'
+#' @return Returns a list containing the following components:
+#' \itemize{
+#'  \item{\code{ate.gaussian}: }{A vector of numerical values of length \code{prop.cutoff}
+#'  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
+#'  constructed based on the estimated CATE scores with Poisson regression.
+#'  Only provided if \code{score.method} includes \code{'gaussian'}.}
+#'  \item{\code{ate.boosting}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
+#'  includes \code{'boosting'}.}
+#'  \item{\code{ate.twoReg}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+#'  the estimated CATE scores with two regressions.
+#'  Only provided if \code{score.method} includes \code{'twoReg'}.}
+#'  \item{\code{ate.contrastReg}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+#'  the estimated CATE scores with contrast regression.
+#'  Only provided if \code{score.method} includes \code{'contrastReg'}.}
+#'  \item{\code{ate.randomForest}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+#'  the estimated CATE scores with random forest.
+#'  Only provided if \code{score.method} includes \code{'gam'}.}
+#'  \item{\code{ate.gam}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+#'  the estimated CATE scores with generalized additive model.
+#'  Only provided if \code{score.method} includes \code{'gam'}.}
+#'  \item{\code{score.gaussian}: }{A vector of numerical values of length n
+#'  (number of observations in \code{data}) containing the estimated CATE scores
+#'  according to the linear regression. Only provided if \code{score.method}
+#'  includes \code{'gaussian'}.}
+#'  \item{\code{score.boosting}: }{Same as \code{score.gaussian}, but with estimated CATE score
+#'  according to boosting. Only provided if \code{score.method} includes
+#'  \code{'boosting'}.}
+#'  \item{\code{score.twoReg}: }{Same as \code{score.gaussian}, but with estimated CATE score
+#'  according to two regressions. Only provided if \code{score.method} includes
+#'  \code{'twoReg'}.}
+#'  \item{\code{score.contrastReg}: }{Same as \code{score.gaussian}, but with estimated CATE score
+#'  according to contrast regression. Only provided if \code{score.method} includes
+#'  \code{'contrastReg'}.}
+#'  \item{\code{score.randomForest}: }{Same as \code{score.gaussian}, but with estimated CATE score
+#'  according to random forest. Only provided if \code{score.method}
+#'  includes \code{'randomForest'}.}
+#'  \item{\code{score.gam}: }{Same as \code{score.gaussian}, but with estimated CATE score
+#'  according to generalized additive model. Only provided if \code{score.method}
+#'  includes \code{'gam'}.}
+#'  \item{\code{fit}: }{Additional details on model fitting if \code{score.method}
+#'  includes 'boosting' or 'contrastReg':}
+#'  \itemize{
+#'    \item{\code{result.boosting}: }{Details on the boosting model fitted to observations
+#'    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
+#'    Only provided if \code{score.method} includes \code{'boosting'}.}
+#'    \item{\code{result.randomForest}: }{Details on the boosting model fitted to observations
+#'    with treatment = 0 \code{($fit0.randomForest)} and to observations with treatment = 1 \code{($fit1.randomForest)}.
+#'    Only provided if \code{score.method} includes \code{'randomForest'}.}
+#'    \item{\code{result.gam}: }{Details on the boosting model fitted to observations
+#'    with treatment = 0 \code{($fit0.gam)} and to observations with treatment = 1 \code{($fit1.gam)}.
+#'    Only provided if \code{score.method} includes \code{'gam'}.}
+#'    \item{\code{result.contrastReg$sigma.contrastReg}: }{Variance-covariance matrix of
+#'    the estimated CATE coefficients in contrast regression.
+#'    Only provided if \code{score.method} includes \code{'contrastReg'}.}
+#'  }
+#'  \item{\code{coefficients}: }{A data frame with the coefficients of the estimated CATE
+#'  score by \code{score.method}. The data frame has number of rows equal to the number of
+#'  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
+#'  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
+#'  column containing the standard errors of the coefficients estimated with contrast regression.
+#'  \code{'boosting'}, \code{'randomForest'}, \code{'gam'} do not have coefficient results because these methods do not
+#'  express the CATE as a linear combination of coefficients and covariates.}
+#' }
+#'
+#' @details The CATE score represents an individual-level treatment effect, estimated with
+#' either linear regression, boosting, random forest and generalized additive model applied separately by
+#' treatment group or with two doubly robust estimators, two regressions and contrast regression
+#' (Yadlowsky, 2020) applied to the entire dataset.
+#'
+#' \code{\link{catefitmean}()} provides the coefficients of the CATE score for each scoring method requested
+#' through \code{score.method}. Currently, contrast regression is the only method which allows
+#' for inference of the CATE coefficients by providing standard errors of the coefficients.
+#' The coefficients can be used to learn the effect size of each variable and predict the
+#' CATE score for a new observation.
+#'
+#' \code{\link{catefitmean}()} also provides the predicted CATE score of each observation in the data set,
+#' for each scoring method. The predictions allow ranking the observations from potentially
+#' high responders to the treatment to potentially low or standard responders.
+#'
+#' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
+#' Note that the ATEs in \code{\link{catefitmean}()} are derived based on the CATE score which is estimated
+#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catefitmean}()} is more
+#' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
+#' validation to reduce optimism.
+#'
+#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
+#' \emph{Estimation and validation of ratio-based conditional average treatment effects using
+#' observational data. Journal of the American Statistical Association, 1-18.}
+#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#'
+#' @seealso \code{\link{catecvmean}()} function
+#'
+#' @examples
+#'\dontrun{
+#' catefit <- catefitmean(cate.model = y ~ age  +
+#'                   previous_treatment +
+#'                   previous_cost +
+#'                   previous_status_measure,
+#'              init.model = y ~ age  +
+#'                           previous_treatment +
+#'                           previous_cost +
+#'                           previous_status_measure,
+#'              ps.model = trt ~ age,
+#'              data = meanExample,
+#'              higher.y = FALSE,
+#'              score.method = "gaussian",
+#'              seed = 999)
+#'}
 
+catefitmean <- function(data,
+                        score.method,
+                        cate.model,
+                        ps.model,
+                        ps.method = "glm",
+                        init.model = NULL,
+                        initial.predictor.method = "boosting",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        higher.y = TRUE,
+                        prop.cutoff = seq(0.5, 1, length = 6),
+                        xvar.smooth.score = NULL,
+                        xvar.smooth.init = NULL,
+                        tree.depth = 2,
+                        n.trees.rf = 1000,
+                        n.trees.boosting = 200,
+                        B = 3,
+                        Kfold = 6,
+                        plot.gbmperf = FALSE,
+                        error.maxNR = 1e-3,
+                        tune = c(0.5, 2),
+                        seed = NULL,
+                        verbose = 0,
+                        ...) {
+
+  stop("This functionality is not implemented yet")
+
+  # TODO: score.method is now a mandatory argument
+
+  # Set seed once for reproducibility
+  set.seed(seed)
+
+  if (verbose >= 1) t.start <- Sys.time()
+
+  #### CHECK ARGUMENTS ####
+  arg.checks(
+    fun = "catefit", response = "continuous", data = data, higher.y = higher.y, score.method = score.method, prop.cutoff = prop.cutoff,
+    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
+    initial.predictor.method = initial.predictor.method,
+    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
+    error.maxNR = error.maxNR, tune = tune
+  )
+
+  #### PRE-PROCESSING ####
+  out <- data.preproc.mean(fun = "catefit", cate.model = cate.model, init.model = init.model, ps.model = ps.model,
+                           score.method = score.method, data = data, prop.cutoff = prop.cutoff, ps.method = ps.method)
+  y <- out$y
+  trt <- out$trt
+  x.ps <- out$x.ps
+  x.cate <- out$x.cate
+  prop <- out$prop
+
+  if (any(score.method %in% c("contrastReg", "twoReg"))) x.init <- out$x.init
+
+  #### FUNCTION STARTS HERE ####
+  result <- vector("list", length(score.method) * 2 + 2)
+  names(result) <- c(paste0("ate.", score.method),
+                     paste0("score.", score.method), "fit", "coefficients")
+
+  fit <- intxmean(y = y, trt = trt, x.cate = x.cate, x.init = x.init, x.ps = x.ps,
+                  score.method = score.method,
+                  ps.method = ps.method, minPS = minPS, maxPS = maxPS,
+                  initial.predictor.method = initial.predictor.method,
+                  xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
+                  tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
+                  Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
+                  error.maxNR = error.maxNR, tune = tune, ...)
+
+  if (fit$best.iter == n.trees.boosting) {
+    warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
+  }
+
+  # Check NA in coefficients of the score
+  if ("gaussian" %in% score.method & sum(is.na(fit$result.gaussian)) > 0) {
+    warning("One or more coefficients in the score (Gaussian) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+  if ("twoReg" %in% score.method & sum(is.na(fit$result.twoReg)) > 0) {
+    warning("One or more coefficients in the score (two regressions) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+  if ("contrastReg" %in% score.method & sum(is.na(fit$result.contrastReg)) > 0) {
+    warning("One or more coefficients in the score (contrast regression) are NA.
+            Consider inspecting the distribution of the covariates in cate.model.")
+  }
+
+  if (length(names(fit$err.fit)) > 0) {
+    score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
+  } else {score.method.updated <- score.method}
+  #    score.method.updated <- score.method[-which(score.method %in% names(fit$err.fit))]
+  if (length(score.method.updated) == 0) {stop("All methods produced error in fitting.")}
+
+  fit.score <- scoremean(fit = fit,
+                         x.cate = x.cate,
+                         score.method = score.method.updated)
+
+  for (name in names(fit.score)) {
+    score <- fit.score[[name]]
+    result[[name]] <- score
+    ate <- estmean.bilevel.subgroups(y = y,
+                                     x.cate = x.cate, x.ps = x.ps,
+                                     trt = trt,
+                                     score = score, higher.y = higher.y,
+                                     prop = prop, onlyhigh = TRUE,
+                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+    result[[str_replace(name, "score", "ate")]] <- ate
+    names(result[[str_replace(name, "score", "ate")]]) <- paste0("prop", round(prop, 2))
+  }
+
+  if (sum(score.method %in% c("gaussian", "twoReg", "contrastReg")) > 0) {
+    cf <- data.frame(matrix(NA, nrow = ncol(x.cate) + 1, ncol = 4))
+    colnames(cf) <- c("gaussian", "twoReg", "contrastReg", "SE_contrastReg")
+    rownames(cf) <- c("(Intercept)", colnames(x.cate))
+
+    if ("gaussian" %in% score.method) cf$gaussian <- fit$result.gaussian
+
+    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+
+    if ("contrastReg" %in% score.method) {
+      cf$contrastReg <- fit$result.contrastReg$delta.contrastReg
+      cf$SE_contrastReg <- sqrt(diag(fit$result.contrastReg$sigma.contrastReg))
+    }
+
+    result$coefficients <- cf[, colSums(is.na(cf)) != nrow(cf), drop = FALSE]
+  }
+
+
+  if (any(is.na(unlist(result[str_replace(names(fit.score), "score", "ate")])))) {
+    warning("Missing log rate ratio detected due to negative doubly robust estimator of y|x
+            for one or both treatment group(s).")
+  }
+
+  if ("boosting" %in% score.method) result$fit$result.boosting <-
+    fit$result.boosting
+  if ("randomForest" %in% score.method) result$fit$result.randomForest <-
+    fit$result.randomForest
+  if ("gam" %in% score.method) result$fit$result.gam <-
+    fit$result.gam
+  if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
+    fit$result.contrastReg$sigma.contrastReg
+
+  if (verbose >= 1) {
+    t.end <- Sys.time()
+    t.diff <- round(difftime(t.end, t.start),2)
+    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
+  }
+
+  result$score.method <- score.method
+
+  class(result) <- "catefit"
+  return(result)
+}
 
 
 #' Doubly robust estimators of the coefficients in the two regression
@@ -87,7 +420,7 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
   #f1.predictor=resultcf$f1.predictor
   #f0.predictor=resultcf$f0.predictor
   fbar.predictor <- (f1.predictor + f0.predictor) / 2
-  resid <- y-fbar.predictor
+  resid <- y - fbar.predictor
 
   x.aug <- cbind(1, x.cate)
   xaug.star <- x.aug * (trt + ps - 2 * trt * ps) / 2
