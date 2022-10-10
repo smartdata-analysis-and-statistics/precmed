@@ -54,7 +54,7 @@ are relatively aligned across the multi-category subgroups indicate absence of t
 effect heterogeneity (or the inability of the scoring method to capture it).
 }
 \examples{
-\dontrun{
+\donttest{
 # Count outcome
 eval_1 <- catecv(response = "count",
                  data = countExample,

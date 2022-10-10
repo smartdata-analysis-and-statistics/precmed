@@ -249,7 +249,7 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
-\dontrun{
+\donttest{
 library(survival)
 
 tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),

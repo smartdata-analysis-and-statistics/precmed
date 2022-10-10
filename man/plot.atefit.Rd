@@ -20,7 +20,8 @@
 \item{...}{Other parameters}
 }
 \value{
-A plot of the class \code{ggplot}.
+A plot of the class \code{ggplot}, displaying the estimated ATE across
+the bootstrap samples
 }
 \description{
 Histogram of bootstrap estimates

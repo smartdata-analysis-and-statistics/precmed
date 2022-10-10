@@ -224,7 +224,7 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
-\dontrun{
+\donttest{
 catefit <- catefitmean(cate.model = y ~ age  +
                   previous_treatment +
                   previous_cost +

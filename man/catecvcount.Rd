@@ -279,7 +279,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 catecv <- catecvcount(data = countExample,
                       score.method = "poisson",
                       cate.model = y ~ age + female + previous_treatment +

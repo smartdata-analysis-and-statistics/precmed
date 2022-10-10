@@ -87,7 +87,7 @@ validation curves indicate absence of treatment effect heterogeneity (or inabili
 to capture it).
 }
 \examples{
-\dontrun{
+\donttest{
 # Count outcome
 eval_1 <- catecv(response = "count",
                  data = countExample,

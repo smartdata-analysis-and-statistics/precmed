@@ -114,7 +114,7 @@ output <- atefit(response = "count",
 output
 plot(output)
 
-\dontrun{
+\donttest{
 
 # Survival outcome
 tau0 <- with(survivalExample,
@@ -130,17 +130,5 @@ output2 <- atefit(response = "survival",
 output2
 plot(output2)
 
-# Continuous outcome
-output3 <- atefit(response = "continuous",
-                       cate.model = y ~ age +
-                                        previous_treatment +
-                                        previous_cost +
-                                        previous_status_measure,
-                       previous_cost + previous_number_relapses + offset(log(years)),
-                       ps.model = trt ~ previous_treatment,
-                       data = meanExample,
-                       seed = 999)
-print(output3)
-output$plot
 }
 }

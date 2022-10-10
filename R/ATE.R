@@ -88,18 +88,6 @@
 #' output2
 #' plot(output2)
 #'
-#'# Continuous outcome
-#' output3 <- atefit(response = "continuous",
-#'                        cate.model = y ~ age +
-#'                                         previous_treatment +
-#'                                         previous_cost +
-#'                                         previous_status_measure,
-#'                        previous_cost + previous_number_relapses + offset(log(years)),
-#'                        ps.model = trt ~ previous_treatment,
-#'                        data = meanExample,
-#'                        seed = 999)
-#' print(output3)
-#' output$plot
 #'}
 #' @export
 #'
@@ -151,7 +139,8 @@ atefit <- function(response,
 #' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
 #' @param ... Other parameters
 #'
-#' @return A plot of the class \code{ggplot}.
+#' @return A plot of the class \code{ggplot}, displaying the estimated ATE across
+#' the bootstrap samples
 #'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
 #' The red vertical reference line represents the final estimate.
@@ -205,7 +194,7 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
 #' restricted mean time lost ratio and log hazard ratio) and count outcomes
 #' (the log rate ratio).
 #'
-#' @value No return value
+#' @return No return value
 #'
 #' @author Thomas Debray
 #'

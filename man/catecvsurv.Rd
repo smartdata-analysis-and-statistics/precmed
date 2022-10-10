@@ -337,7 +337,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 library(survival)
 
 tau0 <- with(survivalExample,

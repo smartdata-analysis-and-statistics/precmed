@@ -181,24 +181,6 @@
 #' abc(cate_2)
 #'
 #'
-#' # Continuous outcome
-#' cate_3 <- catecv(response = "continuous",
-#'                  data = meanExample,
-#'                  score.method = c("gaussian", "twoReg"),
-#'                  cate.model = y ~ age + previous_treatment + previous_cost +
-#'                                   previous_status_measure,
-#'                  ps.model = trt ~ previous_status_measure,
-#'                  init.model = y ~ age + previous_treatment + previous_cost +
-#'                                   previous_status_measure,
-#'                  initial.predictor.method = "gaussian",
-#'                  higher.y = FALSE,
-#'                  cv.n = 5,
-#'                  xvar.smooth.score = c("age", "previous_cost"),
-#'                  seed = 999)
-#'
-#' plot(cate_3)
-#' boxplot(cate_3)
-#' abc(cate_3)
 #' }
 #'
 #' @export
@@ -1828,29 +1810,7 @@ catecvcount <- function(data,
 #' and \code{\link{catefitmean}()} function.
 #'
 #' @examples
-#' \donttest{
-#' catecv <- catecvmean(cate.model = y ~ age  +
-#'                               previous_treatment +
-#'                               previous_cost +
-#'                               previous_status_measure,
-#'              init.model = y ~ age +
-#'                           previous_treatment +
-#'                           previous_cost +
-#'                           previous_status_measure,
-#'              ps.model = trt ~ previous_status_measure,
-#'              data = meanExample,
-#'              higher.y = FALSE,
-#'              score.method = c("gaussian", "twoReg"),
-#'              initial.predictor.method = "gaussian",
-#'              cv.n = 5,
-#'              plot.gbmperf = FALSE,
-#'              seed = 999)
-#'
-#' # Try:
-#' # plot(x = catecv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
-#' # boxplot(x = catecv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
-#' # abc(catecv)
-#' }
+#' # Not implemented yet!
 #'
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
@@ -2285,27 +2245,9 @@ catecvmean <- function(data,
 #' # ABC of the validation curves for each method and each CV iteration
 #' abc(cv_surv)
 #'
-#' # Continuous outcome
-#' cv_mean <- catecv(response = "continuous",
-#'                   data = meanExample,
-#'                   score.method = "gaussian",
-#'                   cate.model = y ~ age +
-#'                                    previous_treatment +
-#'                                    previous_cost +
-#'                                    previous_status_measure,
-#'                   ps.model = trt ~ previous_treatment,
-#'                   init.model = y ~ age +
-#'                                    previous_treatment +
-#'                                    previous_cost +
-#'                                    previous_status_measure,
-#'                   higher.y = FALSE, cv.n = 5)
-#'
-#' abc(cv_mean) # ABC of the validation curves for each method and each CV iteration
 #' }
 #'
 #' @export
-#'
-#' @importFrom stringr str_extract
 abc <- function(x) UseMethod("abc", x)
 
 abc.default <- function(x, ...){
@@ -2314,6 +2256,69 @@ abc.default <- function(x, ...){
                 "and can only be used on class precmed"))
 }
 
+#' Compute the area between curves from the \code{"precmed"} object
+#'
+#' Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
+#' This should be run only after results of \code{\link{catecv}()} have been obtained.
+#'
+#' @param x An object of class \code{"precmed"}.
+#'
+#' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
+#' iteration and number of rows equal to the number of scoring methods in \code{x}.
+#'
+#' @details The ABC is the area between a validation curve and the overall ATE in the validation set.
+#' It is calculated for each scoring method separately. Higher ABC values are preferable as they
+#' indicate that more treatment effect heterogeneity is captured by the scoring method.
+#' Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
+#' The ABC is calculated with the \code{\link[MESS]{auc}()} in the \code{MESS} package with a natural
+#' cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
+#' 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
+#'
+#' The ABC is a metric to help users select the best scoring method in terms of capturing treatment
+#' effect heterogeneity in the data. It should be used in complement to the visual inspection of
+#' the validation curves in the validation set in \code{\link{plot}()}.
+#'
+#' @references Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
+#' \emph{Effectively selecting a target population for a future comparative study.
+#' Journal of the American Statistical Association, 108(502), 527-539.}
+#'
+#' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
+#' \code{"precmed"} objects.
+#'
+#' @examples
+#' \donttest{
+#' # Count outcome
+#' cv_count <- catecv(response = "count",
+#'                    data = countExample,
+#'                    score.method = "poisson",
+#'                    cate.model = y ~ age + female + previous_treatment +
+#'                                 previous_cost + previous_number_relapses +
+#'                                 offset(log(years)),
+#'                    ps.model = trt ~ age + previous_treatment,
+#'                    higher.y = FALSE, cv.n = 5, verbose = 1)
+#'
+#' # ABC of the validation curves for each method and each CV iteration
+#' abc(cv_count)
+#'
+#' # Survival outcome
+#' library(survival)
+#' cv_surv <- catecv(response = "survival",
+#'                   data = survivalExample,
+#'                   score.method = c("poisson", "randomForest"),
+#'                   cate.model = Surv(y, d) ~ age + female + previous_cost +
+#'                                previous_number_relapses,
+#'                   ps.model = trt ~ age + previous_treatment,
+#'                   higher.y = FALSE,
+#'                   cv.n = 5)
+#'
+#' # ABC of the validation curves for each method and each CV iteration
+#' abc(cv_surv)
+#'
+#' }
+#'
+#' @export
+#'
+#' @importFrom stringr str_extract
 abc.precmed <- function(x) {
 
   # Check the value of abc (must have area between curves values)

@@ -275,29 +275,7 @@ following steps \code{cv.n} times:
 }
 }
 \examples{
-\dontrun{
-catecv <- catecvmean(cate.model = y ~ age  +
-                              previous_treatment +
-                              previous_cost +
-                              previous_status_measure,
-             init.model = y ~ age +
-                          previous_treatment +
-                          previous_cost +
-                          previous_status_measure,
-             ps.model = trt ~ previous_status_measure,
-             data = meanExample,
-             higher.y = FALSE,
-             score.method = c("gaussian", "twoReg"),
-             initial.predictor.method = "gaussian",
-             cv.n = 5,
-             plot.gbmperf = FALSE,
-             seed = 999)
-
-# Try:
-# plot(x = catecv, ylab = "Mean difference of drug1 vs drug0 in each subgroup")
-# boxplot(x = catecv, ylab = "mean difference of drug1 vs drug0 in each subgroup")
-# abc(catecv)
-}
+# Not implemented yet!
 
 }
 \references{

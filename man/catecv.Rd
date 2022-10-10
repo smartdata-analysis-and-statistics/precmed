@@ -217,7 +217,7 @@ For survival response, see details in \code{\link{catecvsurv}()}.
 For continuous response, see details in \code{\link{catecvmean}()}.
 }
 \examples{
-\dontrun{
+\donttest{
 cate_1 <- catecv(response = "count",
                  data = countExample,
                  score.method = "poisson",
@@ -255,24 +255,6 @@ boxplot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(cate_2)
 
 
-# Continuous outcome
-cate_3 <- catecv(response = "continuous",
-                 data = meanExample,
-                 score.method = c("gaussian", "twoReg"),
-                 cate.model = y ~ age + previous_treatment + previous_cost +
-                                  previous_status_measure,
-                 ps.model = trt ~ previous_status_measure,
-                 init.model = y ~ age + previous_treatment + previous_cost +
-                                  previous_status_measure,
-                 initial.predictor.method = "gaussian",
-                 higher.y = FALSE,
-                 cv.n = 5,
-                 xvar.smooth.score = c("age", "previous_cost"),
-                 seed = 999)
-
-plot(cate_3)
-boxplot(cate_3)
-abc(cate_3)
 }
 
 }

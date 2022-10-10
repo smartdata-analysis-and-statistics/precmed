@@ -230,7 +230,7 @@ catefit <- function(response,
 #' restricted mean time lost ratio and log hazard ratio) and count outcomes
 #' (the log rate ratio).
 #'
-#' @value No return value
+#' @return No return value
 #'
 #' @author Thomas Debray
 #'

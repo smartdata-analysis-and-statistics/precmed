@@ -11,6 +11,9 @@
 
 \item{...}{Other parameters}
 }
+\value{
+No return value
+}
 \description{
 Print function for atefit
 }
