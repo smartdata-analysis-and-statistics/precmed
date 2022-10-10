@@ -29,10 +29,12 @@ Authors@R: c(person(given = "Lu",
             person(given = "Joana", 
                    family = "Caldas", 
                    role = "ctb"))
-Description: A doubly robust precision medicine Approach to fit, cross-validate 
-and visualize the outputs of different models, including doubly-robust and 
-machine learning methods, for the conditional average treatment effect based on 
-count or survival outcomes.
+Description: A doubly robust precision medicine approach to fit, cross-validate 
+and visualize prediction models for the conditional average treatment 
+effect (CATE). It implements doubly robust estimation and semiparametric modeling 
+approach of treatment-covariate interactions as proposed by Yadlowsky et 
+al. (2020) <doi:10.1080/01621459.2020.1772080>.
+
 Depends: R (>= 3.5.0)
 License: Apache License (== 2.0)
 Encoding: UTF-8
