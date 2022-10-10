@@ -1,7 +1,6 @@
 Package: precmed
 Type: Package
-Title: A Doubly Robust Precision Medicine Approach to Estimate and 
-        Validate Conditional Average Treatment Effects
+Title: Precision Medicine
 Version: 1.0.0
 Authors@R: c(person(given = "Lu", 
                     family = "Tian", 
@@ -30,7 +29,10 @@ Authors@R: c(person(given = "Lu",
             person(given = "Joana", 
                    family = "Caldas", 
                    role = "ctb"))
-Description: Fit, cross-validate and visualize the outputs of different models, including doubly-robust and machine learning methods, for the conditional average treatment effect based on count or survival outcomes.
+Description: A doubly robust precision medicine Approach to fit, cross-validate 
+and visualize the outputs of different models, including doubly-robust and 
+machine learning methods, for the conditional average treatment effect based on 
+count or survival outcomes.
 Depends: R (>= 3.5.0)
 License: Apache License (== 2.0)
 Encoding: UTF-8
