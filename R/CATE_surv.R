@@ -194,7 +194,7 @@
 #' @seealso \code{\link{catecvsurv}()}
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' library(survival)
 #'
 #' tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),

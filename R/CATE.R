@@ -133,7 +133,7 @@
 #'
 #' coef(fit_1)
 #'
-#' \dontrun{
+#' \donttest{
 #' # Survival outcome
 #' library(survival)
 #' tau0 <- with(survivalExample,

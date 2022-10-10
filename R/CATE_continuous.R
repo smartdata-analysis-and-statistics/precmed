@@ -173,7 +173,7 @@
 #' @seealso \code{\link{catecvmean}()} function
 #'
 #' @examples
-#'\dontrun{
+#' \donttest{
 #' catefit <- catefitmean(cate.model = y ~ age  +
 #'                   previous_treatment +
 #'                   previous_cost +

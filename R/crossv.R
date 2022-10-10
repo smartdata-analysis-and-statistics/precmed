@@ -143,7 +143,7 @@
 #' \code{"precmed"} objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' cate_1 <- catecv(response = "count",
 #'                  data = countExample,
 #'                  score.method = "poisson",
@@ -544,7 +544,7 @@ catecv <- function(response,
 #' \code{"precmed"} objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' library(survival)
 #'
 #' tau0 <- with(survivalExample,
@@ -1259,7 +1259,7 @@ catecvsurv <- function(data,
 #' and \code{\link{catefitcount}()} function.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' catecv <- catecvcount(data = countExample,
 #'                       score.method = "poisson",
 #'                       cate.model = y ~ age + female + previous_treatment +
@@ -1828,7 +1828,7 @@ catecvcount <- function(data,
 #' and \code{\link{catefitmean}()} function.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' catecv <- catecvmean(cate.model = y ~ age  +
 #'                               previous_treatment +
 #'                               previous_cost +
@@ -2257,7 +2257,7 @@ catecvmean <- function(data,
 #' \code{"precmed"} objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Count outcome
 #' cv_count <- catecv(response = "count",
 #'                    data = countExample,
@@ -2398,7 +2398,7 @@ abc.precmed <- function(x) {
 #' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Count outcome
 #' eval_1 <- catecv(response = "count",
 #'                  data = countExample,
@@ -2758,7 +2758,7 @@ plot.precmed <- function(x,
 #' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Count outcome
 #' eval_1 <- catecv(response = "count",
 #'                  data = countExample,

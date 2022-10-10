@@ -72,7 +72,7 @@
 #' output
 #' plot(output)
 #'
-#' \dontrun{
+#' \donttest{
 #'
 #' # Survival outcome
 #' tau0 <- with(survivalExample,
