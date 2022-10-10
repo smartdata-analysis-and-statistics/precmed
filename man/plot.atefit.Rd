@@ -19,6 +19,9 @@
 
 \item{...}{Other parameters}
 }
+\value{
+A plot of the class \code{ggplot}.
+}
 \description{
 Histogram of bootstrap estimates
 }

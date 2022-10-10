@@ -151,6 +151,8 @@ atefit <- function(response,
 #' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
 #' @param ... Other parameters
 #'
+#' @return A plot of the class \code{ggplot}.
+#'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
 #' The red vertical reference line represents the final estimate.
 #' @author Thomas Debray
@@ -202,6 +204,8 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
 #' @details Display the estimated treatment effects for survival outcomes (log
 #' restricted mean time lost ratio and log hazard ratio) and count outcomes
 #' (the log rate ratio).
+#'
+#' @value No return value
 #'
 #' @author Thomas Debray
 #'
