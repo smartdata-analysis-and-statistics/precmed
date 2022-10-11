@@ -28,7 +28,8 @@ intxsurv(
   plot.gbmperf = TRUE,
   error.maxNR = 0.001,
   max.iterNR = 100,
-  tune = c(0.5, 2)
+  tune = c(0.5, 2),
+  ...
 )
 }
 \arguments{
@@ -112,6 +113,8 @@ Default is \code{100}.}
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
 Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+
+\item{...}{Additional arguments for \code{gbm()}}
 }
 \value{
 Depending on what score.method is, the outputs is a combination of the following:

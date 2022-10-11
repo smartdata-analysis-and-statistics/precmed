@@ -540,7 +540,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
       index[trt == 0] <- index0cv
 
       f1.predictcv <- f0.predictcv <- pscv <- rep(NA, N)
-      for (k in 1:Kfold) {
+      for (k in seq(Kfold)) {
         datatot_train <- datatot[index != k, ]
         x_ps_train <- x.ps[index != k, , drop = FALSE]
         trt_train <- trt[index != k]

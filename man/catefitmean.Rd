@@ -223,23 +223,6 @@ using the same data sample. Therefore, overfitting may be an issue. \code{\link{
 suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
 validation to reduce optimism.
 }
-\examples{
-\donttest{
-catefit <- catefitmean(cate.model = y ~ age  +
-                  previous_treatment +
-                  previous_cost +
-                  previous_status_measure,
-             init.model = y ~ age  +
-                          previous_treatment +
-                          previous_cost +
-                          previous_status_measure,
-             ps.model = trt ~ age,
-             data = meanExample,
-             higher.y = FALSE,
-             score.method = "gaussian",
-             seed = 999)
-}
-}
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 \emph{Estimation and validation of ratio-based conditional average treatment effects using

@@ -30,7 +30,8 @@ catefitsurv(
   max.iterNR = 100,
   tune = c(0.5, 2),
   seed = NULL,
-  verbose = 0
+  verbose = 0,
+  ...
 )
 }
 \arguments{
@@ -143,6 +144,8 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
+
+\item{...}{Additional arguments for \code{gbm()}}
 }
 \value{
 Returns an object of the class \code{catefit} containing the following components:

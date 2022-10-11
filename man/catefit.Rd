@@ -34,7 +34,8 @@ catefit(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 0
+  verbose = 0,
+  ...
 )
 }
 \arguments{
@@ -167,6 +168,8 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
+
+\item{...}{Additional arguments for \code{gbm()}}
 }
 \value{
 For count response, see description of outputs in \code{\link{catefitcount}()}.
@@ -210,27 +213,9 @@ fit_2 <- catefit(response = "survival",
                  ps.model = trt ~ age + previous_treatment,
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
-                 tau0 = tau0,
-                 higher.y = TRUE,
-                 seed = 999)
+                 tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 
 coef(fit_2)
-
-
-# Continuous outcome
-fit_3 <- catefit(response = "continuous",
-                 data = meanExample,
-                 score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
-                 cate.model = y ~ age + previous_treatment + previous_cost +
-                                  previous_status_measure,
-                 ps.model = trt ~ age + previous_treatment,
-                 init.model = y ~ age + previous_treatment + previous_cost +
-                                  previous_status_measure,
-                 initial.predictor.method = "gaussian",
-                 higher.y = FALSE,
-                 seed = 999)
-
-coef(fit_3)
 
 }
 }

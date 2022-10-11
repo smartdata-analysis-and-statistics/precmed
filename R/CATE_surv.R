@@ -88,6 +88,7 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' @param ... Additional arguments for \code{gbm()}
 #'
 #' @return Returns an object of the class \code{catefit} containing the following components:
 #' \itemize{
@@ -239,7 +240,8 @@ catefitsurv <- function(data,
                         max.iterNR = 100,
                         tune = c(0.5, 2),
                         seed = NULL,
-                        verbose = 0) {
+                        verbose = 0,
+                        ...) {
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -304,7 +306,7 @@ catefitsurv <- function(data,
                   initial.predictor.method = initial.predictor.method,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
-                  error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune)
+                  error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
 
   if (initial.predictor.method == "boosting" & fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -589,6 +591,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param ... Additional arguments for \code{gbm()}
 #'
 #' @return Depending on what score.method is, the outputs is a combination of the following:
 #'           result.randomForest: Results of random forest fit, for trt = 0 and trt = 1 separately
@@ -604,7 +607,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
                      ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow",
                      initial.predictor.method = "randomForest",
                      tree.depth = 3, n.trees.rf = 1000, n.trees.boosting = 150,  B = 3, Kfold = 5, plot.gbmperf = TRUE,
-                     error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2)) {
+                     error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2), ...) {
 
   result <- vector("list", length(score.method))
   names(result) <- c(paste0("result.", score.method))
@@ -692,7 +695,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
           weight0 <- weightnew_train[trt_train == 0]
 
           fit1.boosting <- gbm(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
-                               cv.folds = 5, weights = weight1)
+                               cv.folds = 5, weights = weight1, ...)
           best1.iter <- max(gbm.perf(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
           f.predict.ini <- predict.gbm(object = fit1.boosting, newdata = data1, n.trees = best1.iter)
           f.predict.ini <- jitter(f.predict.ini, factor = 0.15)
@@ -710,7 +713,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
           f1.predictcv[index == k] <- predict(fit1.gam, newdata = newdata1, type = "response")
 
           fit0.boosting <- gbm(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
-                               cv.folds = 5, weights = weight0)
+                               cv.folds = 5, weights = weight0, ...)
           best0.iter <- max(gbm.perf(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
           f.predict.ini <- predict.gbm(object = fit0.boosting, newdata = data0, n.trees = best0.iter)
           f.predict.ini <- jitter(f.predict.ini, factor = 0.15)
@@ -807,7 +810,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
     weight0 <- weightc[trt == 0]
 
     fit1.boosting <- gbm(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth,
-                         n.trees = n.trees.boosting, cv.folds = 5, weights = weight1)
+                         n.trees = n.trees.boosting, cv.folds = 5, weights = weight1, ...)
     best1.iter <- max(gbm.perf(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
     f.predict.ini <- predict(object = fit1.boosting, newdata = data1, n.trees = best1.iter)
     f.predict.ini <- jitter(f.predict.ini, factor = 0.1)
@@ -821,7 +824,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0, surv.min 
     })
 
     fit0.boosting <- gbm(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth,
-                         n.trees = n.trees.boosting, cv.folds = 5, weights = weight0)
+                         n.trees = n.trees.boosting, cv.folds = 5, weights = weight0, ...)
     best0.iter <- max(gbm.perf(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
     f.predict.ini <- predict(object = fit0.boosting, newdata = data0, n.trees = best0.iter)
     f.predict.ini <- jitter(f.predict.ini, factor = 0.1)

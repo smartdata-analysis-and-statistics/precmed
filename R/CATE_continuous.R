@@ -172,22 +172,6 @@
 #'
 #' @seealso \code{\link{catecvmean}()} function
 #'
-#' @examples
-#' \donttest{
-#' catefit <- catefitmean(cate.model = y ~ age  +
-#'                   previous_treatment +
-#'                   previous_cost +
-#'                   previous_status_measure,
-#'              init.model = y ~ age  +
-#'                           previous_treatment +
-#'                           previous_cost +
-#'                           previous_status_measure,
-#'              ps.model = trt ~ age,
-#'              data = meanExample,
-#'              higher.y = FALSE,
-#'              score.method = "gaussian",
-#'              seed = 999)
-#'}
 
 catefitmean <- function(data,
                         score.method,

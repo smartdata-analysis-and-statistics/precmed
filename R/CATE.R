@@ -105,6 +105,7 @@
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
+#' @param ... Additional arguments for \code{gbm()}
 #'
 #' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
@@ -147,27 +148,9 @@
 #'                  ps.model = trt ~ age + previous_treatment,
 #'                  initial.predictor.method = "logistic",
 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                  tau0 = tau0,
-#'                  higher.y = TRUE,
-#'                  seed = 999)
+#'                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 #'
 #' coef(fit_2)
-#'
-#'
-#' # Continuous outcome
-#' fit_3 <- catefit(response = "continuous",
-#'                  data = meanExample,
-#'                  score.method = c("gaussian", "randomForest", "twoReg", "contrastReg"),
-#'                  cate.model = y ~ age + previous_treatment + previous_cost +
-#'                                   previous_status_measure,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  init.model = y ~ age + previous_treatment + previous_cost +
-#'                                   previous_status_measure,
-#'                  initial.predictor.method = "gaussian",
-#'                  higher.y = FALSE,
-#'                  seed = 999)
-#'
-#' coef(fit_3)
 #'
 #' }
 #' @export
@@ -201,7 +184,8 @@ catefit <- function(response,
                     tune = c(0.5, 2),
                     seed = NULL,
                     plot.gbmperf = TRUE,
-                    verbose = 0) {
+                    verbose = 0,
+                    ...) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   .args <- as.list(match.call())[-1]
