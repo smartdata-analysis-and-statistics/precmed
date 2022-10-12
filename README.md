@@ -1,6 +1,6 @@
 <!-- README.md is generated from README.Rmd using knitr. Please edit that file -->
 
-# precmed: An R package for Precision Medicine <img src='https://fromdatatowisdom.com/images/precmed_sticker.jpg' align="right" height="139" />
+# precmed: Precision Medicine in R <img src='https://fromdatatowisdom.com/images/precmed_sticker.jpg' align="right" height="139" />
 
 <!-- badges: start -->
 
