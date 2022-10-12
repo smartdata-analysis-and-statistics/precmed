@@ -1,13 +1,11 @@
 <!-- README.md is generated from README.Rmd using knitr. Please edit that file -->
 
-# precmed <img src='https://fromdatatowisdom.com/images/precmed_sticker.jpg' align="right" height="139" />
+# precmed: An R package for Precision Medicine <img src='https://fromdatatowisdom.com/images/precmed_sticker.jpg' align="right" height="139" />
 
 <!-- badges: start -->
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 <!-- badges: end -->
-
-## Precision Medicine - Comprehensive R package
 
 A doubly robust precision medicine approach to estimate and validate
 conditional average treatment effects
