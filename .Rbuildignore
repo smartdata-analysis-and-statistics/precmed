@@ -6,3 +6,6 @@ references.bib
 README.Rmd
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
