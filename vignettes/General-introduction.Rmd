@@ -1,0 +1,163 @@
+---
+title: |
+  A general introduction  
+  Vignette 1 of 5
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc: TRUE
+    number_sections: TRUE
+    toc_depth: 3
+    fig_caption: yes
+    fig_width: 9
+    fig_height: 6
+    bookdown::html_document2: default
+bibliography: references.bib
+link-citations: yes
+resource_files:
+    - assets/sticker4.jpg
+---
+<!-- badges: start -->
+
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
+[![metacran downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
+<!-- badges: end -->
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
+```
+```{r, echo=FALSE}
+htmltools::img(src = "sticker4.jpg",
+               alt = 'logo', 
+               style = 'position:absolute; top:0; right:10px; padding:0px;',
+               width = "300px",
+               heigth = "300px")
+```
+
+<h1>precmed: Precision Medicine in R</h1>
+A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
+
+# General introduction
+
+**precmed** was developed to help researchers with precision medicine. In precision medicine, we want to determine the optimal treatment for each patient instead of applying one treatment to all patients because not all patients respond to treatments in the same way. This is also called *treatment effect heterogeneity* in which different subgroups of patients respond differently to the same treatment. **precmed** can help to estimate and internally validate these different treatment effects, also called the conditional average treatment effects (CATEs) which describe how different subgroups respond to the same treatment. Users of the package can estimate these effects (CATEs) between two treatments (e.g., treatment A or treatment B) from either randomized controlled trials (RCTs) or real world data (RWD).  
+
+## Capabilities of `precmed` package
+
+The `precmed` package contains functions to
+
+- Estimate average treatment effects for count, survival and contiuous data
+- Estimate conditional average treatment effect (CATE) score for count and survival
+- Cross-validation of CATE score
+- Compute area between curves
+- Plot validation curves
+  
+The CATEs can be estimated using various scoring methods depending on the type of outcome. Currently, **precmed** supports count and survival outcome:  
+- Example count outcome: When the outcome is the number of relapses (0, 1, 2, 3) and we want to estimate if drug0 or drug1 is preferred for patients.  
+- Example survival outcome: When the outcome is the time (days) to first relapse (or censoring).
+
+Using the `catecv()` function, these treatment effects can be estimated using different scoring methods like `boosting`, `poisson`, and `randomForest` (survival outcomes only). The function will internally evaluate the performance of these different scoring methods with repeated cross-validation (CV). 
+
+
+## User input
+
+The user has to (atleast) input:  
+- response: type of outcome/response (either `count` or `survival`)  
+- data: a data frame with patient data  
+- score.method: select which methods are used to estimate the CATE (e.g., `boosting`, `poisson`, `twoReg`, `contrastReg`)  
+- cate.model: a formula describing the outcome model (outcome ~ age + gender + previous_treatment)  
+The outcome of interest is located on the left, and the covariates on the right.  
+- ps.model: a formula describing the propensity score model (treatment ~ age + previous_treatment)  
+To correct for confounding, the propensity score is calculated. The treatment is located on the left (e.g., drug0 or drug1, treatment must be coded as 0 or 1) and all variables that can influence treatment allocation are located on the right (e.g, age and previous treatment might influence if patients receive drug0 or drug1).  
+  
+## Validation  
+
+The outcome of the `catecv()` function can be validated using 3 built-in validation metrics to internally evaluate the performance of different scoring methods:  
+  
+- area between curves (ABC): `abc(x)`   
+The ABC is a metric to help users select the best scoring method in terms of capturing treatment effect heterogeneity in the data. It is calculated for each scoring method separately. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.  
+  
+- validation curves: `plot(x)`  
+Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., `boosting`, `randomForest`) specified under score.method.  
+  
+- box plots: `boxplot(x)`   
+Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in the validation set across all cross-validation iterations. The subgroups are mutually exclusive and are categorized by the CATE score percentiles `prop.multi` specified in `catecv()`. 
+
+
+## How to install?
+
+The `precmed` package can be installed from CRAN as follows:
+
+``` r
+install.packages("precmed")
+```
+
+The latest version can be installed from GitHub as follows:
+
+``` r
+install.packages("devtools")
+devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
+```
+
+## Main functions
+
+The main functions in the `precmed` package are:
+
+Function name      | Description
+-------------------|---------------------------------
+catecv()           | Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
+catefit()          | Estimation of the conditional average treatment effect (CATE) score for count, survival and continuous data
+atefit()           | Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data
+Validation functions: | 
+abc()              | Compute the area between curves from the `precmed` object
+plot()             | Two side-by-side line plots of validation curves from the `precmed` object
+boxplot()          | A set of box plots of estimated ATEs from the `precmed` object
+
+
+The main functions of the package are: `catecv()`, `catefit()`, `atefit()`, `abc()`, `plot()`, and `boxplot()`. The recommended workflow of analyses to identify treatment effect heterogeneity with several candidate scoring methods follows the steps below:  
+
+1. Compare up to 5 methods to construct the CATE score via internal validation (function `catecv()`).  
+  
+2. Select the best method using 3 metrics:  
+  
+    2.1 Compare the ABC across methods (function `abc()`).  
+    
+    2.2 Compare the steepness of the validation curves in the validation samples across methods (function `plot()`).  
+  
+    2.3 Compare the distribution of the ATE in mutually exclusive subgroups in the validation samples (function `boxplot()`).  
+  
+  
+3. For the selected method, estimate the CATE score in the entire data or, ideally, in an external data set (function `catefit()`). Steps 1 & 2 can be skipped if comparing and selecting methods are not of interest.  
+
+4. Optional. Use `atefit()` to estimate ATE between 2 treatment groups with a doubly robust estimator and estimate the variability of the ATE with a bootstrap approach. 
+
+
+# Other `precmed` vignettes in this serie  
+  
+[1. General introduction](General-introduction.html)  
+[2. Examples for count outcome](Count-examples.html)  
+[3. Examples for survival outcome](Survival-examples.html)  
+[4. Additional examples](Additional-examples.html)  
+[5. Theoretical details](Theoretical-details.html)   
+  
+# Abbreviations
+
+Abbreviation        Full Name
+-------------       ----------
+ABC                 Area between curves
+ATE                 Average treatment effect
+CATE                Conditional average treatment effect
+contrastReg         Contrast regression
+CV                  Cross-validation
+GAM                 Generalized additive model
+GBM                 Gradient boosting machine
+IPCW                Inverse probability of censoring weights
+PM                  Precision medicine
+PS                  Propensity score 
+RCT                 Randomized controlled trial
+RR                  Rate ratio
+twoReg              Two regressions
+
+# References  
+
+
+

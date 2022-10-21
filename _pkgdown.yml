@@ -1,4 +1,14 @@
 url: ~
 template:
   bootstrap: 5
+  bootswatch: lumen
 
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - General-introduction
+  - Count-examples
+  - Survival-examples
+  - Additional-examples
+  - Theoretical-details
