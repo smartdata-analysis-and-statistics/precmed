@@ -1,7 +1,6 @@
 ---
-title: |
-  Examples for survival outcome  
-  Vignette 3 of 5
+title: "Examples for survival outcome"
+subtitle: "Vignette 3 of 5"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -11,25 +10,17 @@ output:
     fig_caption: yes
     fig_width: 9
     fig_height: 6
-resource_files:
-    - assets/sticker4.jpg
 ---
-<!-- badges: start -->
 
+<!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 <!-- badges: end -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
 doc.cache <- T #for cran; change to F
-```
-```{r, echo=FALSE}
-htmltools::img(src = "sticker4.jpg",
-               alt = 'logo', 
-               style = 'position:absolute; top:0; right:10px; padding:0px;',
-               width = "300px",
-               heigth = "300px")
 ```
 
 <h1>precmed: Precision Medicine in R</h1>
@@ -417,7 +408,11 @@ output_atefit$warning
 
 Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for 4 estimands (`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.hazard.ratio`). A red vertical line is added to each histogram with the mean of the bootstrap estimates.
 
-![Figure. Histograms of bootstrap estimators for 4 estimands after 500 bootstrap iterations](atefit_bootstrap.png)
+
+```{r, echo = F}
+knitr::include_graphics("atefit_bootstrap.png")
+```
+Histograms of bootstrap estimators for 4 estimands after 500 bootstrap
 
 # Other `precmed` vignettes in this serie  
   

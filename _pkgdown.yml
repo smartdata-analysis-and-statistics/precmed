@@ -1,14 +1,14 @@
-url: ~
+url: https://smartdata-analysis-and-statistics.github.io/precmed/
 template:
   bootstrap: 5
-  bootswatch: lumen
-
+bootswatch: lumen
 articles:
-- title: Articles
-  navbar: ~
-  contents:
-  - General-introduction
-  - Count-examples
-  - Survival-examples
-  - Additional-examples
-  - Theoretical-details
+  - title: Vignettes
+    navbar: ~
+    contents:
+    - General-introduction
+    - Count-examples
+    - Survival-examples
+    - Additional-examples
+    - Theoretical-details
+
