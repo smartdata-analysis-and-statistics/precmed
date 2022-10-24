@@ -1,198 +1,210 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/404.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html</loc>
   </url>
   <url>
-    <loc>/articles/overview.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/General-introduction.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/index.html</loc>
   </url>
   <url>
-    <loc>/LICENSE.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html</loc>
   </url>
   <url>
-    <loc>/news/index.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html</loc>
   </url>
   <url>
-    <loc>/reference/abc.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/authors.html</loc>
   </url>
   <url>
-    <loc>/reference/abc.precmed.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/index.html</loc>
   </url>
   <url>
-    <loc>/reference/arg.checks.common.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/LICENSE.html</loc>
   </url>
   <url>
-    <loc>/reference/arg.checks.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/atefit.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html</loc>
   </url>
   <url>
-    <loc>/reference/atefitcount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.precmed.html</loc>
   </url>
   <url>
-    <loc>/reference/atefitmean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.common.html</loc>
   </url>
   <url>
-    <loc>/reference/atefitsurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.html</loc>
   </url>
   <url>
-    <loc>/reference/balance.split.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.html</loc>
   </url>
   <url>
-    <loc>/reference/balancemean.split.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.html</loc>
   </url>
   <url>
-    <loc>/reference/balancesurv.split.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitmean.html</loc>
   </url>
   <url>
-    <loc>/reference/boxplot.precmed.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.html</loc>
   </url>
   <url>
-    <loc>/reference/catecv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/balance.split.html</loc>
   </url>
   <url>
-    <loc>/reference/catecvcount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/balancemean.split.html</loc>
   </url>
   <url>
-    <loc>/reference/catecvmean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/balancesurv.split.html</loc>
   </url>
   <url>
-    <loc>/reference/catecvsurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/boxplot.precmed.html</loc>
   </url>
   <url>
-    <loc>/reference/catefit.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.html</loc>
   </url>
   <url>
-    <loc>/reference/catefitcount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html</loc>
   </url>
   <url>
-    <loc>/reference/catefitmean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.html</loc>
   </url>
   <url>
-    <loc>/reference/catefitsurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.html</loc>
   </url>
   <url>
-    <loc>/reference/countExample.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.html</loc>
   </url>
   <url>
-    <loc>/reference/cox.rmst.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html</loc>
   </url>
   <url>
-    <loc>/reference/data.preproc.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitmean.html</loc>
   </url>
   <url>
-    <loc>/reference/data.preproc.mean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.html</loc>
   </url>
   <url>
-    <loc>/reference/data.preproc.surv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/countExample.html</loc>
   </url>
   <url>
-    <loc>/reference/drcount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/cox.rmst.html</loc>
   </url>
   <url>
-    <loc>/reference/drmean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/data.preproc.html</loc>
   </url>
   <url>
-    <loc>/reference/drsurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/data.preproc.mean.html</loc>
   </url>
   <url>
-    <loc>/reference/estcount.bilevel.subgroups.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/data.preproc.surv.html</loc>
   </url>
   <url>
-    <loc>/reference/estcount.multilevel.subgroup.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/drcount.html</loc>
   </url>
   <url>
-    <loc>/reference/estmean.bilevel.subgroups.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/drmean.html</loc>
   </url>
   <url>
-    <loc>/reference/estmean.multilevel.subgroup.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/drsurv.html</loc>
   </url>
   <url>
-    <loc>/reference/estsurv.bilevel.subgroups.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estcount.bilevel.subgroups.html</loc>
   </url>
   <url>
-    <loc>/reference/estsurv.multilevel.subgroups.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estcount.multilevel.subgroup.html</loc>
   </url>
   <url>
-    <loc>/reference/glm.ps.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estmean.bilevel.subgroups.html</loc>
   </url>
   <url>
-    <loc>/reference/glm.simplereg.ps.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estmean.multilevel.subgroup.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estsurv.bilevel.subgroups.html</loc>
   </url>
   <url>
-    <loc>/reference/intxcount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/estsurv.multilevel.subgroups.html</loc>
   </url>
   <url>
-    <loc>/reference/intxmean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/glm.ps.html</loc>
   </url>
   <url>
-    <loc>/reference/intxsurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/glm.simplereg.ps.html</loc>
   </url>
   <url>
-    <loc>/reference/ipcw.surv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/meanCatch.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/intxcount.html</loc>
   </url>
   <url>
-    <loc>/reference/meanExample.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/intxmean.html</loc>
   </url>
   <url>
-    <loc>/reference/onearmglmcount.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/intxsurv.html</loc>
   </url>
   <url>
-    <loc>/reference/onearmglmmean.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/ipcw.surv.html</loc>
   </url>
   <url>
-    <loc>/reference/onearmsurv.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/meanCatch.html</loc>
   </url>
   <url>
-    <loc>/reference/plot.atefit.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/meanExample.html</loc>
   </url>
   <url>
-    <loc>/reference/plot.precmed.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/onearmglmcount.dr.html</loc>
   </url>
   <url>
-    <loc>/reference/print.atefit.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/onearmglmmean.dr.html</loc>
   </url>
   <url>
-    <loc>/reference/print.catefit.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/onearmsurv.dr.html</loc>
   </url>
   <url>
-    <loc>/reference/scorecount.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.atefit.html</loc>
   </url>
   <url>
-    <loc>/reference/scoremean.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.html</loc>
   </url>
   <url>
-    <loc>/reference/scoresurv.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/print.atefit.html</loc>
   </url>
   <url>
-    <loc>/reference/survCatch.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/print.catefit.html</loc>
   </url>
   <url>
-    <loc>/reference/survivalExample.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scorecount.html</loc>
   </url>
   <url>
-    <loc>/reference/twoarmglmcount.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoremean.html</loc>
   </url>
   <url>
-    <loc>/reference/twoarmglmmean.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoresurv.html</loc>
   </url>
   <url>
-    <loc>/reference/twoarmsurv.dr.html</loc>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/survCatch.html</loc>
+  </url>
+  <url>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/survivalExample.html</loc>
+  </url>
+  <url>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/twoarmglmcount.dr.html</loc>
+  </url>
+  <url>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/twoarmglmmean.dr.html</loc>
+  </url>
+  <url>
+    <loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/twoarmsurv.dr.html</loc>
   </url>
 </urlset>
