@@ -40,3 +40,4 @@ Imports: dplyr, gbm, gam, ggplot2, glmnet, graphics, MASS, MESS, mgcv,
         rlang, stringr, tidyr, survival, randomForestSRC
 NeedsCompilation: no
 URL: https://smartdata-analysis-and-statistics.github.io/precmed/
+BugReports: https://github.com/smartdata-analysis-and-statistics/precmed/issues
