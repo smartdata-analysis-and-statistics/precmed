@@ -138,12 +138,12 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 17.85 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 14.29 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2       cv3        cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1400913 0.1716225 0.1086166 0.04360924 0.1337202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2       cv3        cv4        cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1317599 0.1389016 0.1969905 0.05298276 0.03729031</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -160,9 +160,9 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4      cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1626720 0.1674978 0.1993836 0.1811472 0.185707</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1568755 0.1634254 0.2007389 0.1764476 0.185354</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2      cv3       cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1572670 0.1674779 0.180864 0.1888606 0.1786889</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1460056 0.1679339 0.175568 0.1833063 0.1726305</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
