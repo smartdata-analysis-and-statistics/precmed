@@ -1,7 +1,6 @@
 ---
-title: |
-  A general introduction  
-  Vignette 1 of 5
+title: "A general introduction"
+subtitle: "Vignette 1 of 5"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -14,24 +13,16 @@ output:
     bookdown::html_document2: default
 bibliography: references.bib
 link-citations: yes
-resource_files:
-    - assets/sticker4.jpg
 ---
-<!-- badges: start -->
 
+<!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 <!-- badges: end -->
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
-```
-```{r, echo=FALSE}
-htmltools::img(src = "sticker4.jpg",
-               alt = 'logo', 
-               style = 'position:absolute; top:0; right:10px; padding:0px;',
-               width = "300px",
-               heigth = "300px")
 ```
 
 <h1>precmed: Precision Medicine in R</h1>
