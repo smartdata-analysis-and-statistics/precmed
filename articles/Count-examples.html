@@ -43,27 +43,42 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
+  <a class="nav-link" href="../index.html">
+    <span class="fa fa-home fa-lg"></span>
+     
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/precmed.html">Get started</a>
 </li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/General-introduction.html">A general introduction</a>
-    <a class="dropdown-item" href="../articles/Count-examples.html">Examples for count outcome</a>
-    <a class="dropdown-item" href="../articles/Survival-examples.html">Examples for survival outcome</a>
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+    <a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a>
+    <a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a>
     <a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a>
     <a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a>
   </div>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+  <a class="nav-link" href="../reference/index.html">Functions</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">News</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -80,7 +95,7 @@
             
             <h4 data-toc-skip class="date">October 24, 2022</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Count-examples.Rmd</code></div>
     </div>
 
@@ -184,7 +199,7 @@ precmed: Precision Medicine in R
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 13:50:27 2022 </span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 15:12:56 2022 </span></span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
@@ -193,7 +208,7 @@ precmed: Precision Medicine in R
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 13:50:32 2022 </span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 15:13:01 2022 </span></span>
 <span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
@@ -202,7 +217,7 @@ precmed: Precision Medicine in R
 <span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 13:50:39 2022 </span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 15:13:09 2022 </span></span>
 <span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
@@ -211,7 +226,7 @@ precmed: Precision Medicine in R
 <span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 13:50:46 2022 </span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 15:13:17 2022 </span></span>
 <span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
@@ -220,11 +235,11 @@ precmed: Precision Medicine in R
 <span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 13:50:53 2022 </span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Oct 24 15:13:25 2022 </span></span>
 <span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 34.89 secs</span></span></code></pre></div>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 39.17 secs</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed” and here we named it <code>output_catecv</code>. It carries the relevant information to use in the next step of the workflow which selects the method (among those specified in the argument <code>score.method</code>) capturing the highest level of treatment effect heterogeneity. The output, which is described below, will be used in the functions <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code> and <code><a href="../reference/abc.html">abc()</a></code>.</p>
 <p>For each method specified in the argument <code>score.method</code>, the following 4 groups of outputs are generated. We use the results from <code>contrastReg</code> as an example.</p>
 <p><strong>1. ATEs in nested subgroups of high responders</strong></p>
@@ -353,7 +368,7 @@ If higher outcomes were preferable (as specified through the argument `higher.y`
 <span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 10.72686 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 11.9528 secs</span></span></code></pre></div>
 <p>Despite the similar arguments, the outputs of <code><a href="../reference/catefit.html">catefit()</a></code> and <code><a href="../reference/catecv.html">catecv()</a></code> differ. Each method specified in <code>score.method</code> has the following sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -459,13 +474,14 @@ If higher outcomes were preferable (as specified through the argument `higher.y`
 <code class="sourceCode R"><span><span class="va">output_atefit</span><span class="op">$</span><span class="va">warning</span></span>
 <span><span class="co">#&gt; [1] "Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.\n"</span></span></code></pre></div>
 <p>Using <code>plot(output_atefit)</code>, a histograms is generated of the point estimates across the <code>n.boot</code> bootstrap iterations for the log rate ratio. A red vertical line is added to each histogram with the mean of the bootstrap estimates.</p>
-<p><img src="atefit_bootstrap_count.png"><!-- --> Histograms of bootstrap log rate ratio estimators after 500 bootstrap iterations, produced if <code>plot.boot</code> = TRUE</p>
+<p><img src="atefit_bootstrap_count.png"><!-- --></p>
+<p>Histograms of bootstrap log rate ratio estimators after 500 bootstrap iterations, produced if <code>plot.boot</code> = TRUE</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-serie">Other <code>precmed</code> vignettes in this serie<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-serie"></a>
 </h2>
-<p><a href="General-introduction.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
+<p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

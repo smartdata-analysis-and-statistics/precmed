@@ -28,26 +28,40 @@ Random forest, boosting, poisson regression, two regressions, and contrast regre
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../index.html">
+    <span class="fa fa-home fa-lg"></span>
+     
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/precmed.html">Get started</a>
 </li>
 <li class="nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/General-introduction.html">A general introduction</a>
-    <a class="dropdown-item" href="../articles/Count-examples.html">Examples for count outcome</a>
-    <a class="dropdown-item" href="../articles/Survival-examples.html">Examples for survival outcome</a>
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+    <a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a>
+    <a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a>
     <a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a>
     <a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a>
   </div>
 </li>
+<li class="active nav-item">
+  <a class="nav-link" href="../reference/index.html">Functions</a>
+</li>
 <li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+  <a class="nav-link" href="../news/index.html">News</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
-      <ul class="navbar-nav"></ul></div>
+      <ul class="navbar-nav"><li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul></div>
 
     
   </div>
@@ -55,7 +69,7 @@ Random forest, boosting, poisson regression, two regressions, and contrast regre
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Cross-validation of the conditional average treatment effect (CATE) score for survival outcomes</h1>
-      
+      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/R/crossv.R" class="external-link"><code>R/crossv.R</code></a></small>
       <div class="d-none name"><code>catecvsurv.Rd</code></div>
     </div>
 
@@ -483,33 +497,33 @@ observational data. Journal of the American Statistical Association, 1-18.</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 13:41:40 2022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 15:03:21 2022 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==============                                                        |  20%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 13:41:47 2022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 15:03:28 2022 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |============================                                          |  40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 13:41:54 2022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 15:03:35 2022 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==========================================                            |  60%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 13:42:01 2022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 15:03:43 2022 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |========================================================              |  80%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 13:42:08 2022 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Oct 24 15:03:50 2022 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |======================================================================| 100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 33.94 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 36.01 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Try:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>

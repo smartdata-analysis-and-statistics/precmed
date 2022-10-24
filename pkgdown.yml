@@ -4,10 +4,10 @@ pkgdown_sha: ~
 articles:
   Additional-examples: Additional-examples.html
   Count-examples: Count-examples.html
-  General-introduction: General-introduction.html
   Survival-examples: Survival-examples.html
   Theoretical-details: Theoretical-details.html
-last_built: 2022-10-24T13:30Z
+  precmed: precmed.html
+last_built: 2022-10-24T14:50Z
 urls:
   reference: https://smartdata-analysis-and-statistics.github.io/precmed/reference
   article: https://smartdata-analysis-and-statistics.github.io/precmed/articles

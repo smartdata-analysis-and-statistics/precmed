@@ -43,27 +43,42 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
+  <a class="nav-link" href="../index.html">
+    <span class="fa fa-home fa-lg"></span>
+     
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/precmed.html">Get started</a>
 </li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/General-introduction.html">A general introduction</a>
-    <a class="dropdown-item" href="../articles/Count-examples.html">Examples for count outcome</a>
-    <a class="dropdown-item" href="../articles/Survival-examples.html">Examples for survival outcome</a>
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-vignettes">Vignettes</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+    <a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a>
+    <a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a>
     <a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a>
     <a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a>
   </div>
 </li>
 <li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
+  <a class="nav-link" href="../reference/index.html">Functions</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../news/index.html">News</a>
 </li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
 </form>
 
-      <ul class="navbar-nav"></ul>
+      <ul class="navbar-nav">
+<li class="nav-item">
+  <a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 
     
@@ -80,7 +95,7 @@
             
             <h4 data-toc-skip class="date">October 24, 2022</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/Theoretical-details.Rmd" class="external-link"><code>vignettes/Theoretical-details.Rmd</code></a></small>
       <div class="d-none name"><code>Theoretical-details.Rmd</code></div>
     </div>
 
@@ -194,11 +209,8 @@ S(\boldsymbol{\delta})&amp;=\sum_{k=1}^K \sum_{i \in D_{-k}} \boldsymbol{\tilde 
 <li><p>If larger count outcomes are preferred (<code>higher.y = TRUE</code>, e.g., positive events like number of motor developmental milestones reached), a validation curve above the ATE line and decreasing towards that line is synonym with treatment effect heterogeneity (top left figure). However, sections of the validation curve below the ATE line indicate inability to capture treatment effect heterogeneity (bottom left figure). Hence, the ABC is defined by subtracting the areas below the ATE line (red) from the areas above the ATE line (green) such that larger positive ABC are preferred.</p></li>
 <li><p>If smaller count outcomes are preferred (<code>higher.y = FALSE</code>, e.g., negative events like number of relapses), a validation curve below the ATE line and increasing towards that line is synonym with treatment effect heterogeneity (top right figure). However, sections of the validation curve above the ATE line indicate inability to capture treatment effect heterogeneity (bottom right figure). Hence, the ABC is defined by subtracting the areas above the ATE line (red) from the areas below the ATE line (green) such that larger positive ABC are preferred.</p></li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/include_graphics.html" class="external-link">include_graphics</a></span><span class="op">(</span><span class="st">"ABCexample.png"</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<img src="ABCexample.png" alt=""><p class="caption">ABC calculation examples in relation with <code>higher.y</code> argument in <code><a href="../reference/catecv.html">catecv()</a></code> and <code><a href="../reference/catefit.html">catefit()</a></code>. Validation curves are represented with a blue line and the dashed line is the ATE.</p>
-</div>
+<p><img src="ABCexample.png"><!-- --></p>
+<p>ABC calculation examples in relation with <code>higher.y</code> argument in <code><a href="../reference/catecv.html">catecv()</a></code> and <code><a href="../reference/catefit.html">catefit()</a></code>. Validation curves are represented with a blue line and the dashed line is the ATE</p>
 </div>
 </div>
 <div class="section level2">
@@ -333,7 +345,7 @@ S(\boldsymbol{\delta})&amp;=\sum_{k=1}^K \sum_{i \in D_{k}} \hat L(r,y) \boldsym
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-serie">Other <code>precmed</code> vignettes in this serie<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-serie"></a>
 </h2>
-<p><a href="General-introduction.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
+<p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
