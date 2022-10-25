@@ -75,12 +75,12 @@ For more info:
 ## Vignettes
 
 1.  [General introduction to
-    precmed](https://smartdata-analysis-and-statistics.github.io/precmed/docs/articles/precmed.html)  
+    precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.html)  
 2.  [Examples with count outcome of the entire
-    workflow](https://smartdata-analysis-and-statistics.github.io/precmed/docs/articles/Count-examples.html)  
+    workflow](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)  
 3.  [Examples with survival outcome of the entire
-    workflow](https://smartdata-analysis-and-statistics.github.io/precmed/docs/articles/Survival-examples.html)  
+    workflow](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)  
 4.  [Additional examples for the `precmed`
-    package](https://smartdata-analysis-and-statistics.github.io/precmed/docs/articles/Additional-examples.html)  
+    package](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html)  
 5.  [Theoretical
-    details](https://smartdata-analysis-and-statistics.github.io/precmed/docs/articles/Theoretical-details.html)
+    details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html)
