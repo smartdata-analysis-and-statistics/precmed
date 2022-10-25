@@ -2,29 +2,29 @@ url: https://smartdata-analysis-and-statistics.github.io/precmed/
 template:
   bootstrap: 5
 bootswatch: lumen
-
 navbar:
-  title: "precmed"
+  title: precmed
   left:
-    - icon: fa-home fa-lg
-      href: index.html
-    - text: "Get started"
-      href: articles/precmed.html
-    - text: "Vignettes"
-      menu:
-        - text: "Example with count outcome"
-          href: articles/Count-examples.html
-        - text: "Example with survival outcome"
-          href: articles/Survival-examples.html
-        - text: "Additional examples"
-          href: articles/Additional-examples.html
-        - text: "Theoretical details"
-          href: articles/Theoretical-details.html
-      href: articles/index.html
-    - text: "Functions"
-      href: reference/index.html
-    - text: "News"
-      href: news/index.html
+  - icon: fa-home fa-lg
+    href: index.html
+  - text: Get started
+    href: articles/precmed.html
+  - text: Vignettes
+    menu:
+    - text: Example with count outcome
+      href: articles/Count-examples.html
+    - text: Example with survival outcome
+      href: articles/Survival-examples.html
+    - text: Additional examples
+      href: articles/Additional-examples.html
+    - text: Theoretical details
+      href: articles/Theoretical-details.html
+    href: articles/index.html
+  - text: Functions
+    href: reference/index.html
+  - text: News
+    href: news/index.html
   right:
-   - icon: fa-github
-     href: https://github.com/smartdata-analysis-and-statistics/precmed
+  - icon: fa-github
+    href: https://github.com/smartdata-analysis-and-statistics/precmed
+
