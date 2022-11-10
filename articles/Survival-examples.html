@@ -93,7 +93,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for survival outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 3 of 5</h3>
             
-            <h4 data-toc-skip class="date">October 25, 2022</h4>
+            <h4 data-toc-skip class="date">November 10, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -106,153 +106,763 @@
 <h1>
 precmed: Precision Medicine in R
 </h1>
-<p>A doubly robust precision medicine approach to estimate and validate conditional average treatment effects</p>
+<p>A doubly robust precision medicine approach to estimate and validate
+conditional average treatment effects</p>
 <div class="section level2">
-<h2 id="load-required-packages">Load required packages<a class="anchor" aria-label="anchor" href="#load-required-packages"></a>
+<h2 id="examples-with-survival-outcome-of-the-entire-workflow">Examples with survival outcome of the entire workflow<a class="anchor" aria-label="anchor" href="#examples-with-survival-outcome-of-the-entire-workflow"></a>
 </h2>
+<div class="section level3">
+<h3 id="load-required-packages">Load required packages<a class="anchor" aria-label="anchor" href="#load-required-packages"></a>
+</h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://smartdata-analysis-and-statistics.github.io/precmed/">precmed</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="examples-with-survival-outcomes">Examples with survival outcomes<a class="anchor" aria-label="anchor" href="#examples-with-survival-outcomes"></a>
-</h2>
-<p>We use the following simulated data to demonstrate the <code>precmed</code> functions for survival outcomes. The data set <code>survivalExample</code> was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables.</p>
+<div class="section level3">
+<h3 id="load-data-set-example-data-with-survival-outcome">Load data set (Example data with survival outcome)<a class="anchor" aria-label="anchor" href="#load-data-set-example-data-with-survival-outcome"></a>
+</h3>
+<p>To show the functionalities of the <code>precmed</code> package for
+survival outcomes we first need data. For our examples we use simulated
+data that is located in the <code>survivalExample</code> data set. The
+data set <code>survivalExample</code> was simulated based on real-world
+claims data in multiple sclerosis and has 4,000 observations and 9
+variables.</p>
 <ul>
-<li><p>We will use <code>y</code> as the survival outcome, which is the number of days until the first relapse or censoring, whichever comes first.</p></li>
-<li><p>We will use <code>d</code> as the event indicator, where <span class="math inline">\(1\)</span> represents an event and <span class="math inline">\(0\)</span> represents censoring. The censoring rate is about 84%.</p></li>
-<li><p>We will use <code>trt</code> as the treatment variable, which has 2 drugs (drug0 and drug1).</p></li>
-<li><p>The rest of the variables are baseline patient characteristics. Variable <code>age</code> is centered at 48 years old. The medical costs in the year prior to treatment initiation <code>previous_cost</code> is centered at 14,362 USD and scaled with standard deviation 24,266 USD.</p></li>
+<li><p>We will use <code>y</code> as the survival outcome, which is the
+number of days until the first relapse or censoring, whichever comes
+first.</p></li>
+<li><p>We will use <code>d</code> as the event indicator, where <span class="math inline">\(1\)</span> represents an event and <span class="math inline">\(0\)</span> represents censoring. The censoring
+rate is about 84%.</p></li>
+<li><p>We will use <code>trt</code> as the treatment variable, which has
+2 drugs (drug0 and drug1).</p></li>
+<li><p>The rest of the variables are baseline patient characteristics.
+Variable <code>age</code> is centered at 48 years old. The medical costs
+in the year prior to treatment initiation <code>previous_cost</code> is
+centered at 14,362 USD and scaled with standard deviation 24,266
+USD.</p></li>
 </ul>
-<pre><code><span><span class="co">#&gt; 'data.frame':    4000 obs. of  9 variables:</span></span>
-<span><span class="co">#&gt;  $ age                     : num [1:4000, 1] -26.83 -2.83 -12.83 -20.83 6.17 ...</span></span>
-<span><span class="co">#&gt;   ..- attr(*, "scaled:center")= num 45.8</span></span>
-<span><span class="co">#&gt;  $ female                  : int  1 1 1 0 0 1 1 1 1 1 ...</span></span>
-<span><span class="co">#&gt;  $ previous_treatment      : Factor w/ 3 levels "drugA","drugB",..: 3 1 3 1 3 1 3 3 3 1 ...</span></span>
-<span><span class="co">#&gt;  $ previous_cost           : num [1:4000, 1] -0.341 -0.239 -0.171 -0.392 -0.518 ...</span></span>
-<span><span class="co">#&gt;   ..- attr(*, "scaled:center")= num 14362</span></span>
-<span><span class="co">#&gt;   ..- attr(*, "scaled:scale")= num 24266</span></span>
-<span><span class="co">#&gt;  $ previous_number_symptoms: Factor w/ 3 levels "0","1","&gt;=2": 2 2 2 3 3 2 3 2 2 2 ...</span></span>
-<span><span class="co">#&gt;  $ previous_number_relapses: int  0 1 2 0 1 0 0 2 0 0 ...</span></span>
-<span><span class="co">#&gt;  $ trt                     : Factor w/ 2 levels "drug0","drug1": 1 1 1 1 2 1 2 2 2 2 ...</span></span>
-<span><span class="co">#&gt;  $ y                       : num  102.1 51.3 104.9 61.5 35.6 ...</span></span>
-<span><span class="co">#&gt;  $ d                       : num  0 0 0 0 0 0 0 0 0 1 ...</span></span></code></pre>
+<table class="table">
+<thead><tr class="header">
+<th align="left"></th>
+<th align="left">drug0</th>
+<th align="left">drug1</th>
+<th align="left">p</th>
+<th align="left">test</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">n</td>
+<td align="left">1849</td>
+<td align="left">2151</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">age (mean (SD))</td>
+<td align="left">-8.51 (6.40)</td>
+<td align="left">7.31 (5.49)</td>
+<td align="left">&lt;0.001</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">female = 1 (%)</td>
+<td align="left">1393 (75.3)</td>
+<td align="left">1611 (74.9)</td>
+<td align="left">0.775</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">previous_treatment (%)</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">0.794</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">drugA</td>
+<td align="left">819 (44.3)</td>
+<td align="left">933 (43.4)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">drugB</td>
+<td align="left">207 (11.2)</td>
+<td align="left">252 (11.7)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">drugC</td>
+<td align="left">823 (44.5)</td>
+<td align="left">966 (44.9)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">previous_cost (mean (SD))</td>
+<td align="left">-0.12 (0.59)</td>
+<td align="left">0.11 (1.24)</td>
+<td align="left">&lt;0.001</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">previous_number_symptoms (%)</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">0.003</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">0</td>
+<td align="left">191 (10.3)</td>
+<td align="left">156 ( 7.3)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left">1219 (65.9)</td>
+<td align="left">1467 (68.2)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">&gt;=2</td>
+<td align="left">439 (23.7)</td>
+<td align="left">528 (24.5)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">previous_number_relapses (%)</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left">0.110</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">0</td>
+<td align="left">1247 (67.4)</td>
+<td align="left">1365 (63.5)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left">488 (26.4)</td>
+<td align="left">618 (28.7)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">2</td>
+<td align="left">99 ( 5.4)</td>
+<td align="left">147 ( 6.8)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">3</td>
+<td align="left">14 ( 0.8)</td>
+<td align="left">19 ( 0.9)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">4</td>
+<td align="left">1 ( 0.1)</td>
+<td align="left">1 ( 0.0)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">5</td>
+<td align="left">0 ( 0.0)</td>
+<td align="left">1 ( 0.0)</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level3">
+<h3 id="estimation-of-the-ate-with-atefit">Estimation of the ATE with <code>atefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-ate-with-atefit"></a>
+</h3>
+<p>First, one might be interested in the effect of the drug (trt) on the
+number of days until the first relapse or censoring (y). Lets test this
+using Cox regression.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
+<span><span class="va">output_cox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">trt</span>, data <span class="op">=</span> <span class="va">survivalExample</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">output_cox</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; coxph(formula = Surv(y, d) ~ trt, data = survivalExample)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;   n= 4000, number of events= 648 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;             coef exp(coef) se(coef)     z Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; trtdrug1 1.11311   3.04381  0.09233 12.06   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;          exp(coef) exp(-coef) lower .95 upper .95</span></span>
+<span><span class="co">#&gt; trtdrug1     3.044     0.3285      2.54     3.648</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Concordance= 0.639  (se = 0.009 )</span></span>
+<span><span class="co">#&gt; Likelihood ratio test= 170.1  on 1 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Wald test            = 145.3  on 1 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Score (logrank) test = 160.9  on 1 df,   p=&lt;2e-16</span></span></code></pre></div>
+<p>We see from the Cox regression we see that drug1 resulted in a hazard
+ratio (HR) of 3.04 when compared to drug 0. This indicates that drug 0
+is superior to drug 1 because drug 1 increases the risk of a
+relapse.</p>
+<p>Now we want to estimate the Average Treatment Effect (ATE) and
+correct for several covariates like age and previous treatment because
+they might influence the relation between treatment and outcome. The
+<code><a href="../reference/atefit.html">atefit()</a></code> function allows estimating the ATE in terms of
+restricted mean time lost (RMTL) and HR (hazard ratio). The RMTL
+estimator is doubly robust, meaning that the estimator is consistent if
+the PS model (argument <code>ps.model</code>) or the outcome model
+(argument <code>cate.model</code>) or both are correctly specified. The
+estimator also depends on the estimation of Inverse Probability
+Censoring Weights (IPCW). The HR estimator is based on a Cox regression
+model. The function also provides standard error, confidence intervals,
+and p-values based on bootstrap.</p>
+<p>The mandatory arguments for <code><a href="../reference/atefit.html">atefit()</a></code> are:</p>
+<ul>
+<li><p>The <code>response</code> argument specifies the type of outcome
+in the data. For survival outcomes, <code>response</code> = “survival”.
+This informs the function of the necessary arguments and methods to
+use.</p></li>
+<li><p>The argument <code>data</code> indicates the data frame in which
+the outcome, treatment and covariates specified in either
+<code>cate.model</code> or <code>ps.model</code> should be
+fetched.</p></li>
+<li>
+<p>The <code>score.method</code> argument specifies the precision
+medicine (PM) methods to be used to calculate the CATE scores. There are
+a total of 5 scoring methods implemented:</p>
+<ul>
+<li><p><code>poisson</code> fits a Poisson model separately by treatment
+group.</p></li>
+<li><p><code>boosting</code> uses gradient boosted regression models
+(GBM) separately by treatment group.</p></li>
+<li><p><code>randomForest</code> fits a random forest model by treatment
+group.</p></li>
+<li><p><code>twoReg</code> implements the doubly robust two regressions
+estimator in <span class="citation">@yadlowsky2020estimation</span>.</p></li>
+<li><p><code>contrastReg</code> implements the doubly robust contrast
+regression estimator from <span class="citation">@yadlowsky2020estimation</span>.</p></li>
+</ul>
+</li>
+<li><p>The argument <code>cate.model</code> specifies the CATE model as
+a formula, with the survival object from the <code>survival</code>
+package, <code>Surv(y, d)</code>, supplied on the left-hand side and the
+explanatory covariates supplied on the right-hand side. In the example
+below, we chose to specify to CATE as a linear combination of the
+following covariates: age, sex, medical costs in the year prior to
+treatment initiation, and number of relapses in the year prior to
+treatment initiation. Non-linear or interaction terms could also be
+included. Note that the treatment variable is not supplied in
+<code>cate.model</code> since this is an outcome model.</p></li>
+<li><p>The <code>ps.model</code> argument specifies the PS model as a
+formula, with the treatment variable <code>trt</code> on the left-hand
+side and the covariates (age and previous treatment in this example) on
+the right-hand side. The variable <code>trt</code> must be supplied as a
+numeric variable taking only 2 values, “1” for active treatment and “0”
+for control or comparator. If it is not the case, <code><a href="../reference/catecv.html">catecv()</a></code>
+will stop with error if <code>trt</code> takes more than 2 distinct
+values or will automatically transform <code>trt</code> into a numeric
+variable. In this example, <code>trt</code> (a factor variable taking
+values “drug0” and “drug1”) was transformed and a warning message was
+left to the user (see output below):
+<code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
+If the data are from a RCT, it suffices to specify <code>ps.model</code>
+= trt ~ 1. Note that the PS model is only used in the estimation of the
+2 doubly robust methods (two and contrast regressions).</p></li>
+<li><p><code>tau0</code>: The truncation time for defining restricted
+mean time lost. Because our outcome <code>y</code> is skewed towards 0,
+we use the 95% upper limit.</p></li>
+</ul>
+<p>Let’s calculate the ATE for the effect of treatment on y and build an
+outcome model that contains all variables and a PS model with
+<code>age</code> and <code>previous_treatment</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#define tau0</span></span>
+<span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#run atefit</span></span>
+<span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
+<span>                        data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
+<span>                        cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>                        ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>                        tau0 <span class="op">=</span> <span class="va">tau0</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<p>When <code>verbose</code> = 1, the function outputs a progress bar in
+the console.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_atefit</span></span>
+<span><span class="co">#&gt; Average treatment effect:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03388229 0.003747232 0.1365634 0.03839997</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.20787467 2.305897428 3.1207512 0.00000000</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Estimated RMST:</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.590050 159.9446 185.7772      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.755358 179.4001 213.7204      0</span></span>
+<span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
+standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
+of the 95% confidence interval, and the p-value (“pvalue”) for 4
+estimands:</p>
+<ul>
+<li><p>the restricted mean survival time under drug 1
+(<code>$rmst1</code>)</p></li>
+<li><p>the restricted mean survival time under drug 0
+(<code>$rmst0</code>)</p></li>
+<li><p>the log RMTL ratio (<code>$log.rmtl.ratio</code>), which is the
+log of the ratio of <code>tau0</code> - <code>$rmst1</code> divided by
+<code>tau0</code> - <code>$rmst0</code></p></li>
+<li><p>the log HR (<code>$log.hazard.ratio</code>).</p></li>
+</ul>
+<p>For example, the log RMTL ratio of 0.07 and the 95% confidence
+interval of (0, 0.14) are displayed in the output. The RMTL ratio of
+along with the 95% confidence interval suggest that drug 0 is superior
+to drug 1 because the ratio is significantly greater than 1. When we
+check the estimated RMST, we also see that the estimated rmst1 is lower
+compared to rmst0, indicating that patients that received drug0 have a
+longer mean survival time compared to drug1.</p>
+<p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> is expressed in terms of
+treatment 0 vs 1, where the RMTL and hazard ratios are expressed as the
+ratio of the treatment coded as 1 over the treatment coded as 0. If the
+treatment variable is not coded as 0/1 in the data set, the function
+returns a warning <code>output_atefit$warning</code> which indicates
+what key was used to recode the treatment variable into a 0/1
+variable.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_atefit</span><span class="op">$</span><span class="va">warning</span></span>
+<span><span class="co">#&gt; [1] "Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.\n"</span></span></code></pre></div>
+<p>Using <code>plot(output_atefit)</code>, a histograms is generated of
+the point estimates across the <code>n.boot</code> bootstrap iterations
+for 4 estimands (<code>rmst1</code>, <code>rmst0</code>,
+<code>log.rmtl.ratio</code>, <code>log.hazard.ratio</code>). A red
+vertical line is added to each histogram with the mean of the bootstrap
+estimates.</p>
+<p><img src="atefit_bootstrap.png"><!-- --></p>
+<p>Histograms of bootstrap estimators for 4 estimands after 500
+bootstrap</p>
+</div>
+<div class="section level3">
+<h3 id="estimation-of-the-cate-score-with-catefit">Estimation of the CATE score with <code>catefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-cate-score-with-catefit"></a>
+</h3>
+<p>Now we have calculated the ATE we know the effect of both treatments
+on average, but this effect might not be the same for all patients.
+Thus, it might be worthwhile to check if there are subgroups that
+respond differently to the treatments. We can calculate the Conditional
+Average Treatment Effect (CATE) score which calculates the ATE for
+different subgroups in the data. If no internal validation is needed (we
+get back to that later), we can use the <code><a href="../reference/catefit.html">catefit()</a></code> function
+to a model directly to the entire data set to estimate the CATE score.
+For the <code><a href="../reference/catefit.html">catefit()</a></code> function we have to define the
+<code>score.method</code>. This arguments specifies the precision
+medicine (PM) method to be used to calculate the CATE scores. There are
+a total of 5 scoring methods implemented:</p>
+<p>The mandatory arguments in <code><a href="../reference/catefit.html">catefit()</a></code> are:</p>
+<ul>
+<li><p><code>response</code>: “survival” in this example because we use
+have data with a survival outcome (e.g., number of days until the first
+relapse or censoring))</p></li>
+<li><p><code>data</code>: the name of the data set.
+(survivalExample)</p></li>
+<li>
+<p><code>score.method</code>: argument specifies the precision
+medicine (PM) methods to be used to calculate the CATE scores. There are
+a total of 5 scoring methods implemented:</p>
+<ul>
+<li><p><code>poisson</code> fits a Poisson model separately by treatment
+group.</p></li>
+<li><p><code>boosting</code> uses gradient boosted regression models
+(GBM) separately by treatment group.</p></li>
+<li><p><code>randomForest</code> fits a random forest model by treatment
+group.</p></li>
+<li><p><code>twoReg</code> implements the doubly robust two regressions
+estimator in <span class="citation">@yadlowsky2020estimation</span>.</p></li>
+<li><p><code>contrastReg</code> implements the doubly robust contrast
+regression estimator from <span class="citation">@yadlowsky2020estimation</span>.</p></li>
+</ul>
+</li>
+<li><p><code>cate.model</code>: A formula describing the outcome model
+to be fitted. The outcome must appear on the left-hand side. In the
+example, we choose to specify to outcome model as a linear combination
+of the following covariates: age, sex, medical costs in the year prior
+to treatment initiation, and number of relapses in the year prior to
+treatment initiation. Non-linear or interaction terms could also be
+included. Note that the treatment variable is not supplied in
+<code>cate.model</code> since this is an outcome model.</p></li>
+<li><p><code>ps.model</code>: A formula describing the propensity score
+(PS) model to be fitted. The treatment must appear on the left-hand side
+and the covariates (age and previous treatment in this example) on the
+right-hand side. The variable <code>trt</code> must be supplied as a
+numeric variable taking only 2 values, 1 for active treatment and 0 for
+control or comparator. If it is not the case, the function will stop
+with error if <code>trt</code> takes more than 2 distinct values or will
+automatically transform <code>trt</code> into a numeric variable. In
+this example, <code>trt</code> (a factor variable taking values “drug0”
+and “drug1”) was transformed and a warning message was left to the user
+(see output below):
+<code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
+If the data are from a RCT, it suffices to specify <code>ps.model</code>
+= trt ~ 1. Note that the PS model is only used in the estimation of the
+2 doubly robust methods (two and contrast regressions).</p></li>
+</ul>
+<p>We also specified the following non-mandatory arguments to fit with
+the data and problem at hand: <code>initial.predictor.method</code>,
+<code>tau0</code>, <code>higher.y</code>, <code>seed</code>, and
+<code>plot.gbmperf</code>.</p>
+<ul>
+<li><p><code>initial.predictor.method</code> specifies how predictions
+of the outcome are estimated in two regressions and contrast regression.
+Flexible models can be used such as GBM (“boosting”), random forests
+(“randomForest”) or logistic regression (“logistic”). We chose
+“logistic” because it is relatively faster than boosting methods and
+random forest.</p></li>
+<li><p><code>tau0</code> is the truncation time for defining restricted
+mean time lost (RMTL). Because our outcome <code>y</code> is skewed
+towards 0, we use the 95% upper limit.</p></li>
+<li><p><code>higher.y</code> was set to <code>TRUE</code> because
+relapse is a negative event and longer time to first relapse is more
+desirable in our example. Hence, we are telling the function that
+subgroups of high responders to drug1 vs drug0 should have later onset
+of the first relapse. In other situation, higher outcomes may be more
+favorable for time to a positive event, e.g., time to discharge or time
+to improved disability. It is important for this argument to match with
+the nature of <code>y</code> outcome because it will affect how the
+subgroups are defined by the CATE scores and the performance
+metrics.</p></li>
+<li><p>We set a random seed <code>seed</code> = 999 to reproduce the
+results.</p></li>
+<li><p>We avoided generating the boosting performance plots by
+specifying <code>plot.gbmperf</code> = FALSE.</p></li>
+</ul>
+<p>Please see the <a href="https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.html">Function
+description</a> section for details.</p>
+<p>If you run into errors or warnings with your data, it might be
+helpful to go over the descriptions to see if you need to alter the
+default values. In this toy example, we keep the default values of the
+remaining arguments. For this toy example we selected
+<code>randomForest</code> and <code>contrastReg</code> to limit run
+time.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
+<span>                          data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
+<span>                          score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
+<span>                          cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>                          ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>                          initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>                          tau0 <span class="op">=</span> <span class="va">tau0</span>, </span>
+<span>                          higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                          seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>                          plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<p>Each method specified in <code>score.method</code> has the following
+sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
+<ol style="list-style-type: decimal">
+<li>
+<code>score</code> contains the log-transformed estimated CATE
+scores for each subject. The CATE score is a linear combination of the
+variables specified in the <code>cate.model</code> argument. Same as the
+outcome, lower CATE scores are more desirable if <code>higher.y</code> =
+FALSE and vice versa. In our example, the survival outcome is time to
+first relapse, which is a negative event, so higher values indicate
+later onset of the first relapse. Hence, we specify
+<code>higher.y</code> = TRUE in the example. Each subject has 1 CATE
+score so the length of this output is 4,000 for our toy example. Below
+we show the CATE scores estimated with contrast regression for the first
+6 subjects in the data.</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 4000</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1]  5.3273340  1.1661594  3.4869179  4.0157912 -0.8475816  2.4217492</span></span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>
+<code>coefficients</code> contains the estimated coefficients of the
+CATE score for each scoring method. It is a data frame of the covariates
+(including intercept) as rows and scoring methods as columns. In our toy
+example, there are 4 covariates in the <code>cate.model</code>, plus the
+intercept, so there are 5 rows of estimated coefficients within each
+column. Boosting method does not estimate coefficients (it directly
+predicts the score) so they do not have coefficient results here.</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
+<span><span class="co">#&gt;                          contrastReg</span></span>
+<span><span class="co">#&gt; (Intercept)                0.2526763</span></span>
+<span><span class="co">#&gt; age                       -0.1912056</span></span>
+<span><span class="co">#&gt; female                     0.1359512</span></span>
+<span><span class="co">#&gt; previous_cost              0.5629853</span></span>
+<span><span class="co">#&gt; previous_number_relapses   0.3703522</span></span></code></pre></div>
+<p>We can define the estimated CATE scores for contrast regression like
+shown below. The user can use this information to study the influence of
+each covariate. <span class="math display">\[
+\begin{aligned}
+\widehat{CATE} = 0.25 &amp; - 0.19 \times \text{age} \\
+&amp; + 0.14 \times \text{female (vs male)} \\
+&amp; + 0.56 \times \text{previous medical costs} \\
+&amp; + 0.37 \times \text{previous number of relapses}
+\end{aligned}
+\]</span></p>
+<ol start="3" style="list-style-type: decimal">
+<li>
+<code>ate</code> contains estimated ATEs by each nested subgroup of
+high responders to drug 1 defined by <code>prop.cutoff</code>. The
+subgroups are defined based on the estimated CATE scores with the
+specified scoring method. In this example, we show the estimated ATEs of
+subgroups identified by CATE scores of the contrast regression. For
+example, the estimated ATE for the subgroup of subjects constructed
+based on the 50% (“prop0.5”) lowest CATE scores estimated from the
+contrast regression is 0.41.</li>
+</ol>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
+<span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
+<span><span class="co">#&gt; 0.4105682 0.5114925 0.6269751 0.7800895 0.9145661 1.0726748</span></span></code></pre></div>
+<p>You are encouraged to summarize and visualize the outputs in
+whichever way that fits their particular situation outside the package’s
+functions. For example, it is possible to plot the densities of all CATE
+scores with <code>ggplot</code>. There are some subjects with extremely
+high estimated CATE scores but most of the samples fall between -10 and
+10.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Random Forest"</span>, <span class="st">"Contrast regression"</span><span class="op">)</span>, </span>
+<span>                                          each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                       value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span>,<span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dataplot</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, fill <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Estimated CATE score"</span>, y <span class="op">=</span> <span class="st">"Density"</span>, fill <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Removed 5 rows containing non-finite values (`stat_density()`).</span></span></code></pre></div>
+<p><img src="Survival-examples_files/figure-html/plot_score-1.png" width="700" style="display: block; margin: auto;"></p>
+</div>
 <div class="section level3">
 <h3 id="internal-validation-via-catecv">Internal validation via <code>catecv()</code><a class="anchor" aria-label="anchor" href="#internal-validation-via-catecv"></a>
 </h3>
-<p>We first run the internal validation to compare 5 scoring methods. This is done with the function <code><a href="../reference/catecv.html">catecv()</a></code>. This first step gives results in the form of a “precmed” object which will be used in the next steps to compare the performance of the scoring methods.</p>
-<p>The mandatory arguments in <code><a href="../reference/catecv.html">catecv()</a></code> are <code>response</code>, <code>data</code>, <code>score.method</code>, <code>cate.model</code>, and <code>ps.model</code>. They must be specified by the user.</p>
+<p>The <code><a href="../reference/catecv.html">catecv()</a></code> function provides the same estimation as
+the <code><a href="../reference/catefit.html">catefit()</a></code> but via cross-validation (CV). With the
+<code><a href="../reference/catecv.html">catecv()</a></code> function internal CV is applied to reduce optimism
+in choosing the CATE estimation method that captures the most treatment
+effect heterogeneity. The CV is applied by repeating the following steps
+<code>cv.n</code> times:</p>
 <ul>
-<li><p>The <code>response</code> argument specifies the type of outcome in the data. For survival outcomes, <code>response</code> = “survival”. This informs the function of the necessary arguments and methods to use.</p></li>
-<li><p>The argument <code>data</code> indicates the data frame in which the outcome, treatment and covariates specified in either <code>cate.model</code> or <code>ps.model</code> should be fetched.</p></li>
+<li><p>Split the data into a training and validation set according to
+<code>train.prop</code> argument. The training and validation sets must
+be balanced with respect to covariate distributions and doubly robust
+rate ratio estimates (see <code>error.max</code> argument).</p></li>
+<li><p>Estimate the CATE score in the training set with the specified
+scoring method.</p></li>
+<li><p>Predict the CATE score in the validation set using the scoring
+model fitted from the training set.</p></li>
 <li>
-<p>The <code>score.method</code> argument specifies the precision medicine (PM) methods to be used to calculate the CATE scores. There are a total of 5 scoring methods implemented:</p>
+<p>Build nested subgroups of treatment responders in the training
+and validation sets, separately, and estimate the ATE within each nested
+subgroup. For each element i of <code>prop.cutoff</code> argument (e.g.,
+<code>prop.cutoff[i] = 0.6</code>), take the following steps:</p>
 <ul>
-<li><p><code>poisson</code> fits a Poisson model separately by treatment group.</p></li>
-<li><p><code>boosting</code> uses gradient boosted regression models (GBM) separately by treatment group.</p></li>
-<li><p><code>randomForest</code> fits a random forest model by treatment group.</p></li>
-<li><p><code>twoReg</code> implements the doubly robust two regressions estimator in <span class="citation">@yadlowsky2020estimation</span>.</p></li>
-<li><p><code>contrastReg</code> implements the doubly robust contrast regression estimator from <span class="citation">@yadlowsky2020estimation</span>.</p></li>
+<li><p>Identify high responders as observations with the 60% (i.e.,
+<code>prop.cutoff[i]x100%</code>) highest (if
+<code>higher.y = TRUE</code>) or lowest (if
+<code>higher.y = FALSE</code>) estimated CATE scores.</p></li>
+<li><p>Estimate the ATE in the subgroup of high responders using a
+doubly robust estimator.</p></li>
+<li><p>Conversely, identify low responders as observations with the 40%
+(i.e., <code>1 - prop.cutoff[i]x100%</code>) lowest (if
+<code>higher.y = TRUE</code>) or highest (if
+<code>higher.y = FALSE</code>) estimated CATE scores.</p></li>
+<li><p>Estimate the ATE in the subgroup of low responders using a doubly
+robust estimator.</p></li>
 </ul>
 </li>
+<li><p>If <code>abc = TRUE</code>, calculate the area between the ATE
+and the series of ATEs in nested subgroups of high responders in the
+validation set. (for more information about the abc score, see <a href="Theoretical-details.html">Validation curves and the ABC
+statistics</a>)</p></li>
+<li><p>Build mutually exclusive subgroups of treatment responders in the
+training and validation sets, separately, and estimate the ATE within
+each subgroup. Mutually exclusive subgroups are built by splitting the
+estimated CATE scores according to prop.multi.</p></li>
 </ul>
-<p>For this toy example we selected <code>randomForest</code> and <code>contrastReg</code> to limit run time.</p>
+<p>Oke, so now we can use the <code><a href="../reference/catecv.html">catecv()</a></code> function to run
+internal validation to compare the different scoring methods. The
+mandatory arguments are similar to <code><a href="../reference/atefit.html">atefit()</a></code> and
+<code><a href="../reference/catefit.html">catefit()</a></code>: The mandatory arguments are:
+<code>response</code>, <code>data</code>, <code>score.method</code>,
+<code>cate.model</code>, and <code>ps.model</code>. See above for more
+details on these arguments. For this toy example we again selected
+<code>randomForest</code> and <code>contrastReg</code> limit run
+time.</p>
+<p>We also specified the following non-mandatory arguments to fit with
+the data and problem at hand: <code>initial.predictor.method</code>,
+<code>ipcw.model</code>, <code>verbose</code>,
+<code>followup.time</code>, <code>tau0</code>, <code>higher.y</code>,
+<code>cv.n</code>, <code>surv.min</code>, <code>seed</code>, and
+<code>plot.gbmperf</code>.</p>
 <ul>
-<li><p>The argument <code>cate.model</code> specifies the CATE model as a formula, with the survival object from the <code>survival</code> package, <code>Surv(y, d)</code>, supplied on the left-hand side and the explanatory covariates supplied on the right-hand side. In the example below, we chose to specify to CATE as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in <code>cate.model</code> since this is an outcome model.</p></li>
-<li><p>The <code>ps.model</code> argument specifies the PS model as a formula, with the treatment variable <code>trt</code> on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable <code>trt</code> must be supplied as a numeric variable taking only 2 values, “1” for active treatment and “0” for control or comparator. If it is not the case, <code><a href="../reference/catecv.html">catecv()</a></code> will stop with error if <code>trt</code> takes more than 2 distinct values or will automatically transform <code>trt</code> into a numeric variable. In this example, <code>trt</code> (a factor variable taking values “drug0” and “drug1”) was transformed and a warning message was left to the user (see output below): <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>. If the data are from a RCT, it suffices to specify <code>ps.model</code> = trt ~ 1. Note that the PS model is only used in the estimation of the 2 doubly robust methods (two and contrast regressions).</p></li>
+<li><p><code>initial.predictor.method</code> specifies how predictions
+of the outcome are estimated in two regressions and contrast regression.
+Flexible models can be used such as GBM (“boosting”), random forests
+(“randomForest”) or logistic regression (“logistic”). We chose
+“logistic” because it is relatively faster than boosting methods and
+random forest.</p></li>
+<li><p><code>followup.time</code> specifies the maximum follow-up time
+in the data. We set it default as <code>NULL</code>, which indicates
+unknown potential censoring time.</p></li>
+<li><p><code>tau0</code> is the truncation time for defining restricted
+mean time lost (RMTL). Because our outcome <code>y</code> is skewed
+towards 0, we use the 95% upper limit.</p></li>
+<li><p><code>higher.y</code> was set to <code>TRUE</code> because
+relapse is a negative event and longer time to first relapse is more
+desirable in our example. Hence, we are telling the function that
+subgroups of high responders to drug1 vs drug0 should have later onset
+of the first relapse. In other situation, higher outcomes may be more
+favorable for time to a positive event, e.g., time to discharge or time
+to improved disability. It is important for this argument to match with
+the nature of <code>y</code> outcome because it will affect how the
+subgroups are defined by the CATE scores and the performance
+metrics.</p></li>
+<li><p><code>surv.min</code> truncates the censoring probability
+estimated from the IPCW model with a lower limit to prevent extremely
+small censoring probabilities. It is recommended to choose a small
+positive value close to 0. We chose <code>0.025</code> in the example,
+which corresponds to the default value.</p></li>
+<li><p>We performed 5 CV iterations by specifying <code>cv.n</code> = 5.
+Typically, more CV iterations are desirable although associated with
+longer computational times.</p></li>
+<li><p>We set a random seed <code>seed</code> = 999 to reproduce the
+results.</p></li>
+<li><p>We avoided generating the boosting performance plots by
+specifying <code>plot.gbmperf</code> = FALSE.</p></li>
+<li><p>When <code>verbose</code> = 1, progress messages are printed in
+the R console but errors and warnings are not printed. The current CV
+iteration is printed, followed by the steps of the CV procedure
+(splitting the data, training the models, validating the models). A
+timestamp and a progress bar are also displayed upon completion of a CV
+iteration. If <code>contrastReg</code> was selected as one of the
+methods in <code>score.method</code>, an additional line of output
+message will indicate whether the algorithm has converged.</p></li>
 </ul>
-<p>We also specified the following non-mandatory arguments to fit with the data and problem at hand: <code>initial.predictor.method</code>, <code>ipcw.model</code>, <code>verbose</code>, <code>followup.time</code>, <code>tau0</code>, <code>higher.y</code>, <code>cv.n</code>, <code>surv.min</code>, <code>seed</code>, and <code>plot.gbmperf</code>.</p>
-<ul>
-<li><p><code>initial.predictor.method</code> specifies how predictions of the outcome are estimated in two regressions and contrast regression. Flexible models can be used such as GBM (“boosting”), random forests (“randomForest”) or logistic regression (“logistic”). We chose “logistic” because it is relatively faster than boosting methods and random forest.</p></li>
-<li><p>The <code>ipcw.model</code> argument specifies the inverse proability of censoring weighting (IPCW) model as a formula, with the left-hand side empty and the covariates on the right-hand side. The IPCW model calculates the probability of being censored as weights to be included in the PM methods in order to correct for right censoring. In the example below, we chose to specify IPCW model as a linear combination of age, medical costs in the year prior to treatment initiation, and previous treatment. This argument can be left default as <code>NULL</code> if the user wants to use the same covariates provided in the outcome model <code>cate.model</code> plus the treatment variable.</p></li>
-<li><p>We only output the progress of the CV procedure (but not the full error messages and warnings) in the R console by setting <code>verbose</code> = 1.</p></li>
-<li><p><code>followup.time</code> specifies the maximum follow-up time in the data. We set it default as <code>NULL</code>, which indicates unknown potential censoring time.</p></li>
-<li><p><code>tau0</code> is the truncation time for defining restricted mean time lost (RMTL). We specified it as <code>NULL</code>, which automatically sets the truncation time as the maximum survival time in the data.</p></li>
-<li><p><code>higher.y</code> was set to <code>TRUE</code> because relapse is a negative event and longer time to first relapse is more desirable in our example. Hence, we are telling the function that subgroups of high responders to drug1 vs drug0 should have later onset of the first relapse. In other situation, higher outcomes may be more favorable for time to a positive event, e.g., time to discharge or time to improved disability. It is important for this argument to match with the nature of <code>y</code> outcome because it will affect how the subgroups are defined by the CATE scores and the performance metrics.</p></li>
-<li><p>We performed 5 CV iterations by specifying <code>cv.n</code> = 5. Typically, more CV iterations are desirable although associated with longer computational times.</p></li>
-<li><p><code>surv.min</code> truncates the censoring probability estimated from the IPCW model with a lower limit to prevent extremely small censoring probabilities. It is recommended to choose a small positive value close to 0. We chose <code>0.025</code> in the example, which corresponds to the default value.</p></li>
-<li><p>We set a random seed <code>seed</code> = 999 to reproduce the results.</p></li>
-<li><p>We avoided generating the boosting performance plots by specifying <code>plot.gbmperf</code> = FALSE.</p></li>
-<li><p>When <code>verbose</code> = 1, progress messages are printed in the R console but errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If <code>contrastReg</code> was selected as one of the methods in <code>score.method</code>, an additional line of output message will indicate whether the algorithm has converged.</p></li>
-</ul>
-<p>There are many other non-mandatory arguments that <code><a href="../reference/catecv.html">catecv()</a></code> can accept. Please see the <a href="Additional-examples.html">More Examples</a> section for more examples and the Function description (<code><a href="../reference/catecvsurv.html">?catecvsurv</a></code>) for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tau0 <span class="ot">&lt;-</span> <span class="fu">with</span>(survivalExample,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">min</span>(<span class="fu">quantile</span>(y[trt <span class="sc">==</span> <span class="st">"drug1"</span>], <span class="fl">0.95</span>), <span class="fu">quantile</span>(y[trt <span class="sc">==</span> <span class="st">"drug0"</span>], <span class="fl">0.95</span>)))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>output_catecv <span class="ot">&lt;-</span> <span class="fu">catecv</span>(<span class="at">response =</span> <span class="st">"survival"</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">data =</span> survivalExample,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">score.method =</span> <span class="fu">c</span>(<span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span>),</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">cate.model =</span> survival<span class="sc">::</span><span class="fu">Surv</span>(y, d) <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                                     previous_cost <span class="sc">+</span> previous_number_relapses,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">ps.model =</span> trt <span class="sc">~</span> age <span class="sc">+</span> previous_treatment,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                        <span class="at">initial.predictor.method =</span> <span class="st">"logistic"</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">ipcw.model =</span> <span class="cn">NULL</span>,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                        <span class="at">followup.time =</span> <span class="cn">NULL</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">tau0 =</span> tau0,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="at">higher.y =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">surv.min =</span> <span class="fl">0.025</span>,</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                        <span class="at">prop.cutoff =</span> <span class="fu">seq</span>(<span class="fl">0.6</span>, <span class="dv">1</span>, <span class="at">length =</span> <span class="dv">5</span>),</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                        <span class="at">prop.multi =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="dv">1</span>),</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">cv.n =</span> <span class="dv">5</span>,</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>                        <span class="at">seed =</span> <span class="dv">999</span>,</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                        <span class="at">plot.gbmperf =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                        <span class="at">verbose =</span> <span class="dv">1</span>)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 1 </span></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tue Oct 25 07:07:51 2022 </span></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 2 </span></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tue Oct 25 07:08:12 2022 </span></span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 3 </span></span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tue Oct 25 07:08:32 2022 </span></span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 4 </span></span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tue Oct 25 07:08:52 2022 </span></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 5 </span></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Tue Oct 25 07:09:13 2022 </span></span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 1.75 mins</span></span></code></pre></div>
-<p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed” and here we named it <code>output_catecv</code>. It carries the relevant information to use in the next step of the workflow which selects the method (among those specified in the argument <code>score.method</code>) capturing the highest level of treatment effect heterogeneity. The output, which is described below, will be used in the functions <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code> and <code><a href="../reference/abc.html">abc()</a></code>.</p>
-<p>For each method specified in the argument <code>score.method</code>, the following 4 groups of outputs are generated. We use the results from <code>randomForest</code> as an example.</p>
+<p>There are many other non-mandatory arguments that
+<code><a href="../reference/catecv.html">catecv()</a></code> can accept. Please see the <a href="Additional-examples.html">Additional examples</a> vignette for
+more examples and the Function description <a href="https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.html">Function
+description</a> for details. If you run into errors or warnings with
+your data, it might be helpful to go over the descriptions to see if you
+need to alter the default values. In this toy example, we keep the
+default values of the remaining arguments.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tau0 <span class="ot">&lt;-</span> <span class="fu">with</span>(survivalExample,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">min</span>(<span class="fu">quantile</span>(y[trt <span class="sc">==</span> <span class="st">"drug1"</span>], <span class="fl">0.95</span>), <span class="fu">quantile</span>(y[trt <span class="sc">==</span> <span class="st">"drug0"</span>], <span class="fl">0.95</span>)))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>output_catecv <span class="ot">&lt;-</span> <span class="fu">catecv</span>(<span class="at">response =</span> <span class="st">"survival"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">data =</span> survivalExample,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">score.method =</span> <span class="fu">c</span>(<span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">cate.model =</span> survival<span class="sc">::</span><span class="fu">Surv</span>(y, d) <span class="sc">~</span> age <span class="sc">+</span> female <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                                     previous_cost <span class="sc">+</span> previous_number_relapses,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">ps.model =</span> trt <span class="sc">~</span> age <span class="sc">+</span> previous_treatment,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                        <span class="at">initial.predictor.method =</span> <span class="st">"logistic"</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">followup.time =</span> <span class="cn">NULL</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                        <span class="at">tau0 =</span> tau0,</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">higher.y =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                        <span class="at">surv.min =</span> <span class="fl">0.025</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">prop.cutoff =</span> <span class="fu">seq</span>(<span class="fl">0.6</span>, <span class="dv">1</span>, <span class="at">length =</span> <span class="dv">5</span>),</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                        <span class="at">prop.multi =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="dv">1</span>),</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>                        <span class="at">cv.n =</span> <span class="dv">5</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                        <span class="at">seed =</span> <span class="dv">999</span>,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>                        <span class="at">plot.gbmperf =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>                        <span class="at">verbose =</span> <span class="dv">1</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="er">|</span>                                                                      <span class="er">|</span>   <span class="dv">0</span>%</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 1 </span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Thu Nov 10 16:55:31 2022 </span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 2 </span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Thu Nov 10 16:55:57 2022 </span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 3 </span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Thu Nov 10 16:56:22 2022 </span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 4 </span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Thu Nov 10 16:56:48 2022 </span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; cv = 5 </span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   splitting the data..</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Thu Nov 10 16:57:14 2022 </span></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 2.18 mins</span></span></code></pre></div>
+<p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
+and here we named it <code>output_catecv</code>. It carries the relevant
+information to use in the next step of the workflow which selects the
+method (among those specified in the argument <code>score.method</code>)
+capturing the highest level of treatment effect heterogeneity. The
+output, which is described below, will be used in the functions
+<code><a href="../reference/abc.html">abc()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>.</p>
+<p>For each method specified in the argument <code>score.method</code>,
+the following 3 groups of outputs are generated: <code>high</code>,
+<code>low</code> and <code>group</code>. We use the results from
+<code>randomForest</code> as an example.</p>
 <p><strong>1. ATEs in nested subgroups of high responders</strong></p>
-<p>This output stores the ATEs - the ratio of RMTL between drug1 vs drug0 in this example - in nested subgroups of patients of high responders to drug 1 in the training (<code>$ate.est.train.high.cv</code>) and validation (<code>$ate.est.valid.high.cv</code>) sets across all CV iterations. When <code>higher.y</code> = TRUE for survival outcomes, which is the case in this example, lower CATE scores correspond to high responders to drug1. When <code>higher.y</code> = FALSE for survival outcomes, higher CATE scores correspond to high responders to drug1. Note that this is different for count outcomes. The direction of CATE scores depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<p>This output stores the ATEs - the ratio of RMTL between drug1 vs
+drug0 in this example - in nested subgroups of patients of high
+responders to drug 1 in the training
+(<code>$ate.est.train.high.cv</code>) and validation
+(<code>$ate.est.valid.high.cv</code>) sets across all CV iterations.
+When <code>higher.y</code> = TRUE for survival outcomes, which is the
+case in this example, lower CATE scores correspond to high responders to
+drug1. When <code>higher.y</code> = FALSE for survival outcomes, higher
+CATE scores correspond to high responders to drug1. Note that this is
+different for count outcomes. The direction of CATE scores depends on
+both <code>higher.y</code> and outcome type.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.6 0.4753124 0.4917526 0.4876323 0.5089093 0.5584117</span></span>
@@ -267,21 +877,65 @@ precmed: Precision Medicine in R
 <span><span class="co">#&gt; prop0.8 0.7970265 0.7169490 0.7944385 0.7349855 0.7500680</span></span>
 <span><span class="co">#&gt; prop0.9 0.9830217 0.8543862 0.9462473 0.8868964 0.9248308</span></span>
 <span><span class="co">#&gt; prop1   1.1465914 1.0194984 1.0968389 1.0526779 1.1027499</span></span></code></pre></div>
-<p>The output is a matrix with columns corresponding to the CV iterations, labeled from 1 to <code>cv.n</code>, and rows corresponding to nested subgroups. The nested subgroups of patients are defined by the argument <code>prop.cutoff</code>. Here, we use <code>seq(0.6, 1, length = 5)</code> which defines nested subgroups with the 60%, 70%, 80%, 90% and 100% lowest (highest if <code>higher.y = FALSE</code>) CATE scores estimated by random forest. The rows in the output are labeled to reflect the user-specified proportions used to build the subgroups.</p>
-<p>For example, in the training set and in the 4th CV iteration (4th column labeled “cv4”), the subgroup defined with the 80% lowest CATE scores (4th row labeled “prop0.8”) has an estimated RMTL ratio of 0.753. In contrast, the subgroup defined with all patients (last row labeled “prop1”) in the 4th CV iteration has an estimated RMTL ratio of 1.083. <!-- This suggests that the CATE score estimated with random forests identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RMTL ratio compared to all patients. If lower outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. --></p>
+<p>The output is a matrix with columns corresponding to the CV
+iterations, labeled from 1 to <code>cv.n</code>, and rows corresponding
+to nested subgroups. The nested subgroups of patients are defined by the
+argument <code>prop.cutoff</code>. Here, we use
+<code>seq(0.6, 1, length = 5)</code> which defines nested subgroups with
+the 60%, 70%, 80%, 90% and 100% lowest (highest if
+<code>higher.y = FALSE</code>) CATE scores estimated by random forest.
+The rows in the output are labeled to reflect the user-specified
+proportions used to build the subgroups.</p>
+<p>For example, in the training set and in the 4th CV iteration (4th
+column labeled “cv4”), the subgroup defined with the 80% lowest CATE
+scores (4th row labeled “prop0.8”) has an estimated RMTL ratio of 0.753.
+In contrast, the subgroup defined with all patients (last row labeled
+“prop1”) in the 4th CV iteration has an estimated RMTL ratio of 1.083.
+<!-- This suggests that the CATE score estimated with random forests identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RMTL ratio compared to all patients. If lower outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. --></p>
 <p><strong>2. ATEs in nested subgroups of low responders</strong></p>
-<p>This output stores the ATEs in nested subgroups of <em>low responders</em> to drug1 in the training (<code>$ate.est.train.low.cv</code>) and validation (<code>$ate.est.valid.low.cv</code>) sets across all CV iterations. When <code>higher.y</code> = TRUE for survival outcomes, higher CATE scores correspond to low responders to drug1. When <code>higher.y</code> = FALSE for survival outcomes, lower CATE scores correspond to low responders to drug1. Again, this is different for count outcomes. The direction of CATE scores depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>This output stores the ATEs in nested subgroups of <em>low
+responders</em> to drug1 in the training
+(<code>$ate.est.train.low.cv</code>) and validation
+(<code>$ate.est.valid.low.cv</code>) sets across all CV iterations. When
+<code>higher.y</code> = TRUE for survival outcomes, higher CATE scores
+correspond to low responders to drug1. When <code>higher.y</code> =
+FALSE for survival outcomes, lower CATE scores correspond to low
+responders to drug1. Again, this is different for count outcomes. The
+direction of CATE scores depends on both <code>higher.y</code> and
+outcome type.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2      cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.4  7.475048  6.763305  9.56552  7.574093  7.307854</span></span>
 <span><span class="co">#&gt; prop0.3 38.211815 53.883349 96.68014 46.428207 46.385038</span></span>
 <span><span class="co">#&gt; prop0.2       Inf        NA      Inf       Inf       Inf</span></span>
 <span><span class="co">#&gt; prop0.1        NA        NA       NA        NA        NA</span></span></code></pre></div>
-<p>The outputs are also matrices with columns corresponding to the CV iterations and rows corresponding to nested subgroups.</p>
-<p>The output for the low responders brings additional information to the user. It gives the ATEs in the complement of each nested subgroup of high responders. For example, the complement of the subgroup of high responders defined as patients with the 60% lowest (highest if <code>higher.y</code> = FALSE) estimated CATE scores is the subgroup of low responders defined as patients with the 40% highest (lowest if <code>higher.y</code> = TRUE) estimated CATE scores, labeled as “prop0.4”. In the training set and in the first CV iterations, the estimated RMTL ratio is 0.62 in the 60% high responders to drug 1 and 38.212 in the 40% low responders.</p>
-<p>The 2 last rows have missing or infinite values and this can be due to many reasons. We record all errors and warnings and keep them as an element of the <code>cv</code> output. For example, we can use the following code to check specific errors and warnings of the first CV iteration (<code>$cv1</code>) using the random forest method (<code>$randomForest</code>) when estimating the ATE in the training sample in the low responder groups (<code>$est.train.low.cv</code>). It looks like there was no event observation in the 10% subgroup, possibly due to small sample size, which also relates to the convergence issue in the warning. Additionally, the warning for the 20% subgroup (<code>$warnings$'prop0.2'</code>) suggested that there was non-convergence of the Cox procedure and that the corresponding estimated ATE should be interpreted with caution.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>The outputs are also matrices with columns corresponding to the CV
+iterations and rows corresponding to nested subgroups.</p>
+<p>The output for the low responders brings additional information to
+the user. It gives the ATEs in the complement of each nested subgroup of
+high responders. For example, the complement of the subgroup of high
+responders defined as patients with the 60% lowest (highest if
+<code>higher.y</code> = FALSE) estimated CATE scores is the subgroup of
+low responders defined as patients with the 40% highest (lowest if
+<code>higher.y</code> = TRUE) estimated CATE scores, labeled as
+“prop0.4”. In the training set and in the first CV iterations, the
+estimated RMTL ratio is 0.62 in the 60% high responders to drug 1 and
+38.212 in the 40% low responders.</p>
+<p>The 2 last rows have missing or infinite values and this can be due
+to many reasons. We record all errors and warnings and keep them as an
+element of the <code>cv</code> output. For example, we can use the
+following code to check specific errors and warnings of the first CV
+iteration (<code>$cv1</code>) using the random forest method
+(<code>$randomForest</code>) when estimating the ATE in the training
+sample in the low responder groups (<code>$est.train.low.cv</code>). It
+looks like there was no event observation in the 10% subgroup, possibly
+due to small sample size, which also relates to the convergence issue in
+the warning. Additionally, the warning for the 20% subgroup
+(<code>$warnings$'prop0.2'</code>) suggested that there was
+non-convergence of the Cox procedure and that the corresponding
+estimated ATE should be interpreted with caution.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">`errors/warnings`</span><span class="op">$</span><span class="va">randomForest</span><span class="op">$</span><span class="va">est.train.low.cv</span><span class="op">$</span><span class="va">cv1</span></span>
 <span><span class="co">#&gt; $errors</span></span>
 <span><span class="co">#&gt; $errors$`prop 0.1`</span></span>
@@ -320,9 +974,14 @@ precmed: Precision Medicine in R
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $warnings$`prop 0.1`</span></span>
 <span><span class="co">#&gt; [1] "Warning in max(event[who2]) : no non-missing arguments to max; returning -Inf"</span></span></code></pre></div>
-<p><strong>3. ATEs in mutually exclusive multi-category subgroups</strong></p>
-<p>This output stores the ATEs in mutually exclusive multi-category subgroups of patients in the training (<code>$ate.est.train.group.cv</code>) and validation (<code>$ate.est.valid.group.cv</code>) sets across all CV iterations.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<p><strong>3. ATEs in mutually exclusive multi-category
+subgroups</strong></p>
+<p>This output stores the ATEs in mutually exclusive multi-category
+subgroups of patients in the training
+(<code>$ate.est.train.group.cv</code>) and validation
+(<code>$ate.est.valid.group.cv</code>) sets across all CV
+iterations.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.5 3.4151485 3.5654842 3.7254944 3.6552745 3.6690400</span></span>
@@ -333,212 +992,173 @@ precmed: Precision Medicine in R
 <span><span class="co">#&gt; prop0.5 4.7844569 3.439306 3.4420698 4.0713342 3.500151</span></span>
 <span><span class="co">#&gt; prop0.6 0.8403764 1.197367 4.9331418 0.8511804 1.343130</span></span>
 <span><span class="co">#&gt; prop1          NA       NA 0.3243074        NA       NA</span></span></code></pre></div>
-<p>The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the mutually exclusive subgroups. The previous 2 outputs only focus on binary subgroups (high or low responders). Here, the mutually exclusive subgroups can be more than 2 and are defined by the argument <code>prop.multi</code>. We use <code>c(0, 0.5, 0.6, 1)</code> which defines 3 subgroups of patients with the 50% lowest, 10% middle and 40% highest estimated CATE scores when <code>higher.y</code> = TRUE (as in this example), or with the 40% highest, 10% middle and 50% lowest estimated CATE scores when <code>higher.y</code> = FALSE. Taking the first column as an example, the first CV iteration calculated 3.415 as the RMTL ratio for the subgroup with the 50% lowest estimated CATE scores, 1.29 as the RMTL ratio for the subgroup with the middle 10% estimated CATE scores, and 0.291 as the RMTL ratio for the subgroup with the 40% highest estimated CATE scores. Use <code>output_catecv$`errors/warnings`$randomForest$est.train.group.cv</code> to learn more about the errors and warnings generated from these outputs.</p>
+<p>The output is a matrix with columns corresponding to the CV
+iterations and rows corresponding to the mutually exclusive subgroups.
+The previous 2 outputs only focus on binary subgroups (high or low
+responders). Here, the mutually exclusive subgroups can be more than 2
+and are defined by the argument <code>prop.multi</code>. We use
+<code>c(0, 0.5, 0.6, 1)</code> which defines 3 subgroups of patients
+with the 50% lowest, 10% middle and 40% highest estimated CATE scores
+when <code>higher.y</code> = TRUE (as in this example), or with the 40%
+highest, 10% middle and 50% lowest estimated CATE scores when
+<code>higher.y</code> = FALSE. Taking the first column as an example,
+the first CV iteration calculated 3.415 as the RMTL ratio for the
+subgroup with the 50% lowest estimated CATE scores, 1.29 as the RMTL
+ratio for the subgroup with the middle 10% estimated CATE scores, and
+0.291 as the RMTL ratio for the subgroup with the 40% highest estimated
+CATE scores. Use
+<code>output_catecv$`errors/warnings`$randomForest$est.train.group.cv</code>
+to learn more about the errors and warnings generated from these
+outputs.</p>
 </div>
 <div class="section level3">
 <h3 id="comparison-of-methods-with-abc">Comparison of methods with <code>abc()</code><a class="anchor" aria-label="anchor" href="#comparison-of-methods-with-abc"></a>
 </h3>
-<p>The ABC statistics is calculated by <code><a href="../reference/abc.html">abc()</a></code> for each scoring method specified in <code><a href="../reference/catecv.html">catecv()</a></code> and for each of the <code>cv.n</code> CV iterations using the output object <code>output_catecv</code> from <code><a href="../reference/catecv.html">catecv()</a></code>. The ABC corresponds to the area between the curve formed by the ATEs in subgroups of high responders in the validation set (e.g., <code>output_catecv$ate.randomForest$ate.est.valid.cv</code> for random forest) and the horizontal line representing the ATE in the validation set. A higher ABC value means that the method captures more treatment effect heterogeneity.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<p>The ABC statistics is calculated by <code><a href="../reference/abc.html">abc()</a></code> for each
+scoring method specified in <code><a href="../reference/catecv.html">catecv()</a></code> and for each of the
+<code>cv.n</code> CV iterations using the output object
+<code>output_catecv</code> from <code><a href="../reference/catecv.html">catecv()</a></code>. The ABC
+corresponds to the area between the curve formed by the ATEs in
+subgroups of high responders in the validation set (e.g.,
+<code>output_catecv$ate.randomForest$ate.est.valid.cv</code> for random
+forest) and the horizontal line representing the ATE in the validation
+set. A higher ABC value means that the method captures more treatment
+effect heterogeneity.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; randomForest 0.1533033 0.1450798 0.1392829 0.1458115 0.1532764</span></span>
 <span><span class="co">#&gt; contrastReg  0.1416306 0.1304287 0.1366230 0.1304199 0.1519283</span></span></code></pre></div>
-<p>The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the scoring methods specified in <code>score.method</code>. For example, random forest in CV iteration 1 has an ABC of 0.153, which is the highest in this CV iteration, meaning that random forest offers the best performance in the first CV iteration. The user can combine the ABC for each method across iterations:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>The output is a matrix with columns corresponding to the CV
+iterations and rows corresponding to the scoring methods specified in
+<code>score.method</code>. For example, random forest in CV iteration 1
+has an ABC of 0.153, which is the highest in this CV iteration, meaning
+that random forest offers the best performance in the first CV
+iteration. The user can combine the ABC for each method across
+iterations:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
 <span><span class="co">#&gt;    0.1473508    0.1382061</span></span></code></pre></div>
-<p>In this example, random forest also offers the best overall performance because it has the highest average ABC, followed closely by contrast regression.</p>
+<p>In this example, random forest also offers the best overall
+performance because it has the highest average ABC, followed closely by
+contrast regression.</p>
 </div>
 <div class="section level3">
 <h3 id="visualization-of-the-validation-curves-with-plot">Visualization of the validation curves with <code>plot()</code><a class="anchor" aria-label="anchor" href="#visualization-of-the-validation-curves-with-plot"></a>
 </h3>
-<p>The ATEs of nested subgroups of high responders to drug1 (e.g., <code>output_catecv$ate.randomForest$ate.est.train.high.cv</code> and <code>output_catecv$ate.randomForest$ate.est.valid.high.cv</code> for random forest) can be visualized as a side-by-side line plot, with training results on the left and validation results on the right. The x-axis is determined by <code>prop.cutoff</code> and the y-axis is the estimated ATEs averaged over <code>cv.n</code> CV iterations as specified by <code>cv.i</code> = NULL (default). The estimated ATE is expressed as a RMTL ratio of drug1 versus drug0 for our toy example. By default, the function retrieves the name of the treatment variable (<code>trt</code>) and the original labels (<code>drug0</code> and <code>drug1</code>) to specify a meaningful y-axis label. Otherwise, it is possible to customize the y-axis label via the <code>ylab</code>, for example, by specifying <code>ylab</code> = “RMTL ratio of drug1 vs drug0 in each subgroup”.</p>
-<p>Steeper slopes indicate more treatment effect heterogeneity between drug1 and drug0. Because <code>higher.y</code> = TRUE in this example, the slopes should be increasing from left (<code>prop.cutoff</code> = 0.6) to right (<code>prop.cutoff</code> = 1) if treatment effect heterogeneity is present (see section <a href="Theoretical-details.html">Validation curves and the ABC statistics</a> for illustration). The method that has the steepest slope in the validation results would be selected because it captures the most treatment effect heterogeneity while generalizing well to unseen data.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p>The ATEs of nested subgroups of high responders to drug1 (e.g.,
+<code>output_catecv$ate.randomForest$ate.est.train.high.cv</code> and
+<code>output_catecv$ate.randomForest$ate.est.valid.high.cv</code> for
+random forest) can be visualized as a side-by-side line plot, with
+training results on the left and validation results on the right. The
+x-axis is determined by <code>prop.cutoff</code> and the y-axis is the
+estimated ATEs averaged over <code>cv.n</code> CV iterations as
+specified by <code>cv.i</code> = NULL (default). The estimated ATE is
+expressed as a RMTL ratio of drug1 versus drug0 for our toy example. By
+default, the function retrieves the name of the treatment variable
+(<code>trt</code>) and the original labels (<code>drug0</code> and
+<code>drug1</code>) to specify a meaningful y-axis label. Otherwise, it
+is possible to customize the y-axis label via the <code>ylab</code>, for
+example, by specifying <code>ylab</code> = “RMTL ratio of drug1 vs drug0
+in each subgroup”.</p>
+<p>Steeper slopes indicate more treatment effect heterogeneity between
+drug1 and drug0. Because <code>higher.y</code> = TRUE in this example,
+the slopes should be increasing from left (<code>prop.cutoff</code> =
+0.6) to right (<code>prop.cutoff</code> = 1) if treatment effect
+heterogeneity is present (see section <a href="Theoretical-details.html">Validation curves and the ABC
+statistics</a> for illustration). The method that has the steepest slope
+in the validation results would be selected because it captures the most
+treatment effect heterogeneity while generalizing well to unseen
+data.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1-1.png" width="1056"></p>
-<p>For this toy example, the methods are performing well in the training data as per the steep, increasing slopes on the left plot. Moreover, all methods generalize well to the validation data, as indicated by the monotonous increasing curves in the validation data (right plot). The dashed gray line is the ATE in the entire data set, which is why all lines merge to this reference line when subgroup size is 100% of the data (<code>prop.cutoff</code> = 1). For more explanation on the validation curves, see the function description.</p>
-<p>The plot’s legend includes the ABC statistics in the validation set. The user can choose to mute the ABC annotations by specifying <code>show.abc</code> = FALSE.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p>For this toy example, the methods are performing well in the training
+data as per the steep, increasing slopes on the left plot. Moreover, all
+methods generalize well to the validation data, as indicated by the
+monotonous increasing curves in the validation data (right plot). The
+dashed gray line is the ATE in the entire data set, which is why all
+lines merge to this reference line when subgroup size is 100% of the
+data (<code>prop.cutoff</code> = 1). For more explanation on the
+validation curves, see the function description.</p>
+<p>The plot’s legend includes the ABC statistics in the validation set.
+The user can choose to mute the ABC annotations by specifying
+<code>show.abc</code> = FALSE.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">output_catecv</span>, </span>
 <span>     show.abc <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>     ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1.1-1.png" width="700"></p>
-<p>The user can choose to plot the validation curves of only 1 CV iteration instead of the average of all CV iterations. In the following example, we plot the validation curves of the second CV iteration by specifying <code>cv.i</code> = 2 and in grayscale by specifying <code>grayscale</code> = TRUE.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<p>The user can choose to plot the validation curves of only 1 CV
+iteration instead of the average of all CV iterations. In the following
+example, we plot the validation curves of the second CV iteration by
+specifying <code>cv.i</code> = 2 and in grayscale by specifying
+<code>grayscale</code> = TRUE.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">output_catecv</span>, </span>
 <span>     cv.i <span class="op">=</span> <span class="fl">2</span>, </span>
 <span>     grayscale <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>     ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot2-1.png" width="700"></p>
-<p>The user can also choose to use the median (instead of mean [default]) of the ATEs across CV iterations by specifying the argument <code>combine</code> = “median” in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
+<p>The user can also choose to use the median (instead of mean
+[default]) of the ATEs across CV iterations by specifying the argument
+<code>combine</code> = “median” in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
 </div>
 <div class="section level3">
-<h3 id="visualization-of-the-ate-in-subgroups-with-boxplot">Visualization of the ATE in subgroups with <code>boxplot()</code><a class="anchor" aria-label="anchor" href="#visualization-of-the-ate-in-subgroups-with-boxplot"></a>
+<h3 id="visualization-of-the-ate-in-subgroups-with-boxplot">Visualization of the ATE in subgroups with
+<code>boxplot()</code><a class="anchor" aria-label="anchor" href="#visualization-of-the-ate-in-subgroups-with-boxplot"></a>
 </h3>
-<p>The ATEs of multi-category subgroups that are mutually exclusive can be visualized as box plots, with 1 box plot for each scoring method. Only validation results are visualized here. The x-axis is determined by <code>prop.multi</code> and the y-axis is the estimated ATEs in each subgroup. We specify the <code>ylab</code> argument accordingly. The subgroups correspond to each row of the <code>ate.est.valid.group.cv</code> result in <code>output_catecv</code>, so in this example the subgroups are patient with the 50% lowest (0-50%), middle 10% (50-60%), and highest 40% (60-100%) estimated CATE scores. Notice that the groups do not have to be equally spaced in terms of percentiles. The box plot shows the distribution of the ATEs over all <code>cv.n</code> CV iterations, instead of a summary statistics like mean or median in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>The ATEs of multi-category subgroups that are mutually exclusive can
+be visualized as box plots, with 1 box plot for each scoring method.
+Only validation results are visualized here. The x-axis is determined by
+<code>prop.multi</code> and the y-axis is the estimated ATEs in each
+subgroup. We specify the <code>ylab</code> argument accordingly. The
+subgroups correspond to each row of the
+<code>ate.est.valid.group.cv</code> result in
+<code>output_catecv</code>, so in this example the subgroups are patient
+with the 50% lowest (0-50%), middle 10% (50-60%), and highest 40%
+(60-100%) estimated CATE scores. Notice that the groups do not have to
+be equally spaced in terms of percentiles. The box plot shows the
+distribution of the ATEs over all <code>cv.n</code> CV iterations,
+instead of a summary statistics like mean or median in
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">output_catecv</span>,</span>
 <span>        ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 4 rows containing non-finite values (stat_boxplot).</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning: Removed 4 rows containing non-finite values (`stat_boxplot()`).</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_boxplot-1.png" width="700"></p>
-<p>For this toy example, we can see why random forest and contrast regression methods have the 2 highest ABC and perform the best in the validation curves in the previous sections. They both have the most distinctive decreasing RMT ratio as we go from the subgroup with the 50% lowest CATE scores (red) to subgroup with the 40% highest CATE scores (blue). This implies that there is some evidence of heterogeneous treatment effect and that the CATE scores estimated with random forest or contrast regression can capture it. They also have relatively smaller variation as the boxes are thinner. In comparison, the other 3 methods also present this increasing trend in the box plots, but we observe a larger variation in the RMTL ratio, especially with boosting. We can see that the box plots correspond to the other 2 outputs, <code><a href="../reference/abc.html">abc()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>. Note that the y-axis can have different scales for different scoring methods. <br><br></p>
+<p>For this toy example, we can see why random forest and contrast
+regression methods have the 2 highest ABC and perform the best in the
+validation curves in the previous sections. They both have the most
+distinctive decreasing RMT ratio as we go from the subgroup with the 50%
+lowest CATE scores (red) to subgroup with the 40% highest CATE scores
+(blue). This implies that there is some evidence of heterogeneous
+treatment effect and that the CATE scores estimated with random forest
+or contrast regression can capture it. They also have relatively smaller
+variation as the boxes are thinner. In comparison, the other 3 methods
+also present this increasing trend in the box plots, but we observe a
+larger variation in the RMTL ratio, especially with boosting. We can see
+that the box plots correspond to the other 2 outputs, <code><a href="../reference/abc.html">abc()</a></code>
+and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>. Note that the y-axis can have different scales
+for different scoring methods.</p>
+<p><br><br></p>
 <blockquote>
-<p>So far we provided 3 different metrics to summarize, visualize, and evaluate the <code><a href="../reference/catecv.html">catecv()</a></code> outputs. The user is encouraged to choose their own way of data wrangling that fits to their particular situation.</p>
+<p>So far we provided 3 different metrics to summarize, visualize, and
+evaluate the <code><a href="../reference/catecv.html">catecv()</a></code> outputs. The user is encouraged to
+choose their own way of data wrangling that fits to their particular
+situation.</p>
 </blockquote>
 <p><br><br></p>
-</div>
-<div class="section level3">
-<h3 id="estimation-of-the-cate-score-with-catefit">Estimation of the CATE score with <code>catefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-cate-score-with-catefit"></a>
-</h3>
-<p>If no internal validation is needed or the user has chosen the scoring methods wanted, we can fit the PM methods directly to the entire given dataset and get the CATE score and ATE results. This is done with the function <code><a href="../reference/catefit.html">catefit()</a></code>.</p>
-<p>In general, <code><a href="../reference/catefit.html">catefit()</a></code> has similar arguments as <code><a href="../reference/catecv.html">catecv()</a></code>. The mandatory arguments are the same: <code>response</code>, <code>data</code>, <code>score.method</code>, <code>cate.model</code>, and <code>ps.model</code> and they must be specified by the user. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the function description of catefitsurv (<code><a href="../reference/catefitsurv.html">?catefitsurv</a></code>) for details. Because there is no internal validation, <code><a href="../reference/catefit.html">catefit()</a></code> does not have the <code>cv.n</code>, <code>train.prop</code>, <code>abc</code>, and <code>prop.multi</code> arguments. This is the main distinction between these 2 output functions. We specified the mandatory and non-mandatory arguments the same way as <code><a href="../reference/catecv.html">catecv()</a></code> in the example for demonstration purpose.</p>
-<p>If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
-<span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
-<span>                          data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>                          score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>                          cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> </span>
-<span>                                       <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>                          ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>                          initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span>
-<span>                          ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                          followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                          tau0 <span class="op">=</span> <span class="va">tau0</span>, </span>
-<span>                          higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                          surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
-<span>                          seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>                          plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 14.15637 secs</span></span></code></pre></div>
-<p>Despite the similar arguments, the outputs of <code><a href="../reference/catefit.html">catefit()</a></code> and <code><a href="../reference/catecv.html">catecv()</a></code> differ. Each method specified in <code>score.method</code> has the following sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
-<ol style="list-style-type: decimal">
-<li>
-<code>score</code> contains the log-transformed estimated CATE scores for each subject. The CATE score is a linear combination of the variables specified in the <code>cate.model</code> argument. Same as the outcome, lower CATE scores are more desirable if <code>higher.y</code> = FALSE and vice versa. In our example, the survival outcome is time to first relapse, which is a negative event, so higher values indicate later onset of the first relapse. Hence, we specify <code>higher.y</code> = TRUE in the example. Each subject has 1 CATE score so the length of this output is 4,000 for our toy example. Below we show the CATE scores estimated with contrast regression for the first 6 subjects in the data.</li>
-</ol>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 4000</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  5.3273340  1.1661594  3.4869179  4.0157912 -0.8475816  2.4217492</span></span></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li>
-<code>coefficients</code> contains the estimated coefficients of the CATE score for each scoring method. It is a data frame of the covariates (including intercept) as rows and scoring methods as columns. In our toy example, there are 4 covariates in the <code>cate.model</code>, plus the intercept, so there are 5 rows of estimated coefficients within each column. Boosting method does not estimate coefficients (it directly predicts the score) so they do not have coefficient results here.</li>
-</ol>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
-<span><span class="co">#&gt;                          contrastReg</span></span>
-<span><span class="co">#&gt; (Intercept)                0.2526763</span></span>
-<span><span class="co">#&gt; age                       -0.1912056</span></span>
-<span><span class="co">#&gt; female                     0.1359512</span></span>
-<span><span class="co">#&gt; previous_cost              0.5629853</span></span>
-<span><span class="co">#&gt; previous_number_relapses   0.3703522</span></span></code></pre></div>
-<p>We can define the estimated CATE scores for contrast regression like shown below. The user can use this information to study the influence of each covariate. <span class="math display">\[ 
-\begin{aligned}
-\widehat{CATE} = 0.25 &amp; - 0.19 \times \text{age} \\
-&amp; + 0.15 \times \text{female (vs male)} \\ 
-&amp; + 0.56 \times \text{previous medical costs} \\
-&amp; + 0.39 \times \text{previous number of relapses} 
-\end{aligned} 
-\]</span></p>
-<ol start="3" style="list-style-type: decimal">
-<li>
-<code>ate</code> contains estimated ATEs by each nested subgroup of high responders to drug 1 defined by <code>prop.cutoff</code>. The subgroups are defined based on the estimated CATE scores with the specified scoring method. In this example, we show the estimated ATEs of subgroups identified by CATE scores of the contrast regression. For example, the estimated ATE for the subgroup of subjects constructed based on the 50% (“prop0.5”) lowest CATE scores estimated from the contrast regression is 0.41.</li>
-</ol>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
-<span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.4105682 0.5114925 0.6269751 0.7800895 0.9145661 1.0726748</span></span></code></pre></div>
-<p>You are encouraged to summarize and visualize the outputs in whichever way that fits their particular situation outside the package’s functions. For example, it is possible to plot the densities of all CATE scores with <code>ggplot</code>. There are some subjects with extremely high estimated CATE scores but most of the samples fall between -10 and 10.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Random Forest"</span>, <span class="st">"Contrast regression"</span><span class="op">)</span>, </span>
-<span>                                          each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>                       value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span>,<span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">dataplot</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, fill <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Estimated CATE score"</span>, y <span class="op">=</span> <span class="st">"Density"</span>, fill <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Removed 5 rows containing non-finite values (stat_density).</span></span></code></pre></div>
-<p><img src="Survival-examples_files/figure-html/plot_score-1.png" width="700" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level3">
-<h3 id="estimation-of-the-ate-with-atefit">Estimation of the ATE with <code>atefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-ate-with-atefit"></a>
-</h3>
-<p>Beyond exploring treatment effect heterogeneity, <code><a href="../reference/atefit.html">atefit()</a></code> allows estimating the ATE in terms of RMTL and HR. The RMTL estimator is doubly robust, meaning that the estimator is consistent if the PS model (argument <code>ps.model</code>) or the outcome model (argument <code>cate.model</code>) or both are correctly specified. The estimator also depends on the estimation of IPCW. The HR estimator is based on a Cox regression model. The function also provides standard error, confidence intervals, and p-values based on bootstrap.</p>
-<p>The mandatory arguments are: <code>response</code>, <code>data</code>, <code>cate.model</code>, and <code>ps.model</code>. Those arguments have the same definitions as in <code><a href="../reference/catecv.html">catecv()</a></code> and <code><a href="../reference/catefit.html">catefit()</a></code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
-<span>                        data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>                        cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span>                                                   <span class="va">previous_number_relapses</span>,</span>
-<span>                        ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>                        ps.method <span class="op">=</span> <span class="st">"glm"</span>,  </span>
-<span>                        ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                        ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
-<span>                        minPS <span class="op">=</span> <span class="fl">0.01</span>, </span>
-<span>                        maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
-<span>                        followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                        tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>                        surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
-<span>                        n.boot <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>                        seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>                        verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
-<p>When <code>verbose</code> = 1, the function outputs a progress bar in the console.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_atefit</span></span>
-<span><span class="co">#&gt; Average treatment effect:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03206484 0.007309376 0.1330012 0.02867542</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.20897752 2.303735883 3.1229127 0.00000000</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Estimated RMST:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.271374 160.5692 185.1526      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 7.753894 181.3629 211.7576      0</span></span>
-<span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
-<p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate, standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound of the 95% confidence interval, and the p-value (“pvalue”) for 4 estimands:</p>
-<ul>
-<li><p>the restricted mean survival time under drug 1 (<code>$rmst1</code>)</p></li>
-<li><p>the restricted mean survival time under drug 0 (<code>$rmst0</code>)</p></li>
-<li><p>the log RMTL ratio (<code>$log.rmtl.ratio</code>), which is the log of the ratio of <code>tau0</code> - <code>$rmst1</code> divided by <code>tau0</code> - <code>$rmst0</code></p></li>
-<li><p>the log HR (<code>$log.hazard.ratio</code>).</p></li>
-</ul>
-<p>For example, the log RMTL ratio of 0.07 and the 95% confidence interval of (0.01, 0.13) are displayed in the output. The user can retrieve the RMTL ratio to facilitate the interpretation:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rmtl.ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">$</span><span class="va">log.rmtl.ratio</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span></span>
-<span><span class="va">rmtl.ratio</span></span>
-<span><span class="co">#&gt; [1] 1.072675</span></span>
-<span><span class="va">CI.rmtl.ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">$</span><span class="va">log.rmtl.ratio</span><span class="op">$</span><span class="va">estimate</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">qnorm</a></span><span class="op">(</span><span class="fl">0.975</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">$</span><span class="va">log.rmtl.ratio</span><span class="op">$</span><span class="va">SE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">CI.rmtl.ratio</span></span>
-<span><span class="co">#&gt; [1] 0.7551728 1.5236661</span></span></code></pre></div>
-<p>The RMTL ratio of 1.07 along with the 95% confidence interval of (0.76, 1.52) suggest that drug 1 is superior to drug 0 because the ratio is significantly greater than 1.</p>
-<p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> is expressed in terms of treatment 0 vs 1, where the RMTL and hazard ratios are expressed as the ratio of the treatment coded as 1 over the treatment coded as 0. If the treatment variable is not coded as 0/1 in the data set, the function returns a warning <code>output_atefit$warning</code> which indicates what key was used to recode the treatment variable into a 0/1 variable.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_atefit</span><span class="op">$</span><span class="va">warning</span></span>
-<span><span class="co">#&gt; [1] "Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.\n"</span></span></code></pre></div>
-<p>Using <code>plot(output_atefit)</code>, a histograms is generated of the point estimates across the <code>n.boot</code> bootstrap iterations for 4 estimands (<code>rmst1</code>, <code>rmst0</code>, <code>log.rmtl.ratio</code>, <code>log.hazard.ratio</code>). A red vertical line is added to each histogram with the mean of the bootstrap estimates.</p>
-<p><img src="atefit_bootstrap.png"><!-- --></p>
-<p>Histograms of bootstrap estimators for 4 estimands after 500 bootstrap</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-serie">Other <code>precmed</code> vignettes in this serie<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-serie"></a>
 </h2>
-<p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
+<p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival
+outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
