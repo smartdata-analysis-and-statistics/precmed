@@ -4,9 +4,6 @@ subtitle: "Vignette 2 of 5"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
-    toc: TRUE
-    number_sections: TRUE
-    toc_depth: 3
     fig_caption: yes
     fig_width: 9
     fig_height: 6
@@ -23,18 +20,10 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 doc.cache <- T #for cran; change to F
 ```
 
-
 <h1>precmed: Precision Medicine in R</h1>
 A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
 
-# Load required packages
-```{r, echo = T, message=F}
-library(precmed)
-library(dplyr)
-library(ggplot2)
-```
-
-# Examples with count outcome of the entire workflow {#examples}
+# Examples with count outcome of the entire workflow
 
 ```{r, include=FALSE}
 ###################################################################
@@ -52,12 +41,19 @@ n.cores <- detectCores()
 options(mc.cores = n.cores-1) # for faster knitting
 #options(mc.cores = 2) # R CMD check allows at most two cores
 knitr::opts_chunk$set(echo = TRUE)
-
 ```
 
-## Example data set
+## Load required packages
+```{r, echo = T, message=F}
+library(precmed)
+library(dplyr)
+library(ggplot2)
+```
 
-We use the following simulated data to demonstrate the `precmed` functions for count outcomes. The data set `countExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
+
+## Load data set (Example data with count outcome)
+
+To show the functionalities of the `precmed` package for count outcomes we first need data. For our examples we use simulated data that is located in the `countExample` data set. The data set `countExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
 
 * We will use `y` as the count outcome, which is the number of relapses during follow-up. 
 
@@ -68,20 +64,86 @@ We use the following simulated data to demonstrate the `precmed` functions for c
 * The rest of the variables are baseline patient characteristics. Variable `age` is centered at 48 years old. The medical costs in the year prior to treatment initiation `previous_cost` is centered at 13,824 USD and scaled with standard deviation 20,172 USD.
 
 ```{r data, echo = F, eval = T, include = T}
-str(countExample)
+library(tableone)
+countExample$age <- as.numeric(countExample$age)
+countExample$previous_cost <- as.numeric(countExample$previous_cost)
+
+## Vector of variables to summarize
+myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "years")
+## Vector of categorical variables that need transformation
+catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
+## Create a TableOne object
+CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = countExample)
+
 ```
 
-## Internal validation via `catecv()` {#catecvcountexample}
 
-We first run the internal validation to compare 5 scoring methods. This is done with the function `catecv()`. This first step gives results in the form of a "precmed" object which will be used in the next steps to compare the performance of the scoring methods.
+## Estimation of the ATE with `atefit()` 
 
-The mandatory arguments in `catecv()` are `response`, `data`, `score.method`, `cate.model`, and `ps.model`. They must be specified by the user.
+First, one might be interested in the effect of the drug (trt) on the number of relapses during follow-up (y). Lets test this using simple regression. 
 
-* The `response` argument specifies the type of outcome in the data. For count outcomes, `response` = "count". This informs the function of the necessary arguments and methods to use. 
+```{r, eval = T, echo = T}
+output_lm <- lm(y ~ trt, countExample)
+output_lm
+```
 
-* The argument `data` indicates the data frame in which the outcome, treatment and covariates specified in either `cate.model` or `ps.model` should be fetched.
+We see from the simple linear model that drug 1 scores `r round(output_lm$coefficients[2], 2)` points higher compared to drug 0. This indicates that drug 0 is superior to drug 1 because lower outcomes are preferred (number of relapses). 
 
-* The `score.method` argument specifies the precision medicine (PM) methods to be used to calculate the CATE scores. There are a total of 5 scoring methods implemented:
+Now we want to estimate the Average Treatment Effect (ATE) and correct for several covariates like age and previous treatment because they might influence the relation between treatment and outcome. The `atefit()` function allows estimating the ATE in terms of rate ratio. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the propensity score (PS) model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified. The function also provides standard error, confidence intervals, and p-values based on bootstrap.
+
+The mandatory arguments for `atefit()` are:
+
+* `response`: "count" in this example because we use have data with a count outcome (e.g., number of relapses))
+
+* `data`: the name of the data set. (countExample)
+
+* `cate.model`: A formula describing the outcome model to be fitted. The outcome must appear on the left-hand side. In the example, we choose to specify to outcome model as a linear combination of the following covariates: age, sex, previous treatment, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. The outcome model has the offset `log(years)` to account for the varying exposure times across patients. Note that the treatment variable is not supplied in `cate.model` since this is an outcome model.
+
+<!-- * We use all 6 variables in the outcome CATE model and specify the offset as `log(years)`. It is recommended to log-transform the exposure variable.
+* -->
+
+* `ps.model`: A formula describing the propensity score (PS) model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and a warning message was left to the user (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. Note that the PS model is only used in the estimation of the 2 doubly robust methods (two and contrast regressions).  
+
+Let's calculate the ATE for the effect of treatment on y and build an outcome model that contains all variables and a PS model with `age` and `previous_treatment`. 
+```{r run_atefit, eval = T, echo = T, cache = doc.cache}
+output_atefit <- atefit(response = "count",
+                        data = countExample,
+                        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+                        ps.model = trt ~ age + previous_treatment,
+                        n.boot = 50, 
+                        seed = 999,
+                        verbose = 0)
+```
+
+When `verbose` = 1, the function outputs a progress bar in the console. 
+
+```{r print_atefit, eval = T, echo = T}
+output_atefit
+```
+
+The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. The user can retrieve the rate ratio to facilitate the interpretation:
+
+```{r rmtl_atefit, eval = T, echo = T}
+rate.ratio <- exp(output_atefit$log.rate.ratio$estimate)
+rate.ratio
+CI.rate.ratio <- exp(output_atefit$log.rate.ratio$estimate + c(-1, 1) * qnorm(0.975) * sqrt(output_atefit$log.rate.ratio$SE))
+CI.rate.ratio
+```
+
+The rate ratio of `r round(rate.ratio, 2)` along with the 95\% confidence interval of (`r round(CI.rate.ratio[1], 2)`, `r round(CI.rate.ratio[2], 2)`) suggest that drug 0 is superior to drug 1 because the ratio is greater than 1 and lower outcomes are preferred, but that this superiority is not statistically significant given the p-value of `r round(output_atefit$log.rate.ratio$pvalue, 2)` in the output (`$log.rate.ratio$pvalue`).
+
+Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for the log rate ratio. A red vertical line is added to each histogram with the mean of the bootstrap estimates.
+
+```{r, echo = F}
+knitr::include_graphics("atefit_bootstrap_count.png")
+```
+   
+Histograms of bootstrap log rate ratio estimators after 500 bootstrap iterations.
+
+
+## Estimation of the CATE score with `catefit()` 
+
+Now we have calculated the ATE we know the effect of both treatments on average, but this effect might not be the same for all patients. Thus, it might be worthwhile to check if there are subgroups that respond differently to the treatments. We can calculate the Conditional Average Treatment Effect (CATE) score which calculates the ATE for different subgroups in the data. If no internal validation is needed (we get back to that later), we can use the `catefit()` function to a model directly to the entire data set to estimate the CATE score. For the `catefit()` function we have to define the `score.method`. This arguments specifies the precision medicine (PM) method to be used to calculate the CATE scores. There are a total of 5 scoring methods implemented:
 
   * `poisson` fits a Poisson model separately by treatment group.
   
@@ -92,15 +154,100 @@ The mandatory arguments in `catecv()` are `response`, `data`, `score.method`, `c
   * `contrastReg` implements the doubly robust contrast regression estimator from @yadlowsky2020estimation.
   
   * `negBin` fits negative binomial regressions by treatment group. This method is recommended if there is overdispersion in the data.
-  
-For this toy example we selected `poisson`, `contrastReg` and `negBin` to limit run time. 
 
-* The argument `cate.model` specifies the CATE model as a formula, with the outcome `y` supplied on the left-hand side and the explanatory covariates supplied on the right-hand side. In the example, we choose to specify to CATE as a linear combination of the following covariates: age, sex, previous treatment, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. The CATE model has the offset `log(years)` to account for the varying exposure times across patients. Note that the treatment variable is not supplied in `cate.model` since this is an outcome model.
+When we have selected a PS method that fits the data (or multiple methods), we can run the `catefit()` function with the same variables as the `atefit()` function.
+The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html) section for details. 
 
-<!-- * We use all 6 variables in the outcome CATE model and specify the offset as `log(years)`. It is recommended to log-transform the exposure variable.
-* -->
+If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
-* The `ps.model` argument specifies the PS model as a formula, with the treatment variable `trt` on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, `catecvcount()`  will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and a warning message was left to the user (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. Note that the PS model is only used in the estimation of the 2 doubly robust methods (two and contrast regressions).
+```{r example_catefit, eval = T, echo = T, cache = doc.cache}
+t0 <- Sys.time()
+output_catefit <- catefit(response = "count",
+                          data = countExample,
+                          score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
+                          cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+                          ps.model = trt ~ age + previous_treatment,
+                          initial.predictor.method = "poisson",
+                          higher.y = FALSE, 
+                          seed = 999)
+t1 <- Sys.time()
+t1 - t0
+```
+
+Each method specified in `score.method` has the following sets of results in `catefit()`: 
+
+1. `score` contains the log-transformed estimated CATE scores for each subject. CATE score is a linear combination of the variables specified in the `cate.model` argument. Same as the outcome, lower CATE scores are more desirable if `higher.y` = FALSE and vice versa. Each subject has one CATE score so the length of this output is 4,000 for our toy example. Below we show the CATE scores estimated with contrast regression for the first 6 subjects in the data. 
+
+```{r print_catefit.score, eval = T, echo = T}
+length(output_catefit$score.contrastReg)
+head(output_catefit$score.contrastReg)
+```
+
+2. `coefficients` contains the estimated coefficients of the CATE score for each scoring method. It is a data frame of the covariates (including intercept) as rows and scoring methods as columns. In our toy example, there are 5 covariates in the `cate.model` (including a categorical variable with 3 distinct factors) so there are 7 rows of estimated coefficients within each column. Since contrast regression is one of the scoring methods specified in the example, we see that contrast regression has an additional column with the standard errors of the estimated coefficients. Boosting does not estimate coefficients (it directly predicts the score) so there is no coefficient result for this method.
+
+```{r print_catefit.coefs, eval = T, echo = T}
+output_catefit$coefficients
+```
+
+We can define the estimated CATE scores for contrast regression like shown below. The user can use this information to study the influence of each covariate. 
+$$ 
+\begin{aligned}
+\widehat{CATE} = -0.60 & - 0.04 \times \text{age} \\
+& + 0.77 \times \text{female (vs male)} \\ 
+& + 0.75 \times \text{previous treatment drug B (vs drug A)} \\
+& - 0.21 \times \text{previous treatment drug C (vs drug A)} \\
+& - 0.02 \times \text{previous medical costs} \\
+& + 0.04 \times \text{previous number of relapses} 
+\end{aligned} 
+$$
+
+3. `ate` contains estimated ATEs in each nested subgroup of high responders to drug 1 defined by `prop.cutoff`. The subgroups are defined based on the estimated CATE scores with the specified scoring method. In this example, we show the estimated ATEs of subgroups identified by CATE scores of contrast regression. For example, the estimated ATE for the subgroup of subjects constructed based on the 50\% ("prop0.5") lowest CATE scores estimated from contrast regression is `r round(output_catefit$ate.contrastReg[1], 2)`. 
+
+```{r print_catefit.ate, eval = T, echo = T}
+output_catefit$ate.contrastReg
+```
+
+You are encouraged to summarize and visualize the outputs in whichever way that fits a particular situation outside the package's functions. For example, it is possible to plot the densities of all CATE scores with `ggplot()`. There are some subjects with extremely low CATE scores but most of the samples fall between -1 and 1 with triple modes at around -0.5, 0, and 0.8. 
+
+```{r plot_score, eval = T, echo = T, fig.align='center'}
+dataplot <- data.frame(score = factor(rep(c("Boosting", "Naive Poisson", "Two regressions", "Contrast regression", "Negative Binomial"), each = length(output_catefit$score.boosting))), 
+                       value = c(output_catefit$score.boosting, output_catefit$score.poisson, output_catefit$score.twoReg, output_catefit$score.contrastReg, output_catefit$score.negBin))
+
+dataplot %>% 
+  ggplot(aes(x = value, fill = score)) + 
+  geom_density(alpha = 0.5) +
+  theme_classic() + 
+  labs(x = "Estimated CATE score", y = "Density", fill = "Method")
+```
+
+
+## Internal validation via `catecv()`
+
+The `catecv()` function provides the same estimation as the `catefit()` but via cross-validation (CV). With the `catecv()` function internal CV is applied to reduce optimism in choosing the CATE estimation method that captures the most treatment effect heterogeneity. The CV is applied by repeating the following steps `cv.n` times:
+
+* Split the data into a training and validation set according to `train.prop` argument. The training and validation sets must be balanced with respect to covariate distributions and doubly robust rate ratio estimates (see `error.max` argument).
+
+* Estimate the CATE score in the training set with the specified scoring method.
+
+* Predict the CATE score in the validation set using the scoring model fitted from the training set.
+
+* Build nested subgroups of treatment responders in the training and validation sets, separately, and estimate the ATE within each nested subgroup. For each element i of `prop.cutoff` argument (e.g., `prop.cutoff[i] = 0.6`), take the following steps:
+
+    * Identify high responders as observations with the 60% (i.e., `prop.cutoff[i]x100%`) highest (if `higher.y = TRUE`) or lowest (if `higher.y = FALSE`) estimated CATE scores.
+
+    * Estimate the ATE in the subgroup of high responders using a doubly robust estimator.
+
+    * Conversely, identify low responders as observations with the 40% (i.e., `1 - prop.cutoff[i]x100%`) lowest (if `higher.y = TRUE`) or highest (if `higher.y = FALSE`) estimated CATE scores.
+
+    * Estimate the ATE in the subgroup of low responders using a doubly robust estimator.
+
+* If `abc = TRUE`, calculate the area between the ATE and the series of ATEs in nested subgroups of high responders in the validation set. (for more information about the abc score, see [Validation curves and the ABC statistics](Theoretical-details.html))
+
+* Build mutually exclusive subgroups of treatment responders in the training and validation sets, separately, and estimate the ATE within each subgroup. Mutually exclusive subgroups are built by splitting the estimated CATE scores according to prop.multi.
+
+
+Oke, so now we can use the `catecv()` function to run internal validation to compare the different scoring methods. The mandatory arguments are similar to `atefit()` and `catefit()`: 
+The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. For this toy example we selected `poisson`, `contrastReg` and `negBin` to limit run time. 
 
 We also specified the following non-mandatory arguments to fit with the data and problem at hand: `initial.predictor.method`, `higher.y`,  `cv.n`, `seed`, `plot.gbmperf` and `verbose`.
 
@@ -114,16 +261,15 @@ We also specified the following non-mandatory arguments to fit with the data and
 
 * We avoid generating the boosting performance plots by specifying `plot.gbmperf` = FALSE.
 
-* When `verbose` = 1, progress messages are printed in the R console but
-errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models) and warnings or errors that have occurred during the steps (none in this example). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If `contrastReg` was selected as one of the methods in `score.method`, an additional line of output message will indicate whether the algorithm has converged.
+* When `verbose` = 1, progress messages are printed in the R console but errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models) and warnings or errors that have occurred during the steps (none in this example). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If `contrastReg` was selected as one of the methods in `score.method`, an additional line of output message will indicate whether the algorithm has converged.
 
-There are many other non-mandatory arguments that `catecv()` can accept. Please see the [More Examples](#moreexamples) section for more examples and the [Function description](#catecvcountdescr) section for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
+There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Additional examples](Additional-examples.html) vignette for more examples and the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html) section for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
 ```{r example_catecv, eval = T, echo = T, cache = doc.cache}
 output_catecv <- catecv(response = "count",
                         data = countExample,
                         score.method = c("poisson", "contrastReg", "negBin"),
-                        cate.model = y ~ age + female + previous_treatment + previous_cost +                                      previous_number_relapses + offset(log(years)),
+                        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
                         ps.model = trt ~ age + previous_treatment, 
                         initial.predictor.method = "poisson",
                         higher.y = FALSE,
@@ -134,13 +280,13 @@ output_catecv <- catecv(response = "count",
 ```
 
 
-The output of `catecv()` is an object of class "precmed" and here we named it `output_catecv`. It carries the relevant information to use in the next step of the workflow which selects the method (among those specified in the argument `score.method`) capturing the highest level of treatment effect heterogeneity. The output, which is described below, will be used in the functions `plot()`, `boxplot()` and `abc()`.
+The output of `catecv()` is an object of class "precmed" and here we named it `output_catecv`. It carries the relevant information to use in the next step of the workflow which selects the method (among those specified in the argument `score.method`) capturing the highest level of treatment effect heterogeneity. The output, which is described below, will be used in the functions `abc()`, `plot()` and `boxplot()`.
 
-For each method specified in the argument `score.method`, the following 4 groups of outputs are generated. We use the results from `contrastReg` as an example.
+For each method specified in the argument `score.method`, the following 3 groups of outputs are generated: `high`, `low` and `group`. We use the results from `contrastReg` as an example.
 
 **1. ATEs in nested subgroups of high responders**
 
-This output stores the ATEs - the ratio of annualized relapse rate between drug1 vs drug0 in this example - in nested subgroups of patients of high responders to drug 1 in the training (`$ate.est.train.high.cv`) and validation (`$ate.est.valid.high.cv`) sets across all CV iterations. For count outcomes, When `higher.y` = TRUE, higher CATE scores correspond to high responders to drug1. When `higher.y` = FALSE, lower CATE scores correspond to high responders to drug1. Note that this is different for survival outcomes. The direction of CATE scores depends on both `higher.y` and outcome type. 
+This output stores the ATEs - the ratio of annualized relapse rate between drug1 vs drug0 in this example - in nested subgroups of patients of high responders to drug 1 in the training (`$ate.est.train.high.cv`) and validation (`$ate.est.valid.high.cv`) sets across all CV iterations. For count outcomes, when `higher.y` = TRUE, higher CATE scores correspond to high responders to drug1. When `higher.y` = FALSE, lower CATE scores correspond to high responders to drug1. Note that this is different for survival outcomes. The direction of CATE scores depends on both `higher.y` and outcome type. 
 
 ```{r example_print_catecv, eval = T, echo = T}
 output_catecv$ate.contrastReg$ate.est.train.high.cv
@@ -205,9 +351,9 @@ Steeper slopes indicate more treatment effect heterogeneity between drug1 and dr
 plot(x = output_catecv)
 ```
 
-For this toy example, the methods are performing well in the training data as per the steep, increasing slopes on the left plot. Moreover, all methods generalize well to the validation data, as indicated by the monotonous increasing curves in the validation data (right plot). The dashed gray line is the ATE in the entire data set, which is why all lines merge to this reference line when subgroup size is 100\% of the data (`prop.cutoff` = 1). For more explanation on the validation curves, see the [Function description](#plotdescr) section. 
+For this toy example, the methods are performing well in the training data as per the steep, increasing slopes on the left plot. Moreover, all methods generalize well to the validation data, as indicated by the monotonous increasing curves in the validation data (right plot). The dashed gray line is the ATE in the entire data set, which is why all lines merge to this reference line when subgroup size is 100\% of the data (`prop.cutoff` = 1). For more explanation on the validation curves, see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.html) section. 
 
-The  plot's legend includes the ABC statistics in the validation set. The user can choose to mute the ABC annotations by specifying `show.abc` = FALSE.
+The plot's legend includes the ABC statistics in the validation set. The user can choose to mute the ABC annotations by specifying `show.abc` = FALSE.
 
 ```{r example_plot_lineplot1.1, eval = T, echo = T}
 plot(x = output_catecv, 
@@ -243,123 +389,9 @@ For this toy example, we can see why the two regressions method has the highest 
 
 <br><br>
 
-## Estimation of the CATE score with `catefit()` 
-
-If no internal validation is needed or the user has chosen the scoring methods wanted, we can fit the PM methods directly to the entire data set to estimate the CATE score. The ATE by subgroup defined by `prop.cutoff` can also be retrieved. This is done with the function `catefit()`. 
-
-In general, `catefit()` has similar arguments as `catecv()`. The mandatory arguments are the same: `response`, `data`, `score.method`, `cate.model`, and `ps.model` and they must be specified by the user. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](#catefitcountdescr) section for details. Because there is no internal validation, `catefit()` does not have the `cv.n`, `train.prop`, `abc`, and `prop.multi` arguments. This is the main distinction between these 2 output functions. We specified the mandatory and non-mandatory arguments the same way as `catecv()` in the example for demonstration purpose. 
-
-If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
 
-```{r example_catefit, eval = T, echo = T, cache = doc.cache}
-t0 <- Sys.time()
-output_catefit <- catefit(response = "count",
-                          data = countExample,
-                          score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
-                          cate.model = y ~ age + female + previous_treatment + previous_cost +                                      previous_number_relapses + offset(log(years)),
-                          ps.model = trt ~ age + previous_treatment,
-                          initial.predictor.method = "poisson",
-                          higher.y = FALSE, 
-                          seed = 999)
-t1 <- Sys.time()
-t1 - t0
-```
 
-Despite the similar arguments, the outputs of `catefit()` and `catecv()` differ. Each method specified in `score.method` has the following sets of results in `catefit()`: 
-
-1. `score` contains the log-transformed estimated CATE scores for each subject. CATE score is a linear combination of the variables specified in the `cate.model` argument. Same as the outcome, lower CATE scores are more desirable if `higher.y` = FALSE and vice versa. Each subject has one CATE score so the length of this output is 4,000 for our toy example. Below we show the CATE scores estimated with contrast regression for the first 6 subjects in the data. 
-
-```{r print_catefit.score, eval = T, echo = T}
-length(output_catefit$score.contrastReg)
-head(output_catefit$score.contrastReg)
-```
-
-2. `coefficients` contains the estimated coefficients of the CATE score for each scoring method. It is a data frame of the covariates (including intercept) as rows and scoring methods as columns. In our toy example, there are 5 covariates in the `cate.model` (including a categorical variable with 3 distinct factors) so there are 7 rows of estimated coefficients within each column. Since contrast regression is one of the scoring methods specified in the example, we see that contrast regression has an additional column with the standard errors of the estimated coefficients. Boosting does not estimate coefficients (it directly predicts the score) so there is no coefficient result for this method.
-
-```{r print_catefit.coefs, eval = T, echo = T}
-output_catefit$coefficients
-```
-
-We can define the estimated CATE scores for contrast regression like shown below. The user can use this information to study the influence of each covariate. 
-$$ 
-\begin{aligned}
-\widehat{CATE} = -0.60 & - 0.04 \times \text{age} \\
-& + 0.77 \times \text{female (vs male)} \\ 
-& + 0.75 \times \text{previous treatment drug B (vs drug A)} \\
-& - 0.21 \times \text{previous treatment drug C (vs drug A)} \\
-& - 0.02 \times \text{previous medical costs} \\
-& + 0.04 \times \text{previous number of relapses} 
-\end{aligned} 
-$$
-
-3. `ate` contains estimated ATEs in each nested subgroup of high responders to drug 1 defined by `prop.cutoff`. The subgroups are defined based on the estimated CATE scores with the specified scoring method. In this example, we show the estimated ATEs of subgroups identified by CATE scores of contrast regression. For example, the estimated ATE for the subgroup of subjects constructed based on the 50\% ("prop0.5") lowest CATE scores estimated from contrast regression is `r round(output_catefit$ate.contrastReg[1], 2)`. 
-
-```{r print_catefit.ate, eval = T, echo = T}
-output_catefit$ate.contrastReg
-```
-
-You are encouraged to summarize and visualize the outputs in whichever way that fits a particular situation outside the package's functions. For example, it is possible to plot the densities of all CATE scores with `ggplot()`. There are some subjects with extremely low CATE scores but most of the samples fall between -1 and 1 with triple modes at around -0.5, 0, and 0.8. 
-
-```{r plot_score, eval = T, echo = T, fig.align='center'}
-dataplot <- data.frame(score = factor(rep(c("Boosting", "Naive Poisson", "Two regressions", "Contrast regression", "Negative Binomial"), each = length(output_catefit$score.boosting))), 
-                       value = c(output_catefit$score.boosting, output_catefit$score.poisson, output_catefit$score.twoReg, output_catefit$score.contrastReg, output_catefit$score.negBin))
-
-dataplot %>% 
-  ggplot(aes(x = value, fill = score)) + 
-  geom_density(alpha = 0.5) +
-  theme_classic() + 
-  labs(x = "Estimated CATE score", y = "Density", fill = "Method")
-```
-
-
-## Estimation of the ATE with `atefit()` 
-
-Beyond exploring treatment effect heterogeneity, `atefit()` allows estimating the ATE in terms of rate ratio. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the PS model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified. The function also provides standard error, confidence intervals, and p-values based on bootstrap.
-
-The mandatory arguments are: `response`, `data`, `cate.model`, and `ps.model`. Those arguments have the same definitions as in `catecv()` and `catefit()`.
-
-```{r run_atefit, eval = T, echo = T, cache = doc.cache}
-output_atefit <- atefit(response = "count",
-                        data = countExample,
-                        cate.model = y ~ age + female + previous_treatment + previous_cost 
-                                         + previous_number_relapses + offset(log(years)),
-                        ps.model = trt ~ age + previous_treatment,
-                        n.boot = 50, 
-                        seed = 999,
-                        verbose = 0)
-```
-
-When `verbose` = 1, the function outputs a progress bar in the console. 
-
-```{r print_atefit, eval = T, echo = T}
-output_atefit
-```
-
-The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. The user can retrieve the rate ratio to facilitate the interpretation:
-
-```{r rmtl_atefit, eval = T, echo = T}
-rate.ratio <- exp(output_atefit$log.rate.ratio$estimate)
-rate.ratio
-CI.rate.ratio <- exp(output_atefit$log.rate.ratio$estimate + c(-1, 1) * qnorm(0.975) * sqrt(output_atefit$log.rate.ratio$SE))
-CI.rate.ratio
-```
-
-The rate ratio of `r round(rate.ratio, 2)` along with the 95\% confidence interval of (`r round(CI.rate.ratio[1], 2)`, `r round(CI.rate.ratio[2], 2)`) suggest that drug 0 is superior to drug 1 because the ratio is greater than 1 and lower outcomes are preferred, but that this superiority is not statistically significant given the p-value of `r round(output_atefit$log.rate.ratio$pvalue, 2)` in the output (`$log.rate.ratio$pvalue`).
-
-The output of `atefit()` is expressed in terms of treatment 0 vs 1 and the rate ratio is expressed as the ratio of the treatment coded as 1 over the treatment coded as 0. If the treatment variable is not coded as 0/1 in the data set, the function returns a warning `output_atefit$warning` which indicates which key was used to recode the treatment variable into a 0/1 variable.
-
-```{r warning_atefit, eval = T, echo = T}
-output_atefit$warning
-```
-
-Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for the log rate ratio. A red vertical line is added to each histogram with the mean of the bootstrap estimates.
-
-```{r, echo = F}
-knitr::include_graphics("atefit_bootstrap_count.png")
-```
-   
-Histograms of bootstrap log rate ratio estimators after 500 bootstrap iterations, produced if `plot.boot` = TRUE
 
 
 
