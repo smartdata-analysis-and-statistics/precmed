@@ -62,19 +62,28 @@ To show the functionalities of the `precmed` package for survival outcomes we fi
 
 * The rest of the variables are baseline patient characteristics. Variable `age` is centered at 48 years old. The medical costs in the year prior to treatment initiation `previous_cost` is centered at 14,362 USD and scaled with standard deviation 24,266 USD.
 
-```{r data, echo = F, eval = T, include = T}
+```{r data, echo = F, eval = T, include = F, results = 'hide'}
 library(tableone)
 survivalExample$age <- as.numeric(survivalExample$age)
 survivalExample$previous_cost <- as.numeric(survivalExample$previous_cost)
+
+if (!require(tableone)){
+install.packages('tableone', repos = "http://cran.us.r-project.org")
+library(tableone)
+}
 
 ## Vector of variables to summarize
 myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses")
 ## Vector of categorical variables that need transformation
 catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
 ## Create a TableOne object
-CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample)
-
+t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample))
 ```
+
+```{r, echo = F, eval = T, include = T}
+knitr::kable(t.table1)
+```
+
 
 
 ## Estimation of the ATE with `atefit()` 
