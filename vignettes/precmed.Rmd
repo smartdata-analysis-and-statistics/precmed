@@ -26,27 +26,48 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 ```
 
 <h1>precmed: Precision Medicine in R</h1>
-A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
+A doubly robust precision medicine approach to estimate and validate conditional average treatment effects.
 
 # General introduction
 
-**precmed** was developed to help researchers with precision medicine. In precision medicine, we want to determine the optimal treatment for each patient instead of applying one treatment to all patients because not all patients respond to treatments in the same way. This is also called *treatment effect heterogeneity* in which different subgroups of patients respond differently to the same treatment. **precmed** can help to estimate and internally validate these different treatment effects, also called the conditional average treatment effects (CATEs) which describe how different subgroups respond to the same treatment. Users of the package can estimate these effects (CATEs) between two treatments (e.g., treatment A or treatment B) from either randomized controlled trials (RCTs) or real world data (RWD).  
+**precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms (e.g., side effects) **precmed** offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
-## Capabilities of `precmed` package
+## How to install?
 
-The `precmed` package contains functions to
+The `precmed` package can be installed from CRAN as follows:
 
-- Estimate average treatment effects for count, survival and contiuous data
-- Estimate conditional average treatment effect (CATE) score for count and survival
-- Cross-validation of CATE score
-- Compute area between curves
-- Plot validation curves
-  
-The CATEs can be estimated using various scoring methods depending on the type of outcome. Currently, **precmed** supports count and survival outcome:  
-- Example count outcome: When the outcome is the number of relapses (0, 1, 2, 3) and we want to estimate if drug0 or drug1 is preferred for patients.  
-- Example survival outcome: When the outcome is the time (days) to first relapse (or censoring).
+``` r
+install.packages("precmed")
+```
 
-Using the `catecv()` function, these treatment effects can be estimated using different scoring methods like `boosting`, `poisson`, and `randomForest` (survival outcomes only). The function will internally evaluate the performance of these different scoring methods with repeated cross-validation (CV). 
+The latest version can be installed from GitHub as follows:
+
+``` r
+install.packages("devtools")
+devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
+```
+
+# Package capabilities
+
+The **precmed** package contains functions to
+
+-	Estimate the average treatment effect for count, survival and continuous outcome data using `atefit()`
+-	Estimate the conditional average treatment effect (CATE) for count and survival outcome data using `catefit()`
+-	Development and Cross-validation of CATE using `catecv()` 
+-	Plot the proportion of subjects with an estimated treatment effect no less than c over a range of values for c [@zhao2013effectively]. 
+-	Compute the area between the average treatment difference curve of competing models for the CATE using `abc()`  [@zhao2013effectively]
+
+# Recommended workflow
+
+The recommended workflow of analyses to identify treatment effect heterogeneity with several candidate scoring methods follows the steps below:
+
+1.	Compare up to 5 methods (e.g., Poisson regression, boosting) for estimating the CATE via cross-validation (function `catecv()`).
+2.	Select the best method using 3 metrics:
+  * Compare the steepness of the validation curves in the validation samples across methods (function plot()). Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under score.method.
+  * The area between curves (ABC)  (function abc()) .quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
+  * Compare the distribution of the ATE in mutually exclusive subgroups in the validation samples (function boxplot()). Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in the validation set across all cross-validation iterations. The subgroups are mutually exclusive and are categorized by the CATE score percentiles prop.multi specified in catecv().
+3.	For the selected method, estimate the CATE score in the entire data or, ideally, in an external data set (function catefit()). Steps 1 & 2 can be skipped if comparing and selecting methods are not of interest.
+4.	Optional. Use atefit() to estimate ATE between 2 treatment groups with a doubly robust estimator and estimate the variability of the ATE with a bootstrap approach.
 
 
 ## User input
@@ -74,20 +95,7 @@ Two side-by-side plots are generated, visualizing the estimated average treatmen
 Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in the validation set across all cross-validation iterations. The subgroups are mutually exclusive and are categorized by the CATE score percentiles `prop.multi` specified in `catecv()`. 
 
 
-## How to install?
 
-The `precmed` package can be installed from CRAN as follows:
-
-``` r
-install.packages("precmed")
-```
-
-The latest version can be installed from GitHub as follows:
-
-``` r
-install.packages("devtools")
-devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
-```
 
 ## Main functions
 
