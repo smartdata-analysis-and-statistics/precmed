@@ -117,16 +117,16 @@ medicine is to determine the optimal treatment separately for each
 patient instead of applying a common treatment to all patients.
 Personalizing treatment decisions becomes particularly relevant when
 treatment response differs across patients, or when patients have
-different preferences about benefits and harms (e.g., side effects)
-<strong>precmed</strong> offers statistical methods to develop and
-validate prediction models for estimating individualized treatment
-effects. These treatment effects are also known as the conditional
-average treatment effects (CATEs) and describe how different subgroups
-of patients respond to the same treatment. Presently,
-<strong>precmed</strong> focuses on the personalization of two
-competitive treatments using randomized data from a clinical trial <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al. 2013</a>)</span> or using real-world
-data (RWD) from a non-randomized study <span class="citation">(<a href="#ref-yadlowsky2020estimation" role="doc-biblioref">Yadlowsky et
-al. 2020</a>)</span>.</p>
+different preferences about benefits and harms. This package offers
+statistical methods to develop and validate prediction models for
+estimating individualized treatment effects. These treatment effects are
+also known as the conditional average treatment effects (CATEs) and
+describe how different subgroups of patients respond to the same
+treatment. Presently, <strong>precmed</strong> focuses on the
+personalization of two competitive treatments using randomized data from
+a clinical trial <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al.
+2013</a>)</span> or using real-world data (RWD) from a non-randomized
+study <span class="citation">(<a href="#ref-yadlowsky2020estimation" role="doc-biblioref">Yadlowsky et al. 2020</a>)</span>.</p>
 <div class="section level3">
 <h3 id="how-to-install">How to install?<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
 </h3>
@@ -145,11 +145,11 @@ follows:</p>
 </h2>
 <p>The <strong>precmed</strong> package contains functions to</p>
 <ul>
-<li>Estimate the average treatment effect for count, survival and
-continuous outcome data using <code><a href="../reference/atefit.html">atefit()</a></code>
+<li>Estimate the average treatment effect (ATE) for count and survival
+outcome data using <code><a href="../reference/atefit.html">atefit()</a></code>
 </li>
-<li>Estimate the conditional average treatment effect (CATE) for count
-and survival outcome data using <code><a href="../reference/catefit.html">catefit()</a></code>
+<li>Estimate the conditional average treatment effect (CATE) using
+<code><a href="../reference/catefit.html">catefit()</a></code>
 </li>
 <li>Development and Cross-validation of CATE using
 <code><a href="../reference/catecv.html">catecv()</a></code>
@@ -169,32 +169,28 @@ competing models for the CATE using <code><a href="../reference/abc.html">abc()<
 the CATE in order to identify treatment effect heterogeneity:</p>
 <ol style="list-style-type: decimal">
 <li>Compare up to five modelling approaches (e.g., Poisson regression,
-boosting) for estimating the CATE via cross-validation (function
-<code><a href="../reference/catecv.html">catecv()</a></code>).</li>
-<li>Select the best modelling approach using 3 metrics:</li>
-</ol>
+boosting) for estimating the CATE using cross-validation through
+<code><a href="../reference/catecv.html">catecv()</a></code>.</li>
+<li>Select the best modelling approach using 3 metrics:
 <ul>
 <li>Compare the steepness of the validation curves in the validation
-samples across methods (function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>). Two side-by-side
-plots are generated, visualizing the estimated average treatment effects
-in a series of nested subgroups. On the left side the curve is shown for
-the training set, and on the right side the curve is shown for the
+samples across methods using <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>. Two side-by-side plots
+are generated, visualizing the estimated average treatment effects in a
+series of nested subgroups. On the left side the curve is shown for the
+training set, and on the right side the curve is shown for the
 validation set. Each line in the plots represents one scoring method
 (e.g., boosting, randomForest) specified under the argument
 <code>score.method</code>.</li>
-<li>The area between curves (ABC) (function <code><a href="../reference/abc.html">abc()</a></code>)
-quantifies a model’s ability to capture treatment effect heterogeneity.
-Higher ABC values are preferable as they indicate that more treatment
-effect heterogeneity is captured by the scoring method.</li>
-<li>Compare the distribution of the estimated ATE in mutually exclusive
-subgroups in the cross-validation samples (function
-<code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>). The subgroups are categorized by the CATE score
-percentiles <code>prop.multi</code> specified in
-<code><a href="../reference/catecv.html">catecv()</a></code>.</li>
+<li>The area between curves (ABC) using <code><a href="../reference/abc.html">abc()</a></code> quantifies a
+model’s ability to capture treatment effect heterogeneity. Higher ABC
+values are preferable as they indicate that more treatment effect
+heterogeneity is captured by the scoring method.</li>
+<li>Compare the distribution of the estimated ATE across different
+levels of the CATE score percentiles using <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>.</li>
 </ul>
-<ol start="3" style="list-style-type: decimal">
+</li>
 <li>Apply the best modelling approach in the original data or in a new
-external dataset (function <code><a href="../reference/catefit.html">catefit()</a></code>).</li>
+external dataset using <code><a href="../reference/catefit.html">catefit()</a></code>.</li>
 <li>Optional. Use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate ATE between 2
 treatment groups with a doubly robust estimator and estimate the
 variability of the ATE with a bootstrap approach.</li>
@@ -204,132 +200,34 @@ expose the user from simple to more complex methods.</p>
 <div class="section level3">
 <h3 id="user-input">User input<a class="anchor" aria-label="anchor" href="#user-input"></a>
 </h3>
-<p>The user has to (atleast) input:<br>
-- response: type of outcome/response (either <code>count</code> or
-<code>survival</code>)<br>
-- data: a data frame with patient data<br>
-- score.method: select which methods are used to estimate the CATE
-(e.g., <code>boosting</code>, <code>poisson</code>, <code>twoReg</code>,
-<code>contrastReg</code>)<br>
-- cate.model: a formula describing the outcome model (outcome ~ age +
-gender + previous_treatment)<br>
-The outcome of interest is located on the left, and the covariates on
-the right.<br>
-- ps.model: a formula describing the propensity score model (treatment ~
-age + previous_treatment)<br>
-To correct for confounding, the propensity score is calculated. The
-treatment is located on the left (e.g., drug0 or drug1, treatment must
-be coded as 0 or 1) and all variables that can influence treatment
-allocation are located on the right (e.g, age and previous treatment
-might influence if patients receive drug0 or drug1).</p>
-</div>
-<div class="section level3">
-<h3 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a>
-</h3>
-<p>The outcome of the <code><a href="../reference/catecv.html">catecv()</a></code> function can be validated
-using 3 built-in validation metrics to internally evaluate the
-performance of different scoring methods:</p>
+<p>When applying <code><a href="../reference/catefit.html">catefit()</a></code> or <code><a href="../reference/catecv.html">catecv()</a></code>, the
+user has to (at least) input:</p>
 <ul>
-<li><p>area between curves (ABC): <code>abc(x)</code><br>
-The ABC is a metric to help users select the best scoring method in
-terms of capturing treatment effect heterogeneity in the data. It is
-calculated for each scoring method separately. Higher ABC values are
-preferable as they indicate that more treatment effect heterogeneity is
-captured by the scoring method.</p></li>
-<li><p>validation curves: <code>plot(x)</code><br>
-Two side-by-side plots are generated, visualizing the estimated average
-treatment effects in a series of nested subgroups. On the left side the
-curve is shown for the training set, and on the right side the curve is
-shown for the validation set. Each line in the plots represents one
-scoring method (e.g., <code>boosting</code>, <code>randomForest</code>)
-specified under score.method.</p></li>
-<li><p>box plots: <code>boxplot(x)</code><br>
-Provides box plots which depict distributions of estimated ATEs for each
-multi-category subgroup in the validation set across all
-cross-validation iterations. The subgroups are mutually exclusive and
-are categorized by the CATE score percentiles <code>prop.multi</code>
-specified in <code><a href="../reference/catecv.html">catecv()</a></code>.</p></li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="main-functions">Main functions<a class="anchor" aria-label="anchor" href="#main-functions"></a>
-</h3>
-<p>The main functions in the <code>precmed</code> package are:</p>
-<table class="table">
-<colgroup>
-<col width="36%">
-<col width="63%">
-</colgroup>
-<thead><tr class="header">
-<th>Function name</th>
-<th>Description</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>catecv()</td>
-<td>Cross-validation of the conditional average treatment effect (CATE)
-score for count, survival or continuous outcomes</td>
-</tr>
-<tr class="even">
-<td>catefit()</td>
-<td>Estimation of the conditional average treatment effect (CATE) score
-for count, survival and continuous data</td>
-</tr>
-<tr class="odd">
-<td>atefit()</td>
-<td>Doubly robust estimator of and inference for the average treatment
-effect for count, survival and continuous data</td>
-</tr>
-<tr class="even">
-<td>Validation functions:</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>abc()</td>
-<td>Compute the area between curves from the <code>precmed</code>
-object</td>
-</tr>
-<tr class="even">
-<td>plot()</td>
-<td>Two side-by-side line plots of validation curves from the
-<code>precmed</code> object</td>
-</tr>
-<tr class="odd">
-<td>boxplot()</td>
-<td>A set of box plots of estimated ATEs from the <code>precmed</code>
-object</td>
-</tr>
-</tbody>
-</table>
-<p>The main functions of the package are: <code><a href="../reference/catecv.html">catecv()</a></code>,
-<code><a href="../reference/catefit.html">catefit()</a></code>, <code><a href="../reference/atefit.html">atefit()</a></code>, <code><a href="../reference/abc.html">abc()</a></code>,
-<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, and <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>. The recommended
-workflow of analyses to identify treatment effect heterogeneity with
-several candidate scoring methods follows the steps below:</p>
-<ol style="list-style-type: decimal">
-<li><p>Compare up to 5 methods to construct the CATE score via internal
-validation (function <code><a href="../reference/catecv.html">catecv()</a></code>).</p></li>
 <li>
-<p>Select the best method using 3 metrics:</p>
-<p>2.1 Compare the ABC across methods (function <code><a href="../reference/abc.html">abc()</a></code>).</p>
-<p>2.2 Compare the steepness of the validation curves in the validation
-samples across methods (function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>).</p>
-<p>2.3 Compare the distribution of the ATE in mutually exclusive
-subgroups in the validation samples (function
-<code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>).</p>
+<code>response</code>: type of outcome/response (either
+<code>count</code> or <code>survival</code>)<br>
 </li>
-<li><p>For the selected method, estimate the CATE score in the entire
-data or, ideally, in an external data set (function
-<code><a href="../reference/catefit.html">catefit()</a></code>). Steps 1 &amp; 2 can be skipped if comparing and
-selecting methods are not of interest.</p></li>
-<li><p>Optional. Use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate ATE between 2
-treatment groups with a doubly robust estimator and estimate the
-variability of the ATE with a bootstrap approach.</p></li>
-</ol>
+<li>
+<code>data</code>: a data frame with individual patient data<br>
+</li>
+<li>
+<code>score.method</code>: methods to estimate the CATE (e.g.,
+<code>boosting</code>, <code>poisson</code>, <code>twoReg</code>,
+<code>contrastReg</code>)<br>
+</li>
+<li>
+<code>cate.model</code>: a formula describing the outcome model
+(e.g., outcome ~ age + gender + previous_treatment)<br>
+</li>
+<li>
+<code>ps.model</code>: a formula describing the propensity score
+model to adjust for confounding (e.g., treatment ~ age +
+previous_treatment)</li>
+</ul>
 </div>
 </div>
 <div class="section level2">
-<h2 id="other-precmed-vignettes-in-this-serie">Other <code>precmed</code> vignettes in this serie<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-serie"></a>
+<h2 id="overview-of-the-vignettes">Overview of the vignettes<a class="anchor" aria-label="anchor" href="#overview-of-the-vignettes"></a>
 </h2>
 <p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival
 outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
