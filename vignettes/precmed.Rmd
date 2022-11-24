@@ -30,7 +30,7 @@ A doubly robust precision medicine approach to estimate and validate conditional
 
 # General introduction
 
-**precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms (e.g., side effects) **precmed** offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
+**precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
 ## How to install?
 
@@ -51,8 +51,8 @@ devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 
 The **precmed** package contains functions to
 
--	Estimate the average treatment effect for count, survival and continuous outcome data using `atefit()`
--	Estimate the conditional average treatment effect (CATE) for count and survival outcome data using `catefit()`
+-	Estimate the average treatment effect (ATE) for count and survival outcome data using `atefit()`
+-	Estimate the conditional average treatment effect (CATE) using `catefit()`
 -	Development and Cross-validation of CATE using `catecv()` 
 -	Plot the proportion of subjects with an estimated treatment effect no less than $c$ over a range of values for $c$ [@zhao2013effectively]. 
 -	Compute the area between the average treatment difference curve of competing models for the CATE using `abc()`  [@zhao2013effectively]
@@ -61,77 +61,28 @@ The **precmed** package contains functions to
 
 We recommend the following workflow to develop a model for estimating the CATE in order to identify treatment effect heterogeneity:
 
-1.	Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE via cross-validation (function `catecv()`).
-2.	Select the best modelling approach using 3 metrics:
-  * Compare the steepness of the validation curves in the validation samples across methods (function `plot()`). Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under the argument `score.method`.
-  * The area between curves (ABC) (function `abc()`) quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
-  * Compare the distribution of the estimated ATE in mutually exclusive subgroups in the cross-validation samples (function `boxplot()`). The subgroups are categorized by the CATE score percentiles `prop.multi` specified in `catecv()`.
-3. Apply the best modelling approach in the original data or in a new external dataset (function `catefit()`). 
+1. Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE using cross-validation through `catecv()`.
+2. Select the best modelling approach using 3 metrics:
+    * Compare the steepness of the validation curves in the validation samples across methods using `plot()`. Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under the argument `score.method`.
+    * The area between curves (ABC) using `abc()` quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
+    * Compare the distribution of the estimated ATE across different levels of the CATE score percentiles using `boxplot()`. 
+3. Apply the best modelling approach in the original data or in a new external dataset using `catefit()`. 
 4.	Optional. Use `atefit()` to estimate ATE between 2 treatment groups with a doubly robust estimator and estimate the variability of the ATE with a bootstrap approach.
 
 In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.
 
 ## User input
 
-The user has to (atleast) input:  
-- response: type of outcome/response (either `count` or `survival`)  
-- data: a data frame with patient data  
-- score.method: select which methods are used to estimate the CATE (e.g., `boosting`, `poisson`, `twoReg`, `contrastReg`)  
-- cate.model: a formula describing the outcome model (outcome ~ age + gender + previous_treatment)  
-The outcome of interest is located on the left, and the covariates on the right.  
-- ps.model: a formula describing the propensity score model (treatment ~ age + previous_treatment)  
-To correct for confounding, the propensity score is calculated. The treatment is located on the left (e.g., drug0 or drug1, treatment must be coded as 0 or 1) and all variables that can influence treatment allocation are located on the right (e.g, age and previous treatment might influence if patients receive drug0 or drug1).  
-  
-## Validation  
+When applying `catefit()` or `catecv()`, the user has to (at least) input:
 
-The outcome of the `catecv()` function can be validated using 3 built-in validation metrics to internally evaluate the performance of different scoring methods:  
-  
-- area between curves (ABC): `abc(x)`   
-The ABC is a metric to help users select the best scoring method in terms of capturing treatment effect heterogeneity in the data. It is calculated for each scoring method separately. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.  
-  
-- validation curves: `plot(x)`  
-Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., `boosting`, `randomForest`) specified under score.method.  
-  
-- box plots: `boxplot(x)`   
-Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in the validation set across all cross-validation iterations. The subgroups are mutually exclusive and are categorized by the CATE score percentiles `prop.multi` specified in `catecv()`. 
+- `response`: type of outcome/response (either `count` or `survival`)  
+- `data`: a data frame with individual patient data  
+- `score.method`: methods to estimate the CATE (e.g., `boosting`, `poisson`, `twoReg`, `contrastReg`)  
+- `cate.model`: a formula describing the outcome model (e.g., outcome ~ age + gender + previous_treatment)  
+- `ps.model`: a formula describing the propensity score model to adjust for confounding (e.g., treatment ~ age + previous_treatment) 
 
 
-
-
-## Main functions
-
-The main functions in the `precmed` package are:
-
-Function name      | Description
--------------------|---------------------------------
-catecv()           | Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
-catefit()          | Estimation of the conditional average treatment effect (CATE) score for count, survival and continuous data
-atefit()           | Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data
-Validation functions: | 
-abc()              | Compute the area between curves from the `precmed` object
-plot()             | Two side-by-side line plots of validation curves from the `precmed` object
-boxplot()          | A set of box plots of estimated ATEs from the `precmed` object
-
-
-The main functions of the package are: `catecv()`, `catefit()`, `atefit()`, `abc()`, `plot()`, and `boxplot()`. The recommended workflow of analyses to identify treatment effect heterogeneity with several candidate scoring methods follows the steps below:  
-
-1. Compare up to 5 methods to construct the CATE score via internal validation (function `catecv()`).  
-  
-2. Select the best method using 3 metrics:  
-  
-    2.1 Compare the ABC across methods (function `abc()`).  
-    
-    2.2 Compare the steepness of the validation curves in the validation samples across methods (function `plot()`).  
-  
-    2.3 Compare the distribution of the ATE in mutually exclusive subgroups in the validation samples (function `boxplot()`).  
-  
-  
-3. For the selected method, estimate the CATE score in the entire data or, ideally, in an external data set (function `catefit()`). Steps 1 & 2 can be skipped if comparing and selecting methods are not of interest.  
-
-4. Optional. Use `atefit()` to estimate ATE between 2 treatment groups with a doubly robust estimator and estimate the variability of the ATE with a bootstrap approach. 
-
-
-# Other `precmed` vignettes in this serie  
+# Overview of the vignettes
   
 [1. General introduction](precmed.html)  
 [2. Examples for count outcome](Count-examples.html)  
