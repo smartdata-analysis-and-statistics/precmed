@@ -155,8 +155,8 @@ and survival outcome data using <code><a href="../reference/catefit.html">catefi
 <code><a href="../reference/catecv.html">catecv()</a></code>
 </li>
 <li>Plot the proportion of subjects with an estimated treatment effect
-no less than c over a range of values for c <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al.
-2013</a>)</span>.</li>
+no less than <span class="math inline">\(c\)</span> over a range of
+values for <span class="math inline">\(c\)</span> <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al. 2013</a>)</span>.</li>
 <li>Compute the area between the average treatment difference curve of
 competing models for the CATE using <code><a href="../reference/abc.html">abc()</a></code> <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al. 2013</a>)</span>
 </li>
@@ -165,43 +165,42 @@ competing models for the CATE using <code><a href="../reference/abc.html">abc()<
 <div class="section level2">
 <h2 id="recommended-workflow">Recommended workflow<a class="anchor" aria-label="anchor" href="#recommended-workflow"></a>
 </h2>
-<p>The recommended workflow of analyses to identify treatment effect
-heterogeneity with several candidate scoring methods follows the steps
-below:</p>
+<p>We recommend the following workflow to develop a model for estimating
+the CATE in order to identify treatment effect heterogeneity:</p>
 <ol style="list-style-type: decimal">
-<li>Compare up to 5 methods (e.g., Poisson regression, boosting) for
-estimating the CATE via cross-validation (function
+<li>Compare up to five modelling approaches (e.g., Poisson regression,
+boosting) for estimating the CATE via cross-validation (function
 <code><a href="../reference/catecv.html">catecv()</a></code>).</li>
-<li>Select the best method using 3 metrics:</li>
+<li>Select the best modelling approach using 3 metrics:</li>
 </ol>
 <ul>
 <li>Compare the steepness of the validation curves in the validation
-samples across methods (function plot()). Two side-by-side plots are
-generated, visualizing the estimated average treatment effects in a
-series of nested subgroups. On the left side the curve is shown for the
-training set, and on the right side the curve is shown for the
+samples across methods (function <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>). Two side-by-side
+plots are generated, visualizing the estimated average treatment effects
+in a series of nested subgroups. On the left side the curve is shown for
+the training set, and on the right side the curve is shown for the
 validation set. Each line in the plots represents one scoring method
-(e.g., boosting, randomForest) specified under score.method.</li>
-<li>The area between curves (ABC) (function abc()) .quantifies a model’s
-ability to capture treatment effect heterogeneity. Higher ABC values are
-preferable as they indicate that more treatment effect heterogeneity is
-captured by the scoring method.</li>
-<li>Compare the distribution of the ATE in mutually exclusive subgroups
-in the validation samples (function boxplot()). Provides box plots which
-depict distributions of estimated ATEs for each multi-category subgroup
-in the validation set across all cross-validation iterations. The
-subgroups are mutually exclusive and are categorized by the CATE score
-percentiles prop.multi specified in catecv().</li>
+(e.g., boosting, randomForest) specified under the argument
+<code>score.method</code>.</li>
+<li>The area between curves (ABC) (function <code><a href="../reference/abc.html">abc()</a></code>)
+quantifies a model’s ability to capture treatment effect heterogeneity.
+Higher ABC values are preferable as they indicate that more treatment
+effect heterogeneity is captured by the scoring method.</li>
+<li>Compare the distribution of the estimated ATE in mutually exclusive
+subgroups in the cross-validation samples (function
+<code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>). The subgroups are categorized by the CATE score
+percentiles <code>prop.multi</code> specified in
+<code><a href="../reference/catecv.html">catecv()</a></code>.</li>
 </ul>
 <ol start="3" style="list-style-type: decimal">
-<li>For the selected method, estimate the CATE score in the entire data
-or, ideally, in an external data set (function catefit()). Steps 1 &amp;
-2 can be skipped if comparing and selecting methods are not of
-interest.</li>
-<li>Optional. Use atefit() to estimate ATE between 2 treatment groups
-with a doubly robust estimator and estimate the variability of the ATE
-with a bootstrap approach.</li>
+<li>Apply the best modelling approach in the original data or in a new
+external dataset (function <code><a href="../reference/catefit.html">catefit()</a></code>).</li>
+<li>Optional. Use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate ATE between 2
+treatment groups with a doubly robust estimator and estimate the
+variability of the ATE with a bootstrap approach.</li>
 </ol>
+<p>In the vignettes, we will adopt a different workflow to gradually
+expose the user from simple to more complex methods.</p>
 <div class="section level3">
 <h3 id="user-input">User input<a class="anchor" aria-label="anchor" href="#user-input"></a>
 </h3>
