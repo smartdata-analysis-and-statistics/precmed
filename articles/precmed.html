@@ -93,7 +93,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>A general introduction</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 5</h3>
             
-            <h4 data-toc-skip class="date">November 10, 2022</h4>
+            <h4 data-toc-skip class="date">November 24, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/precmed.Rmd" class="external-link"><code>vignettes/precmed.Rmd</code></a></small>
       <div class="d-none name"><code>precmed.Rmd</code></div>
@@ -107,50 +107,101 @@
 precmed: Precision Medicine in R
 </h1>
 <p>A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects</p>
+conditional average treatment effects.</p>
 <div class="section level2">
 <h2 id="general-introduction">General introduction<a class="anchor" aria-label="anchor" href="#general-introduction"></a>
 </h2>
-<p><strong>precmed</strong> was developed to help researchers with
-precision medicine. In precision medicine, we want to determine the
-optimal treatment for each patient instead of applying one treatment to
-all patients because not all patients respond to treatments in the same
-way. This is also called <em>treatment effect heterogeneity</em> in
-which different subgroups of patients respond differently to the same
-treatment. <strong>precmed</strong> can help to estimate and internally
-validate these different treatment effects, also called the conditional
-average treatment effects (CATEs) which describe how different subgroups
-respond to the same treatment. Users of the package can estimate these
-effects (CATEs) between two treatments (e.g., treatment A or treatment
-B) from either randomized controlled trials (RCTs) or real world data
-(RWD).</p>
+<p><strong>precmed</strong> was developed to help researchers with the
+implementation of precision medicine in R. A key objective of precision
+medicine is to determine the optimal treatment separately for each
+patient instead of applying a common treatment to all patients.
+Personalizing treatment decisions becomes particularly relevant when
+treatment response differs across patients, or when patients have
+different preferences about benefits and harms (e.g., side effects)
+<strong>precmed</strong> offers statistical methods to develop and
+validate prediction models for estimating individualized treatment
+effects. These treatment effects are also known as the conditional
+average treatment effects (CATEs) and describe how different subgroups
+of patients respond to the same treatment. Presently,
+<strong>precmed</strong> focuses on the personalization of two
+competitive treatments using randomized data from a clinical trial <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al. 2013</a>)</span> or using real-world
+data (RWD) from a non-randomized study <span class="citation">(<a href="#ref-yadlowsky2020estimation" role="doc-biblioref">Yadlowsky et
+al. 2020</a>)</span>.</p>
 <div class="section level3">
-<h3 id="capabilities-of-precmed-package">Capabilities of <code>precmed</code> package<a class="anchor" aria-label="anchor" href="#capabilities-of-precmed-package"></a>
+<h3 id="how-to-install">How to install?<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
 </h3>
-<p>The <code>precmed</code> package contains functions to</p>
-<ul>
-<li>Estimate average treatment effects for count, survival and contiuous
-data</li>
-<li>Estimate conditional average treatment effect (CATE) score for count
-and survival</li>
-<li>Cross-validation of CATE score</li>
-<li>Compute area between curves</li>
-<li>Plot validation curves</li>
-</ul>
-<p>The CATEs can be estimated using various scoring methods depending on
-the type of outcome. Currently, <strong>precmed</strong> supports count
-and survival outcome:<br>
-- Example count outcome: When the outcome is the number of relapses (0,
-1, 2, 3) and we want to estimate if drug0 or drug1 is preferred for
-patients.<br>
-- Example survival outcome: When the outcome is the time (days) to first
-relapse (or censoring).</p>
-<p>Using the <code><a href="../reference/catecv.html">catecv()</a></code> function, these treatment effects can
-be estimated using different scoring methods like <code>boosting</code>,
-<code>poisson</code>, and <code>randomForest</code> (survival outcomes
-only). The function will internally evaluate the performance of these
-different scoring methods with repeated cross-validation (CV).</p>
+<p>The <code>precmed</code> package can be installed from CRAN as
+follows:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"precmed"</span><span class="op">)</span></span></code></pre></div>
+<p>The latest version can be installed from GitHub as follows:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span>repo <span class="op">=</span> <span class="st">"smartdata-analysis-and-statistics/precmed"</span><span class="op">)</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="package-capabilities">Package capabilities<a class="anchor" aria-label="anchor" href="#package-capabilities"></a>
+</h2>
+<p>The <strong>precmed</strong> package contains functions to</p>
+<ul>
+<li>Estimate the average treatment effect for count, survival and
+continuous outcome data using <code><a href="../reference/atefit.html">atefit()</a></code>
+</li>
+<li>Estimate the conditional average treatment effect (CATE) for count
+and survival outcome data using <code><a href="../reference/catefit.html">catefit()</a></code>
+</li>
+<li>Development and Cross-validation of CATE using
+<code><a href="../reference/catecv.html">catecv()</a></code>
+</li>
+<li>Plot the proportion of subjects with an estimated treatment effect
+no less than c over a range of values for c <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al.
+2013</a>)</span>.</li>
+<li>Compute the area between the average treatment difference curve of
+competing models for the CATE using <code><a href="../reference/abc.html">abc()</a></code> <span class="citation">(<a href="#ref-zhao2013effectively" role="doc-biblioref">Zhao et al. 2013</a>)</span>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="recommended-workflow">Recommended workflow<a class="anchor" aria-label="anchor" href="#recommended-workflow"></a>
+</h2>
+<p>The recommended workflow of analyses to identify treatment effect
+heterogeneity with several candidate scoring methods follows the steps
+below:</p>
+<ol style="list-style-type: decimal">
+<li>Compare up to 5 methods (e.g., Poisson regression, boosting) for
+estimating the CATE via cross-validation (function
+<code><a href="../reference/catecv.html">catecv()</a></code>).</li>
+<li>Select the best method using 3 metrics:</li>
+</ol>
+<ul>
+<li>Compare the steepness of the validation curves in the validation
+samples across methods (function plot()). Two side-by-side plots are
+generated, visualizing the estimated average treatment effects in a
+series of nested subgroups. On the left side the curve is shown for the
+training set, and on the right side the curve is shown for the
+validation set. Each line in the plots represents one scoring method
+(e.g., boosting, randomForest) specified under score.method.</li>
+<li>The area between curves (ABC) (function abc()) .quantifies a model’s
+ability to capture treatment effect heterogeneity. Higher ABC values are
+preferable as they indicate that more treatment effect heterogeneity is
+captured by the scoring method.</li>
+<li>Compare the distribution of the ATE in mutually exclusive subgroups
+in the validation samples (function boxplot()). Provides box plots which
+depict distributions of estimated ATEs for each multi-category subgroup
+in the validation set across all cross-validation iterations. The
+subgroups are mutually exclusive and are categorized by the CATE score
+percentiles prop.multi specified in catecv().</li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>For the selected method, estimate the CATE score in the entire data
+or, ideally, in an external data set (function catefit()). Steps 1 &amp;
+2 can be skipped if comparing and selecting methods are not of
+interest.</li>
+<li>Optional. Use atefit() to estimate ATE between 2 treatment groups
+with a doubly robust estimator and estimate the variability of the ATE
+with a bootstrap approach.</li>
+</ol>
 <div class="section level3">
 <h3 id="user-input">User input<a class="anchor" aria-label="anchor" href="#user-input"></a>
 </h3>
@@ -200,18 +251,6 @@ cross-validation iterations. The subgroups are mutually exclusive and
 are categorized by the CATE score percentiles <code>prop.multi</code>
 specified in <code><a href="../reference/catecv.html">catecv()</a></code>.</p></li>
 </ul>
-</div>
-<div class="section level3">
-<h3 id="how-to-install">How to install?<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
-</h3>
-<p>The <code>precmed</code> package can be installed from CRAN as
-follows:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"precmed"</span><span class="op">)</span></span></code></pre></div>
-<p>The latest version can be installed from GitHub as follows:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span>repo <span class="op">=</span> <span class="st">"smartdata-analysis-and-statistics/precmed"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="main-functions">Main functions<a class="anchor" aria-label="anchor" href="#main-functions"></a>
@@ -361,8 +400,22 @@ outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br>
 </table>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-yadlowsky2020estimation" class="csl-entry">
+Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
+and Lu Tian. 2020. <span>“Estimation and Validation of Ratio-Based
+Conditional Average Treatment Effects Using Observational Data.”</span>
+<em>Journal of the American Statistical Association</em>, 1–18.
+</div>
+<div id="ref-zhao2013effectively" class="csl-entry">
+Zhao, Lihui, Lu Tian, Tianxi Cai, Brian Claggett, and Lee-Jen Wei. 2013.
+<span>“Effectively Selecting a Target Population for a Future
+Comparative Study.”</span> <em>Journal of the American Statistical
+Association</em> 108 (502): 527–39.
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
