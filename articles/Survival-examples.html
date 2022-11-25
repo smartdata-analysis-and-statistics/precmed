@@ -458,14 +458,14 @@ the console.</p>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03447411 0.002587293 0.1377233 0.04184943</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.19316256 2.334732634 3.0919160 0.00000000</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03147179 0.008471724 0.1318389 0.02580401</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.21044610 2.300857518 3.1257911 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.696177 159.7366 185.9852      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.733204 179.4435 213.6770      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.595993 159.9330 185.7888      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.176952 180.5337 212.5868      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -482,7 +482,7 @@ log of the ratio of <code>tau0</code> - <code>$rmst1</code> divided by
 <li><p>the log HR (<code>$log.hazard.ratio</code>).</p></li>
 </ul>
 <p>For example, the log RMTL ratio of 0.07 and the 95% confidence
-interval of (0, 0.14) are displayed in the output. The RMTL ratio of
+interval of (0.01, 0.13) are displayed in the output. The RMTL ratio of
 along with the 95% confidence interval suggest that drug 0 is superior
 to drug 1 because the ratio is significantly greater than 1. When we
 check the estimated RMST, we also see that the estimated rmst1 is lower
@@ -848,7 +848,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 13:59:39 2022 </span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:30:11 2022 </span></span>
 <span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
@@ -857,7 +857,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:00:02 2022 </span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:30:34 2022 </span></span>
 <span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
@@ -866,7 +866,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:00:23 2022 </span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:30:57 2022 </span></span>
 <span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
@@ -875,7 +875,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:00:44 2022 </span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:31:19 2022 </span></span>
 <span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
@@ -884,11 +884,11 @@ default values of the remaining arguments.</p>
 <span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:01:04 2022 </span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 14:31:42 2022 </span></span>
 <span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 1.78 mins</span></span></code></pre></div>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 1.89 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
