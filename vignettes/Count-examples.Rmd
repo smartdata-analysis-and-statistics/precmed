@@ -55,18 +55,12 @@ library(ggplot2)
 
 To show the functionalities of the `precmed` package for count outcomes we first need data. For our examples we use simulated data that is located in the `countExample` data set. The data set `countExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
 
-* We will use `y` as the count outcome, which is the number of relapses during follow-up. 
-
-* We will use `years` as the offset variable, which is number of years during follow-up.
-
-* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
-
-* The rest of the variables are baseline patient characteristics. Variable `age` is centered at 48 years old. The medical costs in the year prior to treatment initiation `previous_cost` is centered at 13,824 USD and scaled with standard deviation 20,172 USD.
-
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
+data(countExample)
+countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
+countExample$previous_cost <- as.numeric(countExample$previous_cost + attr(countExample$previous_cost, "scaled:center"))
+countExample$female <- factor(countExample$female, levels = c(0, 1), labels = c("male", "female"))
 
-countExample$age <- as.numeric(countExample$age)
-countExample$previous_cost <- as.numeric(countExample$previous_cost)
 
 if (!require(tableone)){
 install.packages('tableone', repos = "http://cran.us.r-project.org")
@@ -74,10 +68,10 @@ library(tableone)
 }
 
 ## Vector of variables to summarize
-myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "years")
+myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "years")
 ## Vector of categorical variables that need transformation
-catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
-t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = countExample))
+catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses", "y")
+t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = countExample), showAllLevels = TRUE)
 ```
 
 ```{r, echo = F, eval = T, include = T}
@@ -85,6 +79,25 @@ t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "
 knitr::kable(t.table1)
 ```
 
+
+--- 
+
+Most variables are baseline patient characteristics like age, gender, and previous treatment. 
+
+* We will use `y` as the count outcome variable, which is the number of relapses during follow-up. 
+
+* We will use `years` as the offset variable, which is number of years during follow-up.
+
+* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
+
+To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 13,824 USD and scaled with standard deviation 20,172 USD.
+
+The final dataset `countExample` looked like this:
+
+```{r, echo = F, eval = T}
+data(countExample) #get clean dataset
+str(countExample)
+```
 
 ## Estimation of the ATE with `atefit()` 
 

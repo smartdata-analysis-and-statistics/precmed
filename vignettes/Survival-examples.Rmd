@@ -54,18 +54,11 @@ library(ggplot2)
 
 To show the functionalities of the `precmed` package for survival outcomes we first need data. For our examples we use simulated data that is located in the `survivalExample` data set. The data set `survivalExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
 
-* We will use `y` as the survival outcome, which is the number of days until the first relapse or censoring, whichever comes first.
-
-* We will use `d` as the event indicator, where $1$ represents an event and $0$ represents censoring. The censoring rate is about 84%.
-
-* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1).
-
-* The rest of the variables are baseline patient characteristics. Variable `age` is centered at 48 years old. The medical costs in the year prior to treatment initiation `previous_cost` is centered at 14,362 USD and scaled with standard deviation 24,266 USD.
-
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
-library(tableone)
-survivalExample$age <- as.numeric(survivalExample$age)
-survivalExample$previous_cost <- as.numeric(survivalExample$previous_cost)
+data(survivalExample)
+survivalExample$age <- as.numeric(survivalExample$age + attr(survivalExample$age, "scaled:center"))
+survivalExample$previous_cost <- as.numeric(survivalExample$previous_cost + attr(survivalExample$previous_cost, "scaled:center"))
+survivalExample$female <- factor(survivalExample$female, levels = c(0, 1), labels = c("male", "female"))
 
 if (!require(tableone)){
 install.packages('tableone', repos = "http://cran.us.r-project.org")
@@ -73,17 +66,36 @@ library(tableone)
 }
 
 ## Vector of variables to summarize
-myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses")
+myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "d")
 ## Vector of categorical variables that need transformation
-catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
+catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses", "d")
 ## Create a TableOne object
-t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample))
+t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample), showAllLevels = TRUE)
 ```
 
 ```{r, echo = F, eval = T, include = T}
 knitr::kable(t.table1)
 ```
 
+--- 
+
+Most variables are baseline patient characteristics like age, gender, and previous treatment. 
+
+* We will use `y` as the survival outcome, which is the number of days until the first relapse or censoring, whichever comes first.
+
+* We will use `d` as the event indicator, where $1$ represents an event and $0$ represents censoring. The censoring rate is about 84%.
+
+* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1).
+
+
+To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 14,362 USD and scaled with standard deviation 24,266 USD.
+
+The final dataset `survivalExample` looked like this:
+
+```{r, echo = F, eval = T}
+data(survivalExample) #get clean dataset
+str(survivalExample)
+```
 
 
 ## Estimation of the ATE with `atefit()` 
