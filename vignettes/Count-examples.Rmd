@@ -1,6 +1,6 @@
 ---
 title: "Examples for count outcome"
-subtitle: "Vignette 2 of 5"
+subtitle: "Vignette 1 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -54,16 +54,6 @@ library(ggplot2)
 ## Example dataset
 We consider a simulated dataset that is based on real-world claims data from patients with multiple sclerosis. The dataset `countExample` includes 4,000 patients with information on the following 9 variables: 
 
-Variable            Description
--------------       ----------
-age                 The age (years) at baseline, centered at 48 years (such that is has a mean value of 0). 
-female              The gender (0 for male, 1 for female).
-previous_treatment  The previous treatment, "drugA", "drugB", or "drugC"
-previous_cost       The medical costs in the year prior to treatment initiation. The variable has been standardized using a mean value of 13,824 USD and a standard deviation of 20,172 USD.
-previous_number_symptoms  Test
-
-
-
 * We will use `y` as the count outcome, which is the number of relapses during follow-up. 
 
 * We will use `years` as the offset variable, which is number of years during follow-up.
@@ -73,9 +63,11 @@ previous_number_symptoms  Test
 
 
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
+data(countExample)
+countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
+countExample$previous_cost <- as.numeric(countExample$previous_cost + attr(countExample$previous_cost, "scaled:center"))
+countExample$female <- factor(countExample$female, levels = c(0, 1), labels = c("male", "female"))
 
-countExample$age <- as.numeric(countExample$age)
-countExample$previous_cost <- as.numeric(countExample$previous_cost)
 
 if (!require(tableone)){
 install.packages('tableone', repos = "http://cran.us.r-project.org")
@@ -83,10 +75,10 @@ library(tableone)
 }
 
 ## Vector of variables to summarize
-myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "years")
+myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "years")
 ## Vector of categorical variables that need transformation
-catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
-t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = countExample))
+catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses", "y")
+t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = countExample), showAllLevels = TRUE)
 ```
 
 ```{r, echo = F, eval = T, include = T}
@@ -94,6 +86,25 @@ t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "
 knitr::kable(t.table1)
 ```
 
+
+--- 
+
+Most variables are baseline patient characteristics like age, gender, and previous treatment. 
+
+* We will use `y` as the count outcome variable, which is the number of relapses during follow-up. 
+
+* We will use `years` as the offset variable, which is number of years during follow-up.
+
+* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
+
+To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 13,824 USD and scaled with standard deviation 20,172 USD.
+
+The final dataset `countExample` looked like this:
+
+```{r, echo = F, eval = T}
+data(countExample) #get clean dataset
+str(countExample)
+```
 
 ## Estimation of the ATE with `atefit()` 
 
@@ -414,11 +425,10 @@ For this toy example, we can see why the two regressions method has the highest 
 
 # Other `precmed` vignettes in this serie  
   
-[1. General introduction](precmed.html)  
-[2. Examples for count outcome](Count-examples.html)  
-[3. Examples for survival outcome](Survival-examples.html)  
-[4. Additional examples](Additional-examples.html)  
-[5. Theoretical details](Theoretical-details.html)    
+[1. Examples for count outcome](Count-examples.html)  
+[2. Examples for survival outcome](Survival-examples.html)  
+[3. Additional examples](Additional-examples.html)  
+[4. Theoretical details](Theoretical-details.html)    
 
 
 

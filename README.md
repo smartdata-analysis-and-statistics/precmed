@@ -38,13 +38,13 @@ devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 
 The `precmed` package contains functions to
 
--   Estimate average treatment effects for count, survival and contiuous
-    data
--   Estimate conditional average treatment effect (CATE) score for
-    count, survival and continuous data
--   Cross-validation of CATE score
--   Compute area between curves
--   Plot validation curves
+- Estimate average treatment effects for count, survival and contiuous
+  data
+- Estimate conditional average treatment effect (CATE) score for count,
+  survival and continuous data
+- Cross-validation of CATE score
+- Compute area between curves
+- Plot validation curves
 
 ## Main functions
 
@@ -74,13 +74,11 @@ For more info:
 
 ## Vignettes
 
-1.  [General introduction to
-    precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.html)  
-2.  [Examples with count outcome of the entire
+1.  [Examples with count outcome of the entire
     workflow](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)  
-3.  [Examples with survival outcome of the entire
+2.  [Examples with survival outcome of the entire
     workflow](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)  
-4.  [Additional examples for the `precmed`
+3.  [Additional examples for the `precmed`
     package](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html)  
-5.  [Theoretical
+4.  [Theoretical
     details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html)

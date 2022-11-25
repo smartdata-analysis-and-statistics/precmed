@@ -14,7 +14,7 @@ A dataframe with 4000 rows (patients) and 9 variables:
   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
   \item{previous_number_relapses}{previous number of relapses}
   \item{trt}{current treatment, "drug0" or "drug1"}
-  \item{y}{count oucome, current number of relapses}#'
+  \item{y}{count outcome, current number of relapses}#'
 }
 }
 \usage{
