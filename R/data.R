@@ -15,7 +15,7 @@
 #'   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
 #'   \item{previous_number_relapses}{previous number of relapses}
 #'   \item{trt}{current treatment, "drug0" or "drug1"}
-#'   \item{y}{count oucome, current number of relapses}#'
+#'   \item{y}{count outcome, current number of relapses}#'
 #' }
 #'
 #' @keywords datasets
@@ -42,7 +42,7 @@
 #'   \item{previous_number_symptoms}{previous number of symptoms, "0", "1", or ">=2"}
 #'   \item{previous_number_relapses}{previous number of relapses}
 #'   \item{trt}{current treatment, "drug0" or "drug1"}
-#'   \item{y}{count oucome, current number of relapses}
+#'   \item{y}{count outcome, current number of relapses}
 #'   \item{years}{length of follow-up, in years}
 #' }
 #'
