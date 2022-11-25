@@ -23,7 +23,7 @@ doc.cache <- T #for cran; change to F
 <h1>precmed: Precision Medicine in R</h1>
 A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
 
-# Examples with count outcome of the entire workflow
+# Applying precmed to count outcome data
 
 ```{r, include=FALSE}
 ###################################################################
@@ -51,9 +51,18 @@ library(ggplot2)
 ```
 
 
-## Load data set (Example data with count outcome)
+## Example dataset
+We consider a simulated dataset that is based on real-world claims data from patients with multiple sclerosis. The dataset `countExample` includes 4,000 patients with information on the following 9 variables: 
 
-To show the functionalities of the `precmed` package for count outcomes we first need data. For our examples we use simulated data that is located in the `countExample` data set. The data set `countExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
+Variable            Description
+-------------       ----------
+age                 The age (years) at baseline, centered at 48 years (such that is has a mean value of 0). 
+female              The gender (0 for male, 1 for female).
+previous_treatment  The previous treatment, "drugA", "drugB", or "drugC"
+previous_cost       The medical costs in the year prior to treatment initiation. The variable has been standardized using a mean value of 13,824 USD and a standard deviation of 20,172 USD.
+previous_number_symptoms  Test
+
+
 
 * We will use `y` as the count outcome, which is the number of relapses during follow-up. 
 
@@ -61,7 +70,7 @@ To show the functionalities of the `precmed` package for count outcomes we first
 
 * We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
 
-* The rest of the variables are baseline patient characteristics. Variable `age` is centered at 48 years old. The medical costs in the year prior to treatment initiation `previous_cost` is centered at 13,824 USD and scaled with standard deviation 20,172 USD.
+
 
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 
