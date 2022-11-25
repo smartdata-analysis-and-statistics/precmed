@@ -7,8 +7,8 @@ navbar:
   left:
   - icon: fa-home fa-lg
     href: index.html
-  - text: Get started
-    href: articles/precmed.html
+#  - text: Get started
+#    href: articles/precmed.html
   - text: Vignettes
     menu:
     - text: Example with count outcome

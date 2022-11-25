@@ -1,6 +1,6 @@
 ---
 title: "Examples for count outcome"
-subtitle: "Vignette 2 of 5"
+subtitle: "Vignette 1 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -405,11 +405,10 @@ For this toy example, we can see why the two regressions method has the highest 
 
 # Other `precmed` vignettes in this serie  
   
-[1. General introduction](precmed.html)  
-[2. Examples for count outcome](Count-examples.html)  
-[3. Examples for survival outcome](Survival-examples.html)  
-[4. Additional examples](Additional-examples.html)  
-[5. Theoretical details](Theoretical-details.html)    
+[1. Examples for count outcome](Count-examples.html)  
+[2. Examples for survival outcome](Survival-examples.html)  
+[3. Additional examples](Additional-examples.html)  
+[4. Theoretical details](Theoretical-details.html)    
 
 
 
