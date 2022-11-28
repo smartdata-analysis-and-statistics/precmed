@@ -90,7 +90,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for count outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 25, 2022</h4>
+            <h4 data-toc-skip class="date">November 28, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Count-examples.Rmd</code></div>
@@ -131,239 +131,210 @@ number of years during follow-up.</p></li>
 <li><p>We will use <code>trt</code> as the treatment variable, which has
 2 drugs (drug0 and drug1).</p></li>
 </ul>
-<table style="width:100%;" class="table">
+<table class="table">
 <colgroup>
-<col width="36%">
-<col width="8%">
-<col width="20%">
-<col width="20%">
-<col width="7%">
+<col width="39%">
 <col width="6%">
+<col width="17%">
+<col width="17%">
+<col width="17%">
 </colgroup>
 <thead><tr class="header">
 <th align="left"></th>
 <th align="left">level</th>
+<th align="left">Overall</th>
 <th align="left">drug0</th>
 <th align="left">drug1</th>
-<th align="left">p</th>
-<th align="left">test</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">n</td>
+<td align="left">Number of patients</td>
 <td align="left"></td>
+<td align="left">4000</td>
 <td align="left">998</td>
 <td align="left">3002</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">age (mean (SD))</td>
+<td align="left">Age (mean (SD))</td>
 <td align="left"></td>
-<td align="left">46.11 (10.06)</td>
-<td align="left">46.26 (9.69)</td>
-<td align="left">0.680</td>
-<td align="left"></td>
+<td align="left">46.2 (9.8)</td>
+<td align="left">46.1 (10.1)</td>
+<td align="left">46.3 (9.7)</td>
 </tr>
 <tr class="odd">
-<td align="left">female (%)</td>
+<td align="left">Gender (%)</td>
 <td align="left">male</td>
+<td align="left">987 (24.7)</td>
 <td align="left">247 (24.7)</td>
 <td align="left">740 (24.7)</td>
-<td align="left">0.984</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">female</td>
+<td align="left">3013 (75.3)</td>
 <td align="left">751 (75.3)</td>
 <td align="left">2262 (75.3)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
-<td align="left">previous_treatment (%)</td>
+<td align="left">Previous treatment (%)</td>
 <td align="left">drugA</td>
+<td align="left">1787 (44.7)</td>
 <td align="left">457 (45.8)</td>
 <td align="left">1330 (44.3)</td>
-<td align="left">0.646</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">drugB</td>
+<td align="left">435 (10.9)</td>
 <td align="left">110 (11.0)</td>
 <td align="left">325 (10.8)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">drugC</td>
+<td align="left">1778 (44.5)</td>
 <td align="left">431 (43.2)</td>
 <td align="left">1347 (44.9)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">previous_cost (mean (SD))</td>
+<td align="left">Previous medical cost ($) (mean (SD))</td>
 <td align="left"></td>
-<td align="left">13823.86 (1.07)</td>
-<td align="left">13823.83 (0.98)</td>
-<td align="left">0.519</td>
-<td align="left"></td>
+<td align="left">13823.8 (20172.3)</td>
+<td align="left">14181.0 (21591.3)</td>
+<td align="left">13705.1 (19680.3)</td>
 </tr>
 <tr class="odd">
-<td align="left">previous_number_symptoms (%)</td>
+<td align="left">Previous number of symptoms (%)</td>
 <td align="left">0</td>
+<td align="left">332 ( 8.3)</td>
 <td align="left">73 ( 7.3)</td>
 <td align="left">259 ( 8.6)</td>
-<td align="left">0.273</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">2669 (66.7)</td>
 <td align="left">662 (66.3)</td>
 <td align="left">2007 (66.9)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">&gt;=2</td>
+<td align="left">999 (25.0)</td>
 <td align="left">263 (26.4)</td>
 <td align="left">736 (24.5)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">previous_number_relapses (%)</td>
+<td align="left">Previous number of relapses (%)</td>
 <td align="left">0</td>
+<td align="left">2603 (65.1)</td>
 <td align="left">646 (64.7)</td>
 <td align="left">1957 (65.2)</td>
-<td align="left">0.623</td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">1114 (27.9)</td>
 <td align="left">280 (28.1)</td>
 <td align="left">834 (27.8)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">2</td>
+<td align="left">245 ( 6.1)</td>
 <td align="left">59 ( 5.9)</td>
 <td align="left">186 ( 6.2)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">3</td>
+<td align="left">32 ( 0.8)</td>
 <td align="left">12 ( 1.2)</td>
 <td align="left">20 ( 0.7)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">4</td>
+<td align="left">4 ( 0.1)</td>
 <td align="left">1 ( 0.1)</td>
 <td align="left">3 ( 0.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">5</td>
+<td align="left">2 ( 0.0)</td>
 <td align="left">0 ( 0.0)</td>
 <td align="left">2 ( 0.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">y (%)</td>
+<td align="left">Number of relapses during follow-up (%)</td>
 <td align="left">0</td>
+<td align="left">3086 (77.1)</td>
 <td align="left">763 (76.5)</td>
 <td align="left">2323 (77.4)</td>
-<td align="left">0.520</td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">640 (16.0)</td>
 <td align="left">170 (17.0)</td>
 <td align="left">470 (15.7)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">2</td>
+<td align="left">173 ( 4.3)</td>
 <td align="left">49 ( 4.9)</td>
 <td align="left">124 ( 4.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">3</td>
+<td align="left">54 ( 1.4)</td>
 <td align="left">9 ( 0.9)</td>
 <td align="left">45 ( 1.5)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">4</td>
+<td align="left">30 ( 0.8)</td>
 <td align="left">5 ( 0.5)</td>
 <td align="left">25 ( 0.8)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">5</td>
+<td align="left">8 ( 0.2)</td>
 <td align="left">1 ( 0.1)</td>
 <td align="left">7 ( 0.2)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">6</td>
+<td align="left">5 ( 0.1)</td>
 <td align="left">1 ( 0.1)</td>
 <td align="left">4 ( 0.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">7</td>
+<td align="left">2 ( 0.0)</td>
 <td align="left">0 ( 0.0)</td>
 <td align="left">2 ( 0.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">8</td>
+<td align="left">2 ( 0.0)</td>
 <td align="left">0 ( 0.0)</td>
 <td align="left">2 ( 0.1)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
-<td align="left">years (mean (SD))</td>
+<td align="left">Length of follow-up (years) (mean (SD))</td>
 <td align="left"></td>
-<td align="left">1.23 (1.29)</td>
-<td align="left">1.21 (1.20)</td>
-<td align="left">0.740</td>
-<td align="left"></td>
+<td align="left">1.2 (1.2)</td>
+<td align="left">1.2 (1.3)</td>
+<td align="left">1.2 (1.2)</td>
 </tr>
 </tbody>
 </table>
@@ -572,7 +543,7 @@ remaining arguments.</p>
 <span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 11.88691 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 13.94968 secs</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -788,7 +759,7 @@ the default values of the remaining arguments.</p>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:11:39 2022 </span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:06:39 2022 </span></span>
 <span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
@@ -797,7 +768,7 @@ the default values of the remaining arguments.</p>
 <span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:11:44 2022 </span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:06:45 2022 </span></span>
 <span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
@@ -806,7 +777,7 @@ the default values of the remaining arguments.</p>
 <span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:11:52 2022 </span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:06:54 2022 </span></span>
 <span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
@@ -815,7 +786,7 @@ the default values of the remaining arguments.</p>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:12:00 2022 </span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:07:04 2022 </span></span>
 <span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
@@ -824,11 +795,11 @@ the default values of the remaining arguments.</p>
 <span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   convergence TRUE </span></span>
-<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:12:09 2022 </span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:07:13 2022 </span></span>
 <span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 40.83 secs</span></span></code></pre></div>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 45.96 secs</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the

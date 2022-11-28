@@ -90,7 +90,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for survival outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 25, 2022</h4>
+            <h4 data-toc-skip class="date">November 28, 2022</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/HEAD/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -127,181 +127,159 @@ claims data in multiple sclerosis and has 4,000 observations and 9
 variables.</p>
 <table style="width:100%;" class="table">
 <colgroup>
-<col width="36%">
-<col width="8%">
-<col width="20%">
-<col width="20%">
-<col width="8%">
+<col width="43%">
 <col width="6%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
 </colgroup>
 <thead><tr class="header">
 <th align="left"></th>
 <th align="left">level</th>
+<th align="left">Overall</th>
 <th align="left">drug0</th>
 <th align="left">drug1</th>
-<th align="left">p</th>
-<th align="left">test</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">n</td>
+<td align="left">Number of patients</td>
 <td align="left"></td>
+<td align="left">4000</td>
 <td align="left">1849</td>
 <td align="left">2151</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">age (mean (SD))</td>
+<td align="left">Age (mean (SD))</td>
 <td align="left"></td>
-<td align="left">37.33 (6.40)</td>
-<td align="left">53.15 (5.49)</td>
-<td align="left">&lt;0.001</td>
-<td align="left"></td>
+<td align="left">45.8 (9.9)</td>
+<td align="left">37.3 (6.4)</td>
+<td align="left">53.1 (5.5)</td>
 </tr>
 <tr class="odd">
-<td align="left">female (%)</td>
+<td align="left">Gender (%)</td>
 <td align="left">male</td>
+<td align="left">996 (24.9)</td>
 <td align="left">456 (24.7)</td>
 <td align="left">540 (25.1)</td>
-<td align="left">0.775</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">female</td>
+<td align="left">3004 (75.1)</td>
 <td align="left">1393 (75.3)</td>
 <td align="left">1611 (74.9)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
-<td align="left">previous_treatment (%)</td>
+<td align="left">Previous treatment (%)</td>
 <td align="left">drugA</td>
+<td align="left">1752 (43.8)</td>
 <td align="left">819 (44.3)</td>
 <td align="left">933 (43.4)</td>
-<td align="left">0.794</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">drugB</td>
+<td align="left">459 (11.5)</td>
 <td align="left">207 (11.2)</td>
 <td align="left">252 (11.7)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">drugC</td>
+<td align="left">1789 (44.7)</td>
 <td align="left">823 (44.5)</td>
 <td align="left">966 (44.9)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">previous_cost (mean (SD))</td>
+<td align="left">Previous medical cost ($) (mean (SD))</td>
 <td align="left"></td>
-<td align="left">14361.83 (0.59)</td>
-<td align="left">14362.06 (1.24)</td>
-<td align="left">&lt;0.001</td>
-<td align="left"></td>
+<td align="left">14362.0 (24265.9)</td>
+<td align="left">11358.0 (14393.2)</td>
+<td align="left">16944.1 (30045.6)</td>
 </tr>
 <tr class="odd">
-<td align="left">previous_number_symptoms (%)</td>
+<td align="left">Previous number of symptoms (%)</td>
 <td align="left">0</td>
+<td align="left">347 ( 8.7)</td>
 <td align="left">191 (10.3)</td>
 <td align="left">156 ( 7.3)</td>
-<td align="left">0.003</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">2686 (67.2)</td>
 <td align="left">1219 (65.9)</td>
 <td align="left">1467 (68.2)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">&gt;=2</td>
+<td align="left">967 (24.2)</td>
 <td align="left">439 (23.7)</td>
 <td align="left">528 (24.5)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">previous_number_relapses (%)</td>
+<td align="left">Previous number of relapses (%)</td>
 <td align="left">0</td>
+<td align="left">2612 (65.3)</td>
 <td align="left">1247 (67.4)</td>
 <td align="left">1365 (63.5)</td>
-<td align="left">0.110</td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">1106 (27.7)</td>
 <td align="left">488 (26.4)</td>
 <td align="left">618 (28.7)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">2</td>
+<td align="left">246 ( 6.2)</td>
 <td align="left">99 ( 5.4)</td>
 <td align="left">147 ( 6.8)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">3</td>
+<td align="left">33 ( 0.8)</td>
 <td align="left">14 ( 0.8)</td>
 <td align="left">19 ( 0.9)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">4</td>
+<td align="left">2 ( 0.0)</td>
 <td align="left">1 ( 0.1)</td>
 <td align="left">1 ( 0.0)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"></td>
 <td align="left">5</td>
+<td align="left">1 ( 0.0)</td>
 <td align="left">0 ( 0.0)</td>
 <td align="left">1 ( 0.0)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="even">
-<td align="left">y (mean (SD))</td>
+<td align="left">Days until the first relapse (mean(SD))</td>
 <td align="left"></td>
-<td align="left">152.56 (275.50)</td>
-<td align="left">132.11 (249.87)</td>
-<td align="left">0.014</td>
-<td align="left"></td>
+<td align="left">141.6 (262.2)</td>
+<td align="left">152.6 (275.5)</td>
+<td align="left">132.1 (249.9)</td>
 </tr>
 <tr class="odd">
-<td align="left">d (%)</td>
+<td align="left">Event indicator (0: censoring, 1: relapse) (%)</td>
 <td align="left">0</td>
+<td align="left">3352 (83.8)</td>
 <td align="left">1695 (91.7)</td>
 <td align="left">1657 (77.0)</td>
-<td align="left">&lt;0.001</td>
-<td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left"></td>
 <td align="left">1</td>
+<td align="left">648 (16.2)</td>
 <td align="left">154 ( 8.3)</td>
 <td align="left">494 (23.0)</td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 </tbody>
 </table>
@@ -457,15 +435,15 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03528259 0.001002702 0.1393079 0.04676933</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.21723028 2.287560780 3.1390878 0.00000000</span></span>
+<span><span class="co">#&gt;                   estimate        SE      CI.lower  CI.upper     pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.0359991 -0.0004016281 0.1407122 0.05131843</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.2099310  2.3018671684 3.1247814 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 7.341217 158.4724 187.2494      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.587036 179.7300 213.3905      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 7.108401 158.9287 186.7931      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 9.004930 178.9109 214.2096      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -848,7 +826,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:15:51 2022 </span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:11:31 2022 </span></span>
 <span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==============</span>                                                        <span class="er">|</span>  <span class="dv">20</span>%</span>
@@ -857,7 +835,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:16:14 2022 </span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:11:58 2022 </span></span>
 <span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="er">|============================</span>                                          <span class="er">|</span>  <span class="dv">40</span>%</span>
@@ -866,7 +844,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:16:36 2022 </span></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:12:25 2022 </span></span>
 <span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="er">|==========================================</span>                            <span class="er">|</span>  <span class="dv">60</span>%</span>
@@ -875,7 +853,7 @@ default values of the remaining arguments.</p>
 <span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:16:59 2022 </span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:12:52 2022 </span></span>
 <span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>  <span class="er">|========================================================</span>              <span class="er">|</span>  <span class="dv">80</span>%</span>
@@ -884,11 +862,11 @@ default values of the remaining arguments.</p>
 <span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   training..</span></span>
 <span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   validating..</span></span>
 <span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Fri Nov 25 21:17:21 2022 </span></span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Mon Nov 28 16:13:18 2022 </span></span>
 <span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>  <span class="sc">|</span>                                                                            </span>
 <span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>  <span class="er">|======================================================================|</span> <span class="dv">100</span>%</span>
-<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 1.87 mins</span></span></code></pre></div>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Total runtime : 2.24 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
