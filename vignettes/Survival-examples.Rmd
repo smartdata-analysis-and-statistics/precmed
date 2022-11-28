@@ -57,7 +57,7 @@ To show the functionalities of the `precmed` package for survival outcomes we fi
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 data(survivalExample)
 survivalExample$age <- as.numeric(survivalExample$age + attr(survivalExample$age, "scaled:center"))
-survivalExample$previous_cost <- as.numeric(survivalExample$previous_cost + attr(survivalExample$previous_cost, "scaled:center"))
+survivalExample$previous_cost <- as.numeric(survivalExample$previous_cost* attr(survivalExample$previous_cost, "scaled:scale") + attr(survivalExample$previous_cost, "scaled:center"))
 survivalExample$female <- factor(survivalExample$female, levels = c(0, 1), labels = c("male", "female"))
 
 if (!require(tableone)){
@@ -69,8 +69,10 @@ library(tableone)
 myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "d")
 ## Vector of categorical variables that need transformation
 catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses", "d")
-## Create a TableOne object
-t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample), showAllLevels = TRUE)
+t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample, addOverall = T, test = F), showAllLevels = TRUE, contDigits = 1)
+row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", "", "Previous treatment (%)", "", "", "Previous medical cost ($) (mean (SD))", "Previous number of symptoms (%)", "", "", "Previous number of relapses (%)", rep("", 5), "Days until the first relapse (mean(SD))", "Event indicator (0: censoring, 1: relapse) (%)", "") 
+
+
 ```
 
 ```{r, echo = F, eval = T, include = T}
