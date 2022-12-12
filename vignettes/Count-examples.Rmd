@@ -426,8 +426,3 @@ For this toy example, we can see why the two regressions method has the highest 
 
 
 
-# References  
-
-
-
-

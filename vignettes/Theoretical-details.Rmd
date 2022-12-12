@@ -2,6 +2,7 @@
 title: "Theoretical details"
 subtitle: "Vignette 4 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+bibliography: references.bib
 output: 
   html_document:
     toc: TRUE
@@ -28,6 +29,8 @@ A doubly robust precision medicine approach to estimate and validate conditional
 
 
 # Theoretical details - Count outcomes
+
+The CATE score represents an individual-level treatment effect expressed as a rate ratio for count outcomes. It can be estimated with boosting, Poisson regression, negative binomial regression, and the doubly robust estimator two regressions [@yadlowsky2020estimation] applied separately by treatment group or with the other doubly robust estimator contrast regression [@yadlowsky2020estimation] applied to the entire data set.
 
 Assume that the following data are recorded for each of $n$ observations:
 
@@ -117,7 +120,7 @@ $$\hat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}$$
 
 
 ## Validation curves and the ABC statistics 
-The ABC statistic represents the area between the validation curve and the ATE. For a single CV iteration, it is implemented in the training and validation sets separately as following:
+The ABC statistic represents the area between the validation curve and the ATE as described by [@zhao2013effectively]. For a single CV iteration, it is implemented in the training and validation sets separately as following:
 
 **Step 1**. Calculate the ATE in the training or validation sets.
 
@@ -148,6 +151,8 @@ knitr::include_graphics("ABCexample.png")
 ABC calculation examples in relation with `higher.y` argument in `catecv()` and `catefit()`. Validation curves are represented with a blue line and the dashed line is the ATE
 
 # Theoretical details - Survival outcomes
+
+The CATE score represents an individual-level treatment effect for survival data, estimated with random forest, boosting, Poisson regression, and the doubly robust estimator (two regressions, [@yadlowsky2020estimation]) applied separately by treatment group or with the other doubly robust estimators (contrast regression, [@yadlowsky2020estimation]) applied to the entire data set.
 
 Assume that the following data are recorded for each of $n$ observations:
 
@@ -290,7 +295,7 @@ $$\widehat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x
 
 ## Validation curves and the ABC statistics
 
-The ABC statistic represents the area between the validation curve and the ATE. For a single CV iteration and a certain CATE score method, it is implemented as following in the training and validation sets separately:
+The ABC statistic represents the area between the validation curve and the ATE as described by [@zhao2013effectively]. For a single CV iteration and a certain CATE score method, it is implemented as following in the training and validation sets separately:
 
 **Step 1**. Calculate the ATE in the training or validation sets.
 
