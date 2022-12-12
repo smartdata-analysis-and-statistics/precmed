@@ -108,6 +108,13 @@ conditional average treatment effects</p>
 <div class="section level2">
 <h2 id="theoretical-details---count-outcomes">Theoretical details - Count outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---count-outcomes"></a>
 </h2>
+<p>The CATE score represents an individual-level treatment effect
+expressed as a rate ratio for count outcomes. It can be estimated with
+boosting, Poisson regression, negative binomial regression, and the
+doubly robust estimator two regressions <span class="citation">(Yadlowsky et al. 2020)</span> applied separately by
+treatment group or with the other doubly robust estimator contrast
+regression <span class="citation">(Yadlowsky et al. 2020)</span> applied
+to the entire data set.</p>
 <p>Assume that the following data are recorded for each of <span class="math inline">\(n\)</span> observations:</p>
 <ul>
 <li>
@@ -295,7 +302,8 @@ the <span class="math inline">\(\boldsymbol{\hat
 <h3 id="validation-curves-and-the-abc-statistics">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics"></a>
 </h3>
 <p>The ABC statistic represents the area between the validation curve
-and the ATE. For a single CV iteration, it is implemented in the
+and the ATE as described by <span class="citation">(Zhao et al.
+2013)</span>. For a single CV iteration, it is implemented in the
 training and validation sets separately as following:</p>
 <p><strong>Step 1</strong>. Calculate the ATE in the training or
 validation sets.</p>
@@ -365,6 +373,12 @@ ATE</p>
 <div class="section level2">
 <h2 id="theoretical-details---survival-outcomes">Theoretical details - Survival outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---survival-outcomes"></a>
 </h2>
+<p>The CATE score represents an individual-level treatment effect for
+survival data, estimated with random forest, boosting, Poisson
+regression, and the doubly robust estimator (two regressions, <span class="citation">(Yadlowsky et al. 2020)</span>) applied separately by
+treatment group or with the other doubly robust estimators (contrast
+regression, <span class="citation">(Yadlowsky et al. 2020)</span>)
+applied to the entire data set.</p>
 <p>Assume that the following data are recorded for each of <span class="math inline">\(n\)</span> observations:</p>
 <ul>
 <li>
@@ -586,7 +600,8 @@ the <span class="math inline">\(\boldsymbol{\hat
 <h3 id="validation-curves-and-the-abc-statistics-1">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics-1"></a>
 </h3>
 <p>The ABC statistic represents the area between the validation curve
-and the ATE. For a single CV iteration and a certain CATE score method,
+and the ATE as described by <span class="citation">(Zhao et al.
+2013)</span>. For a single CV iteration and a certain CATE score method,
 it is implemented as following in the training and validation sets
 separately:</p>
 <p><strong>Step 1</strong>. Calculate the ATE in the training or
@@ -659,8 +674,22 @@ ATE.</p>
 outcome</a><br><a href="Additional-examples.html">3. Additional examples</a><br><a href="Theoretical-details.html">4. Theoretical details</a></p>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-yadlowsky2020estimation" class="csl-entry">
+Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
+and Lu Tian. 2020. <span>“Estimation and Validation of Ratio-Based
+Conditional Average Treatment Effects Using Observational Data.”</span>
+<em>Journal of the American Statistical Association</em>, 1–18.
+</div>
+<div id="ref-zhao2013effectively" class="csl-entry">
+Zhao, Lihui, Lu Tian, Tianxi Cai, Brian Claggett, and Lee-Jen Wei. 2013.
+<span>“Effectively Selecting a Target Population for a Future
+Comparative Study.”</span> <em>Journal of the American Statistical
+Association</em> 108 (502): 527–39.
+</div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
