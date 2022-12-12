@@ -52,15 +52,7 @@ library(ggplot2)
 
 
 ## Example dataset
-We consider a simulated dataset that is based on real-world claims data from patients with multiple sclerosis. The dataset `countExample` includes 4,000 patients with information on the following 9 variables: 
-
-* We will use `y` as the count outcome, which is the number of relapses during follow-up. 
-
-* We will use `years` as the offset variable, which is number of years during follow-up.
-
-* We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
-
-
+We consider a simulated dataset that is based on real-world claims data from patients with multiple sclerosis. The dataset `countExample` includes 4,000 patients with information on the following 9 variables.
 
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 data(countExample)
