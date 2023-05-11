@@ -1,0 +1,15 @@
+cff-version: 1.0.1
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Tian 
+    given-names: Lu
+    orcid: https://orcid.org/0000-0002-5893-0169
+  - family-names: Jiang Gabrielle  
+    given-names: Xiaotong
+    orcid: https://orcid.org/0000-0003-3698-4526
+  - family-names: Simoneau 
+    given-names: Gabrielle 
+    orcid: https://orcid.org/0000-0001-9310-6274
+title: smartdata-analysis-and-statistics/precmed: 1.0.1
+version: v1.0.1
+date-released: 2023-05-11
