@@ -7,6 +7,7 @@
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6532702.svg)](https://doi.org/10.5281/zenodo.7923687)
+[![R-CMD-check](https://github.com/amices/ggmice/workflows/R-CMD-check/badge.svg)](https://github.com/smartdata-analysis-and-statistics/precmed/actions)
 <!-- badges: end -->
 
 ## Overview
