@@ -126,7 +126,7 @@ The ABC statistic represents the area between the validation curve and the ATE a
 
 **Step 2**. Calculate the ATE in 100 nested subgroups based on the estimated CATE score and derive the corresponding validation curve. Subgroups are defined with 100 equally-spaced proportions from `min(prop.cutoff)` to `max(prop.cutoff)` to ensure that enough data points are available to build the validation curve.
 
-**Step 3**. The ABC is calculated with `auc()` from the MESS R package using the natural cubic spline interpolation, which calculates the area between the horizontal line with y-intercept at the ATE calculated in **step 1** over the range [`min(prop.cutoff)`,`max(prop.cutoff)`] (*y*) and the validation curve calculated in **step 2** (*x*).
+**Step 3**. The ABC is calculated with `auc()` from `utility.R` using the natural cubic spline interpolation, which calculates the area between the horizontal line with y-intercept at the ATE calculated in **step 1** over the range [`min(prop.cutoff)`,`max(prop.cutoff)`] (*y*) and the validation curve calculated in **step 2** (*x*).
 
 
 The function `plot()` allows the user to combine validation curves from 2 or more CV iterations (i.e., `cv.n > 1`). There are 2 ways to combine the validation curves:
@@ -301,7 +301,7 @@ The ABC statistic represents the area between the validation curve and the ATE a
 
 **Step 2**. Calculate the ATE in 100 nested subgroups and derive the corresponding validation curve. Subgroups are defined with 100 equally-spaced proportions from `min(prop.cutoff)` to `max(prop.cutoff)` to ensure that enough data points are available to build the validation curve.
 
-**Step 3**. The ABC is calculated with `auc()` from the MESS R package using the natural cubic spline interpolation, which calculates the area between the horizontal line with y-intercept at the ATE calculated in **step 1** (*y*) and the validation curve calculated in **step 2** (*x*) over the range [`min(prop.cutoff)`, `max(prop.cutoff)`].
+**Step 3**. The ABC is calculated with `auc()` from `utility.R` using the natural cubic spline interpolation, which calculates the area between the horizontal line with y-intercept at the ATE calculated in **step 1** (*y*) and the validation curve calculated in **step 2** (*x*) over the range [`min(prop.cutoff)`, `max(prop.cutoff)`].
 
 The function `plot()` allows the user combining validation curves from 2 or more CV iterations (i.e., `cv.n > 1`). There are 2 ways to combine the validation curves:
 

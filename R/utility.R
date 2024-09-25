@@ -453,4 +453,44 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
 }
 
 
-
+#' Compute the area under the curve using linear or natural spline interpolation for two
+#' vectors where one corresponds to the x values and the other corresponds to the y values.
+#'
+#' Note: This is based on MESS R package's auc() function (retrieved on Sep 2024). We do not
+#' import MESS due to MESS' dependence on "geepack" and CRAN sent us a notification that
+#' "package geepack is now scheduled for archival on 2024-09-07, and archiving this will
+#' necessitate also archiving its CRAN strong reverse dependencies." (Aug 24, 2024).
+#' Since we only care about the auc() function and do not directly use geepack functions,
+#' we extract the auc() function from MESS.
+#'
+#' @param x A numeric vector of x values.
+#' @param y A numeric vector of y values of the same length as x.
+#' @param from The value from where to start calculating the area under the curve.
+#' Defaults to the smallest x value.
+#' @param to The value from where to end the calculation of the area under the curve.
+#' Defaults to the greatest x value.
+#' @param type The type of interpolation.
+#' Defaults to "linear" for area under the curve for linear interpolation.
+#' The value "spline" results in the area under the natural cubic spline interpolation.
+#' @param subdivisionsAan integer telling how many subdivisions should be used for integrate
+#' (for nonlinear approximations)
+#'
+#' @return A numeric value, the value of the area under the curve.
+auc <- function (x, y, from = min(x, na.rm = TRUE), to = max(x, na.rm = TRUE),
+                   type = c("linear", "spline"), subdivisions = 100)
+{
+  type <- match.arg(type)
+  stopifnot(length(x) == length(y))
+  stopifnot(!is.na(from))
+  if (length(unique(x)) < 2)
+    return(NA)
+  if (type == "linear") {
+    values <- approx(x, y, xout = sort(unique(c(from, to, x[x > from & x < to]))), ...)
+    res <- 0.5 * sum(diff(values$x) * (values$y[-1] + values$y[-length(values$y)]))
+  }
+  else {
+    myfunction <- splinefun(x, y, method = "natural")
+    res <- integrate(myfunction, lower = from, upper = to, subdivisions = subdivisions)$value
+  }
+  return(res)
+}

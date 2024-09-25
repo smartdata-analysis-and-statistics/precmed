@@ -22,7 +22,7 @@ The ABC is the area between a validation curve and the overall ATE in the valida
 It is calculated for each scoring method separately. Higher ABC values are preferable as they
 indicate that more treatment effect heterogeneity is captured by the scoring method.
 Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-The ABC is calculated with the \code{\link[MESS]{auc}()} in the \code{MESS} package with a natural
+The ABC is calculated with the \code{\link{auc}()} in \code{utility.R} with a natural
 cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
 

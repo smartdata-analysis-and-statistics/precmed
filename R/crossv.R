@@ -191,7 +191,6 @@
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom graphics hist lines
 #' @importFrom MASS glm.nb
-#' @importFrom MESS auc
 #' @importFrom randomForestSRC rfsrc predict.rfsrc
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
@@ -557,7 +556,6 @@ catecv <- function(response,
 #' @importFrom gbm gbm gbm.perf predict.gbm
 #' @importFrom gam gam
 #' @importFrom stringr str_replace
-#' @importFrom MESS auc
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom dplyr %>%
 
@@ -1264,7 +1262,6 @@ catecvsurv <- function(data,
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom gbm gbm gbm.perf
-#' @importFrom MESS auc
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
@@ -1816,7 +1813,6 @@ catecvcount <- function(data,
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom gbm gbm gbm.perf
-#' @importFrom MESS auc
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
@@ -2136,7 +2132,7 @@ catecvmean <- function(data,
           ref <- (result$overall.ate.valid[cv.i]) - temp.abc
         }
         result[[stringr::str_replace(name, "score", "ate")]]$abc.valid[cv.i] <-
-          MESS::auc(x = prop.abc, y = ref, from = prop.abc[1], to = prop.abc[length(prop.abc)], type = "spline")
+          auc(x = prop.abc, y = ref, from = prop.abc[1], to = prop.abc[length(prop.abc)], type = "spline")
       }
 
     }
@@ -2201,7 +2197,7 @@ catecvmean <- function(data,
 #' It is calculated for each scoring method separately. Higher ABC values are preferable as they
 #' indicate that more treatment effect heterogeneity is captured by the scoring method.
 #' Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-#' The ABC is calculated with the \code{\link[MESS]{auc}()} in the \code{MESS} package with a natural
+#' The ABC is calculated with the \code{\link{auc}()} in \code{utility.R} with a natural
 #' cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
 #' 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
 #'
@@ -2270,7 +2266,7 @@ abc.default <- function(x, ...){
 #' It is calculated for each scoring method separately. Higher ABC values are preferable as they
 #' indicate that more treatment effect heterogeneity is captured by the scoring method.
 #' Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-#' The ABC is calculated with the \code{\link[MESS]{auc}()} in the \code{MESS} package with a natural
+#' The ABC is calculated with the \code{\link{auc}()} in \code{utility.R} with a natural
 #' cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
 #' 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
 #'
@@ -2462,7 +2458,6 @@ abc.precmed <- function(x) {
 #'
 #' @importFrom rlang .data
 #' @importFrom stringr str_extract
-#' @importFrom MESS auc
 #' @importFrom dplyr filter select mutate group_by ungroup
 #' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line
 #' labs scale_color_manual scale_linetype_manual scale_y_continuous
