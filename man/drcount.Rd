@@ -20,7 +20,7 @@ drcount(
 \item{y}{A numeric vector of size \code{n} with each element representing
 the observed count outcome for each subject.}
 
-\item{trt}{A numeric vector (in {0, 1}) of size \code{n} with each element
+\item{trt}{A numeric vector (in \{0, 1\}) of size \code{n} with each element
 representing the treatment received for each subject.}
 
 \item{x.cate}{A numeric matrix of dimension \code{n} by \code{p.cate} with

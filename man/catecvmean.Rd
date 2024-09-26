@@ -201,10 +201,10 @@ Returns a list containing the following components saved as a \code{"precmed"} o
  if \code{score.method} includes \code{'twoReg'}.}
  \item{\code{ate.contrastReg}: }{A list of results similar to \code{ate.gaussian} output
  if \code{score.method} includes \code{'contrastReg'}.}
- \item{\code{ate.randomForest}: }{A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'randomForest'}.}
- \item{\code{ate.gam}: }{A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'gam'}.}
+\item{\code{ate.randomForest}: }{A list of ATE output measured by the RMTL ratio if
+\code{score.method} includes \code{'randomForest'}:}
+\item{\code{ate.gam}: }{A list of results similar to \code{ate.gaussian} output
+if \code{score.method} includes \code{'gam'}.}
  \item{\code{props}: }{A list of 3 elements:}
  \itemize{
     \item{\code{prop.onlyhigh}: }{The original argument \code{prop.cutoff},

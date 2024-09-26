@@ -184,7 +184,7 @@ atefitcount <- function(data,
 #'
 #' @param y A numeric vector of size \code{n} with each element representing
 #' the observed count outcome for each subject.
-#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element
+#' @param trt A numeric vector (in \{0, 1\}) of size \code{n} with each element
 #' representing the treatment received for each subject.
 #' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with
 #' each column representing each baseline covariate specified in the outcome

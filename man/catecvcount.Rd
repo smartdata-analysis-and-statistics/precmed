@@ -219,9 +219,9 @@ Returns a list containing the following components saved as a \code{"precmed"} o
  \item{\code{overall.ate.valid}: }{A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE in the validation set of the ith cross-validation
  iteration, estimated with the doubly robust estimator.}
- \item{\code{overall.ate.train}: }{A vector of numerical values of length \code{cv.n}.
- The ith element contains the ATE in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.}
+\item{\code{overall.ate.train}: }{A vector of numerical values of length \code{cv.n}.
+The ith element contains the ATE in the training set of the ith cross-validation
+iteration, estimated with the doubly robust estimator.}
  \item{\code{fgam}: }{The formula used in GAM if \code{initial.predictor.method = 'gam'}.}
  \item{\code{higher.y}: }{The original \code{higher.y} argument.}
  \item{\code{abc}: }{The original \code{abc} argument.}

@@ -179,7 +179,7 @@ atefitmean <- function(data,
 #'
 #' @param y A numeric vector of size \code{n} with each element representing
 #' the observed continuous outcome for each subject.
-#' @param trt A numeric vector (in {0, 1}) of size \code{n} with each element
+#' @param trt A numeric vector (in \{0, 1\}) of size \code{n} with each element
 #' representing the treatment received for each subject.
 #' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with
 #' each column representing each baseline covariate specified in the outcome
@@ -195,9 +195,9 @@ atefitmean <- function(data,
 #' penalization on two-way interactions (added to the model if interactions are
 #' not specified in \code{ps.model}). Relevant only when \code{ps.model} has
 #' more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity
+#' @param minPS A numerical value between 0 and 1 below which estimated propensity
 #' scores should be truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity
+#' @param maxPS A numerical value between 0 and 1 above which estimated propensity
 #' scores should be truncated. Must be strictly greater than \code{minPS}.
 #' Default is \code{0.99}.
 #' @param interactions A logical value indicating whether the outcome model

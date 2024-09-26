@@ -19,7 +19,7 @@ drmean(
 \item{y}{A numeric vector of size \code{n} with each element representing
 the observed continuous outcome for each subject.}
 
-\item{trt}{A numeric vector (in {0, 1}) of size \code{n} with each element
+\item{trt}{A numeric vector (in \{0, 1\}) of size \code{n} with each element
 representing the treatment received for each subject.}
 
 \item{x.cate}{A numeric matrix of dimension \code{n} by \code{p.cate} with
@@ -39,10 +39,10 @@ penalization on two-way interactions (added to the model if interactions are
 not specified in \code{ps.model}). Relevant only when \code{ps.model} has
 more than one variable.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity
+\item{minPS}{A numerical value between 0 and 1 below which estimated propensity
 scores should be truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity
+\item{maxPS}{A numerical value between 0 and 1 above which estimated propensity
 scores should be truncated. Must be strictly greater than \code{minPS}.
 Default is \code{0.99}.}
 

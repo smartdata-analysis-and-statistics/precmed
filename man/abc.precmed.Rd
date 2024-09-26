@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{An object of class \code{"precmed"}.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
 Returns a matrix of numeric values with number of columns equal to the number cross-validation
