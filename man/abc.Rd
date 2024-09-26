@@ -2,12 +2,17 @@
 % Please edit documentation in R/crossv.R
 \name{abc}
 \alias{abc}
+\alias{abc.default}
 \title{Compute the area between curves from the \code{"precmed"} object}
 \usage{
-abc(x)
+abc(x, ...)
+
+\method{abc}{default}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{"precmed"}.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
 Returns a matrix of numeric values with number of columns equal to the number cross-validation

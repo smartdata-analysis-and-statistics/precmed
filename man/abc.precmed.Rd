@@ -4,7 +4,7 @@
 \alias{abc.precmed}
 \title{Compute the area between curves from the \code{"precmed"} object}
 \usage{
-\method{abc}{precmed}(x)
+\method{abc}{precmed}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{"precmed"}.}
