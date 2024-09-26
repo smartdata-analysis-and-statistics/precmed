@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">precmed</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Theoretical details</h1>
             <h3 data-toc-skip class="subtitle">Vignette 4 of 4</h3>
             
-            <h4 data-toc-skip class="date">September 25, 2024</h4>
+            <h4 data-toc-skip class="date">September 26, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Theoretical-details.Rmd" class="external-link"><code>vignettes/Theoretical-details.Rmd</code></a></small>
       <div class="d-none name"><code>Theoretical-details.Rmd</code></div>
@@ -326,7 +326,7 @@ proportions from <code>min(prop.cutoff)</code> to
 <code>max(prop.cutoff)</code> to ensure that enough data points are
 available to build the validation curve.</p>
 <p><strong>Step 3</strong>. The ABC is calculated with
-<code>auc()</code> from <code>utility.R</code> using the natural cubic
+<code><a href="../reference/auc.html">auc()</a></code> from <code>utility.R</code> using the natural cubic
 spline interpolation, which calculates the area between the horizontal
 line with y-intercept at the ATE calculated in <strong>step 1</strong>
 over the range
@@ -664,7 +664,7 @@ with 100 equally-spaced proportions from <code>min(prop.cutoff)</code>
 to <code>max(prop.cutoff)</code> to ensure that enough data points are
 available to build the validation curve.</p>
 <p><strong>Step 3</strong>. The ABC is calculated with
-<code>auc()</code> from <code>utility.R</code> using the natural cubic
+<code><a href="../reference/auc.html">auc()</a></code> from <code>utility.R</code> using the natural cubic
 spline interpolation, which calculates the area between the horizontal
 line with y-intercept at the ATE calculated in <strong>step 1</strong>
 (<em>y</em>) and the validation curve calculated in <strong>step

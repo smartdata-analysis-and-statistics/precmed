@@ -9,7 +9,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">precmed</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +48,7 @@ This should be run only after results of <code><a href="catecv.html">catecv</a>(
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'precmed'</span></span>
-<span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,7 +70,7 @@ iteration and number of rows equal to the number of scoring methods in <code>x</
 It is calculated for each scoring method separately. Higher ABC values are preferable as they
 indicate that more treatment effect heterogeneity is captured by the scoring method.
 Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-The ABC is calculated with the <code>auc()</code> in <code>utility.R</code> with a natural
+The ABC is calculated with the <code><a href="auc.html">auc</a>()</code> in <code>utility.R</code> with a natural
 cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
 100 proportions equally spaced from <code>min(prop.cutoff)</code> to <code>max(prop.cutoff)</code>.</p>
 <p>The ABC is a metric to help users select the best scoring method in terms of capturing treatment
@@ -128,12 +128,12 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 20.09 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 23.46 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1        cv2        cv3        cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.04408837 0.06874879 0.09146548 0.08592608 0.0420832</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1         cv2        cv3        cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.01245745 -0.01710762 0.08396769 0.07566077 0.1787267</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -151,8 +151,8 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1919023 0.1546108 0.1553460 0.1994899 0.1853953</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1927606 0.1520519 0.1534324 0.1969768 0.1783877</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1956834 0.1865913 0.1752629 0.2149921 0.1785155</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1850524 0.1751386 0.1722496 0.2052603 0.1732321</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

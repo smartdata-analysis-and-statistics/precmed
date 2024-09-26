@@ -17,7 +17,7 @@ Random forest, boosting, poisson regression, two regressions, and contrast regre
 
     <a class="navbar-brand me-2" href="../index.html">precmed</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -300,107 +300,78 @@ be printed. <code>0</code> means no outputs. <code>1</code> means only progress 
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns a list containing the following components saved as a <code>"precmed"</code> object:</p><ul><li><p><code>ate.randomForest</code>: A list of ATE output measured by the RMTL ratio if
- <code>score.method</code> includes <code>'randomForest'</code>:</p><ul><li><p><code>ate.est.train.high.cv</code>: A matrix of numerical values with
-    <code>length(prop.cutoff)</code> rows and <code>cv.n</code> columns.
-    The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
-    defined by CATE score above (if <code>higher.y = FALSE</code>) or below (if <code>higher.y = TRUE</code>) the
-    <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.</p></li>
+     <code>score.method</code> includes <code>'randomForest'</code>. The list contains the following elements:</p><ul><li><p><code>ate.est.train.high.cv</code>: A matrix of numerical values with
+       <code>length(prop.cutoff)</code> rows and <code>cv.n</code> columns.
+       The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
+       defined by CATE score above (if <code>higher.y = FALSE</code>) or below (if <code>higher.y = TRUE</code>) the
+       <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
+       cross-validation iteration.</p></li>
 <li><p><code>ate.est.train.low.cv</code>: A matrix of numerical values with
-    <code>length(prop.cutoff) - 1</code> rows and <code>cv.n</code> columns.
-    TThe ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
-    defined by CATE score below (if <code>higher.y = FALSE</code>) or above (if <code>higher.y = TRUE</code>) the
-    <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.</p></li>
-<li><p><code>ate.est.valid.high.cv</code>: Same as <code>ate.est.train.high.cv</code>,
-    but in the validation set.</p></li>
-<li><p><code>ate.est.valid.low.cv</code>: Same as <code>ate.est.train.low.cv</code>,
-    but in the validation set.</p></li>
+       <code>length(prop.cutoff) - 1</code> rows and <code>cv.n</code> columns.
+       The ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
+       defined by CATE score below (if <code>higher.y = FALSE</code>) or above (if <code>higher.y = TRUE</code>) the
+       <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
+       cross-validation iteration.</p></li>
+<li><p><code>ate.est.valid.high.cv</code>: Same as <code>ate.est.train.high.cv</code>, but in the validation set.</p></li>
+<li><p><code>ate.est.valid.low.cv</code>: Same as <code>ate.est.train.low.cv</code>, but in the validation set.</p></li>
 <li><p><code>ate.est.train.group.cv</code>: A matrix of numerical values with
-    <code>length(prop.multi) - 1</code> rows and <code>cv.n</code> columns.
-    The ith column contains the estimated ATE in <code>length(prop.multi) - 1</code>
-    mutually exclusive subgroups defined by <code>prop.multi</code> in the training set in ith
-    cross-validation iteration.</p></li>
-<li><p><code>ate.est.valid.group.cv</code>: Same as <code>ate.est.train.group.cv</code>, but in the
-    validation set.</p></li>
-<li><p><code>abc.valid</code>: A vector of numerical values of length <code>cv.n</code>,
-    The ith element returns the ABC of the validation curve in the ith cross-validation
-    iteration. Only returned if <code>abc = TRUE</code>.</p></li>
+       <code>length(prop.multi) - 1</code> rows and <code>cv.n</code> columns.
+       The ith column contains the estimated ATE in <code>length(prop.multi) - 1</code>
+       mutually exclusive subgroups defined by <code>prop.multi</code> in the training set in the ith
+       cross-validation iteration.</p></li>
+<li><p><code>ate.est.valid.group.cv</code>: Same as <code>ate.est.train.group.cv</code>, but in the validation set.</p></li>
+<li><p><code>abc.valid</code>: A vector of numerical values of length <code>cv.n</code>.
+       The ith element returns the ABC of the validation curve in the ith cross-validation iteration. Only returned if <code>abc = TRUE</code>.</p></li>
 </ul></li>
-<li><p><code>ate.boosting</code>: A list of results similar to <code>ate.randomForest</code> output
- if <code>score.method</code> includes <code>'boosting'</code>.</p></li>
-<li><p><code>ate.poisson</code>: A list of results similar to <code>ate.randomForest</code> output
- if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
-<li><p><code>ate.twoReg</code>: A list of results similar to <code>ate.randomForest</code> output
- if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
-<li><p><code>ate.contrastReg</code>: A list of results similar to <code>ate.randomForest</code> output
- if <code>score.method</code> includes <code>'contrastReg'</code>.
- This method has an additional element in the list of results:</p><ul><li><p><code>converge.contrastReg.cv</code>: A vector of logical value of length <code>cv.n</code>.
-    The ith element indicates whether the algorithm converged in the ith cross-validation
-    iteration.</p></li>
+<li><p><code>ate.boosting</code>: A list of results similar to <code>ate.randomForest</code> output if <code>score.method</code> includes <code>'boosting'</code>.</p></li>
+<li><p><code>ate.poisson</code>: A list of results similar to <code>ate.randomForest</code> output if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
+<li><p><code>ate.twoReg</code>: A list of results similar to <code>ate.randomForest</code> output if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
+<li><p><code>ate.contrastReg</code>: A list of results similar to <code>ate.randomForest</code> output if <code>score.method</code> includes <code>'contrastReg'</code>. This method has an additional element in the list of results:</p><ul><li><p><code>converge.contrastReg.cv</code>: A vector of logical values of length <code>cv.n</code>.
+       The ith element indicates whether the algorithm converged in the ith cross-validation iteration.</p></li>
 </ul></li>
-<li><p><code>hr.randomForest</code>: A list of adjusted hazard ratio if <code>score.method</code> includes
- <code>'randomForest'</code>:</p><ul><li><p><code>hr.est.train.high.cv</code>: A matrix of numerical values with
-    <code>length(prop.cutoff)</code> rows and <code>cv.n</code> columns.
-    The ith column/jth row cell contains the estimated HR in the nested subgroup of high responders
-    defined by CATE score above (if <code>higher.y = FALSE</code>) or below (if <code>higher.y = TRUE</code>) the
-    <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.</p></li>
+<li><p><code>hr.randomForest</code>: A list of adjusted hazard ratios if <code>score.method</code> includes <code>'randomForest'</code>. The list contains the following elements:</p><ul><li><p><code>hr.est.train.high.cv</code>: A matrix of numerical values with
+       <code>length(prop.cutoff)</code> rows and <code>cv.n</code> columns.
+       The ith column/jth row cell contains the estimated HR in the nested subgroup of high responders
+       defined by CATE score above (if <code>higher.y = FALSE</code>) or below (if <code>higher.y = TRUE</code>) the
+       <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
+       cross-validation iteration.</p></li>
 <li><p><code>hr.est.train.low.cv</code>: A matrix of numerical values with
-    <code>length(prop.cutoff) - 1</code> rows and <code>cv.n</code> columns.
-    TThe ith column/jth row cell contains the estimated HR in the nested subgroup of low responders
-    defined by CATE score below (if <code>higher.y = FALSE</code>) or above (if <code>higher.y = TRUE</code>) the
-    <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.</p></li>
-<li><p><code>hr.est.valid.high.cv</code>: Same as <code>hr.est.train.high.cv</code>,
-    but in the validation set.</p></li>
-<li><p><code>hr.est.valid.low.cv</code>: Same as <code>hr.est.train.low.cv</code>,
-    but in the validation set.</p></li>
+       <code>length(prop.cutoff) - 1</code> rows and <code>cv.n</code> columns.
+       The ith column/jth row cell contains the estimated HR in the nested subgroup of low responders
+       defined by CATE score below (if <code>higher.y = FALSE</code>) or above (if <code>higher.y = TRUE</code>) the
+       <code>prop.cutoff[j]</code>x100% percentile of the estimated CATE score in the training set in the ith
+       cross-validation iteration.</p></li>
+<li><p><code>hr.est.valid.high.cv</code>: Same as <code>hr.est.train.high.cv</code>, but in the validation set.</p></li>
+<li><p><code>hr.est.valid.low.cv</code>: Same as <code>hr.est.train.low.cv</code>, but in the validation set.</p></li>
 <li><p><code>hr.est.train.group.cv</code>: A matrix of numerical values with
-    <code>length(prop.multi) - 1</code> rows and <code>cv.n</code> columns.
-    The ith column contains the estimated HR in <code>length(prop.multi) - 1</code>
-    mutually exclusive subgroups defined by <code>prop.multi</code> in the training set in ith
-    cross-validation iteration.</p></li>
-<li><p><code>hr.est.valid.group.cv</code>: Same as <code>hr.est.train.group.cv</code>, but in the
-    validation set.</p></li>
+       <code>length(prop.multi) - 1</code> rows and <code>cv.n</code> columns.
+       The ith column contains the estimated HR in <code>length(prop.multi) - 1</code>
+       mutually exclusive subgroups defined by <code>prop.multi</code> in the training set in the ith cross-validation iteration.</p></li>
+<li><p><code>hr.est.valid.group.cv</code>: Same as <code>hr.est.train.group.cv</code>, but in the validation set.</p></li>
 </ul></li>
-<li><p><code>hr.boosting</code>: A list of results similar to <code>hr.randomForest</code> output
- if <code>score.method</code> includes <code>'boosting'</code>.</p></li>
-<li><p><code>hr.poisson</code>: A list of results similar to <code>hr.randomForest</code> output
- if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
-<li><p><code>hr.twoReg</code>: A list of results similar to <code>hr.randomForest</code> output
- if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
-<li><p><code>hr.contrastReg</code>: A list of results similar to <code>hr.randomForest</code> output
- if <code>score.method</code> includes <code>'contrastReg'</code>.
- <code>props</code>: A list of 3 elements:
- </p><ul><li><p><code>prop.onlyhigh</code>: The original argument <code>prop.cutoff</code>,
-    reformatted as necessary.</p></li>
-<li><p><code>prop.bi</code>: The original argument <code>prop.cutoff</code>,
-    similar to <code>prop.onlyhigh</code> but reformatted to exclude 1.</p></li>
-<li><p><code>prop.multi</code>: The original argument <code>prop.multi</code>,
-    reformatted as necessary to include 0 and 1.</p></li>
-</ul><code>overall.ate.train</code>: A vector of numerical values of length <code>cv.n</code>.
- The ith element contains the ATE (RMTL ratio) in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.
- <code>overall.hr.train</code>: A vector of numerical values of length <code>cv.n</code>.
- The ith element contains the ATE (HR) in the training set of the ith cross-validation
- iteration.
- <code>overall.ate.valid</code>: A vector of numerical values of length <code>cv.n</code>.
- The ith element contains the ATE (RMTL ratio) in the validation set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.
- <code>overall.hr.valid</code>: A vector of numerical values of length <code>cv.n</code>.
- The ith element contains the ATE (HR) in the validation set of the ith cross-validation
- iteration.
- <code>errors/warnings</code>: A nested list of errors and warnings that were wrapped during the
- calculation of ATE. Errors and warnings are organized by <code>score.method</code> and
- position in the CV flow.
- <code>higher.y</code>: The original <code>higher.y</code> argument.
- <code>abc</code>: The original <code>abc</code> argument.
- <code>cv.n</code>: The original <code>cv.n</code> argument.
- <code>response</code>: The type of response. Always 'survival' for this function.
- <code>formulas</code>:A list of 3 elements: (1) <code>cate.model</code> argument,
- (2) <code>ps.model</code> argument and (3) original labels of the left-hand side variable in
- <code>ps.model</code> (treatment) if it was not 0/1.</li>
+<li><p><code>hr.boosting</code>: A list of results similar to <code>hr.randomForest</code> output if <code>score.method</code> includes <code>'boosting'</code>.</p></li>
+<li><p><code>hr.poisson</code>: A list of results similar to <code>hr.randomForest</code> output if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
+<li><p><code>hr.twoReg</code>: A list of results similar to <code>hr.randomForest</code> output if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
+<li><p><code>hr.contrastReg</code>: A list of results similar to <code>hr.randomForest</code> output if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
+<li><p><code>props</code>: A list of 3 elements:</p><ul><li><p><code>prop.onlyhigh</code>: The original argument <code>prop.cutoff</code>, reformatted as necessary.</p></li>
+<li><p><code>prop.bi</code>: The original argument <code>prop.cutoff</code>, similar to <code>prop.onlyhigh</code> but reformatted to exclude 1.</p></li>
+<li><p><code>prop.multi</code>: The original argument <code>prop.multi</code>, reformatted as necessary to include 0 and 1.</p></li>
+</ul></li>
+<li><p><code>overall.ate.train</code>: A vector of numerical values of length <code>cv.n</code>.
+     The ith element contains the ATE (RMTL ratio) in the training set of the ith cross-validation iteration, estimated with the doubly robust estimator.</p></li>
+<li><p><code>overall.hr.train</code>: A vector of numerical values of length <code>cv.n</code>.
+     The ith element contains the ATE (HR) in the training set of the ith cross-validation iteration.</p></li>
+<li><p><code>overall.ate.valid</code>: A vector of numerical values of length <code>cv.n</code>.
+     The ith element contains the ATE (RMTL ratio) in the validation set of the ith cross-validation iteration, estimated with the doubly robust estimator.</p></li>
+<li><p><code>overall.hr.valid</code>: A vector of numerical values of length <code>cv.n</code>.
+     The ith element contains the ATE (HR) in the validation set of the ith cross-validation iteration.</p></li>
+<li><p><code>errors/warnings</code>: A nested list of errors and warnings that were wrapped during the calculation of ATE. Errors and warnings are organized by <code>score.method</code> and position in the CV flow.</p></li>
+<li><p><code>higher.y</code>: The original <code>higher.y</code> argument.</p></li>
+<li><p><code>abc</code>: The original <code>abc</code> argument.</p></li>
+<li><p><code>cv.n</code>: The original <code>cv.n</code> argument.</p></li>
+<li><p><code>response</code>: The type of response. Always 'survival' for this function.</p></li>
+<li><p><code>formulas</code>:A list of 3 elements: (1) <code>cate.model</code> argument, (2)  <code>ps.model</code> argument and (3) original labels of the left-hand side variable in
+ <code>ps.model</code> (treatment) if it was not 0/1.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -472,33 +443,33 @@ observational data. Journal of the American Statistical Association, 1-18.</em>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Wed Sep 25 18:25:24 2024 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Thu Sep 26 14:46:11 2024 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==============                                                        |  20%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Wed Sep 25 18:25:29 2024 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Thu Sep 26 14:46:16 2024 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |============================                                          |  40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Wed Sep 25 18:25:34 2024 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Thu Sep 26 14:46:21 2024 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==========================================                            |  60%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Wed Sep 25 18:25:39 2024 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Thu Sep 26 14:46:27 2024 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |========================================================              |  80%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Wed Sep 25 18:25:44 2024 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Thu Sep 26 14:46:32 2024 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |======================================================================| 100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 25.57 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 25.72 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Try:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
