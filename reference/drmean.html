@@ -72,7 +72,7 @@ the observed continuous outcome for each subject.</p></dd>
 
 
 <dt id="arg-trt">trt<a class="anchor" aria-label="anchor" href="#arg-trt"></a></dt>
-<dd><p>A numeric vector (in 0, 1) of size <code>n</code> with each element
+<dd><p>A numeric vector (in {0, 1}) of size <code>n</code> with each element
 representing the treatment received for each subject.</p></dd>
 
 
@@ -100,12 +100,12 @@ more than one variable.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
-<dd><p>A numerical value (in [0, 1]) below which estimated propensity
+<dd><p>A numerical value between 0 and 1 below which estimated propensity
 scores should be truncated. Default is <code>0.01</code>.</p></dd>
 
 
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
-<dd><p>A numerical value (in (0, 1]) above which estimated propensity
+<dd><p>A numerical value between 0 and 1 above which estimated propensity
 scores should be truncated. Must be strictly greater than <code>minPS</code>.
 Default is <code>0.99</code>.</p></dd>
 

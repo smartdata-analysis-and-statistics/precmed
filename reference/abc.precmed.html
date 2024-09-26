@@ -58,6 +58,10 @@ This should be run only after results of <code><a href="catecv.html">catecv</a>(
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>An object of class <code>"precmed"</code>.</p></dd>
 
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments (currently unused).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -128,12 +132,12 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 23.46 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 24.29 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1         cv2        cv3        cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.01245745 -0.01710762 0.08396769 0.07566077 0.1787267</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2        cv3        cv4        cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1427719 0.2183962 0.03696827 0.07206915 0.05886575</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -151,8 +155,8 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1956834 0.1865913 0.1752629 0.2149921 0.1785155</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1850524 0.1751386 0.1722496 0.2052603 0.1732321</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1791387 0.1668873 0.1536377 0.1580742 0.1663754</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1721419 0.1630683 0.1526665 0.1559750 0.1602133</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

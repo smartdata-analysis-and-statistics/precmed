@@ -314,10 +314,10 @@ be printed. <code>0</code> means no outputs. <code>1</code> means only progress 
  if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
 <li><p><code>ate.contrastReg</code>: A list of results similar to <code>ate.gaussian</code> output
  if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
-<li><p><code>ate.randomForest</code>: A list of results similar to <code>ate.gaussian</code> output
- if <code>score.method</code> includes <code>'randomForest'</code>.</p></li>
+<li><p><code>ate.randomForest</code>: A list of ATE output measured by the RMTL ratio if
+<code>score.method</code> includes <code>'randomForest'</code>:</p></li>
 <li><p><code>ate.gam</code>: A list of results similar to <code>ate.gaussian</code> output
- if <code>score.method</code> includes <code>'gam'</code>.</p></li>
+if <code>score.method</code> includes <code>'gam'</code>.</p></li>
 <li><p><code>props</code>: A list of 3 elements:</p><ul><li><p><code>prop.onlyhigh</code>: The original argument <code>prop.cutoff</code>,
     reformatted as necessary.</p></li>
 <li><p><code>prop.bi</code>: The original argument <code>prop.cutoff</code>,

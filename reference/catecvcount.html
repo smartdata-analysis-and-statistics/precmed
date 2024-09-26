@@ -327,8 +327,8 @@ be printed. <code>0</code> means no outputs. <code>1</code> means only progress 
  The ith element contains the ATE in the validation set of the ith cross-validation
  iteration, estimated with the doubly robust estimator.</p></li>
 <li><p><code>overall.ate.train</code>: A vector of numerical values of length <code>cv.n</code>.
- The ith element contains the ATE in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.</p></li>
+The ith element contains the ATE in the training set of the ith cross-validation
+iteration, estimated with the doubly robust estimator.</p></li>
 <li><p><code>fgam</code>: The formula used in GAM if <code>initial.predictor.method = 'gam'</code>.</p></li>
 <li><p><code>higher.y</code>: The original <code>higher.y</code> argument.</p></li>
 <li><p><code>abc</code>: The original <code>abc</code> argument.</p></li>
@@ -427,7 +427,7 @@ and <code><a href="catefitcount.html">catefitcount</a>()</code> function.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 12.21 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 11.92 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="catecvcount-1.png" alt="" width="700" height="433"></span>
