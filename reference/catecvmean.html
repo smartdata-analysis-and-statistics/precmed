@@ -139,12 +139,12 @@ Default is <code>'boosting'</code>.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
-<dd><p>A numerical value (in [0, 1]) below which estimated propensity scores should be
+<dd><p>A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is <code>0.01</code>.</p></dd>
 
 
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
-<dd><p>A numerical value (in (0, 1]) above which estimated propensity scores should be
+<dd><p>A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.99</code>.</p></dd>
 
 
@@ -154,7 +154,7 @@ values of the outcome are more desirable. Default is <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-prop-cutoff">prop.cutoff<a class="anchor" aria-label="anchor" href="#arg-prop-cutoff"></a></dt>
-<dd><p>A vector of numerical values (in (0, 1]) specifying percentiles of the
+<dd><p>A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of <code>prop.cutoff</code> is the number of nested subgroups.
@@ -163,7 +163,7 @@ Default is <code>seq(0.5, 1, length = 6)</code>.</p></dd>
 
 
 <dt id="arg-prop-multi">prop.multi<a class="anchor" aria-label="anchor" href="#arg-prop-multi"></a></dt>
-<dd><p>A vector of numerical values (in [0, 1]) specifying percentiles of the
+<dd><p>A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 estimated CATE scores to define mutually exclusive subgroups.
 It should start with 0, end with 1, and be of <code>length(prop.multi) &gt; 2</code>.
 Each element represents the cutoff to separate the observations into
@@ -177,7 +177,7 @@ at each cross-validation iterations, for each <code>score.method</code>. Default
 
 
 <dt id="arg-train-prop">train.prop<a class="anchor" aria-label="anchor" href="#arg-train-prop"></a></dt>
-<dd><p>A numerical value (in (0, 1)) indicating the proportion of total data used
+<dd><p>A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is <code>3/4</code>.</p></dd>
 
 

@@ -107,7 +107,7 @@ values of the outcome are more desirable. Default is <code>TRUE</code>.</p></dd>
 
 <dt id="arg-prop">prop<a class="anchor" aria-label="anchor" href="#arg-prop"></a></dt>
 <dd><p>Proportions corresponding to percentiles in the estimated CATE scores that define subgroups to calculate ATE for;
-vector of floats in (0,1] (if onlyhigh=T) or in (0,1) (if onlyhigh=F):
+vector of floats in `(0, 1]` (if onlyhigh=T) or in `(0, 1)` (if onlyhigh=F):
              Each element of <code>prop</code> represents the high/low cutoff in each bi-level subgroup and the length of <code>prop</code>
              is number of bi-level subgroups</p></dd>
 
@@ -125,12 +125,12 @@ Relevant only when <code>ps.model</code> has more than one variable.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
-<dd><p>A numerical value (in [0, 1]) below which estimated propensity scores should be
+<dd><p>A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is <code>0.01</code>.</p></dd>
 
 
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
-<dd><p>A numerical value (in (0, 1]) above which estimated propensity scores should be
+<dd><p>A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.99</code>.</p></dd>
 
 </dl></div>

@@ -120,12 +120,12 @@ Default is <code>'boosting'</code>.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
-<dd><p>A numerical value (in [0, 1]) below which estimated propensity scores should be
+<dd><p>A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is <code>0.01</code>.</p></dd>
 
 
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
-<dd><p>A numerical value (in (0, 1]) above which estimated propensity scores should be
+<dd><p>A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.99</code>.</p></dd>
 
 
@@ -135,7 +135,7 @@ lower (<code>FALSE</code>) values of the outcome are more desirable. Default is 
 
 
 <dt id="arg-prop-cutoff">prop.cutoff<a class="anchor" aria-label="anchor" href="#arg-prop-cutoff"></a></dt>
-<dd><p>A vector of numerical values (in (0, 1]) specifying percentiles of the
+<dd><p>A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of <code>prop.cutoff</code> is the number of nested subgroups.
@@ -308,7 +308,7 @@ observational data. Journal of the American Statistical Association, 1-18.</em>
 <span class="r-in"><span>                    higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                    seed <span class="op">=</span> <span class="fl">999</span>, verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 0.15 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 0.16 secs </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

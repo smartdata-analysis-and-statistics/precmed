@@ -126,12 +126,12 @@ Default is <code>'boosting'</code>.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
-<dd><p>A numerical value (in [0, 1]) below which estimated propensity scores should be
+<dd><p>A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is <code>0.01</code>.</p></dd>
 
 
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
-<dd><p>A numerical value (in (0, 1]) above which estimated propensity scores should be
+<dd><p>A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.99</code>.</p></dd>
 
 
@@ -141,7 +141,7 @@ lower (<code>FALSE</code>) values of the outcome are more desirable. Default is 
 
 
 <dt id="arg-prop-cutoff">prop.cutoff<a class="anchor" aria-label="anchor" href="#arg-prop-cutoff"></a></dt>
-<dd><p>A vector of numerical values (in (0, 1]) specifying percentiles of
+<dd><p>A vector of numerical values (in `(0, 1]`) specifying percentiles of
 the estimated log CATE scores to define nested subgroups. Each element represents the
 cutoff to separate observations in nested subgroups (below vs above cutoff).
 The length of <code>prop.cutoff</code> is the number of nested subgroups.
