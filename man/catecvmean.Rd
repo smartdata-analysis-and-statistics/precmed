@@ -68,23 +68,23 @@ in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values inclu
 one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
 Default is \code{'boosting'}.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+\item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+\item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
 values of the outcome are more desirable. Default is \code{TRUE}.}
 
-\item{prop.cutoff}{A vector of numerical values (in (0, 1]) specifying percentiles of the
+\item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
 
-\item{prop.multi}{A vector of numerical values (in [0, 1]) specifying percentiles of the
+\item{prop.multi}{A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 estimated CATE scores to define mutually exclusive subgroups.
 It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 Each element represents the cutoff to separate the observations into
@@ -94,7 +94,7 @@ Default is \code{c(0, 1/3, 2/3, 1)}.}
 \item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
 at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
 
-\item{train.prop}{A numerical value (in (0, 1)) indicating the proportion of total data used
+\item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
 
 \item{cv.n}{A positive integer value indicating the number of cross-validation iterations.

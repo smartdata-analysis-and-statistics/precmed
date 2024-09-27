@@ -7,9 +7,9 @@
 #' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
 #' @param xnew A matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept)
 #' for which we want PS predictions; dimension \code{m} (observations in the new data set) by \code{p.ps + 1}
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
 #' @return The estimated propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}
@@ -39,9 +39,9 @@ glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
 #' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
 #' @param xnew Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept)
 #' for which we want propensity scores predictions; dimension \code{m} (observations in the new data set) by \code{p.ps + 1}
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
 #' @return The trimmed propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}

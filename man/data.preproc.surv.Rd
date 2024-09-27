@@ -41,14 +41,14 @@ which corresponds to setting the truncation time as the maximum survival time in
 \item{data}{A data frame containing the variables in the outcome, propensity score, and IPCW models;
 a data frame with \code{n} rows (1 row per observation).}
 
-\item{prop.cutoff}{A vector of numerical values (in (0, 1]) specifying percentiles of the
+\item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
 
-\item{prop.multi}{A vector of numerical values (in [0, 1]) specifying percentiles of the
+\item{prop.multi}{A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 estimated log CATE scores to define mutually exclusive subgroups.
 It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 Each element represents the cutoff to separate the observations into

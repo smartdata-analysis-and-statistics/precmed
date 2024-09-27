@@ -51,10 +51,10 @@ he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)
 \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
 with different distributions for y variable). Default is \code{'breslow'}.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+\item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+\item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{followup.time}{A column name in \code{data} specifying the maximum follow-up time,

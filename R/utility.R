@@ -9,21 +9,21 @@
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
 #' values of the outcome are more desirable. Default is \code{TRUE}.
 #' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
 #' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
+#' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into
@@ -55,7 +55,7 @@
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
-#' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
+#' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
 #' Default is \code{10}.
@@ -158,9 +158,9 @@ arg.checks.common <- function(fun,
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
 #' values of the outcome are more desirable. Default is \code{TRUE}.
@@ -169,19 +169,19 @@ arg.checks.common <- function(fun,
 #' \code{'negBin'}. Default specifies all 5 methods.
 #' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
 #' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
+#' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
+#' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
 #' Default is \code{10}.
@@ -324,13 +324,13 @@ arg.checks <- function(fun, response, data,
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and propensity score models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
+#' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into

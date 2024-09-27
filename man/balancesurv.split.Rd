@@ -35,7 +35,7 @@ balancesurv.split(
 \item{yf}{Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
 If unknown, set \code{yf == NULL} and \code{yf} will be taken as \code{y} in the function.}
 
-\item{train.prop}{A numerical value (in (0, 1)) indicating the proportion of total data used
+\item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
 
 \item{error.max}{A numerical value > 0 indicating the tolerance (maximum value of error)

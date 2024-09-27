@@ -47,7 +47,7 @@ estsurv.bilevel.subgroups(
 \item{higher.y}{A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})}
 
 \item{prop}{Proportions corresponding to percentiles in the estimated log CATE scores that define subgroups to calculate ATE for;
-vector of floats in (0,1] (if \code{onlyhigh=TRUE}) or in (0,1) (if \code{onlyhigh=FALSE}):
+vector of floats in `(0, 1]` (if \code{onlyhigh=TRUE}) or in `(0, 1)` (if \code{onlyhigh=FALSE}):
              Each element of \code{prop} represents the high/low cutoff in each bi-level subgroup and the length of \code{prop}
              is number of bi-level subgroups}
 
@@ -61,10 +61,10 @@ vector of floats in (0,1] (if \code{onlyhigh=TRUE}) or in (0,1) (if \code{onlyhi
 two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 Relevant only when \code{ps.model} has more than one variable.}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+\item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+\item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{ipcw.method}{The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),

@@ -105,13 +105,13 @@ survCatch <- function(fun) {
 #' which corresponds to setting the truncation time as the maximum survival time in the data
 #' @param data A data frame containing the variables in the outcome, propensity score, and IPCW models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
+#' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into
@@ -324,7 +324,7 @@ data.preproc.surv <- function(fun, cate.model, ps.model, ipcw.model = NULL, tau0
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
 #' If unknown, set \code{yf == NULL} and \code{yf} will be taken as \code{y} in the function.
-#' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
+#' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param error.max A numerical value > 0 indicating the tolerance (maximum value of error)
 #' for the largest standardized absolute difference in the covariate distributions or in the

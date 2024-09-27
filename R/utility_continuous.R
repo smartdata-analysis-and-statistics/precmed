@@ -19,11 +19,11 @@
 #' (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
 #' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param train.prop A numerical value (in (0, 1)) indicating the proportion of total data used
+#' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param error.max A numerical value > 0 indicating the tolerance (maximum value of error)
 #' for the largest standardized absolute difference in the covariate distributions or in the
@@ -131,13 +131,13 @@ balancemean.split <- function(y, trt, x.cate, x.ps,
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and propensity score models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param prop.cutoff A vector of numerical values (in (0, 1]) specifying percentiles of the
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param prop.multi A vector of numerical values (in [0, 1]) specifying percentiles of the
+#' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into

@@ -29,13 +29,13 @@ balancemean.split(
 \item{x.ps}{Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
 dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)}
 
-\item{minPS}{A numerical value (in [0, 1]) below which estimated propensity scores should be
+\item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
 
-\item{maxPS}{A numerical value (in (0, 1]) above which estimated propensity scores should be
+\item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
-\item{train.prop}{A numerical value (in (0, 1)) indicating the proportion of total data used
+\item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
 
 \item{error.max}{A numerical value > 0 indicating the tolerance (maximum value of error)

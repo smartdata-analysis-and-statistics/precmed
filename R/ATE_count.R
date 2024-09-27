@@ -294,7 +294,7 @@ drcount <- function(y, trt, x.cate, x.ps, time,
 #' @param score Estimated log CATE scores for all \code{n} observations from one of the four methods
 #' (boosting, naive Poisson, two regressions, contrast regression); vector of size \code{n}
 #' @param prop Proportions corresponding to percentiles in the estimated log CATE scores that define subgroups to calculate ATE for;
-#' vector of floats in (0,1] (if onlyhigh=T) or in (0,1) (if onlyhigh=F):
+#' vector of floats in `(0, 1]` (if onlyhigh=T) or in `(0, 1)` (if onlyhigh=F):
 #'              Each element of \code{prop} represents the high/low cutoff in each bi-level subgroup and the length of \code{prop}
 #'              is number of bi-level subgroups
 #' @param onlyhigh Indicator of returning only the ATEs in the higher-than-cutoff category of the bi-level subgroups; boolean
@@ -305,9 +305,9 @@ drcount <- function(y, trt, x.cate, x.ps, time,
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
 #' @return ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;
@@ -357,7 +357,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' @param score Estimated log CATE scores for all \code{n} observations from one of the four methods
 #' (boosting, naive Poisson, two regressions, contrast regression); vector of size \code{n}
 #' @param prop Proportions corresponding to percentiles in the estimated log CATE scores that define subgroups to calculate ATE for;
-#' vector of floats in [0,1] always starting with 0 and ending with 1:
+#' vector of floats in `[0, 1]` always starting with 0 and ending with 1:
 #'              Each element of \code{prop} represents inclusive cutoffs in the multilevel subgroup and the length of \code{prop}
 #'              is number of categories in the multilevel subgroup
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
@@ -367,9 +367,9 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in [0, 1]) below which estimated propensity scores should be
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in (0, 1]) above which estimated propensity scores should be
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
