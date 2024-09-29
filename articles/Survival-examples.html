@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for survival outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
-            <h4 data-toc-skip class="date">September 27, 2024</h4>
+            <h4 data-toc-skip class="date">September 29, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -406,9 +406,7 @@ outcome model that contains all variables and a PS model with
 <span>                        cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
 <span>                        ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>                        tau0 <span class="op">=</span> <span class="va">tau0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt; Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, :</span></span>
-<span><span class="co">#&gt; Loglik converged before variable 3 ; coefficient may be infinite.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>When <code>verbose</code> = 1, the function outputs a progress bar in
 the console.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -416,14 +414,14 @@ the console.</p>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03432837 0.002872936 0.1374377 0.04098776</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.20970045 2.302318973 3.1243296 0.00000000</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03429706 0.002934303 0.1373763 0.04080367</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.19356901 2.333936003 3.0927126 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 7.174710 158.7987 186.9231      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.447502 180.0035 213.1171      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.906521 159.3244 186.3974      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.398404 180.0997 213.0208      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -807,37 +805,37 @@ default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Sep 27 16:02:41 2024 </span></span>
+<span><span class="co">#&gt;    Sun Sep 29 12:07:21 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Sep 27 16:02:56 2024 </span></span>
+<span><span class="co">#&gt;    Sun Sep 29 12:07:36 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Sep 27 16:03:11 2024 </span></span>
+<span><span class="co">#&gt;    Sun Sep 29 12:07:51 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Sep 27 16:03:26 2024 </span></span>
+<span><span class="co">#&gt;    Sun Sep 29 12:08:06 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Sep 27 16:03:41 2024 </span></span>
+<span><span class="co">#&gt;    Sun Sep 29 12:08:20 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 1.24 mins</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 1.25 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
