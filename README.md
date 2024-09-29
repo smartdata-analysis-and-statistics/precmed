@@ -6,7 +6,6 @@
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
-[![DOI](https://zenodo.org/badge/523236629.svg)](https://zenodo.org/badge/latestdoi/523236629)
 [![R-CMD-check](https://github.com/smartdata-analysis-and-statistics/precmed/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/smartdata-analysis-and-statistics/precmed/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -68,22 +67,22 @@ the CATE in order to identify treatment effect heterogeneity:
     boosting) for estimating the CATE using cross-validation through
     [catecv](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.html).
 2.  Select the best modelling approach using 3 metrics:
-    -   Compare the steepness of the validation curves in the validation
-        samples across methods using `plot()`. Two side-by-side plots
-        are generated, visualizing the estimated average treatment
-        effects in a series of nested subgroups. On the left side the
-        curve is shown for the training set, and on the right side the
-        curve is shown for the validation set. Each line in the plots
-        represents one scoring method (e.g., boosting, randomForest)
-        specified under the argument `score.method`.
-    -   The area between curves (ABC) using
-        [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)
-        quantifies a model’s ability to capture treatment effect
-        heterogeneity. Higher ABC values are preferable as they indicate
-        that more treatment effect heterogeneity is captured by the
-        scoring method.
-    -   Compare the distribution of the estimated ATE across different
-        levels of the CATE score percentiles using `boxplot()`.
+    - Compare the steepness of the validation curves in the validation
+      samples across methods using `plot()`. Two side-by-side plots are
+      generated, visualizing the estimated average treatment effects in
+      a series of nested subgroups. On the left side the curve is shown
+      for the training set, and on the right side the curve is shown for
+      the validation set. Each line in the plots represents one scoring
+      method (e.g., boosting, randomForest) specified under the argument
+      `score.method`.
+    - The area between curves (ABC) using
+      [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)
+      quantifies a model’s ability to capture treatment effect
+      heterogeneity. Higher ABC values are preferable as they indicate
+      that more treatment effect heterogeneity is captured by the
+      scoring method.
+    - Compare the distribution of the estimated ATE across different
+      levels of the CATE score percentiles using `boxplot()`.
 3.  Apply the best modelling approach in the original data or in a new
     external dataset using `catefit()`.
 4.  Optional. Use `atefit()` to estimate ATE between 2 treatment groups
@@ -98,15 +97,14 @@ the user from simple to more complex methods.
 When applying `catefit()` or `catecv()`, the user has to (at least)
 input:
 
--   `response`: type of outcome/response (either `count` or
-    `survival`)  
--   `data`: a data frame with individual patient data  
--   `score.method`: methods to estimate the CATE (e.g., `boosting`,
-    `poisson`, `twoReg`, `contrastReg`)  
--   `cate.model`: a formula describing the outcome model (e.g., outcome
-    \~ age + gender + previous_treatment)  
--   `ps.model`: a formula describing the propensity score model to
-    adjust for confounding (e.g., treatment \~ age + previous_treatment)
+- `response`: type of outcome/response (either `count` or `survival`)  
+- `data`: a data frame with individual patient data  
+- `score.method`: methods to estimate the CATE (e.g., `boosting`,
+  `poisson`, `twoReg`, `contrastReg`)  
+- `cate.model`: a formula describing the outcome model (e.g., outcome ~
+  age + gender + previous_treatment)  
+- `ps.model`: a formula describing the propensity score model to adjust
+  for confounding (e.g., treatment ~ age + previous_treatment)
 
 ## Vignettes
 
@@ -121,7 +119,8 @@ input:
 
 # References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 

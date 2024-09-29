@@ -222,8 +222,7 @@ coef(fit_2)
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 \emph{Estimation and validation of ratio-based conditional average treatment effects using
-observational data. Journal of the American Statistical Association, 1-18.}
-\url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 }
 \seealso{
 \code{\link{catecv}()}

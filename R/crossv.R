@@ -136,8 +136,7 @@
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso \code{\link{catefit}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
@@ -518,8 +517,7 @@ catecv <- function(response,
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' observational data. Journal of the American Statistical Association, 1-18.}. DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso \code{\link{catefitsurv}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
@@ -1230,8 +1228,7 @@ catecvsurv <- function(data,
 #' Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment
 #' effects using observational data. Journal of the American Statistical
-#' Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' Association, 1-18.}. DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso
 #' \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()},
@@ -1800,8 +1797,7 @@ catecvcount <- function(data,
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
 #' and \code{\link{catefitmean}()} function.
@@ -2398,8 +2394,7 @@ abc.precmed <- function(x, ...) {
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
@@ -2755,10 +2750,10 @@ plot.precmed <- function(x,
 #' are relatively aligned across the multi-category subgroups indicate absence of treatment
 #' effect heterogeneity (or the inability of the scoring method to capture it).
 #'
-#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
+#' @references
+#' Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.}
-#' \url{https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1772080}
+#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
 #' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'

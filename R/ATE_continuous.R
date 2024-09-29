@@ -97,7 +97,7 @@ atefitmean <- function(data,
   # Set seed once for reproducibility
   set.seed(seed)
 
-  #### CHECK ARGUMENTS ####
+  # CHECK ARGUMENTS
   # TODO: Phoebe I think we removed the arg.check on interactions but here it is?
   arg.checks(fun = "drinf", response = "continuous", data = data,
              ps.method = ps.method,
@@ -107,7 +107,7 @@ atefitmean <- function(data,
              n.boot = n.boot,
              plot.boot = plot.boot)
 
-  #### PRE-PROCESSING ####
+  # PRE-PROCESSING
   preproc <- data.preproc.mean(fun = "drinf", cate.model = cate.model,
                                init.model = NULL, #TODO: Needs to be specified
                                ps.model = ps.model,
@@ -179,7 +179,7 @@ atefitmean <- function(data,
 #'
 #' @param y A numeric vector of size \code{n} with each element representing
 #' the observed continuous outcome for each subject.
-#' @param trt A numeric vector (in `{0, 1}`) of size \code{n} with each element
+#' @param trt A numeric vector (in \{0, 1\}) of size \code{n} with each element
 #' representing the treatment received for each subject.
 #' @param x.cate A numeric matrix of dimension \code{n} by \code{p.cate} with
 #' each column representing each baseline covariate specified in the outcome
