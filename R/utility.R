@@ -123,23 +123,18 @@ arg.checks.common <- function(fun,
       if (train.prop >= 1 | train.prop <= 0) stop("train.prop must be a number between 0 and 1, exclusive.")
 
       # Check if cv.n is a positive integer
-      if (!is.numeric(cv.n) || cv.n <= 0 || cv.n %% 1 != 0) {
-        stop("cv.n must be a positive integer.")
-      }
+      check_positive_integer(cv.n, var_name = "cv.n")
+
 
       # Check control values for balance.split
       if (any(c(error.max, max.iter) <= 0)) stop("error.max and max.iterNR must be > 0.")
     }
   } else if (fun == "drinf") {
     # Check if n.boot is a positive integer
-    if (!is.numeric(n.boot) || n.boot %% 1 != 0 || n.boot <= 0) {
-      stop("n.boot must be a positive integer.")
-    }
+    check_positive_integer(n.boot, var_name = "n.boot")
 
     # Check if plot.boot is a boolean
-    if (!is.logical(plot.boot) || length(plot.boot) != 1) {
-      stop("plot.boot must be a boolean (TRUE or FALSE).")
-    }
+    check_boolean(plot.boot, "plot.boot")
   }
 }
 
@@ -284,10 +279,7 @@ arg.checks <- function(fun, response, data,
       stop("Elements of score.method must come from: 'boosting', 'poisson', 'twoReg', 'contrastReg', 'negBin'.")
 
     if (fun == "drinf") {
-      # Check interactions boolean
-      if (!is.logical(interactions) || length(interactions) != 1) {
-        stop("interactions must be a single boolean value (TRUE or FALSE).")
-      }
+      check_boolean(interactions, "interactions")
     }
   }
 
@@ -508,4 +500,16 @@ auc <- function(x, y, from = min(x, na.rm = TRUE), to = max(x, na.rm = TRUE),
   }
 
   return(res)
+}
+
+check_positive_integer <- function(x, var_name = "value") {
+  if (!is.numeric(x) || x <= 0 || x %% 1 != 0) {
+    stop(paste(var_name, "must be a positive integer."))
+  }
+}
+
+check_boolean <- function(x, var_name = "value") {
+  if (!is.logical(x) || length(x) != 1) {
+    stop(paste(var_name, "must be a boolean (TRUE or FALSE)."))
+  }
 }
