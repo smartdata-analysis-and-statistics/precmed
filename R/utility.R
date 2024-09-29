@@ -121,18 +121,25 @@ arg.checks.common <- function(fun,
 
       # Check values of CV
       if (train.prop >= 1 | train.prop <= 0) stop("train.prop must be a number between 0 and 1, exclusive.")
-      if (cv.n <= 0) stop("cv.n must be > 0.")
-      if (cv.n %% 1 != 0) stop("cv.n must be an integer.")
+
+      # Check if cv.n is a positive integer
+      if (!is.numeric(cv.n) || cv.n <= 0 || cv.n %% 1 != 0) {
+        stop("cv.n must be a positive integer.")
+      }
 
       # Check control values for balance.split
       if (any(c(error.max, max.iter) <= 0)) stop("error.max and max.iterNR must be > 0.")
     }
   } else if (fun == "drinf") {
-    # Check n.boot positive
-    if (n.boot <= 0) stop("n.boot must be > 0.")
+    # Check if n.boot is a positive integer
+    if (!is.numeric(n.boot) || n.boot %% 1 != 0 || n.boot <= 0) {
+      stop("n.boot must be a positive integer.")
+    }
 
-    # Check plot.boot boolean
-    if (!(plot.boot %in% c(TRUE, FALSE))) stop("plot.boot has to be boolean.")
+    # Check if plot.boot is a boolean
+    if (!is.logical(plot.boot) || length(plot.boot) != 1) {
+      stop("plot.boot must be a boolean (TRUE or FALSE).")
+    }
   }
 }
 
@@ -268,32 +275,39 @@ arg.checks <- function(fun, response, data,
   if (response == "count") {
     # Check initial predictor method
     if (is.null(initial.predictor.method) == FALSE) {
-      if (!(initial.predictor.method %in% c("poisson", "boosting", "gam"))) stop("initial.predictor.method must be 'poisson', 'boosting' or 'gam'.")
+      if (!(initial.predictor.method %in% c("poisson", "boosting", "gam")))
+        stop("initial.predictor.method must be 'poisson', 'boosting' or 'gam'.")
     }
 
     # Check values of score.method
-    if (any(!(score.method %in% c("boosting", "poisson", "twoReg", "contrastReg", "negBin")))) stop("Elements of score.method must come from: 'boosting', 'poisson', 'twoReg', 'contrastReg', 'negBin'.")
+    if (any(!(score.method %in% c("boosting", "poisson", "twoReg", "contrastReg", "negBin"))))
+      stop("Elements of score.method must come from: 'boosting', 'poisson', 'twoReg', 'contrastReg', 'negBin'.")
 
     if (fun == "drinf") {
       # Check interactions boolean
-      if (!(interactions %in% c(TRUE, FALSE))) stop("interactions has to be boolean.")
+      if (!is.logical(interactions) || length(interactions) != 1) {
+        stop("interactions must be a single boolean value (TRUE or FALSE).")
+      }
     }
   }
 
   #### Check argument only used for survival outcome ####
   if (response == "survival") {
-    # Check if followup.time is either NULL or a column name of the data
-    if (!is.null(followup.time)) {
-      if (!as.character(followup.time) %in% names(data)) stop("followup.time must be either NULL or one of the column names of data.")
+
+    # Check if followup.time is either NULL or a valid column name in the data
+    if (!is.null(followup.time) && !as.character(followup.time) %in% names(data)) {
+      stop("followup.time must be either NULL or a valid column name in the data.")
     }
 
     # Check if tau0 > 0
-    if (is.null(tau0) == FALSE) {
-      if (tau0 <= 0) stop("tau0 must be positive.")
+    if (!is.null(tau0) && tau0 <= 0) {
+      stop("tau0 must be positive.")
     }
 
-    # Check if surv.min is positive and very close to 0
-    if (!(surv.min > 0 & surv.min < 0.1)) stop("surv.min must be positive and close to 0.")
+    # Check if surv.min is positive and within the acceptable range (0, 0.1)
+    if (surv.min <= 0 || surv.min >= 0.1)
+      stop("surv.min must be positive and less than 0.1.")
+
 
     # Check n.trees.rf
     if (any(c(n.trees.rf) <= 0)) stop("n.trees.rf must be > 0.")

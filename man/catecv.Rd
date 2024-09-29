@@ -254,7 +254,6 @@ plot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 boxplot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(cate_2)
 
-
 }
 
 }

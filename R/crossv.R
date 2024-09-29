@@ -179,7 +179,6 @@
 #' boxplot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #' abc(cate_2)
 #'
-#'
 #' }
 #'
 #' @export
@@ -597,7 +596,8 @@ catecvsurv <- function(data,
 
   # Check arguments
   arg.checks(
-    fun = "crossv", response = "survival", data = data, followup.time = followup.time, tau0 = tau0, surv.min = surv.min,
+    fun = "crossv", response = "survival", data = data,
+    followup.time = followup.time, tau0 = tau0, surv.min = surv.min,
     higher.y = higher.y, score.method = score.method, abc = abc,
     prop.cutoff = prop.cutoff, prop.multi = prop.multi,
     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method,
@@ -708,7 +708,7 @@ catecvsurv <- function(data,
   if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
 
   # Begin CV iteration
-  for(cv.i in 1:cv.n) {
+  for (cv.i in 1:cv.n) {
 
     ##### Split the data ------------------------------------------------------------------------------
     if (verbose >= 1){
@@ -940,12 +940,15 @@ catecvsurv <- function(data,
           ref <- log(result$overall.ate.valid[cv.i]) - temp.abc
         }
         result[[str_replace(name, "score", "ate")]]$abc.valid[cv.i] <-
-          auc(x = prop.abc, y = ref, from = prop.abc[1], to = prop.abc[length(prop.abc)], type = "spline")
+          auc(x = prop.abc, y = ref,
+              from = prop.abc[1],
+              to = prop.abc[length(prop.abc)],
+              type = "spline")
       } # end of if (abc == TRUE) {}
     } # end of for (name in names(fit.score.train)) {}
 
 
-    if (verbose == 2){
+    if (verbose == 2) {
       if (length(errors.valid) != 0) {
         if (verbose == 2) cat(paste0('     Warning: Error(s) occurred when estimating the ATEs in the nested subgroup using "', paste0(errors.valid, collapse = '", "'), '";\n    return NAs in the corresponding subgroup.'),'\n')
         warning(paste0('Error(s) occurred when estimating the ATEs in the nested subgroup in the validation set using "', paste0(errors.valid, collapse = '", "'), '" in cross-validation iteration ', cv.i, ". NAs are returned for RMTL ratio and HR in the corresponding subgroup; see 'errors/warnings'."))
