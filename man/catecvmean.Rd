@@ -165,68 +165,68 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 \value{
 Returns a list containing the following components saved as a \code{"precmed"} object:
 \itemize{
- \item{\code{ate.gaussian}: }{A list of results output if \code{score.method} includes
- \code{'gaussian'}:}
+ \item{\code{ate.gaussian}: }A list of results output if \code{score.method} includes
+ \code{'gaussian'}:
  \itemize{
-    \item{\code{ate.est.train.high.cv}: }{A matrix of numerical values with
+    \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
     The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
     defined by CATE score above (if \code{higher.y = TRUE}) or below (if \code{higher.y = FALSE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{ate.est.train.low.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{ate.est.train.low.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff) - 1} rows and \code{cv.n} columns.
     The ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
     defined by CATE score below (if \code{higher.y = TRUE}) or above (if \code{higher.y = FALSE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{ate.est.valid.high.cv}: }{Same as \code{ate.est.train.high.cv},
-    but in the validation set.}
-    \item{\code{ate.est.valid.low.cv}: }{Same as \code{ate.est.train.low.cv},
-    but in the validation set.}
-    \item{\code{ate.est.train.group.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{ate.est.valid.high.cv}: }Same as \code{ate.est.train.high.cv},
+    but in the validation set.
+    \item{\code{ate.est.valid.low.cv}: }Same as \code{ate.est.train.low.cv},
+    but in the validation set.
+    \item{\code{ate.est.train.group.cv}: }A matrix of numerical values with
     \code{length(prop.multi) - 1} rows and \code{cv.n} columns.
     The ith column contains the estimated ATE in \code{length(prop.multi) - 1}
     mutually exclusive subgroups defined by \code{prop.multi} in the training set in ith
-    cross-validation iteration.}
-    \item{\code{ate.est.valid.group.cv}: }{Same as \code{ate.est.train.group.cv}, but in the
-    validation set.}
-    \item{\code{abc.valid}: }{A vector of numerical values of length \code{cv.n},
+    cross-validation iteration.
+    \item{\code{ate.est.valid.group.cv}: }Same as \code{ate.est.train.group.cv}, but in the
+    validation set.
+    \item{\code{abc.valid}: }A vector of numerical values of length \code{cv.n},
     The ith element returns the ABC of the validation curve in the ith cross-validation
-    iteration. Only returned if \code{abc = TRUE}.}
+    iteration. Only returned if \code{abc = TRUE}.
  }
- \item{\code{ate.boosting}: }{A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'boosting'}.}
- \item{\code{ate.twoReg}: }{A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'twoReg'}.}
- \item{\code{ate.contrastReg}: }{A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'contrastReg'}.}
-\item{\code{ate.randomForest}: }{A list of ATE output measured by the RMTL ratio if
-\code{score.method} includes \code{'randomForest'}:}
-\item{\code{ate.gam}: }{A list of results similar to \code{ate.gaussian} output
-if \code{score.method} includes \code{'gam'}.}
- \item{\code{props}: }{A list of 3 elements:}
+ \item{\code{ate.boosting}: }A list of results similar to \code{ate.gaussian} output
+ if \code{score.method} includes \code{'boosting'}.
+ \item{\code{ate.twoReg}: }A list of results similar to \code{ate.gaussian} output
+ if \code{score.method} includes \code{'twoReg'}.
+ \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.gaussian} output
+ if \code{score.method} includes \code{'contrastReg'}.
+\item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
+\code{score.method} includes \code{'randomForest'}:
+\item{\code{ate.gam}: }A list of results similar to \code{ate.gaussian} output
+if \code{score.method} includes \code{'gam'}.
+ \item{\code{props}: }A list of 3 elements:
  \itemize{
-    \item{\code{prop.onlyhigh}: }{The original argument \code{prop.cutoff},
-    reformatted as necessary.}
-    \item{\code{prop.bi}: }{The original argument \code{prop.cutoff},
-    similar to \code{prop.onlyhigh} but reformatted to exclude 1.}
-    \item{\code{prop.multi}: }{The original argument \code{prop.multi},
-    reformatted as necessary.}
+    \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
+    reformatted as necessary.
+    \item{\code{prop.bi}: }The original argument \code{prop.cutoff},
+    similar to \code{prop.onlyhigh} but reformatted to exclude 1.
+    \item{\code{prop.multi}: }The original argument \code{prop.multi},
+    reformatted as necessary.
  }
- \item{\code{overall.ate.train}: }{A vector of numerical values of length \code{cv.n}.
+ \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.}
- \item{\code{overall.ate.valid}: }{A vector of numerical values of length \code{cv.n}.
+ iteration, estimated with the doubly robust estimator.
+ \item{\code{overall.ate.valid}: }A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE in the validation set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.}
- \item{\code{higher.y}: }{The original \code{higher.y} argument.}
- \item{\code{abc}: }{The original \code{abc} argument.}
- \item{\code{cv.n}: }{The original \code{cv.n} argument.}
- \item{\code{response}: }{The type of response. Always 'continuous' for this function.}
- \item{\code{formulas}:}{A list of 3 elements: (1) \code{cate.model} argument,
+ iteration, estimated with the doubly robust estimator.
+ \item{\code{higher.y}: }The original \code{higher.y} argument.
+ \item{\code{abc}: }The original \code{abc} argument.
+ \item{\code{cv.n}: }The original \code{cv.n} argument.
+ \item{\code{response}: }The type of response. Always 'continuous' for this function.
+ \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
  (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
- \code{ps.model} (treatment) if it was not 0/1.}
+ \code{ps.model} (treatment) if it was not 0/1.
 }
 }
 \description{

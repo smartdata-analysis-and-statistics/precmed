@@ -133,67 +133,67 @@ be printed. \code{0} means no outputs. \code{1} means only progress and run time
 \value{
 Returns a list containing the following components:
 \itemize{
- \item{\code{ate.gaussian}: }{A vector of numerical values of length \code{prop.cutoff}
+ \item{\code{ate.gaussian}: }A vector of numerical values of length \code{prop.cutoff}
  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with Poisson regression.
- Only provided if \code{score.method} includes \code{'gaussian'}.}
- \item{\code{ate.boosting}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'gaussian'}.
+ \item{\code{ate.boosting}: }Same as \code{ate.gaussian}, but with the nested subgroups based
  the estimated CATE scores with boosting. Only provided if \code{score.method}
- includes \code{'boosting'}.}
- \item{\code{ate.twoReg}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+ includes \code{'boosting'}.
+ \item{\code{ate.twoReg}: }Same as \code{ate.gaussian}, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if \code{score.method} includes \code{'twoReg'}.}
- \item{\code{ate.contrastReg}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'twoReg'}.
+ \item{\code{ate.contrastReg}: }Same as \code{ate.gaussian}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if \code{score.method} includes \code{'contrastReg'}.}
- \item{\code{ate.randomForest}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'contrastReg'}.
+ \item{\code{ate.randomForest}: }Same as \code{ate.gaussian}, but with the nested subgroups based
  the estimated CATE scores with random forest.
- Only provided if \code{score.method} includes \code{'gam'}.}
- \item{\code{ate.gam}: }{Same as \code{ate.gaussian}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'gam'}.
+ \item{\code{ate.gam}: }Same as \code{ate.gaussian}, but with the nested subgroups based
  the estimated CATE scores with generalized additive model.
- Only provided if \code{score.method} includes \code{'gam'}.}
- \item{\code{score.gaussian}: }{A vector of numerical values of length n
+ Only provided if \code{score.method} includes \code{'gam'}.
+ \item{\code{score.gaussian}: }A vector of numerical values of length n
  (number of observations in \code{data}) containing the estimated CATE scores
  according to the linear regression. Only provided if \code{score.method}
- includes \code{'gaussian'}.}
- \item{\code{score.boosting}: }{Same as \code{score.gaussian}, but with estimated CATE score
+ includes \code{'gaussian'}.
+ \item{\code{score.boosting}: }Same as \code{score.gaussian}, but with estimated CATE score
  according to boosting. Only provided if \code{score.method} includes
- \code{'boosting'}.}
- \item{\code{score.twoReg}: }{Same as \code{score.gaussian}, but with estimated CATE score
+ \code{'boosting'}.
+ \item{\code{score.twoReg}: }Same as \code{score.gaussian}, but with estimated CATE score
  according to two regressions. Only provided if \code{score.method} includes
- \code{'twoReg'}.}
- \item{\code{score.contrastReg}: }{Same as \code{score.gaussian}, but with estimated CATE score
+ \code{'twoReg'}.
+ \item{\code{score.contrastReg}: }Same as \code{score.gaussian}, but with estimated CATE score
  according to contrast regression. Only provided if \code{score.method} includes
- \code{'contrastReg'}.}
- \item{\code{score.randomForest}: }{Same as \code{score.gaussian}, but with estimated CATE score
+ \code{'contrastReg'}.
+ \item{\code{score.randomForest}: }Same as \code{score.gaussian}, but with estimated CATE score
  according to random forest. Only provided if \code{score.method}
- includes \code{'randomForest'}.}
- \item{\code{score.gam}: }{Same as \code{score.gaussian}, but with estimated CATE score
+ includes \code{'randomForest'}.
+ \item{\code{score.gam}: }Same as \code{score.gaussian}, but with estimated CATE score
  according to generalized additive model. Only provided if \code{score.method}
- includes \code{'gam'}.}
- \item{\code{fit}: }{Additional details on model fitting if \code{score.method}
- includes 'boosting' or 'contrastReg':}
+ includes \code{'gam'}.
+ \item{\code{fit}: }Additional details on model fitting if \code{score.method}
+ includes 'boosting' or 'contrastReg':
  \itemize{
-   \item{\code{result.boosting}: }{Details on the boosting model fitted to observations
+   \item{\code{result.boosting}: }Details on the boosting model fitted to observations
    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
-   Only provided if \code{score.method} includes \code{'boosting'}.}
-   \item{\code{result.randomForest}: }{Details on the boosting model fitted to observations
+   Only provided if \code{score.method} includes \code{'boosting'}.
+   \item{\code{result.randomForest}: }Details on the boosting model fitted to observations
    with treatment = 0 \code{($fit0.randomForest)} and to observations with treatment = 1 \code{($fit1.randomForest)}.
-   Only provided if \code{score.method} includes \code{'randomForest'}.}
-   \item{\code{result.gam}: }{Details on the boosting model fitted to observations
+   Only provided if \code{score.method} includes \code{'randomForest'}.
+   \item{\code{result.gam}: }Details on the boosting model fitted to observations
    with treatment = 0 \code{($fit0.gam)} and to observations with treatment = 1 \code{($fit1.gam)}.
-   Only provided if \code{score.method} includes \code{'gam'}.}
-   \item{\code{result.contrastReg$sigma.contrastReg}: }{Variance-covariance matrix of
+   Only provided if \code{score.method} includes \code{'gam'}.
+   \item{\code{result.contrastReg$sigma.contrastReg}: }Variance-covariance matrix of
    the estimated CATE coefficients in contrast regression.
-   Only provided if \code{score.method} includes \code{'contrastReg'}.}
+   Only provided if \code{score.method} includes \code{'contrastReg'}.
  }
- \item{\code{coefficients}: }{A data frame with the coefficients of the estimated CATE
+ \item{\code{coefficients}: }A data frame with the coefficients of the estimated CATE
  score by \code{score.method}. The data frame has number of rows equal to the number of
  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
  column containing the standard errors of the coefficients estimated with contrast regression.
  \code{'boosting'}, \code{'randomForest'}, \code{'gam'} do not have coefficient results because these methods do not
- express the CATE as a linear combination of coefficients and covariates.}
+ express the CATE as a linear combination of coefficients and covariates.
 }
 }
 \description{

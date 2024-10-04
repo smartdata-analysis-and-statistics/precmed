@@ -177,117 +177,116 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 \value{
 Returns a list containing the following components saved as a \code{"precmed"} object:
 \itemize{
- \item{\code{ate.randomForest}: }{A list of ATE output measured by the RMTL ratio if
- \code{score.method} includes \code{'randomForest'}:}
+ \item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
+ \code{score.method} includes \code{'randomForest'}:
  \itemize{
-    \item{\code{ate.est.train.high.cv}: }{A matrix of numerical values with
+    \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
     The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
     defined by CATE score above (if \code{higher.y = FALSE}) or below (if \code{higher.y = TRUE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{ate.est.train.low.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{ate.est.train.low.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff) - 1} rows and \code{cv.n} columns.
     TThe ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
     defined by CATE score below (if \code{higher.y = FALSE}) or above (if \code{higher.y = TRUE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{ate.est.valid.high.cv}: }{Same as \code{ate.est.train.high.cv},
-    but in the validation set.}
-    \item{\code{ate.est.valid.low.cv}: }{Same as \code{ate.est.train.low.cv},
-    but in the validation set.}
-    \item{\code{ate.est.train.group.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{ate.est.valid.high.cv}: }Same as \code{ate.est.train.high.cv},
+    but in the validation set.
+    \item{\code{ate.est.valid.low.cv}: }Same as \code{ate.est.train.low.cv},
+    but in the validation set.
+    \item{\code{ate.est.train.group.cv}: }A matrix of numerical values with
     \code{length(prop.multi) - 1} rows and \code{cv.n} columns.
     The ith column contains the estimated ATE in \code{length(prop.multi) - 1}
     mutually exclusive subgroups defined by \code{prop.multi} in the training set in ith
-    cross-validation iteration.}
-    \item{\code{ate.est.valid.group.cv}: }{Same as \code{ate.est.train.group.cv}, but in the
-    validation set.}
-    \item{\code{abc.valid}: }{A vector of numerical values of length \code{cv.n},
+    cross-validation iteration.
+    \item{\code{ate.est.valid.group.cv}: }Same as \code{ate.est.train.group.cv}, but in the
+    validation set.
+    \item{\code{abc.valid}: }A vector of numerical values of length \code{cv.n},
     The ith element returns the ABC of the validation curve in the ith cross-validation
-    iteration. Only returned if \code{abc = TRUE}.}
+    iteration. Only returned if \code{abc = TRUE}.
  }
- \item{\code{ate.boosting}: }{A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'boosting'}.}
- \item{\code{ate.poisson}: }{A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'poisson'}.}
- \item{\code{ate.twoReg}: }{A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'twoReg'}.}
- \item{\code{ate.contrastReg}: }{A list of results similar to \code{ate.randomForest} output
+ \item{\code{ate.boosting}: }A list of results similar to \code{ate.randomForest} output
+ if \code{score.method} includes \code{'boosting'}.
+ \item{\code{ate.poisson}: }A list of results similar to \code{ate.randomForest} output
+ if \code{score.method} includes \code{'poisson'}.
+ \item{\code{ate.twoReg}: }A list of results similar to \code{ate.randomForest} output
+ if \code{score.method} includes \code{'twoReg'}.
+ \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.randomForest} output
  if \code{score.method} includes \code{'contrastReg'}.
- This method has an additional element in the list of results:}
+ This method has an additional element in the list of results:
  \itemize{
-    \item{\code{converge.contrastReg.cv}: }{A vector of logical value of length \code{cv.n}.
+    \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
     The ith element indicates whether the algorithm converged in the ith cross-validation
-    iteration.}
+    iteration.
  }
- \item{\code{hr.randomForest}: }{A list of adjusted hazard ratio if \code{score.method} includes
- \code{'randomForest'}:}
+ \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if \code{score.method} includes
+ \code{'randomForest'}:
  \itemize{
-    \item{\code{hr.est.train.high.cv}: }{A matrix of numerical values with
+    \item{\code{hr.est.train.high.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
     The ith column/jth row cell contains the estimated HR in the nested subgroup of high responders
     defined by CATE score above (if \code{higher.y = FALSE}) or below (if \code{higher.y = TRUE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{hr.est.train.low.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{hr.est.train.low.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff) - 1} rows and \code{cv.n} columns.
     TThe ith column/jth row cell contains the estimated HR in the nested subgroup of low responders
     defined by CATE score below (if \code{higher.y = FALSE}) or above (if \code{higher.y = TRUE}) the
     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.}
-    \item{\code{hr.est.valid.high.cv}: }{Same as \code{hr.est.train.high.cv},
-    but in the validation set.}
-    \item{\code{hr.est.valid.low.cv}: }{Same as \code{hr.est.train.low.cv},
-    but in the validation set.}
-    \item{\code{hr.est.train.group.cv}: }{A matrix of numerical values with
+    cross-validation iteration.
+    \item{\code{hr.est.valid.high.cv}: }Same as \code{hr.est.train.high.cv},
+    but in the validation set.
+    \item{\code{hr.est.valid.low.cv}: }Same as \code{hr.est.train.low.cv},
+    but in the validation set.
+    \item{\code{hr.est.train.group.cv}: }A matrix of numerical values with
     \code{length(prop.multi) - 1} rows and \code{cv.n} columns.
     The ith column contains the estimated HR in \code{length(prop.multi) - 1}
     mutually exclusive subgroups defined by \code{prop.multi} in the training set in ith
-    cross-validation iteration.}
-    \item{\code{hr.est.valid.group.cv}: }{Same as \code{hr.est.train.group.cv}, but in the
-    validation set.}
+    cross-validation iteration.
+    \item{\code{hr.est.valid.group.cv}: }Same as \code{hr.est.train.group.cv}, but in the
+    validation set.
  }
- \item{\code{hr.boosting}: }{A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'boosting'}.}
- \item{\code{hr.poisson}: }{A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'poisson'}.}
- \item{\code{hr.twoReg}: }{A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'twoReg'}.}
- \item{\code{hr.contrastReg}: }{A list of results similar to \code{hr.randomForest} output
+ \item{\code{hr.boosting}: }A list of results similar to \code{hr.randomForest} output
+ if \code{score.method} includes \code{'boosting'}.
+ \item{\code{hr.poisson}: }A list of results similar to \code{hr.randomForest} output
+ if \code{score.method} includes \code{'poisson'}.
+ \item{\code{hr.twoReg}: }A list of results similar to \code{hr.randomForest} output
+ if \code{score.method} includes \code{'twoReg'}.
+ \item{\code{hr.contrastReg}: }A list of results similar to \code{hr.randomForest} output
  if \code{score.method} includes \code{'contrastReg'}.
- \item{\code{props}: }{A list of 3 elements:}
+ \item{\code{props}: }A list of 3 elements:
  \itemize{
-    \item{\code{prop.onlyhigh}: }{The original argument \code{prop.cutoff},
-    reformatted as necessary.}
-    \item{\code{prop.bi}: }{The original argument \code{prop.cutoff},
-    similar to \code{prop.onlyhigh} but reformatted to exclude 1.}
-    \item{\code{prop.multi}: }{The original argument \code{prop.multi},
-    reformatted as necessary to include 0 and 1.}
+    \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
+    reformatted as necessary.
+    \item{\code{prop.bi}: }The original argument \code{prop.cutoff},
+    similar to \code{prop.onlyhigh} but reformatted to exclude 1.
+    \item{\code{prop.multi}: }The original argument \code{prop.multi},
+    reformatted as necessary to include 0 and 1.
  }
- \item{\code{overall.ate.train}: }{A vector of numerical values of length \code{cv.n}.
+ \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE (RMTL ratio) in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.}
- \item{\code{overall.hr.train}: }{A vector of numerical values of length \code{cv.n}.
+ iteration, estimated with the doubly robust estimator.
+ \item{\code{overall.hr.train}: }A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE (HR) in the training set of the ith cross-validation
- iteration.}
- \item{\code{overall.ate.valid}: }{A vector of numerical values of length \code{cv.n}.
+ iteration.
+ \item{\code{overall.ate.valid}: }A vector of numerical values of length \code{cv.n}.
  The ith element contains the ATE (RMTL ratio) in the validation set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.}
-\item{\code{overall.hr.valid}: }{A vector of numerical values of length \code{cv.n}.
+ iteration, estimated with the doubly robust estimator.
+\item{\code{overall.hr.valid}: }A vector of numerical values of length \code{cv.n}.
 The ith element contains the ATE (HR) in the validation set of the ith cross-validation
-iteration.}
- \item{\code{errors/warnings}: }{A nested list of errors and warnings that were wrapped during the
+iteration.
+ \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
  calculation of ATE. Errors and warnings are organized by \code{score.method} and
- position in the CV flow.}
- \item{\code{higher.y}: }{The original \code{higher.y} argument.}
- \item{\code{abc}: }{The original \code{abc} argument.}
- \item{\code{cv.n}: }{The original \code{cv.n} argument.}
- \item{\code{response}: }{The type of response. Always 'survival' for this function.}
- \item{\code{formulas}:}{A list of 3 elements: (1) \code{cate.model} argument,
+ position in the CV flow.
+ \item{\code{higher.y}: }The original \code{higher.y} argument.
+ \item{\code{abc}: }The original \code{abc} argument.
+ \item{\code{cv.n}: }The original \code{cv.n} argument.
+ \item{\code{response}: }The type of response. Always 'survival' for this function.
+ \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
  (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
- \code{ps.model} (treatment) if it was not 0/1.}
-}
+ \code{ps.model} (treatment) if it was not 0/1.
 }
 }
 \description{

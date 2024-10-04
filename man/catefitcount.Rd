@@ -124,55 +124,55 @@ be printed. \code{0} means no outputs. \code{1} means only progress and run time
 \value{
 Returns a list containing the following components:
 \itemize{
- \item{\code{ate.poisson}: }{A vector of numerical values of length \code{prop.cutoff}
+ \item{\code{ate.poisson}: }A vector of numerical values of length \code{prop.cutoff}
  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with poisson regression.
- Only provided if \code{score.method} includes \code{'poisson'}.}
- \item{\code{ate.boosting}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'poisson'}.
+ \item{\code{ate.boosting}: }Same as \code{ate.poisson}, but with the nested subgroups based
  the estimated CATE scores with boosting. Only provided if \code{score.method}
- includes \code{'boosting'}.}
- \item{\code{ate.twoReg}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+ includes \code{'boosting'}.
+ \item{\code{ate.twoReg}: }Same as \code{ate.poisson}, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if \code{score.method} includes \code{'twoReg'}.}
- \item{\code{ate.contrastReg}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'twoReg'}.
+ \item{\code{ate.contrastReg}: }Same as \code{ate.poisson}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if \code{score.method} includes \code{'contrastReg'}.}
- \item{\code{ate.negBin}: }{Same as \code{ate.poisson}, but with the nested subgroups based
+ Only provided if \code{score.method} includes \code{'contrastReg'}.
+ \item{\code{ate.negBin}: }Same as \code{ate.poisson}, but with the nested subgroups based
  the estimated CATE scores with negative binomial regression.
- Only provided if \code{score.method} includes \code{'negBin'}.}
- \item{\code{score.poisson}: }{A vector of numerical values of length n
+ Only provided if \code{score.method} includes \code{'negBin'}.
+ \item{\code{score.poisson}: }A vector of numerical values of length n
  (number of observations in \code{data}) containing the estimated log-CATE scores
  according to the Poisson regression. Only provided if \code{score.method}
- includes \code{'poisson'}.}
- \item{\code{score.boosting}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+ includes \code{'poisson'}.
+ \item{\code{score.boosting}: }Same as \code{score.poisson}, but with estimated log-CATE score
  according to boosting. Only provided if \code{score.method} includes
- \code{'boosting'}.}
- \item{\code{score.twoReg}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+ \code{'boosting'}.
+ \item{\code{score.twoReg}: }Same as \code{score.poisson}, but with estimated log-CATE score
  according to two regressions. Only provided if \code{score.method} includes
- \code{'twoReg'}.}
- \item{\code{score.contrastReg}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+ \code{'twoReg'}.
+ \item{\code{score.contrastReg}: }Same as \code{score.poisson}, but with estimated log-CATE score
  according to contrast regression. Only provided if \code{score.method} includes
- \code{'contrastReg'}.}
- \item{\code{score.negBin}: }{Same as \code{score.poisson}, but with estimated log-CATE score
+ \code{'contrastReg'}.
+ \item{\code{score.negBin}: }Same as \code{score.poisson}, but with estimated log-CATE score
  according to negative binomial regression. Only provided if \code{score.method}
- includes \code{'negBin'}.}
- \item{\code{fit}: }{Additional details on model fitting if \code{score.method}
- includes 'boosting' or 'contrastReg':}
+ includes \code{'negBin'}.
+ \item{\code{fit}: }Additional details on model fitting if \code{score.method}
+ includes 'boosting' or 'contrastReg':
  \itemize{
-   \item{\code{result.boosting}: }{Details on the boosting model fitted to observations
+   \item{\code{result.boosting}: }Details on the boosting model fitted to observations
    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
-   Only provided if \code{score.method} includes \code{'boosting'}.}
-   \item{\code{result.contrastReg$sigma.contrastReg}: }{Variance-covariance matrix of
+   Only provided if \code{score.method} includes \code{'boosting'}.
+   \item{\code{result.contrastReg$sigma.contrastReg}: }Variance-covariance matrix of
    the estimated log-CATE coefficients in contrast regression.
-   Only provided if \code{score.method} includes \code{'contrastReg'}.}
+   Only provided if \code{score.method} includes \code{'contrastReg'}.
  }
- \item{\code{coefficients}: }{A data frame with the coefficients of the estimated log-CATE
+ \item{\code{coefficients}: }A data frame with the coefficients of the estimated log-CATE
  score by \code{score.method}. The data frame has number of rows equal to the number of
  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
  column containing the standard errors of the coefficients estimated with contrast regression.
  \code{'boosting'} does not have coefficient results because tree-based methods typically do not
- express the log-CATE as a linear combination of coefficients and covariates.}
+ express the log-CATE as a linear combination of coefficients and covariates.
 }
 }
 \description{
