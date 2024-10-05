@@ -9,7 +9,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">precmed</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Compute the area between curves from the <code>"precmed"</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/v1.1.0/R/crossv.R" class="external-link"><code>R/crossv.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/R/crossv.R" class="external-link"><code>R/crossv.R</code></a></small>
       <div class="d-none name"><code>abc.Rd</code></div>
     </div>
 
@@ -134,12 +134,12 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 10.98 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 33.33 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 cv1        cv2       cv3        cv4        cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson -0.02648908 0.08565262 0.1957446 0.02892278 0.04809943</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1       cv2         cv3        cv4        cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.03153852 0.1348655 -0.01246573 0.07267316 0.06803775</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -157,8 +157,8 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.2026535 0.1571719 0.2056992 0.1839665 0.1772734</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.2042826 0.1565549 0.2032972 0.1789695 0.1762017</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1681464 0.1953949 0.1912239 0.1647485 0.1791282</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1648040 0.1888142 0.1835995 0.1603466 0.1730738</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
