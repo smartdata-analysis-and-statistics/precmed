@@ -514,7 +514,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
   # Calculate p.aug: the number of covariates in x.cate plus 1 for the intercept
   p.aug <- ncol(x.cate) + 1
 
-  datatot <- data.frame("y" = y, x.cate, "time" = time)
+  datatot <- data.frame("y" = y, x.cate)
   datatot.init <- data.frame("y" = y, x.init)
 
   ######### cross-fitting

@@ -443,7 +443,7 @@ onearmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv, ps, f.predi
     yhat <- exp(as.matrix(x[, !is.na(fit$coef), drop = FALSE]) %*% beta)
 
     # Fit the second model on the predicted values
-    fit2 <- glm(yhat ~ x.cate, family = poisson())
+    fit2 <- glm(yhat ~ x.cate, family = "poisson")
   },
   warning = function(w) {
     # Suppress the specific "non-integer x" warning in glm() for Poisson models
