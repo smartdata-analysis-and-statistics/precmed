@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for count outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 4</h3>
             
-            <h4 data-toc-skip class="date">October 04, 2024</h4>
+            <h4 data-toc-skip class="date">October 05, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Count-examples.Rmd</code></div>
@@ -510,7 +510,7 @@ remaining arguments.</p>
 <span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 11.46515 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 11.49799 secs</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -528,7 +528,7 @@ data.</li>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  0.1499685  0.2620096  0.5860160 -0.8024144 -0.1906713 -0.4043656</span></span></code></pre></div>
+<span><span class="co">#&gt; [1]  0.1497829  0.2624196  0.5864289 -0.8024851 -0.1907681 -0.4049082</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <code>coefficients</code> contains the estimated coefficients of the
@@ -546,13 +546,13 @@ result for this method.</li>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span><span class="co">#&gt;                              poisson      twoReg contrastReg SE_contrastReg</span></span>
-<span><span class="co">#&gt; (Intercept)              -0.58185218 -0.57207204 -0.59736822     0.37228114</span></span>
-<span><span class="co">#&gt; age                      -0.01117701 -0.04008509 -0.03578803     0.01382166</span></span>
-<span><span class="co">#&gt; female                    0.58829733  0.73775319  0.77478198     0.36574103</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugB   0.73724361  0.64060449  0.74664939     0.35878718</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugC   0.15545985 -0.25803279 -0.20421285     0.26463665</span></span>
-<span><span class="co">#&gt; previous_cost            -0.13035642 -0.08485511 -0.02671264     0.15747560</span></span>
-<span><span class="co">#&gt; previous_number_relapses -0.05339112  0.06098503  0.02863769     0.16914400</span></span>
+<span><span class="co">#&gt; (Intercept)              -0.58185218 -0.57230335 -0.59733948     0.37239529</span></span>
+<span><span class="co">#&gt; age                      -0.01117701 -0.04006858 -0.03579484     0.01382861</span></span>
+<span><span class="co">#&gt; female                    0.58829733  0.73791026  0.77499335     0.36588639</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugB   0.73724361  0.64116126  0.74877593     0.35907273</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugC   0.15545985 -0.25808471 -0.20473293     0.26470389</span></span>
+<span><span class="co">#&gt; previous_cost            -0.13035642 -0.08457179 -0.02750876     0.15712507</span></span>
+<span><span class="co">#&gt; previous_number_relapses -0.05339112  0.06117043  0.02831604     0.16882933</span></span>
 <span><span class="co">#&gt;                               negBin</span></span>
 <span><span class="co">#&gt; (Intercept)              -0.59232437</span></span>
 <span><span class="co">#&gt; age                      -0.01410487</span></span>
@@ -588,7 +588,7 @@ the estimated ATE for the subgroup of subjects constructed based on the
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.6233165 0.6624837 0.7904911 0.8451963 0.9372587 1.0640579</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.6191191 0.6630810 0.7910504 0.8432274 0.9372587 1.0640579</span></span></code></pre></div>
 <p>You are encouraged to summarize and visualize the outputs in
 whichever way that fits a particular situation outside the package’s
 functions. For example, it is possible to plot the densities of all CATE
@@ -726,37 +726,37 @@ the default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:56:54 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:52:56 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:56:58 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:53:00 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:57:05 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:53:07 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:57:12 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:53:13 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:57:19 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:53:20 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 32.96 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 32.81 secs</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
@@ -782,19 +782,19 @@ scores depends on both <code>higher.y</code> and outcome type.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5 0.5915071 0.6428854 0.5744973 0.6406698 0.5924975</span></span>
-<span><span class="co">#&gt; prop0.6 0.6722855 0.7114461 0.6591966 0.6871502 0.7186517</span></span>
-<span><span class="co">#&gt; prop0.7 0.7371734 0.8399117 0.7806273 0.7779180 0.7539283</span></span>
-<span><span class="co">#&gt; prop0.8 0.8034239 0.9082507 0.8218952 0.8269917 0.8117300</span></span>
-<span><span class="co">#&gt; prop0.9 0.9027108 1.0257463 0.9595834 0.9049020 0.9452626</span></span>
+<span><span class="co">#&gt; prop0.5 0.5896053 0.6428854 0.5744973 0.6406698 0.5924975</span></span>
+<span><span class="co">#&gt; prop0.6 0.6744447 0.7114461 0.6589297 0.6930484 0.7186517</span></span>
+<span><span class="co">#&gt; prop0.7 0.7383527 0.8360698 0.7806273 0.7779180 0.7539283</span></span>
+<span><span class="co">#&gt; prop0.8 0.8034239 0.9092085 0.8208183 0.8263584 0.8117300</span></span>
+<span><span class="co">#&gt; prop0.9 0.9041969 1.0257463 0.9595834 0.9049020 0.9452626</span></span>
 <span><span class="co">#&gt; prop1   1.0599740 1.0520675 1.0577453 1.0641114 1.0677619</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.5 0.7448829 0.6271739 0.8552290 0.5565145 0.5514821</span></span>
-<span><span class="co">#&gt; prop0.6 0.7404875 0.7224230 0.8308576 0.5906053 0.6909427</span></span>
-<span><span class="co">#&gt; prop0.7 0.9166009 0.7876447 0.8468713 0.8076085 0.7944857</span></span>
-<span><span class="co">#&gt; prop0.8 1.1280003 0.8535919 0.9563156 0.9041068 0.8734434</span></span>
-<span><span class="co">#&gt; prop0.9 1.1300157 0.8417894 0.9364762 0.9264986 0.9791587</span></span>
+<span><span class="co">#&gt; prop0.6 0.7325445 0.7194496 0.8308576 0.5906053 0.6909427</span></span>
+<span><span class="co">#&gt; prop0.7 0.9166009 0.7932235 0.8468713 0.8076085 0.7944857</span></span>
+<span><span class="co">#&gt; prop0.8 1.1280003 0.8535919 0.9563156 0.9041068 0.8696296</span></span>
+<span><span class="co">#&gt; prop0.9 1.1300157 0.8374393 0.9452552 0.9264986 0.9791587</span></span>
 <span><span class="co">#&gt; prop1   1.0812603 1.0978549 1.0531927 1.0726353 1.0689638</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations, labeled from 1 to <code>cv.n</code>, and rows corresponding
@@ -807,7 +807,7 @@ regression. The rows in the output are labeled to reflect the
 user-specified proportions used to build the subgroups.</p>
 <p>For example, in the training set and in the first CV iterations
 (first column labeled “cv1”), the subgroup defined with the 50% lowest
-CATE scores (first row labeled “prop0.5”) has an estimated RR of 0.592.
+CATE scores (first row labeled “prop0.5”) has an estimated RR of 0.59.
 In contrast, the subgroup defined with all patients (last row labeled
 “prop1”) has an estimated RR of 1.06.
 <!-- This suggests that the CATE score estimated with contrast regression identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RR compared to all patients. However, the same relationship between estimated RRs is not observed in the training set. This will be further visualized with valiation curves in the next section. 
@@ -825,11 +825,11 @@ depends on both <code>higher.y</code> and outcome type.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
-<span><span class="co">#&gt; prop0.5 1.616081 1.556901 1.657101 1.542445 1.623386</span></span>
-<span><span class="co">#&gt; prop0.4 1.715570 1.575580 1.727447 1.615714 1.594635</span></span>
-<span><span class="co">#&gt; prop0.3 1.865026 1.529785 1.629855 1.648721 1.737306</span></span>
-<span><span class="co">#&gt; prop0.2 1.919854 1.572316 1.963560 1.845068 2.122016</span></span>
-<span><span class="co">#&gt; prop0.1 2.093288 1.254235 1.522567 2.118723 2.074404</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.5 1.619590 1.556901 1.657101 1.542445 1.623386</span></span>
+<span><span class="co">#&gt; prop0.4 1.710009 1.575580 1.727388 1.608509 1.594635</span></span>
+<span><span class="co">#&gt; prop0.3 1.850595 1.542156 1.629855 1.648721 1.737306</span></span>
+<span><span class="co">#&gt; prop0.2 1.919854 1.573453 1.961972 1.853781 2.122016</span></span>
+<span><span class="co">#&gt; prop0.1 2.077797 1.254235 1.522567 2.118723 2.074404</span></span></code></pre></div>
 <p>The outputs are also matrices with columns corresponding to the CV
 iterations and rows corresponding to nested subgroups.</p>
 <p>The output for the low responders brings additional information to
@@ -840,7 +840,7 @@ responders defined as patients with the 60% lowest (highest if
 responders defined as patients with the 40% highest (lowest if
 <code>higher.y</code> = TRUE) estimated CATE scores, labeled as
 “prop0.4”. In the training set and in the first CV iterations, the
-estimated RR is 0.672 in the 60% high responders to drug 1 and 1.716 in
+estimated RR is 0.674 in the 60% high responders to drug 1 and 1.71 in
 the 40% low responders.</p>
 <p><strong>3. ATEs in mutually exclusive subgroups</strong></p>
 <p>This output stores the ATEs in mutually exclusive multi-category
@@ -850,15 +850,15 @@ subgroups of patients in the training
 iterations.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
-<span><span class="co">#&gt;                cv1      cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.33 1.8635694 1.487886 1.7151928 1.6904282 1.6561713</span></span>
-<span><span class="co">#&gt; prop0.67 1.0633686 1.502770 1.0504965 1.1763982 1.0960883</span></span>
-<span><span class="co">#&gt; prop1    0.4867885 0.470482 0.4762452 0.4816721 0.5361898</span></span>
+<span><span class="co">#&gt;                cv1      cv2       cv3       cv4      cv5</span></span>
+<span><span class="co">#&gt; prop0.33 1.8635694 1.497846 1.7138028 1.6908566 1.649720</span></span>
+<span><span class="co">#&gt; prop0.67 1.0699029 1.489476 1.0511935 1.1809557 1.111132</span></span>
+<span><span class="co">#&gt; prop1    0.4831034 0.470482 0.4764857 0.4816721 0.535003</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.group.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.33 1.4220392 1.9876476 1.3647971 1.6091552 1.9901237</span></span>
-<span><span class="co">#&gt; prop0.67 0.7328152 0.7720613 1.0883491 0.9727634 0.9083542</span></span>
-<span><span class="co">#&gt; prop1    0.8122051 0.6583514 0.6702625 0.5232875 0.6028634</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.33 1.4220392 2.0022062 1.3647971 1.5853124 1.9901237</span></span>
+<span><span class="co">#&gt; prop0.67 0.7328152 0.7720613 1.1046447 0.9853931 0.9878052</span></span>
+<span><span class="co">#&gt; prop1    0.8122051 0.6583514 0.6605675 0.5232875 0.5790997</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the mutually exclusive subgroups.
 The previous 2 outputs only focus on binary subgroups (high or low
@@ -870,8 +870,8 @@ scores when <code>higher.y</code> = FALSE (as in this example), or with
 the 33% highest, 33% middle and 33% lowest estimated CATE scores when
 <code>higher.y</code> = FALSE. Taking the first column as an example,
 the first CV iteration calculated 1.864 as the RR for the subgroup with
-the 33% lowest estimated CATE scores, 1.063 as the RR for subgroup with
-the 33% middle estimated CATE scores, and 0.487 as the RR for subgroup
+the 33% lowest estimated CATE scores, 1.07 as the RR for subgroup with
+the 33% middle estimated CATE scores, and 0.483 as the RR for subgroup
 with the 33% highest estimated CATE scores.</p>
 </div>
 <div class="section level3">
@@ -895,7 +895,7 @@ curves.</p>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2        cv3        cv4       cv5</span></span>
 <span><span class="co">#&gt; poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204</span></span>
-<span><span class="co">#&gt; contrastReg 0.07300565 0.1605130 0.06858134 0.14825053 0.1309099</span></span>
+<span><span class="co">#&gt; contrastReg 0.07311255 0.1602017 0.06894946 0.14832787 0.1310745</span></span>
 <span><span class="co">#&gt; negBin      0.14517127 0.2203584 0.08899030 0.09382214 0.1395976</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
@@ -908,7 +908,7 @@ across iterations:</p>
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt;     poisson contrastReg      negBin </span></span>
-<span><span class="co">#&gt;   0.1314988   0.1162521   0.1375879</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.1314988   0.1163332   0.1375879</span></span></code></pre></div>
 <p>In this example, negative binomial also offers the best overall
 performance because it has the highest average ABC, followed closely by
 Poisson.</p>

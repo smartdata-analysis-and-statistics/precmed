@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Additional examples</h1>
             <h3 data-toc-skip class="subtitle">Vignette 3 of 4</h3>
             
-            <h4 data-toc-skip class="date">October 04, 2024</h4>
+            <h4 data-toc-skip class="date">October 05, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Additional-examples.Rmd" class="external-link"><code>vignettes/Additional-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Additional-examples.Rmd</code></div>
@@ -246,15 +246,15 @@ reflected in the results.</p></li>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5  0.5915071 0.6428854 0.5744973 0.6406698 0.5924975</span></span>
-<span><span class="co">#&gt; prop0.55 0.6139446 0.6935608 0.6003164 0.6519496 0.6531537</span></span>
-<span><span class="co">#&gt; prop0.6  0.6722855 0.7114461 0.6591966 0.6871502 0.7186517</span></span>
-<span><span class="co">#&gt; prop0.65 0.6958967 0.7839030 0.7306405 0.7265152 0.7519433</span></span>
-<span><span class="co">#&gt; prop0.7  0.7371734 0.8399117 0.7806273 0.7779180 0.7539283</span></span>
-<span><span class="co">#&gt; prop0.75 0.7795305 0.8320732 0.8003894 0.8266780 0.7999920</span></span>
-<span><span class="co">#&gt; prop0.8  0.8034239 0.9082507 0.8218952 0.8269917 0.8117300</span></span>
-<span><span class="co">#&gt; prop0.85 0.8585330 0.9649914 0.8763313 0.8949641 0.8512447</span></span>
-<span><span class="co">#&gt; prop0.9  0.9027108 1.0257463 0.9595834 0.9049020 0.9452626</span></span>
+<span><span class="co">#&gt; prop0.5  0.5896053 0.6428854 0.5744973 0.6406698 0.5924975</span></span>
+<span><span class="co">#&gt; prop0.55 0.6123025 0.6913102 0.5994781 0.6506526 0.6531537</span></span>
+<span><span class="co">#&gt; prop0.6  0.6744447 0.7114461 0.6589297 0.6930484 0.7186517</span></span>
+<span><span class="co">#&gt; prop0.65 0.6958967 0.7769476 0.7306405 0.7265152 0.7519433</span></span>
+<span><span class="co">#&gt; prop0.7  0.7383527 0.8360698 0.7806273 0.7779180 0.7539283</span></span>
+<span><span class="co">#&gt; prop0.75 0.7769239 0.8320732 0.8020475 0.8271006 0.7999920</span></span>
+<span><span class="co">#&gt; prop0.8  0.8034239 0.9092085 0.8208183 0.8263584 0.8117300</span></span>
+<span><span class="co">#&gt; prop0.85 0.8585330 0.9649914 0.8771507 0.8949641 0.8512447</span></span>
+<span><span class="co">#&gt; prop0.9  0.9041969 1.0257463 0.9595834 0.9049020 0.9452626</span></span>
 <span><span class="co">#&gt; prop0.95 0.9607169 1.0002418 0.9968210 0.9784077 0.9816699</span></span>
 <span><span class="co">#&gt; prop1    1.0599740 1.0520675 1.0577453 1.0641114 1.0677619</span></span>
 <span><span class="co"># Dimension is now 11 rows (nested binary subgroups) by 5 columns (CV iterations)</span></span></code></pre></div>
@@ -276,10 +276,10 @@ details on ABC calculation in the <a href="Theoretical-details.html">Theoretical
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.25 1.8605588 1.7135347 1.8864599 1.6231411 1.8095445</span></span>
-<span><span class="co">#&gt; prop0.5  1.2881059 1.3353842 1.3960644 1.4225390 1.3873281</span></span>
-<span><span class="co">#&gt; prop0.75 0.8863431 1.0140060 0.8214955 1.0732422 0.8013989</span></span>
-<span><span class="co">#&gt; prop1    0.4352059 0.3988016 0.4113767 0.4230607 0.4559544</span></span>
+<span><span class="co">#&gt; prop0.25 1.8720359 1.7135347 1.8803024 1.6290449 1.8095445</span></span>
+<span><span class="co">#&gt; prop0.5  1.2812141 1.3353842 1.4042263 1.4192956 1.3873281</span></span>
+<span><span class="co">#&gt; prop0.75 0.8821662 1.0769622 0.8219097 1.0732422 0.8013989</span></span>
+<span><span class="co">#&gt; prop1    0.4352059 0.3641272 0.4109202 0.4230607 0.4559544</span></span>
 <span><span class="co"># Dimension is now 4 rows (multi-category mutually exclusive subgroups) by 5 columns (CV iterations)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">)</span></span></code></pre></div>
@@ -323,42 +323,42 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:53:41 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:49:41 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:53:44 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:49:44 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:53:50 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:49:50 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:53:57 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:49:56 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:54:03 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:50:03 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 29.8 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 30.56 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2          cv3          cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.01 0.5746485        NA 6.858623e+04 1.901224e+06        NA</span></span>
-<span><span class="co">#&gt; prop0.3  0.6944399 0.6252387 6.104046e-01 5.625166e-01 0.5828618</span></span>
-<span><span class="co">#&gt; prop0.75 1.1424118 0.8042944 8.929894e-01 7.984435e-01 0.8409132</span></span>
+<span><span class="co">#&gt; prop0.3  0.6944399 0.6252387 6.324404e-01 5.625166e-01 0.5828618</span></span>
+<span><span class="co">#&gt; prop0.75 1.1424118 0.8042944 9.012645e-01 7.984435e-01 0.8428192</span></span>
 <span><span class="co">#&gt; prop1    1.0812603 1.0978549 1.053193e+00 1.072635e+00 1.0689638</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv3</span><span class="op">)</span> </span></code></pre></div>
@@ -555,12 +555,12 @@ reflected in the results.</p>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.6  0.5286488 0.5344877 0.5325352 0.5246205 0.5338395</span></span>
 <span><span class="co">#&gt; prop0.65 0.5791944 0.5829187 0.6151744 0.5762170 0.5955160</span></span>
-<span><span class="co">#&gt; prop0.7  0.6168472 0.6682790 0.6440506 0.6333903 0.6438643</span></span>
+<span><span class="co">#&gt; prop0.7  0.6168472 0.6682790 0.6436875 0.6321281 0.6438643</span></span>
 <span><span class="co">#&gt; prop0.75 0.7017728 0.7330868 0.7038570 0.6943269 0.7105475</span></span>
-<span><span class="co">#&gt; prop0.8  0.7696228 0.8005505 0.7752939 0.7763984 0.7873444</span></span>
+<span><span class="co">#&gt; prop0.8  0.7704101 0.8005505 0.7752939 0.7763984 0.7873444</span></span>
 <span><span class="co">#&gt; prop0.85 0.8374886 0.8700290 0.8403268 0.8512221 0.8544261</span></span>
 <span><span class="co">#&gt; prop0.9  0.9110024 0.9351850 0.9030097 0.9108305 0.9137251</span></span>
-<span><span class="co">#&gt; prop0.95 0.9951218 1.0190440 0.9862585 0.9967722 0.9920313</span></span>
+<span><span class="co">#&gt; prop0.95 0.9961731 1.0190440 0.9862585 0.9967722 0.9920313</span></span>
 <span><span class="co">#&gt; prop1    1.0534514 1.1042633 1.0646558 1.0830122 1.0690691</span></span>
 <span><span class="co"># Dimension is 9 (nested binary subgroups) by 5 (CV iterations)</span></span></code></pre></div>
 <p>Because we have new <code>prop.cutoff</code> with 9 values as opposed
@@ -635,37 +635,37 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:55:36 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:51:36 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:55:40 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:51:41 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:55:45 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:51:45 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:55:49 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:51:49 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Oct  4 23:55:53 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:51:54 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 21.3 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 21.56 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>

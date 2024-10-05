@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for survival outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
-            <h4 data-toc-skip class="date">October 04, 2024</h4>
+            <h4 data-toc-skip class="date">October 05, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -406,7 +406,9 @@ outcome model that contains all variables and a PS model with
 <span>                        cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
 <span>                        ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>                        tau0 <span class="op">=</span> <span class="va">tau0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, :</span></span>
+<span><span class="co">#&gt; Loglik converged before variable 3 ; coefficient may be infinite.</span></span></code></pre></div>
 <p>When <code>verbose</code> = 1, the function outputs a progress bar in
 the console.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -414,14 +416,14 @@ the console.</p>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   estimate         SE     CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03535531 0.0008601689 0.1394504 0.04722316</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.21035118 2.3010435600 3.1256050 0.00000000</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03536058 0.0008498315 0.1394608 0.04725614</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.19936217 2.3225816260 3.1040670 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.379819 160.3567 185.3651      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.898167 179.1202 214.0003      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.726500 159.6772 186.0446      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.994241 178.9319 214.1886      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -599,7 +601,7 @@ we show the CATE scores estimated with contrast regression for the first
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  5.3273340  1.1661594  3.4869179  4.0157912 -0.8475816  2.4217492</span></span></code></pre></div>
+<span><span class="co">#&gt; [1]  5.3264861  1.1651265  3.4845913  4.0150879 -0.8484891  2.4213491</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <code>coefficients</code> contains the estimated coefficients of the
@@ -613,11 +615,11 @@ predicts the score) so they do not have coefficient results here.</li>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span><span class="co">#&gt;                          contrastReg</span></span>
-<span><span class="co">#&gt; (Intercept)                0.2526763</span></span>
-<span><span class="co">#&gt; age                       -0.1912056</span></span>
-<span><span class="co">#&gt; female                     0.1359512</span></span>
-<span><span class="co">#&gt; previous_cost              0.5629853</span></span>
-<span><span class="co">#&gt; previous_number_relapses   0.3703522</span></span></code></pre></div>
+<span><span class="co">#&gt; (Intercept)                0.2528396</span></span>
+<span><span class="co">#&gt; age                       -0.1911735</span></span>
+<span><span class="co">#&gt; female                     0.1359737</span></span>
+<span><span class="co">#&gt; previous_cost              0.5634907</span></span>
+<span><span class="co">#&gt; previous_number_relapses   0.3693452</span></span></code></pre></div>
 <p>We can define the estimated CATE scores for contrast regression like
 shown below. The user can use this information to study the influence of
 each covariate.
@@ -643,7 +645,7 @@ contrast regression is 0.41.</li>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.4105682 0.5114925 0.6269751 0.7800895 0.9145661 1.0726748</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.4098373 0.5114925 0.6269751 0.7801699 0.9145661 1.0726748</span></span></code></pre></div>
 <p>You are encouraged to summarize and visualize the outputs in
 whichever way that fits their particular situation outside the package’s
 functions. For example, it is possible to plot the densities of all CATE
@@ -805,35 +807,35 @@ default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Oct  5 00:00:49 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:56:52 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Oct  5 00:01:04 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:57:07 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Oct  5 00:01:19 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:57:22 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Oct  5 00:01:33 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:57:37 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Oct  5 00:01:48 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 08:57:52 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
 <span><span class="co">#&gt; Total runtime : 1.24 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
@@ -1026,7 +1028,7 @@ effect heterogeneity.</p>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; randomForest 0.1533033 0.1450798 0.1392829 0.1458115 0.1532764</span></span>
-<span><span class="co">#&gt; contrastReg  0.1416306 0.1304287 0.1366230 0.1304199 0.1519283</span></span></code></pre></div>
+<span><span class="co">#&gt; contrastReg  0.1415529 0.1304287 0.1366294 0.1303885 0.1519330</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
 <code>score.method</code>. For example, random forest in CV iteration 1
@@ -1038,7 +1040,7 @@ iterations:</p>
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
-<span><span class="co">#&gt;    0.1473508    0.1382061</span></span></code></pre></div>
+<span><span class="co">#&gt;    0.1473508    0.1381865</span></span></code></pre></div>
 <p>In this example, random forest also offers the best overall
 performance because it has the highest average ABC, followed closely by
 contrast regression.</p>
