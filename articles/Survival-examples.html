@@ -65,7 +65,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Examples for survival outcome</h1>
             <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
-            <h4 data-toc-skip class="date">September 29, 2024</h4>
+            <h4 data-toc-skip class="date">October 04, 2024</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -414,14 +414,14 @@ the console.</p>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   estimate         SE     CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03624347 -0.000880591 0.1411912 0.05290844</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.20933874  2.303027905 3.1236207 0.00000000</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03535531 0.0008601689 0.1394504 0.04722316</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.21035118 2.3010435600 3.1256050 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.973506 159.1931 186.5287      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 9.329485 178.2748 214.8457      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.379819 160.3567 185.3651      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.898167 179.1202 214.0003      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -805,37 +805,37 @@ default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sun Sep 29 14:05:14 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 00:00:49 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sun Sep 29 14:05:30 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 00:01:04 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sun Sep 29 14:05:45 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 00:01:19 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sun Sep 29 14:05:59 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 00:01:33 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sun Sep 29 14:06:14 2024 </span></span>
+<span><span class="co">#&gt;    Sat Oct  5 00:01:48 2024 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 1.25 mins</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 1.24 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
