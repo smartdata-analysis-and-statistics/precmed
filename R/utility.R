@@ -513,3 +513,30 @@ check_boolean <- function(x, var_name = "value") {
     stop(paste(var_name, "must be a boolean (TRUE or FALSE)."))
   }
 }
+
+#' Generate K-fold Indices for Cross-Validation
+#'
+#' This function generates indices for K-fold cross-validation based on the total sample size `N` and the number of folds `Kfold`.
+#' If `reverse = TRUE`, the remainder indices will be assigned in reverse order.
+#'
+#' @param N Integer. Total sample size (number of observations).
+#' @param Kfold Integer. The number of folds to split the data into.
+#' @param reverse Logical. Whether to reverse the remainder indices when `N` is not divisible by `Kfold`. Defaults to `FALSE`.
+#'
+#' @author Thomas Debray
+#' @return A vector of length `N` containing the fold assignments (from 1 to `Kfold`).
+generate_kfold_indices <- function(N, Kfold, reverse = FALSE) {
+  base_index <- rep(seq(Kfold), floor(N / Kfold))  # Base repeated sequence
+  remainder <- N %% Kfold                        # Calculate the remainder
+
+  if (remainder > 0) {
+    additional_index <- if (reverse) {
+      rev(seq(remainder))                         # Reverse the remainder for index0
+    } else {
+      seq(remainder)                              # Normal order for index1
+    }
+    base_index <- c(base_index, additional_index)
+  }
+
+  return(base_index)
+}

@@ -503,27 +503,25 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
 
-  N1 <- sum(trt)
-  N0 <- sum(1 - trt)
-  N <- N1 + N0
+  # Calculate the total number of patients who received the treatment (N1)
+  # and the total number of patients who did not receive the treatment (N0)
+  N1 <- sum(trt)               # N1: number of treated patients (trt = 1)
+  N0 <- length(trt) - N1        # N0: number of untreated patients (trt = 0)
+
+  # Total number of patients
+  N <- length(trt)              # N is simply the total number of patients
+
+  # Calculate p.aug: the number of covariates in x.cate plus 1 for the intercept
   p.aug <- ncol(x.cate) + 1
 
-  #datatot <- data.frame(y, x.cate, time)
-  #colnames(datatot) <- c("y", colnames(x.cate), "time")
+  datatot <- data.frame("y" = y, x.cate, "time" = time)
+  datatot.init <- data.frame("y" = y, x.init)
 
-  datatot <- data.frame(y, x.cate)
-  colnames(datatot) <- c("y", colnames(x.cate))
+  ######### cross-fitting
 
-  datatot.init <- data.frame(y, x.init)
-  colnames(datatot.init) <- c("y", colnames(x.init))
-
-  ######### cross-fitting  ---------------------------------------------------------------
-
-  index1 <- rep(1:Kfold, floor(N1 / Kfold))
-  if (N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
-
-  index0 <- rep(1:Kfold, floor(N0 / Kfold))
-  if (N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
+  # Generate indices for N1 (normal order) and N0 (reverse order)
+  index1 <- generate_kfold_indices(N1, Kfold, reverse = FALSE)
+  index0 <- generate_kfold_indices(N0, Kfold, reverse = TRUE)
 
   delta.twoReg.mat <- delta.contrastReg.mat <- matrix(NA, B, p.aug)
   sigma.contrastReg.mat <- matrix(0, p.aug, p.aug)

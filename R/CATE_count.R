@@ -196,10 +196,12 @@ catefitcount <- function(data,
 
   #### CHECK ARGUMENTS ####
   arg.checks(
-    fun = "catefit", response = "count", data = data, higher.y = higher.y, score.method = score.method, prop.cutoff = prop.cutoff,
+    fun = "catefit", response = "count", data = data, higher.y = higher.y,
+    score.method = score.method, prop.cutoff = prop.cutoff,
     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
     initial.predictor.method = initial.predictor.method,
-    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
+    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, B = B,
+    Kfold = Kfold, plot.gbmperf = plot.gbmperf,
     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune
   )
 
@@ -508,21 +510,25 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
 
-  N1 <- sum(trt)
-  N0 <- sum(1 - trt)
-  N <- N1 + N0
+  # Calculate the total number of patients who received the treatment (N1)
+  # and the total number of patients who did not receive the treatment (N0)
+  N1 <- sum(trt)               # N1: number of treated patients (trt = 1)
+  N0 <- length(trt) - N1        # N0: number of untreated patients (trt = 0)
+
+  # Total number of patients
+  N <- length(trt)              # N is simply the total number of patients
+
+  # Calculate p.aug: the number of covariates in x.cate plus 1 for the intercept
   p.aug <- ncol(x.cate) + 1
 
-  datatot <- data.frame(y, x.cate, time)
-  colnames(datatot) <- c("y", colnames(x.cate), "time")
+  datatot <- data.frame("y" = y, x.cate, "time" = time)
 
-  ######### cross-fitting  ---------------------------------------------------------------
+  ######### cross-fitting
 
-  index1 <- rep(1:Kfold, floor(N1 / Kfold))
-  if (N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
+  # Generate indices for N1 (normal order) and N0 (reverse order)
+  index1 <- generate_kfold_indices(N1, Kfold, reverse = FALSE)
+  index0 <- generate_kfold_indices(N0, Kfold, reverse = TRUE)
 
-  index0 <- rep(1:Kfold, floor(N0 / Kfold))
-  if (N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
 
   delta.twoReg.mat <- delta.contrastReg.mat <- matrix(NA, B, p.aug)
   sigma.contrastReg.mat <- matrix(0, p.aug, p.aug)
@@ -553,8 +559,12 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
         if (initial.predictor.method == "boosting") {
           # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
           cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
-          fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
-                                 interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
+          fit1.boosting <- gbm(y ~ . - time + offset(time),
+                               data = data1,
+                               distribution = "poisson",
+                               interaction.depth = tree.depth,
+                               n.trees = n.trees.boosting,
+                               cv.folds = cate.cvfold, ...)
           best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
 
 
@@ -772,3 +782,4 @@ scorecount <- function(fit, x.cate, time,
 
   return(result)
 }
+

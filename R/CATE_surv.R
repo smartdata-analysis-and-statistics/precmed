@@ -421,22 +421,37 @@ catefitsurv <- function(data,
 #'
 
 onearmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv, ps, f.predictor) {
+
+  # Normalize the survival weights
   weightc <- weightsurv / mean(weightsurv)
 
+  # Update ynew and f.predictor by subtracting tau0
   ynew <- tau0 - ynew
   f.predictor <- tau0 - f.predictor
-  x <- as.matrix(cbind(1, log(f.predictor), x.cate))
 
+  # Construct the design matrix including the intercept and log(f.predictor)
+  x <- cbind(1, log(f.predictor), x.cate)
+
+  # Fit the Poisson model with weighted data, handle warnings, and return coefficients
   withCallingHandlers({
-    fit <- glm(ynew ~ log(f.predictor) + x.cate, family = "poisson", weights = weightc * trt / ps)
-    beta <- fit$coef
-    yhat <- exp(as.matrix(x[, is.na(beta) == FALSE, drop = FALSE]) %*% beta[is.na(beta) == FALSE])
-    fit2 <- glm(yhat ~ x.cate, family = "poisson")
+    fit <- glm(ynew ~ log(f.predictor) + x.cate,
+               family = "poisson",
+               weights = weightc * trt / ps)
+
+    # Extract non-NA coefficients and calculate predictions
+    beta <- fit$coef[!is.na(fit$coef)]
+    yhat <- exp(as.matrix(x[, !is.na(fit$coef), drop = FALSE]) %*% beta)
+
+    # Fit the second model on the predicted values
+    fit2 <- glm(yhat ~ x.cate, family = poisson())
   },
-  warning = function(w) { # don't change the = to <- in withCallingHandlers
+  warning = function(w) {
+    # Suppress the specific "non-integer x" warning in glm() for Poisson models
     if (grepl("non-integer", conditionMessage(w)))
-      invokeRestart("muffleWarning") # suppress warnings in glm(): "In dpois(y, mu, log = TRUE) : non-integer x = 0.557886."
+      invokeRestart("muffleWarning")
   })
+
+  # Return the coefficients of the second model
   return(fit2$coef)
 }
 
@@ -618,9 +633,15 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
   result <- vector("list", length(score.method))
   names(result) <- c(paste0("result.", score.method))
 
-  N1 <- sum(trt)
-  N0 <- sum(1 - trt)
-  N <- N1 + N0
+  # Calculate the total number of patients who received the treatment (N1)
+  # and the total number of patients who did not receive the treatment (N0)
+  N1 <- sum(trt)               # N1: number of treated patients (trt = 1)
+  N0 <- length(trt) - N1        # N0: number of untreated patients (trt = 0)
+
+  # Total number of patients
+  N <- length(trt)              # N is simply the total number of patients
+
+  # Calculate p.aug: the number of covariates in x.cate plus 1 for the intercept
   p.aug <- ncol(x.cate) + 1
 
   ynew <- pmin(y, tau0)
@@ -631,18 +652,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
   weightc <- dnew / surv.new
   weightc <- weightc / mean(weightc)
 
-  datatotrf <- data.frame(y = ynew, d = dnew, x = x.cate)
-  colnames(datatotrf) <- c("y", "d", colnames(x.cate))
-  datatot <- data.frame(y = ynew / tau0, x = x.cate)
-  colnames(datatot) <- c("y", colnames(x.cate))
+  datatotrf <- data.frame("y" = ynew, "d" = dnew, x.cate)
+  datatot <- data.frame("y" = ynew / tau0, x.cate)
 
-  # Cross fitting
-
-  index1 <- rep(1:Kfold, floor(N1 / Kfold))
-  if (N1 > Kfold * floor(N1 / Kfold)) index1 <- c(index1, 1:(N1 - Kfold * floor(N1 / Kfold)))
-
-  index0 <- rep(1:Kfold, floor(N0 / Kfold))
-  if (N0 > Kfold * floor(N0 / Kfold)) index0 <- c(index0, Kfold + 1 - 1:(N0 - Kfold * floor(N0 / Kfold)))
+  # Generate indices for N1 (normal order) and N0 (reverse order)
+  index1 <- generate_kfold_indices(N1, Kfold, reverse = FALSE)
+  index0 <- generate_kfold_indices(N0, Kfold, reverse = TRUE)
 
   best.iter <- 0
 
