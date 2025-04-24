@@ -2,6 +2,7 @@
 title: "Examples for survival outcome"
 subtitle: "Vignette 2 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+bibliography: references.bib
 output: 
   html_document:
     fig_caption: yes
@@ -128,9 +129,9 @@ The mandatory arguments for `atefit()` are:
         
     *   `randomForest` fits a random forest model by treatment group.
 
-    *   `twoReg` implements the doubly robust two regressions estimator in @yadlowsky2020estimation.
+    *   `twoReg` implements the doubly robust two regressions estimator in [@yadlowsky2020estimation].
 
-    *   `contrastReg` implements the doubly robust contrast regression estimator from @yadlowsky2020estimation.
+    *   `contrastReg` implements the doubly robust contrast regression estimator from [@yadlowsky2020estimation].
     
 
 * The argument `cate.model` specifies the CATE model as a formula, with the survival object from the `survival` package, `Surv(y, d)`, supplied on the left-hand side and the explanatory covariates supplied on the right-hand side. In the example below, we chose to specify to CATE as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in `cate.model` since this is an outcome model.
@@ -207,9 +208,9 @@ The mandatory arguments in `catefit()` are:
         
     *   `randomForest` fits a random forest model by treatment group.
 
-    *   `twoReg` implements the doubly robust two regressions estimator in @yadlowsky2020estimation.
+    *   `twoReg` implements the doubly robust two regressions estimator in [@yadlowsky2020estimation].
 
-    *   `contrastReg` implements the doubly robust contrast regression estimator from @yadlowsky2020estimation.
+    *   `contrastReg` implements the doubly robust contrast regression estimator from [@yadlowsky2020estimation].
 
 * `cate.model`: A formula describing the outcome model to be fitted. The outcome must appear on the left-hand side. In the example, we choose to specify to outcome model as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in `cate.model` since this is an outcome model.
 
@@ -491,5 +492,4 @@ For this toy example, we can see why random forest and contrast regression metho
 [4. Theoretical details](Theoretical-details.html)    
  
 
-
-
+# References  

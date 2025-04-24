@@ -2,6 +2,7 @@
 title: "Examples for count outcome"
 subtitle: "Vignette 1 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+bibliography: references.bib
 output: 
   html_document:
     fig_caption: yes
@@ -171,9 +172,9 @@ Now we have calculated the ATE we know the effect of both treatments on average,
   
   * `boosting` uses gradient boosted regression models (GBM) separately by treatment group.
   
-  * `twoReg` implements the doubly robust two regressions estimator in @yadlowsky2020estimation.
+  * `twoReg` implements the doubly robust two regressions estimator in [@yadlowsky2020estimation].
   
-  * `contrastReg` implements the doubly robust contrast regression estimator from @yadlowsky2020estimation.
+  * `contrastReg` implements the doubly robust contrast regression estimator from [@yadlowsky2020estimation].
   
   * `negBin` fits negative binomial regressions by treatment group. This method is recommended if there is overdispersion in the data.
 
@@ -425,4 +426,4 @@ For this toy example, we can see why the two regressions method has the highest 
 [4. Theoretical details](Theoretical-details.html)    
 
 
-
+# References  
