@@ -75,17 +75,20 @@ $$\hat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\bold
 2. For each fold $k=1,\dots,K$, and separately by treatment group $r \in \{0,1\}$:
 
     2.1 Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset with the
-    Poisson-based gradient boosting regression method based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome.
+    Poisson-based gradient boosting regression method (`initial.predictor.method = "gbm"`) based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome. Other methods can be used to generate an initial prediction (see `initial.predictor.method` argument).
     
     2.2 Estimate the PS based on $D_{-k}$. Denote the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$ and estimate the weights $\hat W(r)=r\frac{R}{\hat \pi_{-k}(\boldsymbol{x})}+(1-r)\frac{(1-R)}{1-\hat \pi_{-k}(\boldsymbol{x})}$ with $R$ denoting the treatment received.
     
     2.3 Solve the following weighted estimating equation by fitting a Poisson regression with $Y$ as the response, $\text{log}(\hat Y^{(r)}(\boldsymbol{x},1))$ and $x$ as the covariates, $\text{log}(T)$ as the offset, and $\hat W(r)$ as weight:
     
-    $$S(\alpha_{rk}, \boldsymbol{\gamma_{rk}})=\sum_{i \in D_{-k}} \hat W(r) \pmatrix{\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)\\\boldsymbol{\tilde x}}\left(Y - \text{exp}\left(\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\gamma_{rk}^T\boldsymbol{\tilde x}}\right)\times T\right)=0$$
+  $$ S(\alpha_{rk}, \boldsymbol{\gamma_{rk}}) = \sum_{i \in D_{-k}} \hat W(r) 
+      \pmatrix{\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)\\ \boldsymbol{\tilde x}} 
+      \left(Y - \text{exp}\left(\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right) + \boldsymbol{\gamma_{rk}^T \boldsymbol{\tilde x}} \right) \times T \right) = 0 $$
     
     where $i$ denotes individual observations. Denote the roots by $(\hat \alpha_{rk}, \boldsymbol{\hat\gamma_{rk}})$.
     
 3. Solve the following doubly robust estimating equation by fitting a Poisson regression with $\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)$ as the response, $\boldsymbol{x}$ as the covariates, and no offset or weight:
+    
 $$S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{-k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0$$
 Denote the estimator as $\boldsymbol{\hat \beta_r}$. 
 
@@ -101,7 +104,7 @@ $$\hat{CATE}_{tworeg}(\boldsymbol{x})=(\boldsymbol{\hat \beta_1} - \boldsymbol{\
 2. For each fold $k=1,\dots,K$, and separately by treatment group $r \in \{0,1\}$:
 
     2.1 Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset with the
-    Poisson-based gradient boosting regression method based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome.
+    Poisson-based gradient boosting regression method  (`initial.predictor.method = "gbm"`) based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome. Other methods can be used to generate an initial prediction (see `initial.predictor.method` argument).
     
     2.2 Estimate the PS based on $D_{-k}$. Denote the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$.
     
@@ -326,7 +329,7 @@ ABC calculation examples in relation with `higher.y` argument in `catecv()` and 
 
 
 
-# Other `precmed` vignettes in this serie  
+# Other `precmed` vignettes in this series  
   
 [1. Examples for count outcome](Count-examples.html)  
 [2. Examples for survival outcome](Survival-examples.html)  

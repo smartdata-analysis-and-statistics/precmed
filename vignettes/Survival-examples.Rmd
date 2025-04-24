@@ -483,7 +483,7 @@ For this toy example, we can see why random forest and contrast regression metho
 <br><br>
 
 
-# Other `precmed` vignettes in this serie  
+# Other `precmed` vignettes in this series  
   
 [1. Examples for count outcome](Count-examples.html)  
 [2. Examples for survival outcome](Survival-examples.html)  
