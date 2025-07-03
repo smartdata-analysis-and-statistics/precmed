@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   Additional-examples: Additional-examples.html
@@ -7,7 +7,7 @@ articles:
   precmed: precmed.html
   Survival-examples: Survival-examples.html
   Theoretical-details: Theoretical-details.html
-last_built: 2024-10-06T12:46Z
+last_built: 2025-07-03T13:45Z
 urls:
   reference: https://smartdata-analysis-and-statistics.github.io/precmed/reference
   article: https://smartdata-analysis-and-statistics.github.io/precmed/articles

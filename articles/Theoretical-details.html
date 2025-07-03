@@ -6,16 +6,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Theoretical details • precmed</title>
-<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
-<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Theoretical details">
 </head>
 <body>
@@ -65,7 +64,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Theoretical details</h1>
             <h3 data-toc-skip class="subtitle">Vignette 4 of 4</h3>
             
-            <h4 data-toc-skip class="date">October 06, 2024</h4>
+            <h4 data-toc-skip class="date">July 03, 2025</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Theoretical-details.Rmd" class="external-link"><code>vignettes/Theoretical-details.Rmd</code></a></small>
       <div class="d-none name"><code>Theoretical-details.Rmd</code></div>
@@ -196,13 +195,15 @@ and separately by treatment group
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
 <p>2.1 Estimate the conditional mean outcome given baseline covariates
 and log-transformed exposure time as the offset with the Poisson-based
-gradient boosting regression method based on observations without the
-kth fold,
+gradient boosting regression method
+(<code>initial.predictor.method = "gbm"</code>) based on observations
+without the kth fold,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
 and denote the prediction as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo>−</mo><mi>k</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x},t)</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential
-outcome.</p>
+This is the initial nonparametric prediction of the potential outcome.
+Other methods can be used to generate an initial prediction (see
+<code>initial.predictor.method</code> argument).</p>
 <p>2.2 Estimate the PS based on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
 Denote the estimated PS as
@@ -224,27 +225,28 @@ as the covariates,
 as the offset, and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>W</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat W(r)</annotation></semantics></math>
 as weight:</p>
-<p><span class="math display">$$S(\alpha_{rk},
-\boldsymbol{\gamma_{rk}})=\sum_{i \in D_{-k}} \hat W(r)
-\pmatrix{\text{log}\left(\hat
-Y^{(r)}(\boldsymbol{x},1)\right)\\\boldsymbol{\tilde x}}\left(Y -
-\text{exp}\left(\alpha_{rk}\text{log}\left(\hat
-Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\gamma_{rk}^T\boldsymbol{\tilde
-x}}\right)\times T\right)=0$$</span></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-denotes individual observations. Denote the roots by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mo>,</mo><msub><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\hat \alpha_{rk}, \boldsymbol{\hat\gamma_{rk}})</annotation></semantics></math>.</p>
 </li>
-<li><p>Solve the following doubly robust estimating equation by fitting
-a Poisson regression with
+</ol>
+<p><span class="math display">$$ S(\alpha_{rk},
+\boldsymbol{\gamma_{rk}}) = \sum_{i \in D_{-k}} \hat W(r)
+      \pmatrix{\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)\\
+\boldsymbol{\tilde x}}
+      \left(Y - \text{exp}\left(\alpha_{rk}\text{log}\left(\hat
+Y^{(r)}(\boldsymbol{x},1)\right) + \boldsymbol{\gamma_{rk}^T
+\boldsymbol{\tilde x}} \right) \times T \right) = 0 $$</span></p>
+<pre><code>where $i$ denotes individual observations. Denote the roots by $(\hat \alpha_{rk}, \boldsymbol{\hat\gamma_{rk}})$.</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Solve the following doubly robust estimating equation by fitting a
+Poisson regression with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)</annotation></semantics></math>
 as the response,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
-as the covariates, and no offset or weight:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mi>𝐫</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub></mrow></munder><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msubsup><mi>𝛃</mi><mi>𝐫</mi><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{-k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0</annotation></semantics></math>
+as the covariates, and no offset or weight:</li>
+</ol>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝛃</mi><mi>𝐫</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub></mrow></munder><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mrow><msubsup><mi>𝛃</mi><mi>𝐫</mi><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{-k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0</annotation></semantics></math>
 Denote the estimator as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>.</p></li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>.</p>
+<ol start="4" style="list-style-type: decimal">
 <li><p>Repeat steps 1-3 with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
 bootstrap samples and denote the estimator
@@ -276,13 +278,15 @@ and separately by treatment group
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
 <p>2.1 Estimate the conditional mean outcome given baseline covariates
 and log-transformed exposure time as the offset with the Poisson-based
-gradient boosting regression method based on observations without the
-kth fold,
+gradient boosting regression method
+(<code>initial.predictor.method = "gbm"</code>) based on observations
+without the kth fold,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
 and denote the prediction as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo>−</mo><mi>k</mi></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x},t)</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential
-outcome.</p>
+This is the initial nonparametric prediction of the potential outcome.
+Other methods can be used to generate an initial prediction (see
+<code>initial.predictor.method</code> argument).</p>
 <p>2.2 Estimate the PS based on
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mo>−</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
 Denote the estimated PS as
@@ -720,7 +724,7 @@ ATE.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="other-precmed-vignettes-in-this-serie">Other <code>precmed</code> vignettes in this serie<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-serie"></a>
+<h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
 <p><a href="Count-examples.html">1. Examples for count outcome</a><br><a href="Survival-examples.html">2. Examples for survival
 outcome</a><br><a href="Additional-examples.html">3. Additional examples</a><br><a href="Theoretical-details.html">4. Theoretical details</a></p>
@@ -754,7 +758,7 @@ Association</em> 108 (502): 527–39.
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
