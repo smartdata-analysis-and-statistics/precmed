@@ -1,6 +1,9 @@
 url: https://smartdata-analysis-and-statistics.github.io/precmed/
 template:
   bootstrap: 5
+  includes:
+    in_header: |
+      <script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script>
 bootswatch: lumen
 navbar:
   title: precmed

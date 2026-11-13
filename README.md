@@ -27,11 +27,60 @@ randomized data from a clinical trial (Zhao et al. 2013) or using
 real-world data (RWD) from a non-randomized study (Yadlowsky et al.
 2020).
 
+## Free learning resources
+
+### An Introduction to Precision Medicine
+
+Learn the foundations of precision medicine through recorded webinars,
+exercises, and readings.
+
+<div class="thinkific-product-card"
+data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
+data-btn-bg-color="#005a80" data-card-type="card"
+data-link-type="landing_page" data-product="3112887"
+data-embed-version="0.0.2" data-card-txt-color="#243746"
+data-card-bg-color="#ffffff"
+data-store-url="https://sdas.thinkific.com/embeds/products/show">
+
+<div class="iframe-container">
+
+</div>
+
+</div>
+
+[Start learning for
+free](https://sdas.thinkific.com/courses/precmedintro)
+
+### Free Companion Course to the Real-World Data Handbook
+
+Explore background materials, example R code, and curated references
+that complement the book.
+
+<div class="thinkific-product-card"
+data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
+data-btn-bg-color="#005a80" data-card-type="card"
+data-link-type="landing_page" data-product="3591896"
+data-embed-version="0.0.2" data-card-txt-color="#243746"
+data-card-bg-color="#ffffff"
+data-store-url="https://sdas.thinkific.com/embeds/products/show">
+
+<div class="iframe-container">
+
+</div>
+
+</div>
+
+[View the free companion
+course](https://sdas.thinkific.com/courses/rwd-book)
+
+### Further reading
+
 For guidance on visualizing and interpreting individualized treatment
-rules, see Chapter 20, “Visualization and interpretation of
-individualized treatment rule results”, by Jiang et al. in *Comparative
-Effectiveness and Personalized Medicine Research Using Real-World Data*
-(Jiang et al. 2026). The [companion
+rules, see Chapter 20, [“Visualization and interpretation of
+individualized treatment rule
+results”](https://doi.org/10.1201/9781003300809-20), by Jiang et al. in
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data* (Jiang et al. 2026). The [companion
 tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
 includes examples using **precmed**.
 
@@ -137,8 +186,7 @@ Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
 Individualized Treatment Rule Results.” In *Comparative Effectiveness
 and Personalized Medicine Research Using Real-World Data*, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36.
-Chapman & Hall/CRC.
-<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
 
 </div>
 

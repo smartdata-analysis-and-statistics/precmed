@@ -143,7 +143,7 @@
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 #' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
 #' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
-#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#' \doi{10.1201/9781003300809-20}
 #'
 #' @seealso \code{\link{catefit}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
@@ -2326,7 +2326,7 @@ abc.default <- function(x, ...){
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 #' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
 #' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
-#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#' \doi{10.1201/9781003300809-20}
 #'
 #' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
 #' \code{"precmed"} objects.
@@ -2450,7 +2450,7 @@ abc.precmed <- function(x, ...) {
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 #' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
 #' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
-#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#' \doi{10.1201/9781003300809-20}
 #'
 #' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
@@ -2816,7 +2816,7 @@ plot.precmed <- function(x,
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 #' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
 #' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
-#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#' \doi{10.1201/9781003300809-20}
 #'
 #' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'
