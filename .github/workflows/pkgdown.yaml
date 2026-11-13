@@ -16,12 +16,13 @@ permissions:
 
 jobs:
   pkgdown:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     # Only restrict concurrency for non-PR jobs
     concurrency:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+      cancel-in-progress: true
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:

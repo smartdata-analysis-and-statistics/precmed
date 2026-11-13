@@ -1,14 +1,20 @@
 url: https://smartdata-analysis-and-statistics.github.io/precmed/
 template:
   bootstrap: 5
+  bootswatch: cosmo
+  bslib:
+    primary: "#26476b"
+    fg: "#212529"
+    bg: "#ffffff"
   includes:
     in_header: |
       <script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script>
-bootswatch: lumen
 navbar:
   title: precmed
+  bg: light
   left:
   - icon: fa-home fa-lg
+    aria-label: Home
     href: index.html
 #  - text: Get started
 #    href: articles/precmed.html
@@ -23,11 +29,14 @@ navbar:
     - text: Theoretical details
       href: articles/Theoretical-details.html
     href: articles/index.html
+  - text: Learning resources
+    href: index.html#learning-resources
   - text: Functions
     href: reference/index.html
   - text: News
     href: news/index.html
   right:
   - icon: fa-github
+    aria-label: Source code
     href: https://github.com/smartdata-analysis-and-statistics/precmed
 

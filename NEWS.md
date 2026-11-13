@@ -1,6 +1,8 @@
 # precmed (development version)
 
-* Added the book chapter by Jiang et al. (2026) to the package references and README.
+* Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.
+
+* Added the book chapter by Jiang et al. (2026) to the package description, references, and README.
 * Fixed display-math formatting of the weighted estimating equation in the theoretical details vignette.
 * Updated validation plots to use ggplot2's `linewidth` argument and require ggplot2 >= 3.4.0.
 * Updated column selections in validation plots and box plots for current tidyselect versions.
