@@ -1,0 +1,8 @@
+"scenario","component","rmse","maxabs","exact","error"
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","ate.poisson",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","ate.boosting",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","ate.twoReg",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","ate.contrastReg",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","ate.negBin",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","overall.ate.valid",0,0,TRUE,""
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1","overall.ate.train",0,0,TRUE,""

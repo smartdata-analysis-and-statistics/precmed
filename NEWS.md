@@ -2,6 +2,17 @@
 
 ## Major changes
 
+* Replaced the `gbm` dependency with `gbm3` for boosting models across count,
+  survival, and internal continuous-outcome methods. Existing tuning argument
+  names and the learning rate of 0.1 are preserved, rather than adopting the
+  GBM3 learning-rate default of 0.001. Parallel controls map to GBM3 threads.
+  Stored boosting fits now have class `GBMFit`. Results can differ from `gbm`
+  even with identical settings and random seeds because random-number usage
+  and Poisson updates for zero-event leaves differ between the packages.
+
+* Fixed continuous boosting predictions by retaining the selected tree count
+  for each treatment arm, and forwarding additional boosting controls.
+
 * Added C backends, enabled by default, for count and survival contrast
   regression, Cox restricted mean survival integration, and LASSO propensity-score
   interaction screening. Installing from source now requires a C compiler and

@@ -52,7 +52,7 @@ If you choose two regressions or contrast regression as the scoring method, ther
 
 * "poisson" (Poisson regression from the `glm()` function) 
   * generalized linear model, strong assumption on Poisson distribution, fast
-* "boosting" (gradient boosting machine from the `gbm` R package)
+* "boosting" (gradient boosting machine from the `gbm3` R package)
   * ensemble method, typically tree-based, slow
 * "gam" (generalized additive model from the `mgcv` package)
   * a combination of generalized linear model and additive models where the linear predictor is an additive function of the covariates, can be slow
@@ -61,8 +61,7 @@ The main example above used a Poisson regression but you can try the other 2 non
 
 ```{r initial_predictor_gbm_gam_count, eval = F, echo = T, cache = doc.cache}
 # An example of using GBM as the initial predictor method
-catecv(response = "count",
-       data = countExample,
+catecvcount(data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
        n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
@@ -75,8 +74,7 @@ catecv(response = "count",
        verbose = 0)
 
 # An example of using GAM as the initial predictor method
-catecv(response = "count",
-       data = countExample,
+catecvcount(data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
        n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
@@ -134,7 +132,7 @@ Because we have new `prop.cutoff` with 11 values as opposed to only 6 in the ori
 plot(output_catecv2) 
 ```
 
-The validation curves depend on `prop.cutoff` and are now smoother than the one presented in the main example because they contain 10 subgroups instead of 5. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section. 
+The validation curves use the 11 nested subgroup cutoffs specified above, so they contain more line segments than the main example. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section. 
 
 
 ```{r subgroup_proportion4_count, eval = T, echo = T}
@@ -191,7 +189,7 @@ If you choose two and/or contrast regression as the scoring method, there is an 
 -   "logistic" (logistic regression from the `glm()` function)
     -   generalized linear model, strong assumption on binomial
         distribution, fast
--   "boosting" (gradient boosting machine from the `gbm` R package)
+-   "boosting" (gradient boosting machine from the `gbm3` R package)
     -   ensemble method, typically tree-based, assume the time-to-event
         outcome as Gaussian distributed, slow
 -   "randomForest" (random survival forest model from the
@@ -210,7 +208,6 @@ tau0 <- with(survivalExample,
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,
@@ -231,7 +228,6 @@ catecv(response = "survival",
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,

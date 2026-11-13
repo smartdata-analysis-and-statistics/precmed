@@ -1,0 +1,6 @@
+"scenario","matched_original_defaults","common_adjusted_configuration","max_abs_adjusted"
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:1",FALSE,FALSE,0.0230974130589086
+"Additional-examples.Rmd:initial_predictor_gbm_gam_count:2",FALSE,TRUE,0
+"Additional-examples.Rmd:initial_predictor_gbm_gam:1",FALSE,TRUE,3.46694895014821e-13
+"Additional-examples.Rmd:initial_predictor_gbm_gam:2",FALSE,TRUE,0
+"Count-examples.Rmd:example_catefit:1",FALSE,TRUE,5.55111512312578e-15

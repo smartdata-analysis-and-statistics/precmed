@@ -72,7 +72,7 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns a list containing the following components:
 #' \itemize{
@@ -539,7 +539,7 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
@@ -629,9 +629,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
           # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
           cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
           # Fit each treatment arm once per cross-fitting fold.
-          fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
+          fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
                                interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-          best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
+          best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f1.predictcv[index == k] <- predict(object = fit1.boosting, newdata = datatot_valid, n.trees = best1.iter, type = "response")
           },
@@ -640,9 +640,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
               invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
           })
 
-          fit0.boosting <- gbm(y ~ . - time + offset(time), data = data0, distribution = "poisson",
+          fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
                                interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-          best0.iter <- max(10, gbm.perf(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
+          best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f0.predictcv[index == k] <- predict(object = fit0.boosting, newdata = datatot_valid, n.trees = best0.iter, type = "response")
           },
@@ -714,14 +714,14 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
     cate.gbmmethod <- ifelse(ncol(x.cate) == 1, "OOB", "cv")
     if (cate.gbmmethod == "OOB") warning("If the model has a single predictor, GBM must use OOB")
 
-    fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
+    fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
                            interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-    best1.iter <- max(10, gbm.perf(fit1.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
+    best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
 
     data0 <- datatot[trt == 0, ]
-    fit0.boosting <- gbm(y ~ . - time + offset(time), data = data0, distribution = "poisson",
+    fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
                            interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-    best0.iter <- max(10, gbm.perf(fit0.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
+    best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
 
     result$result.boosting <- list(fit0.boosting = fit0.boosting, best0.iter = best0.iter, fit1.boosting = fit1.boosting, best1.iter = best1.iter)
     best.iter <- max(best.iter, best1.iter, best0.iter)

@@ -192,7 +192,6 @@
 #'
 #' @importFrom dplyr %>%
 #' @importFrom gam gam
-#' @importFrom gbm gbm gbm.perf predict.gbm
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom graphics hist lines
 #' @importFrom MASS glm.nb
@@ -582,7 +581,6 @@ catecv <- function(response,
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom survival Surv coxph coxph.detail survreg
 #' @importFrom randomForestSRC rfsrc predict.rfsrc
-#' @importFrom gbm gbm gbm.perf predict.gbm
 #' @importFrom gam gam
 #' @importFrom stringr str_replace
 #' @importFrom glmnet cv.glmnet glmnet
@@ -1172,7 +1170,7 @@ catecvsurv <- function(data,
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
@@ -1316,7 +1314,6 @@ catecvsurv <- function(data,
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom gbm gbm gbm.perf
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
@@ -1767,7 +1764,7 @@ catecvcount <- function(data,
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns a list containing the following components saved as a \code{"precmed"} object:
 #' \itemize{
@@ -1885,7 +1882,6 @@ catecvcount <- function(data,
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' @importFrom gbm gbm gbm.perf
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet

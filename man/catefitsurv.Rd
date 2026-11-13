@@ -167,7 +167,7 @@ Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
-\item{...}{Additional arguments for \code{gbm()}}
+\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 Returns an object of the class \code{catefit} containing the following components:

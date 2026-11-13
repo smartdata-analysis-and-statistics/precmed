@@ -105,7 +105,7 @@
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.

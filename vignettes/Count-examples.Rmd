@@ -85,7 +85,10 @@ row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", 
 colnames(t.table1)[-1] <- paste0(
   colnames(t.table1)[-1], "<br>(n = ", trimws(t.table1[1, -1]), ")"
 )
-knitr::kable(t.table1[-1, , drop = FALSE], format = "html", escape = FALSE)
+display.table <- t.table1[-1, , drop = FALSE]
+# Escape cell values (e.g., >=2) while retaining the HTML header breaks.
+display.table[] <- htmltools::htmlEscape(display.table)
+knitr::kable(display.table, format = "html", escape = FALSE)
 ```
 
 
@@ -416,7 +419,7 @@ boxplot(output_catecv,
         ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 ```
 
-For this toy example, we can see why the two regressions method has the highest ABC and performs the best in the validation curves in the previous sections. Two regression has a decreasing RR as we go from the subgroup  with the 33\% lowest CATE scores (0-33\%) to subgroup with the 33\% highest CATE scores (66-100\%), implying that there is some evidence of heterogeneous treatment effect and the CATE scores estimated with two regressions can distinguish the treatment heterogeneity in the data. In comparison, the other 3 methods seem to struggle with the validation data. Even tough they show different subgroups, we can see that the box plots correspond to the other 2 metrics. Note that the y-axis can have different scales for different scoring methods.
+The box plots compare estimated rate ratios across mutually exclusive score-based subgroups. Read them alongside the validation curves and ABC statistics to assess how each scoring method separates patients by treatment benefit and how estimates vary across CV iterations. Note that the y-axis can have different scales for different scoring methods.
 
 <br><br>
 
