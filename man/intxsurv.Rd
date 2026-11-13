@@ -29,6 +29,8 @@ intxsurv(
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
+  contrast.control = list(),
+  ps.control = list(),
   ...
 )
 }
@@ -113,6 +115,19 @@ Default is \code{100}.}
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
 Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+
+\item{contrast.control}{A named list of contrast-regression options:
+\code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+\code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+to \code{stats::optim} on fallback). List entries override top-level NR
+arguments. This is independent of \code{rmst.control}, which selects RMST
+integration, and is not passed to boosting via \code{...}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

@@ -1,34 +1,51 @@
 # precmed (development version)
 
-* Added optional C integration for Cox restricted mean survival times. Set
-  `rmst.control = list(solver = "C")` for survival ATE, fit, or CV workflows
-  to avoid allocating patient-by-event-time matrices. C is the default; the R backend remains available.
+## Major changes
 
-* Added an optional C backend for count contrast regression, selected with
-  `contrast.control = list(solver = "C")` in `catefit()`/`catecv()` or their
-  count variants. C is the default; fallback optimizer settings can be
-  supplied through `optim.control`. Installing from source now requires a C
-  compiler and R's standard BLAS/LAPACK libraries.
+* Added C backends, enabled by default, for count and survival contrast
+  regression, Cox restricted mean survival integration, and LASSO propensity-score
+  interaction screening. Installing from source now requires a C compiler and
+  R's standard BLAS/LAPACK libraries.
 
-* Compute Breslow censoring probabilities with one cumulative-hazard lookup
-  rather than repeatedly scanning and summing hazards for every patient.
+* Added `contrast.control`, `rmst.control`, and `ps.control` to select numerical
+  backends independently of model-fitting arguments. Set `solver = "R"` in the
+  relevant list to use the R implementation. `contrast.control` also accepts
+  Newton-Raphson settings and nested `optim.control` options for fallback
+  optimization. Small floating-point differences between backends are possible.
 
-* Reuse numeric model designs and GLM families during count-data balanced
-  splitting, avoiding repeated formula and model-frame construction.
+## Minor changes and bug fixes
 
-* Avoid fitting and discarding a duplicate treated-arm boosting model in count
-  cross-fitting. Seeded boosting results can change because fewer random draws
-  are consumed.
+* Fixed intercept-only propensity models in survival cross-fitting, subgroup
+  evaluation, and bootstrap ATE estimation by preserving matrix dimensions.
 
-* Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.
+* Fixed LASSO propensity-score dimension handling with two predictors or a single
+  prediction row.
 
-* Added the book chapter by Jiang et al. (2026) to the package description, references, and README.
-* Fixed display-math formatting of the weighted estimating equation in the theoretical details vignette.
-* Updated validation plots to use ggplot2's `linewidth` argument and require ggplot2 >= 3.4.0.
-* Updated column selections in validation plots and box plots for current tidyselect versions.
-* Declared vignette and test dependencies, removed package installation during rendering, and limited boosting examples to one core for reliable builds.
-* Corrected outdated boosting argument names in the vignettes.
-* Invalidated vignette caches when R or package dependencies change.
+* Reused model designs and GLM families during count and continuous-outcome
+  balanced splitting to avoid repeated formula processing. Continuous-outcome
+  public APIs remain disabled as before.
+
+* Used `lm.fit()` for complete-data continuous contrast regression and reused the
+  slope generalized inverse in the sandwich covariance, preserving coefficient
+  labels and the formula path for incomplete inputs.
+
+* Accelerated Breslow censoring probabilities using cumulative hazards and
+  interval lookup instead of repeated scans and sums.
+
+* Reused the full-data fit returned by `cv.glmnet()` instead of fitting the same
+  propensity-score LASSO path separately.
+
+* Removed a duplicate treated-arm boosting fit in count cross-fitting. Results
+  obtained with the same seed may change because fewer random draws are consumed.
+
+* Updated validation plots and box plots for current ggplot2 and tidyselect
+  versions; ggplot2 >= 3.4.0 is now required.
+
+* Added the book chapter by Jiang et al. (2026) to the package description and
+  references.
+
+* Added Smart Data Analysis and Statistics B.V. as copyright holder for its
+  contributions after version 1.1.0, alongside the existing Biogen attribution.
 
 # precmed 1.1.0
 

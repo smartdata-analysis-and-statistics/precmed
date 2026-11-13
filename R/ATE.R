@@ -97,7 +97,12 @@
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom tidyr gather
 
 atefit <- function(response,
@@ -115,7 +120,9 @@ atefit <- function(response,
                    interactions = TRUE,
                    n.boot = 500,
                    seed = NULL,
-                   verbose = 0, rmst.control = list()) {
+                   verbose = 0, rmst.control = list(), ps.control = list()) {
+  resolve_ps_control(ps.control)
+
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   if (length(rmst.control) && response != "survival")

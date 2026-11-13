@@ -169,6 +169,11 @@
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @seealso \code{\link{catecvmean}()} function
 #'
 
@@ -195,7 +200,9 @@ catefitmean <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        ...) {
+                        ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
 
   stop("This functionality is not implemented yet")
 
@@ -238,7 +245,7 @@ catefitmean <- function(data,
                   xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
-                  error.maxNR = error.maxNR, tune = tune, ...)
+                  error.maxNR = error.maxNR, tune = tune, ..., ps.control = ps.control)
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -276,7 +283,7 @@ catefitmean <- function(data,
                                      trt = trt,
                                      score = score, higher.y = higher.y,
                                      prop = prop, onlyhigh = TRUE,
-                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
     result[[str_replace(name, "score", "ate")]] <- ate
     names(result[[str_replace(name, "score", "ate")]]) <- paste0("prop", round(prop, 2))
   }
@@ -410,14 +417,24 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
   # (1-ps)/2 when trt = 0, ps/2 when trt = 1
 
   outcome <- resid * (trt - ps) # (1-ps) when trt = 1, -ps when trt = 0
-  fit <- lm(outcome ~ xaug.star - 1) # omitting intercept
+  if (all(is.finite(xaug.star)) && all(is.finite(outcome))) {
+    # xaug.star already contains the weighted intercept: do not add another.
+    fit <- stats::lm.fit(xaug.star, outcome)
+    # Preserve the coefficient labels produced by the former matrix term.
+    labels <- if (ncol(xaug.star) == 1L) "" else colnames(xaug.star)
+    if (is.null(labels)) labels <- seq_len(ncol(xaug.star))
+    names(fit$coefficients) <- paste0("xaug.star", labels)
+  } else {
+    # Retain lm's historical na.action behavior for incomplete inputs.
+    fit <- lm(outcome ~ xaug.star - 1)
+  }
   beta <- fit$coef
 
   ###### estimate the variance of the weights in ITR score 4  sandwich estimator
   error <- fit$res
   slope <- t(xaug.star) %*% xaug.star
-  #sigma=solve(slope)%*%(t(xaug.star*error^2)%*%xaug.star)%*%solve(slope)
-  sigma <- MASS::ginv(slope) %*% (t(xaug.star*error^2) %*% xaug.star) %*% MASS::ginv(slope)
+  slope.inverse <- MASS::ginv(slope)
+  sigma <- slope.inverse %*% (t(xaug.star*error^2) %*% xaug.star) %*% slope.inverse
 
   return(list(coef = beta, vcov = sigma))
 }
@@ -479,6 +496,11 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return Depending on what score.method is, the outputs is a combination of the following:
 #'           result.boosting: Results of boosting fit and best iteration, for trt = 0 and trt = 1 separately
 #'           result.gaussian: Linear regression estimator (beta1 - beta0); vector of length \code{p.cate} + 1
@@ -498,7 +520,9 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
                      ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                      initial.predictor.method = "boosting",
                      xvar.smooth.init, xvar.smooth.score,
-                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ...) {
+                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ps.control = list(), ...) {
+  ps.args <- resolve_ps_control(ps.control)
+
 
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
@@ -629,7 +653,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
         if (ps.method == "glm") {
           pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
         } else {
-          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
+          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
         }
 
       }#end of Kfold loops

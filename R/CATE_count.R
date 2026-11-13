@@ -163,13 +163,18 @@
 #'                     ps.model = trt ~ age + previous_treatment,
 #'                     higher.y = FALSE,
 #'                     seed = 999, verbose = 1)
-#' @param contrast.control A named list of options for count-outcome contrast
+#' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
 #' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
 #' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Only count
-#' outcomes support this list; other outcomes retain their existing solver.
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @export
 
 catefitcount <- function(data,
@@ -194,7 +199,9 @@ catefitcount <- function(data,
                          plot.gbmperf = FALSE,
                          verbose = 0,
                          contrast.control = list(),
-                         ...) {
+                         ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
 
 
   resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
@@ -238,7 +245,7 @@ catefitcount <- function(data,
                    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                   contrast.control = contrast.control, ...)
+                   contrast.control = contrast.control, ..., ps.control = ps.control)
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste0("The best boosting iteration was iteration number",
@@ -277,7 +284,7 @@ catefitcount <- function(data,
                                       time = time, trt = trt,
                                       score = score, higher.y = higher.y,
                                       prop = prop, onlyhigh = TRUE,
-                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
     result[[str_replace(name, "score", "ate")]] <- ate
     names(result[[str_replace(name, "score", "ate")]]) <- paste0("prop", round(prop, 2))
   }
@@ -534,13 +541,18 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
-#' @param contrast.control A named list of options for count-outcome contrast
+#' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
 #' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
 #' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Only count
-#' outcomes support this list; other outcomes retain their existing solver.
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return Depending on what score.method is, the outputs is a combination of the following:
 #'           result.boosting: Results of boosting fit and best iteration, for trt = 0 and trt = 1 separately
 #'           result.poisson: Naive Poisson estimator (beta1 - beta0); vector of length \code{p.cate} + 1
@@ -558,7 +570,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
                       initial.predictor.method = "boosting",
                       xvar.smooth = NULL,
                       tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
-                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ...) {
+                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ps.control = list(), ...) {
+  ps.args <- resolve_ps_control(ps.control)
+
 
   contrast.args <- resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
@@ -668,7 +682,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
         if (ps.method == "glm") {
           pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
         } else {
-          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
+          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
         }
 
       }#end of Kfold loops

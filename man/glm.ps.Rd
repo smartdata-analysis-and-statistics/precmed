@@ -4,7 +4,14 @@
 \alias{glm.ps}
 \title{Propensity score estimation with LASSO}
 \usage{
-glm.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
+glm.ps(
+  trt,
+  x.ps,
+  xnew = NULL,
+  minPS = 0.01,
+  maxPS = 0.99,
+  solver = c("C", "R")
+)
 }
 \arguments{
 \item{trt}{Treatment received; vector of size \code{n} (observations) with treatment coded as 0/1}
@@ -20,6 +27,10 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{solver}{Interaction-screening backend: \code{"C"} (default) or
+\code{"R"}. C screens pairs before allocating retained training and prediction
+columns. Both use the strict SMD > 0.1 rule and positive sample variance.}
 }
 \value{
 The trimmed propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}

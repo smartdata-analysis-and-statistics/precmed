@@ -78,6 +78,11 @@
 #' # This module is not implemented yet!
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom dplyr mutate
 
 atefitmean <- function(data,
@@ -90,7 +95,9 @@ atefitmean <- function(data,
                        n.boot = 500,
                        plot.boot = FALSE,
                        seed = NULL,
-                       verbose = 0) {
+                       verbose = 0, ps.control = list()) {
+  resolve_ps_control(ps.control)
+
 
   stop("This functionality is not implemented yet")
 
@@ -118,7 +125,7 @@ atefitmean <- function(data,
   x.cate <- preproc$x.cate
 
   # Point estimate
-  est <- drmean(y = y, x.cate = x.cate, x.ps = x.ps, trt = trt, ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions)
+  est <- drmean(y = y, x.cate = x.cate, x.ps = x.ps, trt = trt, ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions, ps.control = ps.control)
   meandiff <- est$mean.diff
 
   # Apply bootstrap
@@ -129,7 +136,7 @@ atefitmean <- function(data,
     trt.boot <- rep(0, n.boot)
     for (i in 1:n.boot) {
       idsub.boot <- sample(n, size = n, replace = TRUE)
-      trt.boot[i] <- drmean(y = y[idsub.boot], x.cate = x.cate[idsub.boot, , drop = FALSE], x.ps = x.ps[idsub.boot, , drop = FALSE], trt = trt[idsub.boot], ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions)$mean.diff
+      trt.boot[i] <- drmean(y = y[idsub.boot], x.cate = x.cate[idsub.boot, , drop = FALSE], x.ps = x.ps[idsub.boot, , drop = FALSE], trt = trt[idsub.boot], ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = interactions, ps.control = ps.control)$mean.diff
 
       if (i %% (n.boot %/% 10) == 0) {
         if (verbose == 1) cat("Bootstrap iteration", i, "\n")
@@ -205,6 +212,11 @@ atefitmean <- function(data,
 #' interactions will be assumed only if at least 10 patients received each
 #' treatment option. Default is \code{TRUE}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return Return a list of 4 elements:
 #' \itemize{
 #'   \item{\code{mean.diff}: } A numeric value of the estimated mean difference.
@@ -217,13 +229,15 @@ atefitmean <- function(data,
 
 drmean <- function(y, trt, x.cate, x.ps,
                    ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                   interactions = TRUE) {
+                   interactions = TRUE, ps.control = list()) {
+  ps.args <- resolve_ps_control(ps.control)
+
 
   n <- length(y)
 
   withCallingHandlers({
     if (ps.method == "lasso") {
-      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
+      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
     } else {
       ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
     }
@@ -273,6 +287,47 @@ drmean <- function(y, trt, x.cate, x.ps,
   return(list(mean.diff = md, mean.diff0 = mu0dr, mean.diff1 = mu1dr))
 }
 
+# Matrix-only equivalent of drmean(..., ps.method = "glm", interactions = TRUE).
+# outcome.design includes the intercept and is constructed once per split search.
+drmean.matrix <- function(y, trt, outcome.design, x.ps, families,
+                          minPS = 0.01, maxPS = 0.99) {
+  withCallingHandlers({
+    beta.ps <- stats::glm.fit(x.ps, trt, family = families$propensity,
+                              intercept = FALSE)$coefficients
+    keep <- !is.na(beta.ps)
+    ps <- as.vector(1 / (1 + exp(-x.ps[, keep, drop = FALSE] %*% beta.ps[keep])))
+    ps <- pmax(pmin(ps, maxPS), minPS)
+
+    predict.mean <- function(beta, design) {
+      keep <- !is.na(beta)
+      design[, keep, drop = FALSE] %*% beta[keep]
+    }
+    if (min(sum(trt), length(y) - sum(trt)) > 10) {
+      id1 <- trt == 1
+      id0 <- trt == 0
+      beta1 <- stats::glm.fit(outcome.design[id1, , drop = FALSE], y[id1],
+                               family = families$outcome)$coefficients
+      beta0 <- stats::glm.fit(outcome.design[id0, , drop = FALSE], y[id0],
+                               family = families$outcome)$coefficients
+      y1hat <- predict.mean(beta1, outcome.design)
+      y0hat <- predict.mean(beta0, outcome.design)
+    } else {
+      beta <- stats::glm.fit(cbind(outcome.design, trt), y,
+                              family = families$outcome)$coefficients
+      y1hat <- predict.mean(beta, cbind(outcome.design, 1))
+      y0hat <- predict.mean(beta, cbind(outcome.design, 0))
+    }
+    mu1dr <- sum(y1hat + (y - y1hat) * trt / ps) / length(y)
+    mu0dr <- sum(y0hat + (y - y0hat) * (1 - trt) / (1 - ps)) / length(y)
+    md <- if (!is.na(mu1dr - mu0dr)) mu1dr - mu0dr else NA
+    list(mean.diff = md, mean.diff0 = mu0dr, mean.diff1 = mu1dr)
+  }, warning = function(w) {
+    if (grepl("numerically 0|1 occurred|glm.fit: algorithm did not converge|glm.fit: fitted rates numerically 0 occurred",
+              conditionMessage(w))) invokeRestart("muffleWarning")
+  })
+}
+
+
 
 #' Estimate the ATE of the mean difference in multiple bi-level subgroups
 #' defined by the proportions
@@ -308,13 +363,18 @@ drmean <- function(y, trt, x.cate, x.ps,
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned
 #'         ate.est.low: estimated ATEs in the multiple bi-level subgroups that are in the lower-than-cutoff category;
 #'         vector of size equal to the length of prop; returned only when \code{onlyhigh} == TRUE
 estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
                                       prop, onlyhigh,
-                                      ps.method = "glm", minPS = 0.01, maxPS = 0.99) {
+                                      ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()) {
 
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -325,12 +385,12 @@ estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
     idsub1 <- (score >= cut[b])
     ate.est.high[b] <- drmean(y = y[idsub1], x.cate = x.cate[idsub1, , drop = FALSE], x.ps = x.ps[idsub1, , drop = FALSE],
                               trt = trt[idsub1], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                              interactions = FALSE)$mean.diff
+                              interactions = FALSE, ps.control = ps.control)$mean.diff
     if (onlyhigh == FALSE) {
       idsub0 <- (score < cut[b])
       ate.est.low[b] <- drmean(y = y[idsub0], x.cate = x.cate[idsub0, , drop = FALSE], x.ps = x.ps[idsub0, , drop = FALSE],
                                trt = trt[idsub0], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                               interactions = FALSE)$mean.diff
+                               interactions = FALSE, ps.control = ps.control)$mean.diff
     }
   }
   if (onlyhigh == TRUE) {
@@ -370,9 +430,14 @@ estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estmean.multilevel.subgroup <- function(y, x.cate, x.ps, trt, score, higher.y, prop,
-                                        ps.method = "glm", minPS = 0.01, maxPS = 0.99){
+                                        ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()){
 
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, prop)
@@ -383,7 +448,7 @@ estmean.multilevel.subgroup <- function(y, x.cate, x.ps, trt, score, higher.y, p
     ate.est[b] <- drmean(y = y[idsub], x.cate = x.cate[idsub, , drop = FALSE],
                          x.ps = x.ps[idsub, , drop = FALSE],
                          trt = trt[idsub],
-                         ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE)$mean.diff
+                         ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$mean.diff
   }
   return((ate.est))
 }

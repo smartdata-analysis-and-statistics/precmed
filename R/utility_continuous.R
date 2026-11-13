@@ -50,6 +50,17 @@ balancemean.split <- function(y, trt, x.cate, x.ps,
   x <- x[, !duplicated(colnames(x)), drop = FALSE]
   sdx <- apply(x, 2, sd)
 
+  # Reuse complete numeric designs across candidate splits; retain the formula
+  # path for other inputs, including the original missing-data behavior.
+  matrix.fits <- is.matrix(x.cate) && is.numeric(x.cate) && ncol(x.cate) > 0 &&
+    is.matrix(x.ps) && is.numeric(x.ps) && ncol(x.ps) > 0 && is.numeric(y) && is.numeric(trt) &&
+    all(is.finite(x.cate)) && all(is.finite(x.ps)) &&
+    all(is.finite(y)) && all(is.finite(trt))
+  if (matrix.fits) {
+    outcome.design <- cbind(1, x.cate)
+    families <- list(outcome = stats::gaussian(), propensity = stats::binomial())
+  }
+
   n1 <- sum(trt)
   n0 <- sum(1 - trt)
   m1 <- round(n1 * train.prop, digits = 0)
@@ -80,11 +91,19 @@ balancemean.split <- function(y, trt, x.cate, x.ps,
     diffx <- colMeans(x.train) - colMeans(x.valid)
     errorx <- max(abs(diffx / sdx))
 
-    #Replace drcount to drmean
-    est.valid  <- drmean(y = y.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid,
-                         ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$mean.diff
-    est.train <- drmean(y = y.train, x.cate = x.train, x.ps = x.ps.train, trt = trt.train,
-                        ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$mean.diff
+    if (matrix.fits) {
+      est.valid <- drmean.matrix(y.valid, trt.valid,
+                                  outcome.design[id.valid, , drop = FALSE],
+                                  x.ps.valid, families, minPS, maxPS)$mean.diff
+      est.train <- drmean.matrix(y.train, trt.train,
+                                  outcome.design[-id.valid, , drop = FALSE],
+                                  x.ps.train, families, minPS, maxPS)$mean.diff
+    } else {
+      est.valid  <- drmean(y = y.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid,
+                           ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$mean.diff
+      est.train <- drmean(y = y.train, x.cate = x.train, x.ps = x.ps.train, trt = trt.train,
+                          ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$mean.diff
+    }
 
     #Change error?
     error <- max(2 * abs(est.valid - est.train) / (abs(est.valid) + abs(est.train)), errorx)

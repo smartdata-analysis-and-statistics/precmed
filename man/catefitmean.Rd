@@ -28,6 +28,7 @@ catefitmean(
   tune = c(0.5, 2),
   seed = NULL,
   verbose = 0,
+  ps.control = list(),
   ...
 )
 }
@@ -127,6 +128,12 @@ Default is \code{NULL}, corresponding to no seed.}
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

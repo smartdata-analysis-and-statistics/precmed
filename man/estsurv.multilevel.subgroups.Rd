@@ -21,7 +21,8 @@ estsurv.multilevel.subgroups(
   minPS = 0.01,
   maxPS = 0.99,
   ipcw.method = "breslow",
-  rmst.control = list()
+  rmst.control = list(),
+  ps.control = list()
 )
 }
 \arguments{
@@ -73,7 +74,13 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 The C backend accumulates each patient's integral without allocating a
 patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of count-model \code{contrast.control}.}
+for survival outcomes; independent of \code{contrast.control}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 }
 \value{
 ate.rmtl: estimated ATEs (ratio of RMTL) of all categories in the one multilevel subgroup;

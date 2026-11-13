@@ -28,9 +28,19 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
 
 
+# Background and further reading
+
+This vignette describes the ratio-based CATE estimators and validation procedures implemented in `precmed`. A CATE describes the average treatment effect among patients with the same measured baseline characteristics; it does not identify an individual patient's unobservable treatment effect. Chapter 17 of @debray2026comparative introduces the principles of treatment effect prediction, model development in randomized and non-randomized data, and the assumptions needed to identify CATEs [@hoogland2026introduction].
+
+The primary methodological reference for the two-regression and contrast-regression estimators is @yadlowsky2020estimation. For practical guidance on interpreting and evaluating the resulting scores, the book provides two complementary chapters:
+
+* **Chapter 19: Validation of prediction models for patient outcomes and individualized treatment effect** discusses validation strategies, discrimination, calibration, and decision accuracy [@thao2026validation].
+* **Chapter 20: Visualization and interpretation of individualized treatment rule results** discusses treatment rules, value functions, validation curves, and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
+
+
 # Theoretical details - Count outcomes
 
-The CATE score represents an individual-level treatment effect expressed as a rate ratio for count outcomes. It can be estimated with boosting, Poisson regression, negative binomial regression, and the doubly robust estimator two regressions [@yadlowsky2020estimation] applied separately by treatment group or with the other doubly robust estimator contrast regression [@yadlowsky2020estimation] applied to the entire data set.
+For count outcomes, the CATE score is expressed as a log-rate ratio conditional on baseline covariates. It can be estimated with boosting, Poisson regression, negative binomial regression, or the doubly robust two-regression and contrast-regression estimators [@yadlowsky2020estimation]. The two-regression approach models the potential outcomes separately by treatment group, whereas contrast regression directly models the treatment contrast.
 
 Assume that the following data are recorded for each of $n$ observations:
 
@@ -128,7 +138,9 @@ $$\hat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}$$
 
 
 ## Validation curves and the ABC statistics 
-The ABC statistic represents the area between the validation curve and the ATE as described by [@zhao2013effectively]. For a single CV iteration, it is implemented in the training and validation sets separately as following:
+The ABC statistic summarizes the area between the validation curve and the overall ATE reference line [@zhao2013effectively; @yadlowsky2020estimation]. Chapter 20 provides worked examples of these curves and their interpretation as responder diagnostics [@jiang2026visualization]. Validation curves and ABC assess how well a score ranks patients by treatment benefit. They do not, by themselves, establish calibration of the predicted CATEs or the clinical value of a treatment rule; Chapter 19 discusses these complementary aspects of validation [@thao2026validation].
+
+For a single CV iteration, it is implemented in the training and validation sets separately as following:
 
 **Step 1**. Calculate the ATE in the training or validation sets.
 
@@ -160,7 +172,7 @@ ABC calculation examples in relation with `higher.y` argument in `catecv()` and 
 
 # Theoretical details - Survival outcomes
 
-The CATE score represents an individual-level treatment effect for survival data, estimated with random forest, boosting, Poisson regression, and the doubly robust estimator (two regressions, [@yadlowsky2020estimation]) applied separately by treatment group or with the other doubly robust estimators (contrast regression, [@yadlowsky2020estimation]) applied to the entire data set.
+For survival outcomes, the CATE score is expressed as a log-ratio of restricted mean time lost conditional on baseline covariates. It can be estimated with random forest, boosting, Poisson regression, or adaptations of the doubly robust two-regression and contrast-regression approaches [@yadlowsky2020estimation]. Chapter 20 of the book also discusses restricted mean time lost as an outcome for ratio-based treatment effects [@jiang2026visualization].
 
 Assume that the following data are recorded for each of $n$ observations:
 
@@ -303,7 +315,7 @@ $$\widehat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x
 
 ## Validation curves and the ABC statistics
 
-The ABC statistic represents the area between the validation curve and the ATE as described by [@zhao2013effectively]. For a single CV iteration and a certain CATE score method, it is implemented as following in the training and validation sets separately:
+The ABC statistic summarizes the area between the validation curve and the overall ATE reference line [@zhao2013effectively; @yadlowsky2020estimation]. Chapter 20 provides worked examples of these curves and their interpretation as responder diagnostics [@jiang2026visualization]. For a single CV iteration and a certain CATE score method, it is implemented as following in the training and validation sets separately:
 
 **Step 1**. Calculate the ATE in the training or validation sets.
 

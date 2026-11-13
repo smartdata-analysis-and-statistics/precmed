@@ -86,9 +86,9 @@ testthat::test_that("C contrast regression agrees with the original R implementa
     .001, 150, c(.5, 2))
   testthat::expect_identical(ctrl$max.iterNR, 0)
   testthat::expect_identical(ctrl$optim.control, list(maxit = 1))
-  testthat::expect_error(precmed::catecv(response = "survival", data = data,
+  testthat::expect_error(precmed::catecv(response = "continuous", data = data,
     cate.model = y ~ x1, ps.model = trt ~ x1,
-    contrast.control = list(solver = "C")), "only for count")
+    contrast.control = list(solver = "C")), "count or survival")
   bad <- make_data(42L)
   bad$ps[1] <- 0
   testthat::expect_error(do.call(precmed:::twoarmglmcount.dr,

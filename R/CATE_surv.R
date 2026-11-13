@@ -216,7 +216,18 @@
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param contrast.control A named list of contrast-regression options:
+#' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+#' \code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+#' to \code{stats::optim} on fallback). List entries override top-level NR
+#' arguments. This is independent of \code{rmst.control}, which selects RMST
+#' integration, and is not passed to boosting via \code{...}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @export
 
 catefitsurv <- function(data,
@@ -245,9 +256,13 @@ catefitsurv <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        rmst.control = list(), ...) {
+                        rmst.control = list(), contrast.control = list(), ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
   resolve_rmst_control(rmst.control)
 
+
+  resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -314,7 +329,8 @@ catefitsurv <- function(data,
                   initial.predictor.method = initial.predictor.method,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
-                  error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
+                  error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
+                  contrast.control = contrast.control, ..., ps.control = ps.control)
 
   if (initial.predictor.method == "boosting" & fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -330,7 +346,7 @@ catefitsurv <- function(data,
   if (prop[length(prop)] == 1) {
     est.prop1 <- survCatch(drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
                                   tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  ipcw.method = ipcw.method, rmst.control = rmst.control))
+                                  ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
     est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
     est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
   }
@@ -343,7 +359,7 @@ catefitsurv <- function(data,
                                               tau0 = tau0, surv.min = surv.min,
                                               score = score, higher.y = higher.y,
                                               prop = prop.no1, onlyhigh = TRUE,
-                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
     result[[str_replace(name, "score", "ate")]] <- c(est.onlyhigh$ate.rmtl.high, est.prop1$ate.rmtl.high)
     result[[str_replace(name, "score", "hr")]] <- c(est.onlyhigh$hr.high, est.prop1$hr.high)
 
@@ -492,6 +508,13 @@ onearmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv, ps, f.predi
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #'
+#' @param solver Numerical backend: \code{"C"} (default) or \code{"R"}.
+#' Both preserve the weighted estimating equation, first-iteration
+#' regularization and eta stopping rule. Small rounding differences are possible.
+#' @param optim.control Named controls passed to \code{stats::optim} if NR fails
+#' to converge, for example \code{list(maxit = 1000, reltol = 1e-10)}.
+#' \code{max.iterNR} governs NR; \code{optim.control$maxit} governs fallback only.
+#'
 #' @return coef: Doubly robust estimators of the contrast regression coefficients \code{delta_0}; vector of size \code{p.cate} + 1 (intercept included)
 #'         converge: Indicator that the Newton Raphson algorithm converged for \code{delta_0}; boolean
 #'
@@ -499,7 +522,12 @@ onearmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv, ps, f.predi
 
 
 twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
-                          ps, f1.predictor, f0.predictor, error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2)) {
+                          ps, f1.predictor, f0.predictor, error.maxNR = 1e-3, max.iterNR = 100, tune = c(0.5, 2),
+                          solver = c("C", "R"), optim.control = list()) {
+  solver <- match.arg(solver)
+  validate_contrast_controls(error.maxNR, max.iterNR, tune, optim.control)
+  if (solver == "C" && (!is.numeric(tau0) || length(tau0) != 1L ||
+      !is.finite(tau0) || tau0 <= 0)) stop("tau0 must be finite and positive.")
   x.aug <- cbind(1, x.cate)
   p.aug <- length(x.aug[1,])
 
@@ -509,29 +537,50 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
   f1.predictor <- 1 - f1.predictor / tau0
   f0.predictor <- 1 - f0.predictor / tau0
 
-  # Estimate coefficients with NR algorithm
-  beta <- rep(0, p.aug)
-  mae <- Inf
-  iter <- 0
-  eta.max <- 0
-  while (mae > error.maxNR && iter <= max.iterNR && eta.max < 1000 * tau0) {
-    eta <- as.numeric(exp(x.aug %*% beta))
-    eta.max <- max(eta)
-    if (eta.max == Inf) break
-    error <- (trt * (y - eta * f0.predictor / 2 - f1.predictor / 2) * (1 - ps) - (1 - trt) * (y * eta - f0.predictor * eta / 2 - f1.predictor / 2) * ps) / (eta * ps + (1 - ps))
-    score <- colSums(x.aug * weightc * error)
-    slopewt <- (y + f0.predictor * (trt / ps - 1) / 2 + f1.predictor * ((1 - trt) / (1 - ps) - 1) / 2) * eta * ps * (1 - ps) / (eta * ps + (1 - ps))^2
-    slope <- crossprod(x.aug * weightc * slopewt, x.aug)
-    if (iter == 0) {
-      epsilon.min <- eigen(slope, only.values = TRUE)$value[p.aug]
-      epsilon0 <- epsilon.min + epsilon.min * (epsilon.min < 0)
+  if (solver == "C") {
+    x.aug <- as.matrix(x.aug)
+    storage.mode(x.aug) <- "double"
+    n <- nrow(x.aug)
+    vectors <- list(y, trt, ps, f1.predictor, f0.predictor, weightc)
+    if (!n || !ncol(x.aug) || any(!is.finite(x.aug)) ||
+        any(vapply(vectors, function(v) !is.numeric(v) || length(v) != n ||
+                     any(!is.finite(v)), logical(1))) ||
+        any(ps <= 0 | ps >= 1) || any(!trt %in% c(0, 1)) || any(weightsurv < 0) || any(weightc < 0)) {
+      stop("C survival solver requires finite numeric data, binary treatment, 0 < ps < 1 and non-negative weights with positive mean.")
     }
-    beta <- beta + solve(slope + diag(tune[2] * abs(epsilon0), p.aug, p.aug)) %*% score * tune[1]
-    mae <- sum(abs(score))
-    iter <- iter + 1
+    native.data <- c(list(x.aug), lapply(vectors, as.double))
+    nr <- .Call(precmed_survival_contrast_nr, native.data, as.double(error.maxNR),
+                as.integer(max.iterNR), as.double(tune), as.double(tau0))
+    # R's NR update returns a column matrix; optim fallback returns a vector.
+    beta <- matrix(nr[[1L]], ncol = 1L)
+    if (!is.null(colnames(x.aug))) rownames(beta) <- colnames(x.aug)
+    converge1 <- as.integer(nr[[2L]])
+  } else {
+    # Estimate coefficients with NR algorithm
+    beta <- rep(0, p.aug)
+    mae <- Inf
+    iter <- 0
+    eta.max <- 0
+    while (mae > error.maxNR && iter <= max.iterNR && eta.max < 1000 * tau0) {
+      eta <- as.numeric(exp(x.aug %*% beta))
+      eta.max <- max(eta)
+      if (eta.max == Inf) break
+      error <- (trt * (y - eta * f0.predictor / 2 - f1.predictor / 2) * (1 - ps) - (1 - trt) * (y * eta - f0.predictor * eta / 2 - f1.predictor / 2) * ps) / (eta * ps + (1 - ps))
+      score <- colSums(x.aug * weightc * error)
+      slopewt <- (y + f0.predictor * (trt / ps - 1) / 2 + f1.predictor * ((1 - trt) / (1 - ps) - 1) / 2) * eta * ps * (1 - ps) / (eta * ps + (1 - ps))^2
+      slope <- crossprod(x.aug * weightc * slopewt, x.aug)
+      if (iter == 0) {
+        epsilon.min <- eigen(slope, only.values = TRUE)$value[p.aug]
+        epsilon0 <- epsilon.min + epsilon.min * (epsilon.min < 0)
+      }
+      beta <- beta + solve(slope + diag(tune[2] * abs(epsilon0), p.aug, p.aug)) %*% score * tune[1]
+      mae <- sum(abs(score))
+      iter <- iter + 1
+    }
+
+    converge1 <- 1 * (mae <= error.maxNR)
   }
 
-  converge1 <- 1 * (mae <= error.maxNR)
   converge2 <- 0
 
   # If NP did not converge, solve for minimizing the L2-norm (sum of squares) of the score function to avoid inversing the slope inverse (generally slower than NP)
@@ -543,8 +592,12 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
       return(sum(score^2))
     }
 
+    if (solver == "C") {
+      lossf <- function(beta) .Call(precmed_survival_contrast_loss, native.data, as.double(beta))
+    }
+
   initial.value <- lossf(rep(0, p.aug))
-  fit <- optim(rep(0, p.aug), fn = lossf)
+  fit <- optim(rep(0, p.aug), fn = lossf, control = optim.control)
   beta <- fit$par
   converge2 <- 1 * (fit$value < initial.value / 100)
   }
@@ -616,6 +669,17 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
+#' @param contrast.control A named list of contrast-regression options:
+#' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+#' \code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+#' to \code{stats::optim} on fallback). List entries override top-level NR
+#' arguments. This is independent of \code{rmst.control}, which selects RMST
+#' integration, and is not passed to boosting via \code{...}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return Depending on what score.method is, the outputs is a combination of the following:
 #'           result.randomForest: Results of random forest fit, for trt = 0 and trt = 1 separately
 #'           result.boosting: Results of boosting fit, for trt = 0 and trt = 1 separately
@@ -635,7 +699,11 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
                      tree.depth = 3, n.trees.rf = 1000, n.trees.boosting = 150,
                      B = 3, Kfold = 5, plot.gbmperf = TRUE,
                      error.maxNR = 1e-3, max.iterNR = 100,
-                     tune = c(0.5, 2), ...) {
+                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), ...) {
+  ps.args <- resolve_ps_control(ps.control)
+
+
+  contrast.args <- resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   result <- vector("list", length(score.method))
   names(result) <- c(paste0("result.", score.method))
@@ -710,12 +778,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
         } else if (initial.predictor.method == "boosting") {
 
           datatot_train <- datatot[index != k, ]
-          x_ps_train <- x.ps[index != k, ]
+          x_ps_train <- x.ps[index != k, , drop = FALSE]
           trt_train <- trt[index != k]
           weightnew_train <- weightc[index != k]
 
           datatot_valid <- datatot[index == k, ]
-          x_ps_valid <- x.ps[index == k, ]
+          x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1 <- datatot_train[trt_train == 1, ]
           data0 <- datatot_train[trt_train == 0, ]
@@ -763,12 +831,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
         } else if (initial.predictor.method == "logistic") {
 
           datatot_train <- datatot[index != k, ]
-          x_ps_train <- x.ps[index != k, ]
+          x_ps_train <- x.ps[index != k, , drop = FALSE]
           trt_train <- trt[index != k]
           weightnew_train <- weightc[index != k]
 
           datatot_valid <- datatot[index == k, ]
-          x_ps_valid <- x.ps[index == k, ]
+          x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1 <- datatot_train[trt_train == 1, ]
           data0 <- datatot_train[trt_train == 0, ]
@@ -797,7 +865,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
         if (ps.method == "glm") {
           pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
         } else {
-          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
+          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
         }
       } #end of Kfold loops
 
@@ -813,7 +881,10 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
 
       if ("contrastReg" %in% score.method) {
         ## bb-th cross fitting contrast regression estimator
-        fit_contrast <- twoarmsurv.dr(ynew = ynew, dnew = dnew, trt = trt, x.cate = x.cate, tau0 = tau0, weightsurv = weightc, ps = pscv, f1.predictor = f1.predictcv, f0.predictor = f0.predictcv, error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune)
+        fit_contrast <- do.call(twoarmsurv.dr, c(list(
+          ynew = ynew, dnew = dnew, trt = trt, x.cate = x.cate, tau0 = tau0,
+          weightsurv = weightc, ps = pscv,
+          f1.predictor = f1.predictcv, f0.predictor = f0.predictcv), contrast.args))
         delta.contrastReg.mat[bb, ] <- fit_contrast$coef
         converge[bb] <- fit_contrast$converge
       } #end of if ("contrastReg" %in% score.method)

@@ -74,6 +74,11 @@
 #' plot(output)
 #' @export
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom dplyr mutate
 #'
 
@@ -86,7 +91,9 @@ atefitcount <- function(data,
                         interactions = TRUE,
                         n.boot = 500,
                         seed = NULL,
-                        verbose = 0) {
+                        verbose = 0, ps.control = list()) {
+  resolve_ps_control(ps.control)
+
 
   # Set seed once for reproducibility
   set.seed(seed)
@@ -120,7 +127,7 @@ atefitcount <- function(data,
                  ps.method = ps.method,
                  minPS = minPS,
                  maxPS = maxPS,
-                 interactions = interactions)
+                 interactions = interactions, ps.control = ps.control)
   logrr <- est$log.rate.ratio
 
   # Apply bootstrap
@@ -145,7 +152,7 @@ atefitcount <- function(data,
                                 ps.method = ps.method,
                                 minPS = minPS,
                                 maxPS = maxPS,
-                                interactions = interactions)$log.rate.ratio
+                                interactions = interactions, ps.control = ps.control)$log.rate.ratio
 
     if (verbose == 1) setTxtProgressBar(pb, i.boot)
   }
@@ -211,6 +218,11 @@ atefitcount <- function(data,
 #' interactions will be assumed only if at least 10 patients received each
 #' treatment option. Default is \code{TRUE}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return Return a list of 4 elements:
 #' \itemize{
 #'   \item{\code{log.rate.ratio}: } A numeric value of the estimated log rate ratio.
@@ -221,13 +233,15 @@ atefitcount <- function(data,
 
 drcount <- function(y, trt, x.cate, x.ps, time,
                     ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                    interactions = TRUE) {
+                    interactions = TRUE, ps.control = list()) {
+  ps.args <- resolve_ps_control(ps.control)
+
 
   n <- length(y)
 
   withCallingHandlers({
     if (ps.method == "lasso") {
-      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
+      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
     } else {
       ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
     }
@@ -352,13 +366,18 @@ drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned
 #'         ate.est.low: estimated ATEs in the multiple bi-level subgroups that are in the lower-than-cutoff category;
 #'         vector of size equal to the length of prop; returned only when \code{onlyhigh} == TRUE
 estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher.y,
                                        prop, onlyhigh,
-                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99) {
+                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()) {
 
   if (!higher.y) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -369,12 +388,12 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
       idsub1 <- (score >= cut[b])
       ate.est.high[b] <- drcount(y = y[idsub1], x.cate = x.cate[idsub1, , drop = FALSE], x.ps = x.ps[idsub1, , drop = FALSE],
                                  trt = trt[idsub1], time = time[idsub1], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                 interactions = FALSE)$log.rate.ratio
+                                 interactions = FALSE, ps.control = ps.control)$log.rate.ratio
       if (onlyhigh == FALSE) {
         idsub0 <- (score < cut[b])
         ate.est.low[b] <- drcount(y = y[idsub0], x.cate = x.cate[idsub0, , drop = FALSE], x.ps = x.ps[idsub0, , drop = FALSE],
                                   trt = trt[idsub0], time = time[idsub0], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  interactions = FALSE)$log.rate.ratio
+                                  interactions = FALSE, ps.control = ps.control)$log.rate.ratio
       }
   }
   if (onlyhigh) {
@@ -414,9 +433,14 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, higher.y, prop,
-                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99){
+                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()){
 
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, prop)
@@ -431,7 +455,7 @@ estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, high
                           ps.method = ps.method,
                           minPS = minPS,
                           maxPS = maxPS,
-                          interactions = FALSE)$log.rate.ratio
+                          interactions = FALSE, ps.control = ps.control)$log.rate.ratio
   }
   return(exp(ate.est))
 }

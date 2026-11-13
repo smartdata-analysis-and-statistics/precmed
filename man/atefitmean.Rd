@@ -16,7 +16,8 @@ atefitmean(
   n.boot = 500,
   plot.boot = FALSE,
   seed = NULL,
-  verbose = 0
+  verbose = 0,
+  ps.control = list()
 )
 }
 \arguments{
@@ -67,6 +68,12 @@ reproducibility. Default is \code{NULL}, corresponding to no seed.}
 \item{verbose}{An integer value indicating whether intermediate progress
 messages and histograms should be printed. \code{1} indicates messages are
 printed and \code{0} otherwise. Default is \code{0}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 }
 \value{
 Return a list of 8 elements:

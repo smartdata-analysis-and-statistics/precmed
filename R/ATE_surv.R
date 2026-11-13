@@ -99,7 +99,12 @@
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom tidyr gather
 
 atefitsurv <- function(data,
@@ -115,7 +120,9 @@ atefitsurv <- function(data,
                        surv.min = 0.025,
                        n.boot = 500,
                        seed = NULL,
-                       verbose = 0, rmst.control = list()) {
+                       verbose = 0, rmst.control = list(), ps.control = list()) {
+  resolve_ps_control(ps.control)
+
   resolve_rmst_control(rmst.control)
 
 
@@ -155,7 +162,7 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method, rmst.control = rmst.control)
+                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
 
   est <- unlist(est)
 
@@ -173,11 +180,11 @@ atefitsurv <- function(data,
     est.boot <- drsurv(y = y[idsub.boot],
                        d = d[idsub.boot],
                        x.cate = x.cate[idsub.boot, ],
-                       x.ps = x.ps[idsub.boot, ],
+                       x.ps = x.ps[idsub.boot, , drop = FALSE],
                        x.ipcw = x.ipcw[idsub.boot, ],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
     save.boot[i,] <- unlist(est.boot)
 
     if (verbose == 1) setTxtProgressBar(pb, i)
@@ -249,17 +256,24 @@ atefitsurv <- function(data,
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom survival Surv coxph coxph.detail survreg
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list()) {
+  ps.args <- resolve_ps_control(ps.control)
+
   rmst.args <- resolve_rmst_control(rmst.control)
 
 
   if (ps.method == "lasso") {
-    ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
+    ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
   } else {
     ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
   }
@@ -332,7 +346,12 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return ate.rmtl.high: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned.
 #'         ate.rmtl.low: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the lower-than-cutoff category;
@@ -345,7 +364,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 
 estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 = tau0,
                                       score, higher.y, prop, onlyhigh,
-                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
+                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list()) {
 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -361,9 +380,9 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 
   for (b in seq(n.subgroup)) {
     idsub1 <- (score >= cut[b])
-    fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, ], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
+    fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
                                  trt = trt[idsub1], yf = yf[idsub1],
-                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
+                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
     ate.rmtl.high[b] <- fit.high$log.rmtl.ratio
     hr.high[b] <- fit.high$log.hazard.ratio
     warn.high[b] <- list(fit.high$warnings)
@@ -371,9 +390,9 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 
     if (onlyhigh == FALSE) {
       idsub0 <- (score < cut[b])
-      fit.low <- survCatch(drsurv(y = y[idsub0], d = d[idsub0], x.cate = as.matrix(x.cate[idsub0, ]), x.ps = x.ps[idsub0, ], x.ipcw = as.matrix(x.ipcw[idsub0, ]),
+      fit.low <- survCatch(drsurv(y = y[idsub0], d = d[idsub0], x.cate = as.matrix(x.cate[idsub0, ]), x.ps = x.ps[idsub0, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub0, ]),
                                   trt = trt[idsub0], yf = yf[idsub0],
-                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
+                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
       ate.rmtl.low[b] <- fit.low$log.rmtl.ratio
       hr.low[b] <- fit.low$log.hazard.ratio
       warn.low[b] <- list(fit.low$warnings)
@@ -428,7 +447,12 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @return ate.rmtl: estimated ATEs (ratio of RMTL) of all categories in the one multilevel subgroup;
 #' vector of size equal to the length of categories in the multilevel subgroup.
 #'         ate.hr: unadjusted hazard ratio of all categories in the one multilevel subgroup;
@@ -436,7 +460,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 
 estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 = tau0,
                                          score, higher.y, prop, surv.min = 0.025,
-                                         ps.method = 'glm', minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
+                                         ps.method = 'glm', minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list()) {
 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, prop)
@@ -447,9 +471,9 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
 
   for (b in 1:n.subgroup) {
     idsub <- (score >= cut[b] & score <= cut[b + 1])
-    fit <- survCatch(drsurv(y = y[idsub], d = d[idsub], x.cate = as.matrix(x.cate[idsub, ]), x.ps = x.ps[idsub, ], x.ipcw = as.matrix(x.ipcw[idsub, ]),
+    fit <- survCatch(drsurv(y = y[idsub], d = d[idsub], x.cate = as.matrix(x.cate[idsub, ]), x.ps = x.ps[idsub, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub, ]),
                             trt = trt[idsub], yf = yf[idsub],
-                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
+                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
     ate.rmtl[b] <- fit$log.rmtl.ratio
     hr[b] <- fit$log.hazard.ratio
     warn[b] <- list(fit$warnings)

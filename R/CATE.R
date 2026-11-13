@@ -159,18 +159,23 @@
 #' coef(fit_2)
 #'
 #' }
-#' @param contrast.control A named list of options for count-outcome contrast
+#' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
 #' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
 #' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Only count
-#' outcomes support this list; other outcomes retain their existing solver.
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @export
 
 catefit <- function(response,
@@ -204,17 +209,19 @@ catefit <- function(response,
                     plot.gbmperf = TRUE,
                     verbose = 0,
                     contrast.control = list(),
-                    rmst.control = list(), ...) {
+                    rmst.control = list(), ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
-  if (length(contrast.control) && response != "count")
-    stop("contrast.control is currently supported only for count outcomes.")
+  if (length(contrast.control) && response == "continuous")
+    stop("contrast.control is supported only for count or survival outcomes.")
   if (length(rmst.control) && response != "survival")
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
   if (response != "survival") .args$rmst.control <- NULL
-  if (response != "count") .args$contrast.control <- NULL
+  if (response == "continuous") .args$contrast.control <- NULL
   switch(response,
          count = {
            fitout <- do.call(catefitcount, .args)

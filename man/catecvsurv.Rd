@@ -37,7 +37,9 @@ catecvsurv(
   seed = NULL,
   plot.gbmperf = TRUE,
   verbose = 0,
-  rmst.control = list()
+  rmst.control = list(),
+  contrast.control = list(),
+  ps.control = list()
 )
 }
 \arguments{
@@ -179,7 +181,20 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 The C backend accumulates each patient's integral without allocating a
 patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of count-model \code{contrast.control}.}
+for survival outcomes; independent of \code{contrast.control}.}
+
+\item{contrast.control}{A named list of contrast-regression options:
+\code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+\code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+to \code{stats::optim} on fallback). List entries override top-level NR
+arguments. This is independent of \code{rmst.control}, which selects RMST
+integration, and is not passed to boosting via \code{...}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 }
 \value{
 Returns a list containing the following components saved as a \code{"precmed"} object:

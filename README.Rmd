@@ -27,7 +27,13 @@ options(width = 60, digits = 3)
 
 ## Learning resources
 
-The theory behind **precmed** is discussed in [*Comparative Effectiveness and Personalized Medicine Research Using Real-World Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter 20](https://doi.org/10.1201/9781003300809-20) explains how to visualize and interpret individualized treatment rule results using the package [@jiang2026visualization].
+For a broader introduction to personalized medicine using real-world data, see *Comparative Effectiveness and Personalized Medicine Research Using Real-World Data* [@debray2026comparative]. The following chapters are particularly relevant to **precmed**:
+
+- [Chapter 17](https://doi.org/10.1201/9781003300809-17): principles of CATE prediction and model development in randomized and non-randomized data [@hoogland2026introduction].
+- [Chapter 19](https://doi.org/10.1201/9781003300809-19): validation strategies and assessment of discrimination, calibration, and decision accuracy [@thao2026validation].
+- [Chapter 20](https://doi.org/10.1201/9781003300809-20): visualization and interpretation of individualized treatment rules, validation curves, and responder diagnostics, with examples using **precmed** [@jiang2026visualization].
+
+The original methodological references are @yadlowsky2020estimation for ratio-based CATE estimation and validation, and @zhao2013effectively for target-population selection.
 
 Two free courses complement the book and introduce **precmed**, its practical use, and the underlying statistical methods. [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro) covers the foundations through recorded webinars, exercises, and readings. The [free companion course to the book](https://sdas.thinkific.com/courses/rwd-book) provides background materials, example R code, and curated references to support practical analyses.
 

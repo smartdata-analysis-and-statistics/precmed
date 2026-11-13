@@ -13,7 +13,8 @@ drcount(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE
+  interactions = TRUE,
+  ps.control = list()
 )
 }
 \arguments{
@@ -53,6 +54,12 @@ propensity scores should be truncated. Must be strictly greater than
 should allow for treatment-covariate interaction by \code{x}. If \code{TRUE},
 interactions will be assumed only if at least 10 patients received each
 treatment option. Default is \code{TRUE}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 }
 \value{
 Return a list of 4 elements:

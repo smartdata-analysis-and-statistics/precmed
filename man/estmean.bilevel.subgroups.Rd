@@ -16,7 +16,8 @@ estmean.bilevel.subgroups(
   onlyhigh,
   ps.method = "glm",
   minPS = 0.01,
-  maxPS = 0.99
+  maxPS = 0.99,
+  ps.control = list()
 )
 }
 \arguments{
@@ -53,6 +54,12 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{ps.control}{Named options for LASSO propensity-score interaction screening.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+\code{...} and other numerical controls.}
 }
 \value{
 ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;

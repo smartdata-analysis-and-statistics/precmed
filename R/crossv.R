@@ -200,18 +200,23 @@
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom survival Surv coxph coxph.detail survreg
-#' @param contrast.control A named list of options for count-outcome contrast
+#' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
 #' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
 #' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Only count
-#' outcomes support this list; other outcomes retain their existing solver.
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom utils setTxtProgressBar txtProgressBar
 
 catecv <- function(response,
@@ -250,18 +255,20 @@ catecv <- function(response,
                    seed = NULL,
                    plot.gbmperf = TRUE,
                    verbose = 0,
-                   contrast.control = list(), rmst.control = list()) {
+                   contrast.control = list(), rmst.control = list(), ps.control = list()) {
+  resolve_ps_control(ps.control)
+
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
 
-  if (length(contrast.control) && response != "count")
-    stop("contrast.control is currently supported only for count outcomes.")
+  if (length(contrast.control) && response == "continuous")
+    stop("contrast.control is supported only for count or survival outcomes.")
   if (length(rmst.control) && response != "survival")
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
   if (response != "survival") .args$rmst.control <- NULL
-  if (response != "count") .args$contrast.control <- NULL
+  if (response == "continuous") .args$contrast.control <- NULL
 
   switch(response,
          count = {
@@ -583,7 +590,18 @@ catecv <- function(response,
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
 #' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of count-model \code{contrast.control}.
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param contrast.control A named list of contrast-regression options:
+#' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+#' \code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+#' to \code{stats::optim} on fallback). List entries override top-level NR
+#' arguments. This is independent of \code{rmst.control}, which selects RMST
+#' integration, and is not passed to boosting via \code{...}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom dplyr %>%
 #'
 catecvsurv <- function(data,
@@ -617,9 +635,13 @@ catecvsurv <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        plot.gbmperf = TRUE,
-                       verbose = 0, rmst.control = list()) {
+                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list()) {
+  resolve_ps_control(ps.control)
+
   resolve_rmst_control(rmst.control)
 
+
+  resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -770,13 +792,13 @@ catecvsurv <- function(data,
     # Calculate the ATE in the training and validation sets (for abc, plot, boxplot)
     overall.train <- drsurv(y = y.train, d = d.train, x.cate = x.cate.train, x.ps = x.ps.train,
                             x.ipcw = x.ipcw.train, trt = trt.train, yf = yf.train, tau0 = tau0, surv.min = surv.min,
-                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
     result$overall.ate.train[cv.i] <- exp(overall.train$log.rmtl.ratio)
     result$overall.hr.train[cv.i] <- exp(overall.train$log.hazard.ratio)
 
     overall.valid <- drsurv(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid,
                             x.ipcw = x.ipcw.valid, trt = trt.valid, yf = yf.valid, tau0 = tau0, surv.min = surv.min,
-                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
     result$overall.ate.valid[cv.i] <- exp(overall.valid$log.rmtl.ratio)
     result$overall.hr.valid[cv.i] <- exp(overall.valid$log.hazard.ratio)
 
@@ -789,7 +811,8 @@ catecvsurv <- function(data,
                     initial.predictor.method = initial.predictor.method,
                     tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                     B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
-                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune)
+                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
+                    contrast.control = contrast.control, ps.control = ps.control)
 
 
     if ("contrastReg" %in% score.method) {
@@ -818,7 +841,7 @@ catecvsurv <- function(data,
     if (prop.onlyhigh[n.subgroup.onlyhigh] == 1) {
       est.prop1 <- survCatch(drsurv(y = y.train, d = d.train, x.cate = x.cate.train, x.ps = x.ps.train, x.ipcw = x.ipcw.train,
                                     trt = trt.train, yf = yf.train,
-                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
+                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
     } else {
@@ -834,7 +857,7 @@ catecvsurv <- function(data,
                                           tau0 = tau0, surv.min = surv.min,
                                           score = score.train, higher.y = higher.y,
                                           prop = prop.bi, onlyhigh = FALSE,
-                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <- c(est.bi$ate.rmtl.high, est.prop1$ate.rmtl.high)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <- est.bi$ate.rmtl.low
       result[[str_replace(name, "score", "hr")]]$hr.est.train.high.cv[, cv.i] <- c(est.bi$hr.high, est.prop1$hr.high)
@@ -861,7 +884,7 @@ catecvsurv <- function(data,
                                                 tau0 = tau0, surv.min = surv.min,
                                                 score = score.train, higher.y = higher.y,
                                                 prop = prop.multi,
-                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.train.group.cv[, cv.i] <- est.multi$hr
 
@@ -899,7 +922,7 @@ catecvsurv <- function(data,
     if (prop.onlyhigh[n.subgroup.onlyhigh] == 1) {
       est.prop1 <- survCatch(drsurv(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, x.ipcw = x.ipcw.valid,
                                     trt = trt.valid, yf = yf.valid,
-                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
+                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
     } else {
@@ -915,7 +938,7 @@ catecvsurv <- function(data,
                                           tau0 = tau0, surv.min = surv.min,
                                           score = score.valid, higher.y = higher.y,
                                           prop = prop.bi, onlyhigh = FALSE,
-                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <- c(est.bi$ate.rmtl.high, est.prop1$ate.rmtl.high)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <- est.bi$ate.rmtl.low
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.high.cv[, cv.i] <- c(est.bi$hr.high, est.prop1$hr.high)
@@ -944,7 +967,7 @@ catecvsurv <- function(data,
                                                 tau0 = tau0, surv.min = surv.min,
                                                 score = score.valid, higher.y = higher.y,
                                                 prop = prop.multi,
-                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
+                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.group.cv[, cv.i] <- est.multi$hr
 
@@ -962,7 +985,7 @@ catecvsurv <- function(data,
         temp.abc <- log(estsurv.bilevel.subgroups(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, x.ipcw = x.ipcw.valid,
                                                   trt = trt.valid, yf = yf.valid, tau0 = tau0, surv.min = surv.min,
                                                   score = score.valid, higher.y = higher.y, prop = prop.abc, onlyhigh = TRUE,
-                                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)$ate.rmtl.high)
+                                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)$ate.rmtl.high)
 
         if (higher.y == FALSE) {
           # if higher.y=FALSE, higher scores are better and ABC requires subtracting the ATE from validation curve
@@ -1297,13 +1320,18 @@ catecvsurv <- function(data,
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
-#' @param contrast.control A named list of options for count-outcome contrast
+#' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
 #' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
 #' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Only count
-#' outcomes support this list; other outcomes retain their existing solver.
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom MASS glm.nb
 
 catecvcount <- function(data,
@@ -1334,7 +1362,9 @@ catecvcount <- function(data,
                         plot.gbmperf = TRUE,
                         verbose = 0,
                         contrast.control = list(),
-                        ...) {
+                        ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
 
   resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
@@ -1446,12 +1476,12 @@ catecvcount <- function(data,
                                                   x.cate = x.cate.train, x.ps = x.ps.train,
                                                   trt = trt.train, time = time.train,
                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                                  interactions = FALSE)$log.rate.ratio)
+                                                  interactions = FALSE, ps.control = ps.control)$log.rate.ratio)
     result$overall.ate.valid[cv.i] <- exp(drcount(y = y.valid,
                                                   x.cate = x.cate.valid, x.ps = x.ps.valid,
                                                   trt = trt.valid, time = time.valid,
                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                                  interactions = FALSE)$log.rate.ratio)
+                                                  interactions = FALSE, ps.control = ps.control)$log.rate.ratio)
 
 
     ####### Fit the interaction model --------------------------------------------------------------
@@ -1466,7 +1496,7 @@ catecvcount <- function(data,
                      tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
                      Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
                      error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                     contrast.control = contrast.control, ...)
+                     contrast.control = contrast.control, ..., ps.control = ps.control)
 
     if ("contrastReg" %in% score.method) converge.contrastReg.cv[cv.i] <-
       fit$result.contrastReg$converge.contrastReg
@@ -1506,7 +1536,7 @@ catecvcount <- function(data,
       est.prop1 <- exp(drcount(y = y.train,
                                x.cate = x.cate.train, x.ps = x.ps.train, trt = trt.train,
                                time = time.train,
-                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE)$log.rate.ratio)
+                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$log.rate.ratio)
     } else {
       est.prop1 <- NULL
     }
@@ -1519,7 +1549,7 @@ catecvcount <- function(data,
                                    time = time.train, trt = trt.train,
                                    score = score.train, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE, ps.method = ps.method,
-                                   minPS = minPS, maxPS = maxPS)
+                                   minPS = minPS, maxPS = maxPS, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <-
         c(ate.train.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <-
@@ -1530,7 +1560,7 @@ catecvcount <- function(data,
                                      time = time.train, trt = trt.train,
                                      score = score.train, higher.y = higher.y,
                                      prop = prop.multi, ps.method = ps.method,
-                                     minPS = minPS, maxPS = maxPS)
+                                     minPS = minPS, maxPS = maxPS, ps.control = ps.control)
     }
 
     ####### Construct the score in validation set ----------------------------------------------
@@ -1546,7 +1576,7 @@ catecvcount <- function(data,
       est.prop1 <- exp(drcount(y = y.valid,
                                x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid,
                                time = time.valid,
-                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE)$log.rate.ratio)
+                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$log.rate.ratio)
     }
 
     for (name in names(fit.score.valid)) {
@@ -1557,7 +1587,7 @@ catecvcount <- function(data,
                                    time = time.valid, trt = trt.valid,
                                    score = score.valid, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE,
-                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <-
         c(ate.valid.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <-
@@ -1568,7 +1598,7 @@ catecvcount <- function(data,
                                      time = time.valid, trt = trt.valid,
                                      score = score.valid, higher.y = higher.y,
                                      prop = prop.multi,
-                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
 
       if (abc == TRUE) {
         temp.abc <- log(estcount.bilevel.subgroups(y = y.valid,
@@ -1576,7 +1606,7 @@ catecvcount <- function(data,
                                                    time = time.valid, trt = trt.valid,
                                                    score = score.valid, higher.y = higher.y,
                                                    prop = prop.abc, onlyhigh = TRUE,
-                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS))
+                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control))
 
         if (higher.y == TRUE) {
           # if higher scores are better, ABC requires subtracting the ATE from validation curve
@@ -1860,6 +1890,11 @@ catecvcount <- function(data,
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom MASS glm.nb ginv
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
 #' @importFrom randomForestSRC rfsrc predict.rfsrc
 
 catecvmean <- function(data,
@@ -1891,7 +1926,9 @@ catecvmean <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        verbose = 0,
-                       ...) {
+                       ps.control = list(), ...) {
+  resolve_ps_control(ps.control)
+
 
   stop("This functionality is not implemented yet")
 
@@ -2042,12 +2079,12 @@ catecvmean <- function(data,
                                              x.cate = x.cate.train, x.ps = x.ps.train,
                                              trt = trt.train,
                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                             interactions = FALSE)$mean.diff
+                                             interactions = FALSE, ps.control = ps.control)$mean.diff
     result$overall.ate.valid[cv.i] <- drmean(y = y.valid,
                                              x.cate = x.cate.valid, x.ps = x.ps.valid,
                                              trt = trt.valid,
                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                             interactions = FALSE)$mean.diff
+                                             interactions = FALSE, ps.control = ps.control)$mean.diff
 
 
     # Fit the interaction model
@@ -2059,7 +2096,7 @@ catecvmean <- function(data,
                     xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
                     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                     tree.depth = tree.depth,  n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
-                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf, ...)
+                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf, ..., ps.control = ps.control)
 
     #    if ("contrastReg" %in% score.method) converge.contrastReg.cv[cv.i] <-
     #      fit$result.contrastReg$converge.contrastReg
@@ -2126,7 +2163,7 @@ catecvmean <- function(data,
                           ps.method = ps.method,
                           minPS = minPS,
                           maxPS = maxPS,
-                          interactions = FALSE)$mean.diff
+                          interactions = FALSE, ps.control = ps.control)$mean.diff
     } else {
       est.prop1 <- NULL
     }
@@ -2139,7 +2176,7 @@ catecvmean <- function(data,
                                   trt = trt.train,
                                   score = score.train, higher.y = higher.y,
                                   prop = prop.bi, onlyhigh = FALSE, ps.method = ps.method,
-                                  minPS = minPS, maxPS = maxPS)
+                                  minPS = minPS, maxPS = maxPS, ps.control = ps.control)
       result[[stringr::str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <-
         c(ate.train.cv.i$ate.est.high, est.prop1)
       result[[stringr::str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <-
@@ -2150,7 +2187,7 @@ catecvmean <- function(data,
                                     trt = trt.train,
                                     score = score.train, higher.y = higher.y,
                                     prop = prop.multi, ps.method = ps.method,
-                                    minPS = minPS, maxPS = maxPS)
+                                    minPS = minPS, maxPS = maxPS, ps.control = ps.control)
     }
 
     ####### Construct the score in validation set
@@ -2165,7 +2202,7 @@ catecvmean <- function(data,
     if (prop.onlyhigh[n.subgroup.onlyhigh] == 1) {
       est.prop1 <- drmean(y = y.valid,
                           x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid,
-                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE)$mean.diff
+                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$mean.diff
     }
 
     for (name in names(fit.score.valid)) {
@@ -2176,7 +2213,7 @@ catecvmean <- function(data,
                                   trt = trt.valid,
                                   score = score.valid, higher.y = higher.y,
                                   prop = prop.bi, onlyhigh = FALSE,
-                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
       result[[stringr::str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <-
         c(ate.valid.cv.i$ate.est.high, est.prop1)
       result[[stringr::str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <-
@@ -2187,7 +2224,7 @@ catecvmean <- function(data,
                                     trt = trt.valid,
                                     score = score.valid, higher.y = higher.y,
                                     prop = prop.multi,
-                                    ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                    ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
 
       if (abc == TRUE) {
         temp.abc <- estmean.bilevel.subgroups(y = y.valid,
@@ -2195,7 +2232,7 @@ catecvmean <- function(data,
                                               trt = trt.valid,
                                               score = score.valid, higher.y = higher.y,
                                               prop = prop.abc, onlyhigh = TRUE,
-                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS)
+                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
 
         if (higher.y == TRUE) {
           # if higher scores are better, ABC requires subtracting the ATE from validation curve

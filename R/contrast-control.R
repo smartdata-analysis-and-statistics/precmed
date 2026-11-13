@@ -26,7 +26,7 @@ validate_contrast_controls <- function(error.maxNR, max.iterNR, tune, optim.cont
   }
 }
 
-# Count-model-specific controls are separated from GBM's ... arguments.
+# Contrast-regression controls are separated from GBM's ... arguments.
 resolve_contrast_control <- function(contrast.control, error.maxNR, max.iterNR, tune) {
   defaults <- list(solver = "C", error.maxNR = error.maxNR,
                    max.iterNR = max.iterNR, tune = tune, optim.control = list())
