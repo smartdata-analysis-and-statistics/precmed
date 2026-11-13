@@ -3,6 +3,8 @@
 S3method(abc,default)
 S3method(abc,precmed)
 S3method(boxplot,precmed)
+S3method(coef,atefit)
+S3method(confint,atefit)
 S3method(plot,atefit)
 S3method(plot,precmed)
 S3method(print,atefit)

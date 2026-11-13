@@ -1,7 +1,8 @@
 ---
-title: "Additional examples"
+title: "Customizing CATE models and validation"
 subtitle: "Vignette 3 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
+bibliography: references.bib
 output: 
   html_document:
     toc: TRUE
@@ -35,22 +36,19 @@ knitr::opts_chunk$set(cache.extra = list(
 ```
 
 
-<h1>precmed: Precision Medicine in R</h1>
-A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
 
-# Additional examples for the `precmed` package
-**precmed** can be flexible given the many arguments that the user can specify. The example described above is one of the many ways to perform the analysis with most argument values kept as default. We provide a few more examples below to show what other options the user has and how to be more creative in using **precmed**. 
+This vignette builds on the worked examples for [count outcomes](Count-examples.html) and [survival outcomes](Survival-examples.html). It shows how to customize initial outcome models, define responder subgroups, and choose censoring models and follow-up settings for CATE estimation and validation.
 
-# Load required packages
+## Load required packages
 ```{r, echo = T, message=F}
 library(precmed)
 library(dplyr)
 library(ggplot2)
 ```
 
-# Additional examples with count outcomes
-## Initial predictor method
-If you choose two regressions or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the CV fold) are calculated. See [Theoretical details](Theoretical-details.html) section for the background of these initial predictors and how they are used in two and contrast regressions. Here is a list of all 3 options:
+## Customize models for count outcomes
+### Initial predictor method
+If you choose two regressions or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the CV fold) are calculated. See [Methods for estimating and validating treatment effects](Theoretical-details.html) section for the background of these initial predictors and how they are used in two and contrast regressions. Here is a list of all 3 options:
 
 * "poisson" (Poisson regression from the `glm()` function) 
   * generalized linear model, strong assumption on Poisson distribution, fast
@@ -97,7 +95,9 @@ Note that for the GAM method, there is an additional argument called `xvar.smoot
 Generally speaking, the "poisson" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "gam" is somewhere in between with longer computational time as the number of smooth terms increases.
 
 
-## Subgroup proportion
+### Subgroup proportion
+Chapter 20, "Visualization and interpretation of individualized treatment rule results", provides background on defining responder subgroups and interpreting the resulting validation curves and responder diagnostics [@jiang2026visualization]. The examples below show how to specify these subgroups in `precmed`.
+
 The ATE by subgroups and validation curve results depend on how the subgroups are defined, which is determined by the sorted CATE scores. There could be nested binary subgroups (cutoffs specified by `prop.cutoff`) or mutually exclusive subgroups (cutoffs specified by `prop.multi`). In the main example above, we used the default values of `prop.cutoff` and `prop.multi` and we have provided explanations in the ATE results. Here is a recap:
 
 * `prop.cutoff = seq(0.5, 1, length = 6)` means that we have 6 sets of nested binary subgroups where the first subgroup splits the sample by 50/50 according to the estimated CATE scores (sorted), the 2nd subgroup splits the sample by 60/40, ..., the 5th subgroup splits the sample by 90/10, and the 6th subgroup splits the sample by 100/0. The validation curves show the ATE in the first group of each split, i.e., 50%, 60%, 70%, ..., 100%. The 6th subgroup is technically not a split but we keep it because it is equivalent to the overall ATE (the gray dashed reference line). The functions that use `prop.cutoff` will automatically discard 0 if supplied because 0/100 split does not make sense as there is no 0% subgroup to plot for the validation curves, and a warning message will be given. The argument `higher.y` controls the direction of the sorted CATE scores, i.e., whether we split from the lowest or the highest CATE scores. For our toy example, `higher.y` = FALSE so we split from the lowest CATE scores such that the first group in each subgroup represents higher responders to the treatment coded with 1.
@@ -134,7 +134,7 @@ Because we have new `prop.cutoff` with 11 values as opposed to only 6 in the ori
 plot(output_catecv2) 
 ```
 
-The validation curves depend on `prop.cutoff` and are now smoother than the one presented in the main example because they contain 10 subgroups instead of 5. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Theoretical details](Theoretical-details.html) section. 
+The validation curves depend on `prop.cutoff` and are now smoother than the one presented in the main example because they contain 10 subgroups instead of 5. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section. 
 
 
 ```{r subgroup_proportion4_count, eval = T, echo = T}
@@ -181,12 +181,12 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 3. In general, we do not recommend specifying too few proportions for `prop.cutoff` (e.g., 2 or 3) because the validation curves will look jagged. The validation curves will be smoother with more proportions spread out over the range of proportions. If computation is an issue, however, choosing too many values for `prop.cutoff` or `prop.multi` can be time consuming. It is recommended to start from a smaller length and you can increase the length as needed. 
 
 
-# Additional examples for survival outcomes
+## Customize models for survival outcomes
 
 
-## Initial predictor method
+### Initial predictor method
 
-If you choose two and/or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the cross validation fold) are calculated. See [Theoretical details](Theoretical-details.html) section for the background of these initial predictors and how they are used in the two and contrast regression. Here is a list of all 3 options:
+If you choose two and/or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the cross validation fold) are calculated. See [Methods for estimating and validating treatment effects](Theoretical-details.html) section for the background of these initial predictors and how they are used in the two and contrast regression. Here is a list of all 3 options:
 
 -   "logistic" (logistic regression from the `glm()` function)
     -   generalized linear model, strong assumption on binomial
@@ -253,7 +253,7 @@ Note that for `boosting` and `randomForest` methods that are tree-based, paramet
 
 Generally speaking, the "logistic" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is somewhere in between with longer computational time as the number of trees and tree depth increase.
 
-## Subgroup proportion
+### Subgroup proportion
 
 The **precmed** results depend on the subgroups which are determined by the sorted CATE scores. There could be nested binary subgroups (cutoffs specified by `prop.cutoff`) or mutually exclusive subgroups (cutoffs specified by `prop.multi`). In the main example above, we used certain values of `prop.cutoff` and `prop.multi` and we have provided explanations in the ATE results. Here is a recap:
 
@@ -301,7 +301,7 @@ plot(output_catecv2)
 ```
 
 The validation curves depend on `prop.cutoff` and have more line segments than the one presented in the main example because they contain 9 sets of subgroups instead of 5 sets (although it is not so obvious here in this example). The ABC statistic is not affected by this because the calculation of ABC statistics depends on the minimum and maximum of
-the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are created from this range. The highest proportion cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See more theoretical details on ABC calculation in the [Theoretical details](Theoretical-details.html) section.
+the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are created from this range. The highest proportion cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section.
 
 ```{r subgroup_proportion4, eval = T, echo = T}
 print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
@@ -349,7 +349,7 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 2.  We do not recommend choosing values too close to 0 either because this will generate very small subgroups which may lead to numerical instability, e.g., 10/90 split specified by 0.1 in this example. In this situation, either the validation curves will be plotted by the range of the unstable ATE estimates will make them useless or the validation curves will not be plotted if the numerical instability due to an extreme split leads to missing or infinite values, in which case a warning or error is printed as in the example above.
 3.  In general, we do not recommend specifying too few proportions for `prop.cutoff` (e.g., 2 or 3) because the validation curves will look very jagged. The validation curves will be smoother with more proportions and more spread out over the range of proportions. If computation is an issue, however, choosing too many values for `prop.cutoff` or `prop.multi` can be time consuming. It is recommended to start from a smaller length and you can increase the length as needed.
 
-## IPCW model and method
+### IPCW model and method
 
 The default IPCW model uses the same covariates as the outcome model `cate.model` plus the treatment. The default IPCW method is a Cox regression with Breslow estimator of the baseline survivor function from `coxph()` function in the `survival` package. Different variables or different method can be specified in the IPCW model. In the example below, we changed the covariates to the number of symptoms and number relapses in the pre-index period and specified the Weibull accelerated failure time (AFT) regression model using the location-scale parameterization. The `survreg()` function in the `survival` package was used to fit the AFT model.
 
@@ -375,7 +375,7 @@ output_catecv4 <- catecv(response = "survival",
                          verbose = 0)
 ```
 
-## Truncation and follow-up time
+### Truncation and follow-up time
 
 The argument `tau0` specifies the truncation time for RMTL. The default is the maximum survival time in the data but it can be changed if you have a specific truncation time in mind. Similarly, the maximum follow-up time argument `followup.time` can be changed from the default, which is unknown potential censoring time. The study setup usually can shed some light on what values to use for these two time parameters.
 
@@ -405,10 +405,12 @@ plot(output_catecv5)
 ```
 
 
-# Other `precmed` vignettes in this series  
+## Other `precmed` vignettes in this series  
   
-[1. Examples for count outcome](Count-examples.html)  
-[2. Examples for survival outcome](Survival-examples.html)  
-[3. Additional examples](Additional-examples.html)  
-[4. Theoretical details](Theoretical-details.html)    
+[1. Estimating and validating treatment effects for count outcomes](Count-examples.html)  
+[2. Estimating and validating treatment effects for survival outcomes](Survival-examples.html)  
+[3. Customizing CATE models and validation](Additional-examples.html)  
+[4. Methods for estimating and validating treatment effects](Theoretical-details.html)    
+
+## References
     

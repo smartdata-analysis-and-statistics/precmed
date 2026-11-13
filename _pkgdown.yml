@@ -20,13 +20,13 @@ navbar:
 #    href: articles/precmed.html
   - text: Vignettes
     menu:
-    - text: Example with count outcome
+    - text: Estimating and validating treatment effects for count outcomes
       href: articles/Count-examples.html
-    - text: Example with survival outcome
+    - text: Estimating and validating treatment effects for survival outcomes
       href: articles/Survival-examples.html
-    - text: Additional examples
+    - text: Customizing CATE models and validation
       href: articles/Additional-examples.html
-    - text: Theoretical details
+    - text: Methods for estimating and validating treatment effects
       href: articles/Theoretical-details.html
     href: articles/index.html
   - text: Learning resources

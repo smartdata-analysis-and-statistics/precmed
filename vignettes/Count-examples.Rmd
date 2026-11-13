@@ -1,5 +1,5 @@
 ---
-title: "Examples for count outcome"
+title: "Estimating and validating treatment effects for count outcomes"
 subtitle: "Vignette 1 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 bibliography: references.bib
@@ -32,10 +32,9 @@ knitr::opts_chunk$set(cache.extra = list(
 ))
 ```
 
-<h1>precmed: Precision Medicine in R</h1>
-A doubly robust precision medicine approach to estimate and validate conditional average treatment effects
+This vignette demonstrates how to use `precmed` to estimate average and conditional average treatment effects (ATEs and CATEs) for count outcomes. Using simulated multiple sclerosis data, we model relapse rates, compare CATE scoring methods through internal validation, and interpret treatment effects in responder subgroups.
 
-# Applying precmed to count outcome data
+For background on CATE prediction and model development, see Chapter 17, "Introduction to methods for personalizing medicine" [@hoogland2026introduction]. Chapter 20, "Visualization and interpretation of individualized treatment rule results", provides practical guidance on interpreting treatment rules and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
 
 ```{r, include=FALSE}
 ###################################################################
@@ -82,7 +81,11 @@ row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", 
 
 ```{r, echo = F, eval = T, include = T}
 ## Create a TableOne object
-knitr::kable(t.table1)
+# Show group sizes beneath the group names in the table header.
+colnames(t.table1)[-1] <- paste0(
+  colnames(t.table1)[-1], "<br>(n = ", trimws(t.table1[1, -1]), ")"
+)
+knitr::kable(t.table1[-1, , drop = FALSE], format = "html", escape = FALSE)
 ```
 
 
@@ -98,11 +101,11 @@ Most variables are baseline patient characteristics like age, gender, and previo
 
 To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 13,824 USD and scaled with standard deviation 20,172 USD.
 
-The final dataset `countExample` looked like this:
+The first six records of the final dataset `countExample` are shown below:
 
 ```{r, echo = F, eval = T}
 data(countExample) #get clean dataset
-str(countExample)
+knitr::kable(head(countExample), row.names = FALSE)
 ```
 
 ## Estimation of the ATE with `atefit()` 
@@ -148,16 +151,16 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 ```
 
-The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. The user can retrieve the rate ratio to facilitate the interpretation:
+The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. Use `coef()` and `confint()` to extract the log rate ratio and its confidence interval, then exponentiate them to obtain the rate ratio and its interval. The default confidence level is 95%; specify `level`, for example `level = 0.90`, to request a different level. Intervals use the bootstrap standard error already stored in the fitted object:
 
 ```{r rmtl_atefit, eval = T, echo = T}
-rate.ratio <- exp(output_atefit$log.rate.ratio$estimate)
+rate.ratio <- exp(coef(output_atefit))
 rate.ratio
-CI.rate.ratio <- exp(output_atefit$log.rate.ratio$estimate + c(-1, 1) * qnorm(0.975) * sqrt(output_atefit$log.rate.ratio$SE))
+CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))
 CI.rate.ratio
 ```
 
-The rate ratio of `r round(rate.ratio, 2)` along with the 95\% confidence interval of (`r round(CI.rate.ratio[1], 2)`, `r round(CI.rate.ratio[2], 2)`) suggest that drug 0 is superior to drug 1 because the ratio is greater than 1 and lower outcomes are preferred, but that this superiority is not statistically significant given the p-value of `r round(output_atefit$log.rate.ratio$pvalue, 2)` in the output (`$log.rate.ratio$pvalue`).
+The rate ratio of `r round(rate.ratio, 2)` along with the 95\% confidence interval of (`r round(CI.rate.ratio[1], 2)`, `r round(CI.rate.ratio[2], 2)`) indicate a higher estimated relapse rate under drug 1 than drug 0. However, the confidence interval includes 1, so there is insufficient evidence of a treatment difference, consistent with the p-value of `r round(output_atefit$log.rate.ratio$pvalue, 2)` in the output (`$log.rate.ratio$pvalue`).
 
 Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for the log rate ratio. A red vertical line is added to each histogram with the mean of the bootstrap estimates.
 
@@ -251,6 +254,8 @@ dataplot %>%
 
 ## Internal validation via `catecv()`
 
+For broader guidance on validation strategies and the assessment of discrimination, calibration, and decision accuracy, see Chapter 19, "Validation of prediction models for patient outcomes and individualized treatment effect" [@thao2026validation].
+
 The `catecv()` function provides the same estimation as the `catefit()` but via cross-validation (CV). With the `catecv()` function internal CV is applied to reduce optimism in choosing the CATE estimation method that captures the most treatment effect heterogeneity. The CV is applied by repeating the following steps `cv.n` times:
 
 * Split the data into a training and validation set according to `train.prop` argument. The training and validation sets must be balanced with respect to covariate distributions and doubly robust rate ratio estimates (see `error.max` argument).
@@ -291,7 +296,7 @@ We also specified the following non-mandatory arguments to fit with the data and
 
 * When `verbose` = 1, progress messages are printed in the R console but errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models) and warnings or errors that have occurred during the steps (none in this example). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If `contrastReg` was selected as one of the methods in `score.method`, an additional line of output message will indicate whether the algorithm has converged.
 
-There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Additional examples](Additional-examples.html) vignette for more examples and the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html) section for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
+There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Customizing CATE models and validation](Additional-examples.html) vignette for more examples and the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html) section for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
 ```{r example_catecv, eval = T, echo = T, cache = doc.cache}
 output_catecv <- catecv(response = "count",
@@ -355,7 +360,7 @@ The output is a matrix with columns corresponding to the CV iterations and rows 
 The ABC statistics is calculated by `abc()` for each scoring method specified in `catecv()` and for each of the `cv.n` CV iterations using the output object `output_catecv` from `catecv()`. The ABC corresponds to the area between the curve formed by the ATEs in subgroups of high responders in the validation set (e.g., `output_catecv$ate.contrastReg$ate.est.valid.cv` for contrast regression) and the horizontal line representing the ATE in the validation set. A higher ABC value means that the method captures more treatment effect heterogeneity. See the [Validation curves and the ABC statistics](Theoretical-details.html) section for a detailed illustration of the relationship between `higher.y`, `abc`, and the validation curves. 
 
 ```{r example_abc, eval = T, echo = T}
-output_abc <- abc(x = output_catecv)
+output_abc <- abc(output_catecv)
 output_abc
 ```
 
@@ -370,13 +375,15 @@ In this example, negative binomial also offers the best overall performance beca
 
 ## Visualization of the validation curves with `plot()`
 
+Chapter 20 discusses validation curves, ABC statistics, and their interpretation as responder diagnostics [@jiang2026visualization]. These summaries assess how well a score ranks patients by treatment benefit; they do not, by themselves, establish calibration of the predicted CATEs or the clinical value of a treatment rule [@thao2026validation].
+
 The ATEs of nested subgroups of high responders to drug1 (e.g., `output_catecv$ate.contrastReg$ate.est.train.high.cv` and `output_catecv$ate.contrastReg$ate.est.valid.high.cv` for contrast regression) can be visualized as a side-by-side line plot, with training results on the left and validation results on the right. The x-axis is determined by `prop.cutoff` and the y-axis is the estimated ATEs averaged over `cv.n` CV iterations as specified by `cv.i` = NULL. The estimated ATE is expressed as a RR of drug1 versus drug0 for our toy example. By default, the function retrieves the name of the treatment variable (`trt`) and the original labels (`drug0` and `drug1`) to specify a meaningful y-axis label. Otherwise, it is possible to customize the y-axis label via the `ylab`, for example, by using `Rate ratio of drug1 vs drug0 in each subgroup`. 
 
 Steeper slopes indicate more treatment effect heterogeneity between drug1 and drug0. Because `higher.y` = FALSE in this example, the slopes should be increasing from left (`prop.cutoff` = 0.5) to right (`prop.cutoff` = 1) if treatment effect heterogeneity is present. The method that has the steepest slope in the validation results would be selected because it captures the most treatment effect heterogeneity while generalizing well to unseen data.
 
  
 ```{r example_plot_lineplot1, eval = T, echo = T}
-plot(x = output_catecv)
+plot(output_catecv)
 ```
 
 For this toy example, the methods are performing well in the training data as per the steep, increasing slopes on the left plot. Moreover, all methods generalize well to the validation data, as indicated by the monotonous increasing curves in the validation data (right plot). The dashed gray line is the ATE in the entire data set, which is why all lines merge to this reference line when subgroup size is 100\% of the data (`prop.cutoff` = 1). For more explanation on the validation curves, see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.html) section. 
@@ -384,7 +391,7 @@ For this toy example, the methods are performing well in the training data as pe
 The plot's legend includes the ABC statistics in the validation set. The user can choose to mute the ABC annotations by specifying `show.abc` = FALSE.
 
 ```{r example_plot_lineplot1.1, eval = T, echo = T}
-plot(x = output_catecv, 
+plot(output_catecv, 
      show.abc = FALSE, 
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
 ```
@@ -392,7 +399,7 @@ plot(x = output_catecv,
 The user can choose to plot the validation curves of only one CV iteration instead of the average of all CV iterations. In the following example, we plot the validation curves of the second CV iteration by specifying `cv.i` = 2 and in grayscale by specifying `grayscale` = TRUE.
 
 ```{r example_plot_lineplot2, eval = T, echo = T}
-plot(x = output_catecv, 
+plot(output_catecv, 
      cv.i = 2, 
      grayscale = TRUE, 
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
@@ -405,7 +412,7 @@ Same as `abc()`, the user can also choose to use the median (instead of mean [de
 The ATEs of multi-category subgroups that are mutually exclusive can be visualized as box plots, with one box plot for each scoring method. Only validation results are visualized here. The x-axis is determined by `prop.multi` and the y-axis is the estimated ATEs in each subgroup. We specify the `ylab` argument accordingly. The subgroups correspond to each row of the `ate.est.valid.group.cv` result in `output_catecv`, so in this example the subgroups are patient with the 33\% lowest (0-33\%), middle 33\% (33-66\%), and highest 33\% (66-100\%) estimated CATE scores. The box plot shows the distribution of the ATEs over all `cv.n` CV iterations, instead of a summary statistics like mean or median in `plot()`. 
 
 ```{r example_plot_boxplot, eval = T, echo = T}
-boxplot(x = output_catecv,
+boxplot(output_catecv,
         ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 ```
 
@@ -423,12 +430,12 @@ For this toy example, we can see why the two regressions method has the highest 
 
 
 
-# Other `precmed` vignettes in this series  
+## Other `precmed` vignettes in this series  
   
-[1. Examples for count outcome](Count-examples.html)  
-[2. Examples for survival outcome](Survival-examples.html)  
-[3. Additional examples](Additional-examples.html)  
-[4. Theoretical details](Theoretical-details.html)    
+[1. Estimating and validating treatment effects for count outcomes](Count-examples.html)  
+[2. Estimating and validating treatment effects for survival outcomes](Survival-examples.html)  
+[3. Customizing CATE models and validation](Additional-examples.html)  
+[4. Methods for estimating and validating treatment effects](Theoretical-details.html)    
 
 
-# References  
+## References  

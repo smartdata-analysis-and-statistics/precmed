@@ -1,5 +1,5 @@
 ---
-title: "A general introduction"
+title: "Getting started with precmed"
 subtitle: "Vignette 1 of 5"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -25,14 +25,12 @@ knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
 ```
 
-<h1>precmed: Precision Medicine in R</h1>
-A doubly robust precision medicine approach to estimate and validate conditional average treatment effects.
-
-# General introduction
 
 **precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
-## How to install?
+For an introduction to CATE prediction, model development, and the assumptions needed to identify treatment effects, see Chapter 17, "Introduction to methods for personalizing medicine" [@hoogland2026introduction].
+
+## Install precmed
 
 The `precmed` package can be installed from CRAN as follows:
 
@@ -47,7 +45,7 @@ install.packages("devtools")
 devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 ```
 
-# Package capabilities
+## Package capabilities
 
 The **precmed** package contains functions to
 
@@ -57,7 +55,9 @@ The **precmed** package contains functions to
 -	Plot the proportion of subjects with an estimated treatment effect no less than $c$ over a range of values for $c$ [@zhao2013effectively]. 
 -	Compute the area between the average treatment difference curve of competing models for the CATE using `abc()`  [@zhao2013effectively]
 
-# Recommended workflow
+## Recommended workflow
+
+Chapter 19 discusses validation strategies and the assessment of discrimination, calibration, and decision accuracy [@thao2026validation]. Chapter 20 provides practical guidance on validation curves, ABC statistics, and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
 
 We recommend the following workflow to develop a model for estimating the CATE in order to identify treatment effect heterogeneity:
 
@@ -71,7 +71,7 @@ We recommend the following workflow to develop a model for estimating the CATE i
 
 In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.
 
-## User input
+### Specify model inputs
 
 When applying `catefit()` or `catecv()`, the user has to (at least) input:
 
@@ -82,15 +82,15 @@ When applying `catefit()` or `catecv()`, the user has to (at least) input:
 - `ps.model`: a formula describing the propensity score model to adjust for confounding (e.g., treatment ~ age + previous_treatment) 
 
 
-# Overview of the vignettes
+## Overview of the vignettes
   
-[1. General introduction](precmed.html)  
-[2. Examples for count outcome](Count-examples.html)  
-[3. Examples for survival outcome](Survival-examples.html)  
-[4. Additional examples](Additional-examples.html)  
-[5. Theoretical details](Theoretical-details.html)   
+[1. Getting started with precmed](precmed.html)  
+[2. Estimating and validating treatment effects for count outcomes](Count-examples.html)  
+[3. Estimating and validating treatment effects for survival outcomes](Survival-examples.html)  
+[4. Customizing CATE models and validation](Additional-examples.html)  
+[5. Methods for estimating and validating treatment effects](Theoretical-details.html)   
   
-# Abbreviations
+## Abbreviations
 
 Abbreviation        Full Name
 -------------       ----------
@@ -108,7 +108,7 @@ RCT                 Randomized controlled trial
 RR                  Rate ratio
 twoReg              Two regressions
 
-# References  
+## References  
 
 
 
