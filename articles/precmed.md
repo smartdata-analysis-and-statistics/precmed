@@ -26,7 +26,7 @@ focuses on the personalization of two competitive treatments using
 randomized data from a clinical trial ([Zhao et al.
 2013](#ref-zhao2013effectively)) or using real-world data (RWD) from a
 non-randomized study ([Yadlowsky et al.
-2020](#ref-yadlowsky2020estimation)).
+2021](#ref-yadlowsky2020estimation)).
 
 ### How to install?
 
@@ -154,11 +154,12 @@ details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Th
 ## References
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. “Estimation and Validation of Ratio-Based Conditional
+and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional
 Average Treatment Effects Using Observational Data.” *Journal of the
-American Statistical Association*, 1–18.
+American Statistical Association* 116 (533): 335–52.
+<https://doi.org/10.1080/01621459.2020.1772080>.
 
 Zhao, Lihui, Lu Tian, Tianxi Cai, Brian Claggett, and Lee-Jen Wei. 2013.
 “Effectively Selecting a Target Population for a Future Comparative
 Study.” *Journal of the American Statistical Association* 108 (502):
-527–39.
+527–39. <https://doi.org/10.1080/01621459.2013.770705>.

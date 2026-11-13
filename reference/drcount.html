@@ -64,7 +64,8 @@ count outcomes.</p>
 <span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
-<span>  interactions <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  interactions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,6 +126,14 @@ propensity scores should be truncated. Must be strictly greater than
 should allow for treatment-covariate interaction by <code>x</code>. If <code>TRUE</code>,
 interactions will be assumed only if at least 10 patients received each
 treatment option. Default is <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
+<dd><p>Named options for LASSO propensity-score interaction screening.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+<code>...</code> and other numerical controls.</p></dd>
 
 </dl></div>
     <div class="section level2">

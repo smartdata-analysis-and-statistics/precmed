@@ -31,6 +31,8 @@ intxsurv(
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
+  contrast.control = list(),
+  ps.control = list(),
   ...
 )
 ```
@@ -178,6 +180,24 @@ intxsurv(
   specifies a quantity to be added to diagonal of the slope matrix to
   prevent singularity. Used only if `score.method = 'contrastReg'`.
   Default is `c(0.5, 2)`.
+
+- contrast.control:
+
+  A named list of contrast-regression options: `solver` (`"C"`, the
+  default, or `"R"`), `error.maxNR`, `max.iterNR`, `tune`, and
+  `optim.control` (a named list passed to
+  [`stats::optim`](https://rdrr.io/r/stats/optim.html) on fallback).
+  List entries override top-level NR arguments. This is independent of
+  `rmst.control`, which selects RMST integration, and is not passed to
+  boosting via `...`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 - ...:
 

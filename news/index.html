@@ -44,20 +44,25 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="precmed-development-version">precmed (development version)<a class="anchor" aria-label="anchor" href="#precmed-development-version"></a></h2>
-<ul><li><p>Added optional C integration for Cox restricted mean survival times. Set <code>rmst.control = list(solver = "C")</code> for survival ATE, fit, or CV workflows to avoid allocating patient-by-event-time matrices. C is the default; the R backend remains available.</p></li>
-<li><p>Added an optional C backend for count contrast regression, selected with <code>contrast.control = list(solver = "C")</code> in <code><a href="../reference/catefit.html">catefit()</a></code>/<code><a href="../reference/catecv.html">catecv()</a></code> or their count variants. C is the default; fallback optimizer settings can be supplied through <code>optim.control</code>. Installing from source now requires a C compiler and R’s standard BLAS/LAPACK libraries.</p></li>
-<li><p>Compute Breslow censoring probabilities with one cumulative-hazard lookup rather than repeatedly scanning and summing hazards for every patient.</p></li>
-<li><p>Reuse numeric model designs and GLM families during count-data balanced splitting, avoiding repeated formula and model-frame construction.</p></li>
-<li><p>Avoid fitting and discarding a duplicate treated-arm boosting model in count cross-fitting. Seeded boosting results can change because fewer random draws are consumed.</p></li>
-<li><p>Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.</p></li>
-<li><p>Added the book chapter by Jiang et al. (2026) to the package description, references, and README.</p></li>
-<li><p>Fixed display-math formatting of the weighted estimating equation in the theoretical details vignette.</p></li>
-<li><p>Updated validation plots to use ggplot2’s <code>linewidth</code> argument and require ggplot2 &gt;= 3.4.0.</p></li>
-<li><p>Updated column selections in validation plots and box plots for current tidyselect versions.</p></li>
-<li><p>Declared vignette and test dependencies, removed package installation during rendering, and limited boosting examples to one core for reliable builds.</p></li>
-<li><p>Corrected outdated boosting argument names in the vignettes.</p></li>
-<li><p>Invalidated vignette caches when R or package dependencies change.</p></li>
+<div class="section level3">
+<h3 id="major-changes-development-version">Major changes<a class="anchor" aria-label="anchor" href="#major-changes-development-version"></a></h3>
+<ul><li><p>Added C backends, enabled by default, for count and survival contrast regression, Cox restricted mean survival integration, and LASSO propensity-score interaction screening. Installing from source now requires a C compiler and R’s standard BLAS/LAPACK libraries.</p></li>
+<li><p>Added <code>contrast.control</code>, <code>rmst.control</code>, and <code>ps.control</code> to select numerical backends independently of model-fitting arguments. Set <code>solver = "R"</code> in the relevant list to use the R implementation. <code>contrast.control</code> also accepts Newton-Raphson settings and nested <code>optim.control</code> options for fallback optimization. Small floating-point differences between backends are possible.</p></li>
 </ul></div>
+<div class="section level3">
+<h3 id="minor-changes-and-bug-fixes-development-version">Minor changes and bug fixes<a class="anchor" aria-label="anchor" href="#minor-changes-and-bug-fixes-development-version"></a></h3>
+<ul><li><p>Fixed intercept-only propensity models in survival cross-fitting, subgroup evaluation, and bootstrap ATE estimation by preserving matrix dimensions.</p></li>
+<li><p>Fixed LASSO propensity-score dimension handling with two predictors or a single prediction row.</p></li>
+<li><p>Reused model designs and GLM families during count and continuous-outcome balanced splitting to avoid repeated formula processing. Continuous-outcome public APIs remain disabled as before.</p></li>
+<li><p>Used <code><a href="https://rdrr.io/r/stats/lmfit.html" class="external-link">lm.fit()</a></code> for complete-data continuous contrast regression and reused the slope generalized inverse in the sandwich covariance, preserving coefficient labels and the formula path for incomplete inputs.</p></li>
+<li><p>Accelerated Breslow censoring probabilities using cumulative hazards and interval lookup instead of repeated scans and sums.</p></li>
+<li><p>Reused the full-data fit returned by <code>cv.glmnet()</code> instead of fitting the same propensity-score LASSO path separately.</p></li>
+<li><p>Removed a duplicate treated-arm boosting fit in count cross-fitting. Results obtained with the same seed may change because fewer random draws are consumed.</p></li>
+<li><p>Updated validation plots and box plots for current ggplot2 and tidyselect versions; ggplot2 &gt;= 3.4.0 is now required.</p></li>
+<li><p>Added the book chapter by Jiang et al. (2026) to the package description and references.</p></li>
+<li><p>Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.1.0" id="precmed-110">precmed 1.1.0<a class="anchor" aria-label="anchor" href="#precmed-110"></a></h2><p class="text-muted">CRAN release: 2024-10-05</p>
 <ul><li>Removed dependency on the MESS package.</li>

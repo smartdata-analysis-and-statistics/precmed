@@ -15,7 +15,8 @@ drmean(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE
+  interactions = TRUE,
+  ps.control = list()
 )
 ```
 
@@ -70,6 +71,14 @@ drmean(
   interactions between `x` and `trt`. If `TRUE`, interactions will be
   assumed only if at least 10 patients received each treatment option.
   Default is `TRUE`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 ## Value
 

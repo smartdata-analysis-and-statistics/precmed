@@ -91,6 +91,7 @@ contrast regression, random forest and generalized additive model (see <code>sco
 <span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -277,6 +278,14 @@ Default is <code>NULL</code>, corresponding to no seed.</p></dd>
 <dd><p>An integer value indicating what kind of intermediate progress messages should
 be printed. <code>0</code> means no outputs. <code>1</code> means only progress bar and run time.
 <code>2</code> means progress bar, run time, and all errors and warnings. Default is <code>0</code>.</p></dd>
+
+
+<dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
+<dd><p>Named options for LASSO propensity-score interaction screening.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+<code>...</code> and other numerical controls.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

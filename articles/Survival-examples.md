@@ -157,10 +157,10 @@ are:
   - `randomForest` fits a random forest model by treatment group.
 
   - `twoReg` implements the doubly robust two regressions estimator in
-    (Yadlowsky et al. 2020).
+    (Yadlowsky et al. 2021).
 
   - `contrastReg` implements the doubly robust contrast regression
-    estimator from (Yadlowsky et al. 2020).
+    estimator from (Yadlowsky et al. 2021).
 
 - The argument `cate.model` specifies the CATE model as a formula, with
   the survival object from the `survival` package, `Surv(y, d)`,
@@ -219,15 +219,15 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03366885 0.004165579 0.136145 0.03718873
-#> log.hazard.ratio 2.7133243 0.21192734 2.297954338 3.128694 0.00000000
+#>                   estimate         SE     CI.lower  CI.upper    pvalue
+#> log.rmtl.ratio   0.0701553 0.03665675 -0.001690613 0.1420012 0.0556401
+#> log.hazard.ratio 2.7133243 0.20859064  2.304494162 3.1221544 0.0000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 6.600056 159.9250 185.7968      0
-#> rmst0 196.5603 8.577900 179.7479 213.3726      0
+#> rmst1 172.8609 7.224257 158.7016 187.0202      0
+#> rmst0 196.5603 9.006910 178.9070 214.2135      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -318,10 +318,10 @@ are:
   - `randomForest` fits a random forest model by treatment group.
 
   - `twoReg` implements the doubly robust two regressions estimator in
-    (Yadlowsky et al. 2020).
+    (Yadlowsky et al. 2021).
 
   - `contrastReg` implements the doubly robust contrast regression
-    estimator from (Yadlowsky et al. 2020).
+    estimator from (Yadlowsky et al. 2021).
 
 - `cate.model`: A formula describing the outcome model to be fitted. The
   outcome must appear on the left-hand side. In the example, we choose
@@ -658,37 +658,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 15:50:18 2026 
+#>    Fri Nov 13 16:31:57 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 15:50:30 2026 
+#>    Fri Nov 13 16:32:11 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 15:50:41 2026 
+#>    Fri Nov 13 16:32:25 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 15:50:53 2026 
+#>    Fri Nov 13 16:32:39 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 15:51:05 2026 
+#>    Fri Nov 13 16:32:53 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 59.95 secs
+#> Total runtime : 1.18 mins
 ```
 
 The output of
@@ -1065,6 +1065,7 @@ details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Th
 ## References
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. “Estimation and Validation of Ratio-Based Conditional
+and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional
 Average Treatment Effects Using Observational Data.” *Journal of the
-American Statistical Association*, 1–18.
+American Statistical Association* 116 (533): 335–52.
+<https://doi.org/10.1080/01621459.2020.1772080>.

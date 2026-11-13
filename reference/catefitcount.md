@@ -30,6 +30,7 @@ catefitcount(
   plot.gbmperf = FALSE,
   verbose = 0,
   contrast.control = list(),
+  ps.control = list(),
   ...
 )
 ```
@@ -175,14 +176,22 @@ catefitcount(
 
 - contrast.control:
 
-  A named list of options for count-outcome contrast regression.
+  A named list of options for count or survival contrast regression.
   Supported names are `solver` (`"C"`, the default, or `"R"`),
   `error.maxNR`, `max.iterNR`, `tune`, and `optim.control` (a named list
   passed to [`stats::optim`](https://rdrr.io/r/stats/optim.html) on
   fallback). List entries override the corresponding top-level NR
   arguments. Options are kept separate from `...`, which is forwarded to
-  boosting. Only count outcomes support this list; other outcomes retain
-  their existing solver.
+  boosting. Count and survival outcomes support this list; continuous
+  outcomes retain their existing solver.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 - ...:
 
@@ -308,5 +317,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.12 secs 
+#> Total runtime : 0.15 secs 
 ```

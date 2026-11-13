@@ -70,6 +70,7 @@
 <span>  max.iterNR <span class="op">=</span> <span class="fl">150</span>,</span>
 <span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -188,13 +189,21 @@ Used only if <code>score.method = 'contrastReg'</code>. Default is <code>c(0.5, 
 
 
 <dt id="arg-contrast-control">contrast.control<a class="anchor" aria-label="anchor" href="#arg-contrast-control"></a></dt>
-<dd><p>A named list of options for count-outcome contrast
+<dd><p>A named list of options for count or survival contrast
 regression. Supported names are <code>solver</code> (<code>"C"</code>, the default, or
 <code>"R"</code>), <code>error.maxNR</code>, <code>max.iterNR</code>, <code>tune</code>, and
 <code>optim.control</code> (a named list passed to <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim</a></code> on fallback).
 List entries override the corresponding top-level NR arguments. Options are
-kept separate from <code>...</code>, which is forwarded to boosting. Only count
-outcomes support this list; other outcomes retain their existing solver.</p></dd>
+kept separate from <code>...</code>, which is forwarded to boosting. Count and survival
+outcomes support this list; continuous outcomes retain their existing solver.</p></dd>
+
+
+<dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
+<dd><p>Named options for LASSO propensity-score interaction screening.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+<code>...</code> and other numerical controls.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

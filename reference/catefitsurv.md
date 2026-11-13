@@ -36,6 +36,8 @@ catefitsurv(
   seed = NULL,
   verbose = 0,
   rmst.control = list(),
+  contrast.control = list(),
+  ps.control = list(),
   ...
 )
 ```
@@ -223,8 +225,26 @@ catefitsurv(
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
   patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of count-model
+  Available only for survival outcomes; independent of
   `contrast.control`.
+
+- contrast.control:
+
+  A named list of contrast-regression options: `solver` (`"C"`, the
+  default, or `"R"`), `error.maxNR`, `max.iterNR`, `tune`, and
+  `optim.control` (a named list passed to
+  [`stats::optim`](https://rdrr.io/r/stats/optim.html) on fallback).
+  List entries override top-level NR arguments. This is independent of
+  `rmst.control`, which selects RMST integration, and is not passed to
+  boosting via `...`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 - ...:
 

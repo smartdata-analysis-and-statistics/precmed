@@ -256,10 +256,10 @@ scores. There are a total of 5 scoring methods implemented:
   treatment group.
 
 - `twoReg` implements the doubly robust two regressions estimator in
-  (Yadlowsky et al. 2020).
+  (Yadlowsky et al. 2021).
 
 - `contrastReg` implements the doubly robust contrast regression
-  estimator from (Yadlowsky et al. 2020).
+  estimator from (Yadlowsky et al. 2021).
 
 - `negBin` fits negative binomial regressions by treatment group. This
   method is recommended if there is overdispersion in the data.
@@ -308,7 +308,7 @@ output_catefit <- catefit(response = "count",
 #> CV: 5
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 3.608077 secs
+#> Time difference of 4.219996 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -554,37 +554,37 @@ output_catecv <- catecv(response = "count",
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 15:47:40 2026 
+#>    Fri Nov 13 16:28:53 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 15:47:43 2026 
+#>    Fri Nov 13 16:28:57 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 15:47:47 2026 
+#>    Fri Nov 13 16:29:02 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 15:47:52 2026 
+#>    Fri Nov 13 16:29:07 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 15:47:57 2026 
+#>    Fri Nov 13 16:29:12 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 22.02 secs
+#> Total runtime : 24.91 secs
 ```
 
 The output of
@@ -904,6 +904,7 @@ details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Th
 ## References
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. “Estimation and Validation of Ratio-Based Conditional
+and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional
 Average Treatment Effects Using Observational Data.” *Journal of the
-American Statistical Association*, 1–18.
+American Statistical Association* 116 (533): 335–52.
+<https://doi.org/10.1080/01621459.2020.1772080>.

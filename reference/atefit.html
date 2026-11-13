@@ -72,7 +72,8 @@ inference.</p>
 <span>  n.boot <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -180,7 +181,15 @@ be printed. <code>1</code> indicates messages are printed and <code>0</code> oth
 Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
 The C backend accumulates each patient's integral without allocating a
 patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of count-model <code>contrast.control</code>.</p></dd>
+for survival outcomes; independent of <code>contrast.control</code>.</p></dd>
+
+
+<dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
+<dd><p>Named options for LASSO propensity-score interaction screening.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+interaction selection rule are unchanged. Kept separate from boosting's
+<code>...</code> and other numerical controls.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -61,7 +61,9 @@
 <span>  <span class="va">f0.predictor</span>,</span>
 <span>  error.maxNR <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  max.iterNR <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  solver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"R"</span><span class="op">)</span>,</span>
+<span>  optim.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -124,6 +126,18 @@ Default is <code>100</code>.</p></dd>
 Newton Raphson algorithm. <code>tune[1]</code> is the step size, <code>tune[2]</code> specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
 Used only if <code>score.method = 'contrastReg'</code>. Default is <code>c(0.5, 2)</code>.</p></dd>
+
+
+<dt id="arg-solver">solver<a class="anchor" aria-label="anchor" href="#arg-solver"></a></dt>
+<dd><p>Numerical backend: <code>"C"</code> (default) or <code>"R"</code>.
+Both preserve the weighted estimating equation, first-iteration
+regularization and eta stopping rule. Small rounding differences are possible.</p></dd>
+
+
+<dt id="arg-optim-control">optim.control<a class="anchor" aria-label="anchor" href="#arg-optim-control"></a></dt>
+<dd><p>Named controls passed to <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim</a></code> if NR fails
+to converge, for example <code>list(maxit = 1000, reltol = 1e-10)</code>.
+<code>max.iterNR</code> governs NR; <code>optim.control$maxit</code> governs fallback only.</p></dd>
 
 </dl></div>
     <div class="section level2">

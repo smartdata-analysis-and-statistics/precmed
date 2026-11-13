@@ -41,6 +41,7 @@ catecvmean(
   tune = c(0.5, 2),
   seed = NULL,
   verbose = 0,
+  ps.control = list(),
   ...
 )
 ```
@@ -237,6 +238,14 @@ catecvmean(
   messages should be printed. `0` means no outputs. `1` means only
   progress bar and run time. `2` means progress bar, run time, and all
   errors and warnings. Default is `0`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 - ...:
 

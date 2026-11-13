@@ -365,10 +365,10 @@ group.</p></li>
 group.</p></li>
 <li><p><code>twoReg</code> implements the doubly robust two regressions
 estimator in <span class="citation">(Yadlowsky et al.
-2020)</span>.</p></li>
+2021)</span>.</p></li>
 <li><p><code>contrastReg</code> implements the doubly robust contrast
 regression estimator from <span class="citation">(Yadlowsky et al.
-2020)</span>.</p></li>
+2021)</span>.</p></li>
 </ul>
 </li>
 <li><p>The argument <code>cate.model</code> specifies the CATE model as
@@ -421,15 +421,15 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   estimate         SE    CI.lower CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03366885 0.004165579 0.136145 0.03718873</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.21192734 2.297954338 3.128694 0.00000000</span></span>
+<span><span class="co">#&gt;                   estimate         SE     CI.lower  CI.upper    pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03665675 -0.001690613 0.1420012 0.0556401</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.20859064  2.304494162 3.1221544 0.0000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.600056 159.9250 185.7968      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.577900 179.7479 213.3726      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 7.224257 158.7016 187.0202      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 9.006910 178.9070 214.2135      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -507,10 +507,10 @@ group.</p></li>
 group.</p></li>
 <li><p><code>twoReg</code> implements the doubly robust two regressions
 estimator in <span class="citation">(Yadlowsky et al.
-2020)</span>.</p></li>
+2021)</span>.</p></li>
 <li><p><code>contrastReg</code> implements the doubly robust contrast
 regression estimator from <span class="citation">(Yadlowsky et al.
-2020)</span>.</p></li>
+2021)</span>.</p></li>
 </ul>
 </li>
 <li><p><code>cate.model</code>: A formula describing the outcome model
@@ -815,37 +815,37 @@ default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 15:50:18 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 13 16:31:57 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 15:50:30 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 13 16:32:11 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 15:50:41 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 13 16:32:25 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 15:50:53 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 13 16:32:39 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 15:51:05 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 13 16:32:53 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 59.95 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 1.18 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
@@ -1174,9 +1174,10 @@ outcome</a><br><a href="Additional-examples.html">3. Additional examples</a><br>
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. <span>“Estimation and Validation of Ratio-Based
+and Lu Tian. 2021. <span>“Estimation and Validation of Ratio-Based
 Conditional Average Treatment Effects Using Observational Data.”</span>
-<em>Journal of the American Statistical Association</em>, 1–18.
+<em>Journal of the American Statistical Association</em> 116 (533):
+335–52. <a href="https://doi.org/10.1080/01621459.2020.1772080" class="external-link">https://doi.org/10.1080/01621459.2020.1772080</a>.
 </div>
 </div>
 </div>

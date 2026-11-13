@@ -17,7 +17,8 @@ atefitcount(
   interactions = TRUE,
   n.boot = 500,
   seed = NULL,
-  verbose = 0
+  verbose = 0,
+  ps.control = list()
 )
 ```
 
@@ -83,6 +84,14 @@ atefitcount(
   An integer value indicating whether intermediate progress messages
   should be printed. `1` indicates messages are printed and `0`
   otherwise. Default is `0`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 ## Value
 

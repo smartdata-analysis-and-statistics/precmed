@@ -6,7 +6,14 @@ penalization on the two-way interactions
 ## Usage
 
 ``` r
-glm.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
+glm.ps(
+  trt,
+  x.ps,
+  xnew = NULL,
+  minPS = 0.01,
+  maxPS = 0.99,
+  solver = c("C", "R")
+)
 ```
 
 ## Arguments
@@ -38,6 +45,12 @@ glm.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
   A numerical value (in \`(0, 1\]\`) above which estimated propensity
   scores should be truncated. Must be strictly greater than `minPS`.
   Default is `0.99`.
+
+- solver:
+
+  Interaction-screening backend: `"C"` (default) or `"R"`. C screens
+  pairs before allocating retained training and prediction columns. Both
+  use the strict SMD \> 0.1 rule and positive sample variance.
 
 ## Value
 

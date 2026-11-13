@@ -44,7 +44,9 @@ catecvsurv(
   seed = NULL,
   plot.gbmperf = TRUE,
   verbose = 0,
-  rmst.control = list()
+  rmst.control = list(),
+  contrast.control = list(),
+  ps.control = list()
 )
 ```
 
@@ -270,8 +272,26 @@ catecvsurv(
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
   patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of count-model
+  Available only for survival outcomes; independent of
   `contrast.control`.
+
+- contrast.control:
+
+  A named list of contrast-regression options: `solver` (`"C"`, the
+  default, or `"R"`), `error.maxNR`, `max.iterNR`, `tune`, and
+  `optim.control` (a named list passed to
+  [`stats::optim`](https://rdrr.io/r/stats/optim.html) on fallback).
+  List entries override top-level NR arguments. This is independent of
+  `rmst.control`, which selects RMST integration, and is not passed to
+  boosting via `...`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 ## Value
 
@@ -516,33 +536,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 15:42:25 2026 
+#>    Fri Nov 13 16:22:40 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 15:42:29 2026 
+#>    Fri Nov 13 16:22:45 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 15:42:32 2026 
+#>    Fri Nov 13 16:22:49 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 15:42:36 2026 
+#>    Fri Nov 13 16:22:53 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 15:42:40 2026 
+#>    Fri Nov 13 16:22:58 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 18.15 secs 
+#> Total runtime : 21.91 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

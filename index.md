@@ -16,16 +16,29 @@ of patients respond to the same treatment. Presently, **precmed**
 focuses on the personalization of two competitive treatments using
 randomized data from a clinical trial (Zhao et al. 2013) or using
 real-world data (RWD) from a non-randomized study (Yadlowsky et al.
-2020).
+2021).
 
 ## Learning resources
 
-The theory behind **precmed** is discussed in [*Comparative
-Effectiveness and Personalized Medicine Research Using Real-World
-Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter
-20](https://doi.org/10.1201/9781003300809-20) explains how to visualize
-and interpret individualized treatment rule results using the package
-(Jiang et al. 2026).
+For a broader introduction to personalized medicine using real-world
+data, see *Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data* (Debray, Nguyen, and Platt 2026). The following
+chapters are particularly relevant to **precmed**:
+
+- [Chapter 17](https://doi.org/10.1201/9781003300809-17): principles of
+  CATE prediction and model development in randomized and non-randomized
+  data (Hoogland et al. 2026).
+- [Chapter 19](https://doi.org/10.1201/9781003300809-19): validation
+  strategies and assessment of discrimination, calibration, and decision
+  accuracy (Thao et al. 2026).
+- [Chapter 20](https://doi.org/10.1201/9781003300809-20): visualization
+  and interpretation of individualized treatment rules, validation
+  curves, and responder diagnostics, with examples using **precmed**
+  (Jiang et al. 2026).
+
+The original methodological references are Yadlowsky et al. (2021) for
+ratio-based CATE estimation and validation, and Zhao et al. (2013) for
+target-population selection.
 
 Two free courses complement the book and introduce **precmed**, its
 practical use, and the underlying statistical methods. [An Introduction
@@ -138,6 +151,18 @@ the user has to (at least) input:
 
 # References
 
+Debray, Thomas P. A., Tri-Long Nguyen, and Robert W. Platt, eds. 2026.
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*. 1st ed. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809>.
+
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. “Introduction to Methods for Personalizing Medicine.” In
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen, and
+Robert W. Platt, 421–63. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-17>.
+
 Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
 Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
 Individualized Treatment Rule Results.” In *Comparative Effectiveness
@@ -145,10 +170,18 @@ and Personalized Medicine Research Using Real-World Data*, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
 
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. “Validation of Prediction Models for
+Patient Outcomes and Individualized Treatment Effect.” In *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*,
+edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt,
+485–512. Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-19>.
+
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. “Estimation and Validation of Ratio-Based Conditional
+and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional
 Average Treatment Effects Using Observational Data.” *Journal of the
-American Statistical Association*, 1–18.
+American Statistical Association* 116 (533): 335–52.
+<https://doi.org/10.1080/01621459.2020.1772080>.
 
 Zhao, Lihui, Lu Tian, Tianxi Cai, Brian Claggett, and Lee-Jen Wei. 2013.
 “Effectively Selecting a Target Population for a Future Comparative

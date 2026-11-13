@@ -21,7 +21,8 @@ drsurv(
   minPS = 0.01,
   maxPS = 0.99,
   ipcw.method = "breslow",
-  rmst.control = list()
+  rmst.control = list(),
+  ps.control = list()
 )
 ```
 
@@ -102,8 +103,16 @@ drsurv(
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
   patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of count-model
+  Available only for survival outcomes; independent of
   `contrast.control`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 ## Value
 

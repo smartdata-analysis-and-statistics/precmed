@@ -87,15 +87,41 @@ precmed: Precision Medicine in R
 <p>A doubly robust precision medicine approach to estimate and validate
 conditional average treatment effects</p>
 <div class="section level2">
+<h2 id="background-and-further-reading">Background and further reading<a class="anchor" aria-label="anchor" href="#background-and-further-reading"></a>
+</h2>
+<p>This vignette describes the ratio-based CATE estimators and
+validation procedures implemented in <code>precmed</code>. A CATE
+describes the average treatment effect among patients with the same
+measured baseline characteristics; it does not identify an individual
+patient’s unobservable treatment effect. Chapter 17 of <span class="citation">Debray et al. (2026)</span> introduces the principles
+of treatment effect prediction, model development in randomized and
+non-randomized data, and the assumptions needed to identify CATEs <span class="citation">(Hoogland et al. 2026)</span>.</p>
+<p>The primary methodological reference for the two-regression and
+contrast-regression estimators is <span class="citation">Yadlowsky et
+al. (2021)</span>. For practical guidance on interpreting and evaluating
+the resulting scores, the book provides two complementary chapters:</p>
+<ul>
+<li>
+<strong>Chapter 19: Validation of prediction models for patient
+outcomes and individualized treatment effect</strong> discusses
+validation strategies, discrimination, calibration, and decision
+accuracy <span class="citation">(Thao et al. 2026)</span>.</li>
+<li>
+<strong>Chapter 20: Visualization and interpretation of
+individualized treatment rule results</strong> discusses treatment
+rules, value functions, validation curves, and responder diagnostics,
+including examples using <code>precmed</code> <span class="citation">(Jiang et al. 2026)</span>.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="theoretical-details---count-outcomes">Theoretical details - Count outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---count-outcomes"></a>
 </h2>
-<p>The CATE score represents an individual-level treatment effect
-expressed as a rate ratio for count outcomes. It can be estimated with
-boosting, Poisson regression, negative binomial regression, and the
-doubly robust estimator two regressions <span class="citation">(Yadlowsky et al. 2020)</span> applied separately by
-treatment group or with the other doubly robust estimator contrast
-regression <span class="citation">(Yadlowsky et al. 2020)</span> applied
-to the entire data set.</p>
+<p>For count outcomes, the CATE score is expressed as a log-rate ratio
+conditional on baseline covariates. It can be estimated with boosting,
+Poisson regression, negative binomial regression, or the doubly robust
+two-regression and contrast-regression estimators <span class="citation">(Yadlowsky et al. 2021)</span>. The two-regression
+approach models the potential outcomes separately by treatment group,
+whereas contrast regression directly models the treatment contrast.</p>
 <p>Assume that the following data are recorded for each of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 observations:</p>
@@ -326,10 +352,17 @@ is the mean of the
 <div class="section level3">
 <h3 id="validation-curves-and-the-abc-statistics">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics"></a>
 </h3>
-<p>The ABC statistic represents the area between the validation curve
-and the ATE as described by <span class="citation">(Zhao et al.
-2013)</span>. For a single CV iteration, it is implemented in the
-training and validation sets separately as following:</p>
+<p>The ABC statistic summarizes the area between the validation curve
+and the overall ATE reference line <span class="citation">(Zhao et al.
+2013; Yadlowsky et al. 2021)</span>. Chapter 20 provides worked examples
+of these curves and their interpretation as responder diagnostics <span class="citation">(Jiang et al. 2026)</span>. Validation curves and ABC
+assess how well a score ranks patients by treatment benefit. They do
+not, by themselves, establish calibration of the predicted CATEs or the
+clinical value of a treatment rule; Chapter 19 discusses these
+complementary aspects of validation <span class="citation">(Thao et al.
+2026)</span>.</p>
+<p>For a single CV iteration, it is implemented in the training and
+validation sets separately as following:</p>
 <p><strong>Step 1</strong>. Calculate the ATE in the training or
 validation sets.</p>
 <p><strong>Step 2</strong>. Calculate the ATE in 100 nested subgroups
@@ -398,12 +431,14 @@ ATE</p>
 <div class="section level2">
 <h2 id="theoretical-details---survival-outcomes">Theoretical details - Survival outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---survival-outcomes"></a>
 </h2>
-<p>The CATE score represents an individual-level treatment effect for
-survival data, estimated with random forest, boosting, Poisson
-regression, and the doubly robust estimator (two regressions, <span class="citation">(Yadlowsky et al. 2020)</span>) applied separately by
-treatment group or with the other doubly robust estimators (contrast
-regression, <span class="citation">(Yadlowsky et al. 2020)</span>)
-applied to the entire data set.</p>
+<p>For survival outcomes, the CATE score is expressed as a log-ratio of
+restricted mean time lost conditional on baseline covariates. It can be
+estimated with random forest, boosting, Poisson regression, or
+adaptations of the doubly robust two-regression and contrast-regression
+approaches <span class="citation">(Yadlowsky et al. 2021)</span>.
+Chapter 20 of the book also discusses restricted mean time lost as an
+outcome for ratio-based treatment effects <span class="citation">(Jiang
+et al. 2026)</span>.</p>
 <p>Assume that the following data are recorded for each of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 observations:</p>
@@ -664,11 +699,12 @@ is the mean of the
 <div class="section level3">
 <h3 id="validation-curves-and-the-abc-statistics-1">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics-1"></a>
 </h3>
-<p>The ABC statistic represents the area between the validation curve
-and the ATE as described by <span class="citation">(Zhao et al.
-2013)</span>. For a single CV iteration and a certain CATE score method,
-it is implemented as following in the training and validation sets
-separately:</p>
+<p>The ABC statistic summarizes the area between the validation curve
+and the overall ATE reference line <span class="citation">(Zhao et al.
+2013; Yadlowsky et al. 2021)</span>. Chapter 20 provides worked examples
+of these curves and their interpretation as responder diagnostics <span class="citation">(Jiang et al. 2026)</span>. For a single CV iteration
+and a certain CATE score method, it is implemented as following in the
+training and validation sets separately:</p>
 <p><strong>Step 1</strong>. Calculate the ATE in the training or
 validation sets.</p>
 <p><strong>Step 2</strong>. Calculate the ATE in 100 nested subgroups
@@ -742,17 +778,47 @@ outcome</a><br><a href="Additional-examples.html">3. Additional examples</a><br>
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-debray2026comparative" class="csl-entry">
+Debray, Thomas P. A., Tri-Long Nguyen, and Robert W. Platt, eds. 2026.
+<em>Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data</em>. 1st ed. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809" class="external-link">https://doi.org/10.1201/9781003300809</a>.
+</div>
+<div id="ref-hoogland2026introduction" class="csl-entry">
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. <span>“Introduction to Methods for Personalizing
+Medicine.”</span> Chap. 17 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">https://doi.org/10.1201/9781003300809-17</a>.
+</div>
+<div id="ref-jiang2026visualization" class="csl-entry">
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. <span>“Visualization and Interpretation
+of Individualized Treatment Rule Results.”</span> Chap. 20 in
+<em>Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-20" class="external-link">https://doi.org/10.1201/9781003300809-20</a>.
+</div>
+<div id="ref-thao2026validation" class="csl-entry">
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. <span>“Validation of Prediction Models
+for Patient Outcomes and Individualized Treatment Effect.”</span> Chap.
+19 in <em>Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long
+Nguyen, and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-19" class="external-link">https://doi.org/10.1201/9781003300809-19</a>.
+</div>
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
-and Lu Tian. 2020. <span>“Estimation and Validation of Ratio-Based
+and Lu Tian. 2021. <span>“Estimation and Validation of Ratio-Based
 Conditional Average Treatment Effects Using Observational Data.”</span>
-<em>Journal of the American Statistical Association</em>, 1–18.
+<em>Journal of the American Statistical Association</em> 116 (533):
+335–52. <a href="https://doi.org/10.1080/01621459.2020.1772080" class="external-link">https://doi.org/10.1080/01621459.2020.1772080</a>.
 </div>
 <div id="ref-zhao2013effectively" class="csl-entry">
 Zhao, Lihui, Lu Tian, Tianxi Cai, Brian Claggett, and Lee-Jen Wei. 2013.
 <span>“Effectively Selecting a Target Population for a Future
 Comparative Study.”</span> <em>Journal of the American Statistical
-Association</em> 108 (502): 527–39.
+Association</em> 108 (502): 527–39. <a href="https://doi.org/10.1080/01621459.2013.770705" class="external-link">https://doi.org/10.1080/01621459.2013.770705</a>.
 </div>
 </div>
 </div>

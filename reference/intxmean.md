@@ -27,6 +27,7 @@ intxmean(
   B = 1,
   Kfold = 2,
   plot.gbmperf = TRUE,
+  ps.control = list(),
   ...
 )
 ```
@@ -142,6 +143,14 @@ intxmean(
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+
+- ps.control:
+
+  Named options for LASSO propensity-score interaction screening.
+  Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
+  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  interaction selection rule are unchanged. Kept separate from
+  boosting's `...` and other numerical controls.
 
 - ...:
 
