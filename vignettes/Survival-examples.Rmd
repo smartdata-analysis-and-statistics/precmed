@@ -83,7 +83,10 @@ row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", 
 colnames(t.table1)[-1] <- paste0(
   colnames(t.table1)[-1], "<br>(n = ", trimws(t.table1[1, -1]), ")"
 )
-knitr::kable(t.table1[-1, , drop = FALSE], format = "html", escape = FALSE)
+display.table <- t.table1[-1, , drop = FALSE]
+# Escape cell values (e.g., >=2) while retaining the HTML header breaks.
+display.table[] <- htmltools::htmlEscape(display.table)
+knitr::kable(display.table, format = "html", escape = FALSE)
 ```
 
 --- 
@@ -487,7 +490,7 @@ boxplot(output_catecv,
         ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 ```
 
-For this toy example, we can see why random forest and contrast regression methods have the 2 highest ABC and perform the best in the validation curves in the previous sections. They both have the most distinctive decreasing RMT ratio as we go from the subgroup with the 50% lowest CATE scores (red) to subgroup with the 40% highest CATE scores (blue). This implies that there is some evidence of heterogeneous treatment effect and that the CATE scores estimated with random forest or contrast regression can capture it. They also have relatively smaller variation as the boxes are thinner. In comparison, the other 3 methods also present this increasing trend in the box plots, but we observe a larger variation in the RMTL ratio, especially with boosting. We can see that the box plots correspond to the other 2 outputs, `abc()` and `plot()`. Note that the y-axis can have different scales for different scoring methods.
+The box plots compare estimated RMTL ratios across mutually exclusive score-based subgroups for random forest and contrast regression. Read them alongside the validation curves and ABC statistics to assess subgroup separation and variation across CV iterations. Note that the y-axis can have different scales for different scoring methods.
 
 <br><br>
 

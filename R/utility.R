@@ -117,7 +117,7 @@ arg.checks.common <- function(fun,
 
       # Check values of prop.multi
       if (any(prop.multi > 1) | any(prop.multi < 0)) stop("prop.multi must be >= 0 and <= 1.")
-      if (length(prop.multi) == 2 & sum(prop.multi == c(0, 1)) == 2) stop("prop.multi must defined at least 2 subgroups.")
+      if (length(prop.multi) == 2 && sum(prop.multi == c(0, 1)) == 2) stop("prop.multi must defined at least 2 subgroups.")
 
       # Check values of CV
       if (train.prop >= 1 | train.prop <= 0) stop("train.prop must be a number between 0 and 1, exclusive.")

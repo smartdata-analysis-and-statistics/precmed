@@ -50,8 +50,10 @@ pdf(file=file.path(dirname(args[3]), paste0(backend,'-',profile,'-plots.pdf')))
 for(i in seq_along(specs)) {
  spec <- specs[[i]]
  a <- lapply(as.list(spec$call)[-1],eval,envir=globalenv())
- response <- a$response; a$response <- NULL
- fun <- if(as.character(spec$call[[1]])=='catefit') {
+ response <- a$response
+ if(is.null(response)) response <- if(grepl('count$',as.character(spec$call[[1]])))'count' else 'survival'
+ a$response <- NULL
+ fun <- if(grepl('^catefit',as.character(spec$call[[1]]))) {
    if(response=='count') catefitcount else catefitsurv
  } else if(response=='count') catecvcount else catecvsurv
  unsupported <- if(as.character(spec$call[[1]])=='catecv')setdiff(names(a),names(formals(catecv)))else character()

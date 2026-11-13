@@ -10,13 +10,13 @@ for(path in paths) {
   if(grepl('^```\\{r',line)){header<-line;inside<-TRUE;code<-character()}
   else if(inside && line=='```') {
    inside<-FALSE
-   if(!any(grepl('catefit\\(|catecv\\(',code))) next
+   if(!any(grepl('catefit(count|surv)?\\(|catecv(count|surv)?\\(',code))) next
    exprs <- parse(text=code)
    index<-0L
    for(expr in exprs) {
     call<-expr
     if(is.call(call) && as.character(call[[1]]) %in% c('<-','='))call<-call[[3]]
-    if(!is.call(call) || !as.character(call[[1]]) %in% c('catefit','catecv'))next
+    if(!is.call(call) || !as.character(call[[1]]) %in% c('catefit','catecv','catefitcount','catefitsurv','catecvcount','catecvsurv'))next
     index<-index+1L
     uses <- grepl('boosting',paste(deparse(call),collapse=' '),fixed=TRUE)
     id<-paste(basename(path),sub('^```\\{r ([^,}]+).*','\\1',header),index,sep=':')
