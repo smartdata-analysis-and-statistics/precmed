@@ -1,24 +1,22 @@
-# Theoretical details
+# Methods for estimating and validating treatment effects
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-# precmed: Precision Medicine in R
-
-A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects
+This vignette explains the ratio-based CATE estimators and validation
+procedures implemented in `precmed` for count and survival outcomes. It
+covers the scoring methods, validation curves, and ABC statistics used
+in the worked examples.
 
 ## Background and further reading
 
-This vignette describes the ratio-based CATE estimators and validation
-procedures implemented in `precmed`. A CATE describes the average
-treatment effect among patients with the same measured baseline
-characteristics; it does not identify an individual patient’s
-unobservable treatment effect. Chapter 17 of Debray et al. (2026)
-introduces the principles of treatment effect prediction, model
-development in randomized and non-randomized data, and the assumptions
-needed to identify CATEs (Hoogland et al. 2026).
+A CATE describes the average treatment effect among patients with the
+same measured baseline characteristics; it does not identify an
+individual patient’s unobservable treatment effect. Chapter 17 of Debray
+et al. (2026) introduces the principles of treatment effect prediction,
+model development in randomized and non-randomized data, and the
+assumptions needed to identify CATEs (Hoogland et al. 2026).
 
 The primary methodological reference for the two-regression and
 contrast-regression estimators is Yadlowsky et al. (2021). For practical
@@ -33,7 +31,7 @@ provides two complementary chapters:
   validation curves, and responder diagnostics, including examples using
   `precmed` (Jiang et al. 2026).
 
-## Theoretical details - Count outcomes
+## Estimation and validation for count outcomes
 
 For count outcomes, the CATE score is expressed as a log-rate ratio
 conditional on baseline covariates. It can be estimated with boosting,
@@ -307,7 +305,7 @@ and
 Validation curves are represented with a blue line and the dashed line
 is the ATE
 
-## Theoretical details - Survival outcomes
+## Estimation and validation for survival outcomes
 
 For survival outcomes, the CATE score is expressed as a log-ratio of
 restricted mean time lost conditional on baseline covariates. It can be
@@ -597,14 +595,14 @@ is the ATE.
 
 ## Other `precmed` vignettes in this series
 
-[1. Examples for count
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Examples for survival
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+[1. Estimating and validating treatment effects for count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
+[2. Estimating and validating treatment effects for survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
+[3. Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
+[4. Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

@@ -1,17 +1,16 @@
-# Examples for survival outcome
+# Estimating and validating treatment effects for survival outcomes
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-# precmed: Precision Medicine in R
+This vignette demonstrates how to use `precmed` to estimate average and
+conditional average treatment effects (ATEs and CATEs) for survival
+outcomes. Using simulated multiple sclerosis data, we model restricted
+mean time lost, compare CATE scoring methods through internal
+validation, and interpret treatment effects in responder subgroups.
 
-A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects
-
-## Examples with survival outcome of the entire workflow
-
-### Load required packages
+## Load required packages
 
 ``` r
 
@@ -20,7 +19,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-### Load data set (Example data with survival outcome)
+## Example dataset
 
 To show the functionalities of the `precmed` package for survival
 outcomes we first need data. For our examples we use simulated data that
@@ -28,28 +27,7 @@ is located in the `survivalExample` data set. The data set
 `survivalExample` was simulated based on real-world claims data in
 multiple sclerosis and has 4,000 observations and 9 variables.
 
-|  | level | Overall | drug0 | drug1 |
-|:---|:---|:---|:---|:---|
-| Number of patients |  | 4000 | 1849 | 2151 |
-| Age (mean (SD)) |  | 45.8 (9.9) | 37.3 (6.4) | 53.1 (5.5) |
-| Gender (%) | male | 996 (24.9) | 456 (24.7) | 540 (25.1) |
-|  | female | 3004 (75.1) | 1393 (75.3) | 1611 (74.9) |
-| Previous treatment (%) | drugA | 1752 (43.8) | 819 (44.3) | 933 (43.4) |
-|  | drugB | 459 (11.5) | 207 (11.2) | 252 (11.7) |
-|  | drugC | 1789 (44.7) | 823 (44.5) | 966 (44.9) |
-| Previous medical cost (\$) (mean (SD)) |  | 14362.0 (24265.9) | 11358.0 (14393.2) | 16944.1 (30045.6) |
-| Previous number of symptoms (%) | 0 | 347 ( 8.7) | 191 (10.3) | 156 ( 7.3) |
-|  | 1 | 2686 (67.2) | 1219 (65.9) | 1467 (68.2) |
-|  | \>=2 | 967 (24.2) | 439 (23.7) | 528 (24.5) |
-| Previous number of relapses (%) | 0 | 2612 (65.3) | 1247 (67.4) | 1365 (63.5) |
-|  | 1 | 1106 (27.7) | 488 (26.4) | 618 (28.7) |
-|  | 2 | 246 ( 6.2) | 99 ( 5.4) | 147 ( 6.8) |
-|  | 3 | 33 ( 0.8) | 14 ( 0.8) | 19 ( 0.9) |
-|  | 4 | 2 ( 0.0) | 1 ( 0.1) | 1 ( 0.0) |
-|  | 5 | 1 ( 0.0) | 0 ( 0.0) | 1 ( 0.0) |
-| Days until the first relapse (mean(SD)) |  | 141.6 (262.2) | 152.6 (275.5) | 132.1 (249.9) |
-| Event indicator (0: censoring, 1: relapse) (%) | 0 | 3352 (83.8) | 1695 (91.7) | 1657 (77.0) |
-|  | 1 | 648 (16.2) | 154 ( 8.3) | 494 (23.0) |
+[TABLE]
 
 ------------------------------------------------------------------------
 
@@ -86,7 +64,11 @@ The final dataset `survivalExample` looked like this:
     #>  $ y                       : num  102.1 51.3 104.9 61.5 35.6 ...
     #>  $ d                       : num  0 0 0 0 0 0 0 0 0 1 ...
 
-### Estimation of the ATE with `atefit()`
+## Estimation of the ATE with `atefit()`
+
+Chapter 20, “Visualization and interpretation of individualized
+treatment rule results”, discusses restricted mean time lost (RMTL) as
+an outcome for ratio-based treatment effects (Jiang et al. 2026).
 
 First, one might be interested in the effect of the drug (trt) on the
 number of days until the first relapse or censoring (y). Lets test this
@@ -219,15 +201,15 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower  CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03296413 0.005546803 0.1347638 0.03331787
-#> log.hazard.ratio 2.7133243 0.20132560 2.318733367 3.1079152 0.00000000
+#>                   estimate         SE      CI.lower  CI.upper     pvalue
+#> log.rmtl.ratio   0.0701553 0.03586099 -0.0001309541 0.1404416 0.05042838
+#> log.hazard.ratio 2.7133243 0.19531152  2.3305207442 3.0961278 0.00000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 6.799952 159.5332 186.1886      0
-#> rmst0 196.5603 8.134436 180.6171 212.5035      0
+#> rmst1 172.8609 7.014662 159.1124 186.6094      0
+#> rmst0 196.5603 8.944020 179.0303 214.0902      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -247,9 +229,9 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 - the log HR (`$log.hazard.ratio`).
 
 For example, the log RMTL ratio of 0.07 and the 95% confidence interval
-of (0.01, 0.13) are displayed in the output. The RMTL ratio of along
-with the 95% confidence interval suggest that drug 0 is superior to drug
-1 because the ratio is significantly greater than 1. When we check the
+of (0, 0.14) are displayed in the output. The RMTL ratio of along with
+the 95% confidence interval suggest that drug 0 is superior to drug 1
+because the ratio is significantly greater than 1. When we check the
 estimated RMST, we also see that the estimated rmst1 is lower compared
 to rmst0, indicating that patients that received drug0 have a longer
 mean survival time compared to drug1.
@@ -279,7 +261,7 @@ estimates.
 
 Histograms of bootstrap estimators for 4 estimands after 500 bootstrap
 
-### Estimation of the CATE score with `catefit()`
+## Estimation of the CATE score with `catefit()`
 
 Now we have calculated the ATE we know the effect of both treatments on
 average, but this effect might not be the same for all patients. Thus,
@@ -499,7 +481,12 @@ dataplot %>%
 
 ![](Survival-examples_files/figure-html/plot_score-1.png)
 
-### Internal validation via `catecv()`
+## Internal validation via `catecv()`
+
+For broader guidance on validation strategies and the assessment of
+discrimination, calibration, and decision accuracy, see Chapter 19,
+“Validation of prediction models for patient outcomes and individualized
+treatment effect” (Thao et al. 2026).
 
 The
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -620,8 +607,8 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
 
 There are many other non-mandatory arguments that
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-can accept. Please see the [Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+can accept. Please see the [Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
 vignette for more examples and the Function description [Function
 description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.html)
 for details. If you run into errors or warnings with your data, it might
@@ -658,37 +645,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:19:24 2026 
+#>    Fri Nov 13 20:41:02 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:19:39 2026 
+#>    Fri Nov 13 20:41:14 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:19:53 2026 
+#>    Fri Nov 13 20:41:26 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:20:08 2026 
+#>    Fri Nov 13 20:41:38 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:20:22 2026 
+#>    Fri Nov 13 20:41:50 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 1.21 mins
+#> Total runtime : 1.01 mins
 ```
 
 The output of
@@ -880,7 +867,7 @@ Use
 `` output_catecv$`errors/warnings`$randomForest$est.train.group.cv `` to
 learn more about the errors and warnings generated from these outputs.
 
-### Comparison of methods with `abc()`
+## Comparison of methods with `abc()`
 
 The ABC statistics is calculated by
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
@@ -898,7 +885,7 @@ heterogeneity.
 
 ``` r
 
-output_abc <- abc(x = output_catecv)
+output_abc <- abc(output_catecv)
 output_abc
 #>                    cv1       cv2       cv3       cv4       cv5
 #> randomForest 0.1529437 0.1468651 0.1390613 0.1457913 0.1535596
@@ -924,7 +911,13 @@ In this example, random forest also offers the best overall performance
 because it has the highest average ABC, followed closely by contrast
 regression.
 
-### Visualization of the validation curves with `plot()`
+## Visualization of the validation curves with `plot()`
+
+Chapter 20 discusses validation curves, ABC statistics, and their
+interpretation as responder diagnostics (Jiang et al. 2026). These
+summaries assess how well a score ranks patients by treatment benefit;
+they do not, by themselves, establish calibration of the predicted CATEs
+or the clinical value of a treatment rule (Thao et al. 2026).
 
 The ATEs of nested subgroups of high responders to drug1 (e.g.,
 `output_catecv$ate.randomForest$ate.est.train.high.cv` and
@@ -952,7 +945,7 @@ treatment effect heterogeneity while generalizing well to unseen data.
 
 ``` r
 
-plot(x = output_catecv)
+plot(output_catecv)
 ```
 
 ![](Survival-examples_files/figure-html/example_plot_lineplot1-1.png)
@@ -972,7 +965,7 @@ FALSE.
 
 ``` r
 
-plot(x = output_catecv, 
+plot(output_catecv, 
      show.abc = FALSE, 
      ylab = c("RMTL ratio of drug1 vs drug0 in each subgroup"))
 ```
@@ -986,7 +979,7 @@ we plot the validation curves of the second CV iteration by specifying
 
 ``` r
 
-plot(x = output_catecv, 
+plot(output_catecv, 
      cv.i = 2, 
      grayscale = TRUE, 
      ylab = c("RMTL ratio of drug1 vs drug0 in each subgroup"))
@@ -998,7 +991,7 @@ The user can also choose to use the median (instead of mean \[default\])
 of the ATEs across CV iterations by specifying the argument `combine` =
 “median” in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
-### Visualization of the ATE in subgroups with `boxplot()`
+## Visualization of the ATE in subgroups with `boxplot()`
 
 The ATEs of multi-category subgroups that are mutually exclusive can be
 visualized as box plots, with 1 box plot for each scoring method. Only
@@ -1015,7 +1008,7 @@ median in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 
-boxplot(x = output_catecv,
+boxplot(output_catecv,
         ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Warning: Removed 4 rows containing non-finite outside the scale range
 #> (`stat_boxplot()`).
@@ -1023,21 +1016,11 @@ boxplot(x = output_catecv,
 
 ![](Survival-examples_files/figure-html/example_plot_boxplot-1.png)
 
-For this toy example, we can see why random forest and contrast
-regression methods have the 2 highest ABC and perform the best in the
-validation curves in the previous sections. They both have the most
-distinctive decreasing RMT ratio as we go from the subgroup with the 50%
-lowest CATE scores (red) to subgroup with the 40% highest CATE scores
-(blue). This implies that there is some evidence of heterogeneous
-treatment effect and that the CATE scores estimated with random forest
-or contrast regression can capture it. They also have relatively smaller
-variation as the boxes are thinner. In comparison, the other 3 methods
-also present this increasing trend in the box plots, but we observe a
-larger variation in the RMTL ratio, especially with boosting. We can see
-that the box plots correspond to the other 2 outputs,
-[`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
-and [`plot()`](https://rdrr.io/r/graphics/plot.default.html). Note that
-the y-axis can have different scales for different scoring methods.
+The box plots compare estimated RMTL ratios across mutually exclusive
+score-based subgroups for random forest and contrast regression. Read
+them alongside the validation curves and ABC statistics to assess
+subgroup separation and variation across CV iterations. Note that the
+y-axis can have different scales for different scoring methods.
 
   
   
@@ -1053,16 +1036,31 @@ the y-axis can have different scales for different scoring methods.
 
 ## Other `precmed` vignettes in this series
 
-[1. Examples for count
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Examples for survival
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+[1. Estimating and validating treatment effects for count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
+[2. Estimating and validating treatment effects for survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
+[3. Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
+[4. Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
+
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
+Individualized Treatment Rule Results.” Chap. 20 in *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*,
+edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. “Validation of Prediction Models for
+Patient Outcomes and Individualized Treatment Effect.” Chap. 19 in
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen, and
+Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-19>.
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
 and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional

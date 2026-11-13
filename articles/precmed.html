@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>A general introduction • precmed</title>
+<title>Getting started with precmed • precmed</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="A general introduction">
+<meta property="og:title" content="Getting started with precmed">
 <script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script>
 </head>
 <body>
@@ -44,10 +44,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a></li>
+<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
@@ -68,7 +68,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>A general introduction</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Getting started with precmed</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 5</h3>
             
             <h4 data-toc-skip class="date">November 13, 2026</h4>
@@ -81,14 +81,6 @@
     
 <!-- badges: start -->
 <p><a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://www.r-pkg.org/badges/version/precmed" alt="CRAN_Status_Badge"></a> <a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/last-month/precmed" alt="metacran downloads"></a> <!-- badges: end --></p>
-<h1>
-precmed: Precision Medicine in R
-</h1>
-<p>A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects.</p>
-<div class="section level2">
-<h2 id="general-introduction">General introduction<a class="anchor" aria-label="anchor" href="#general-introduction"></a>
-</h2>
 <p><strong>precmed</strong> was developed to help researchers with the
 implementation of precision medicine in R. A key objective of precision
 medicine is to determine the optimal treatment separately for each
@@ -105,9 +97,13 @@ personalization of two competitive treatments using randomized data from
 a clinical trial <span class="citation">(<a href="#ref-zhao2013effectively">Zhao et al. 2013</a>)</span> or using
 real-world data (RWD) from a non-randomized study <span class="citation">(<a href="#ref-yadlowsky2020estimation">Yadlowsky et
 al. 2021</a>)</span>.</p>
-<div class="section level3">
-<h3 id="how-to-install">How to install?<a class="anchor" aria-label="anchor" href="#how-to-install"></a>
-</h3>
+<p>For an introduction to CATE prediction, model development, and the
+assumptions needed to identify treatment effects, see Chapter 17,
+“Introduction to methods for personalizing medicine” <span class="citation">(<a href="#ref-hoogland2026introduction">Hoogland et
+al. 2026</a>)</span>.</p>
+<div class="section level2">
+<h2 id="install-precmed">Install precmed<a class="anchor" aria-label="anchor" href="#install-precmed"></a>
+</h2>
 <p>The <code>precmed</code> package can be installed from CRAN as
 follows:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -116,7 +112,6 @@ follows:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span>repo <span class="op">=</span> <span class="st">"smartdata-analysis-and-statistics/precmed"</span><span class="op">)</span></span></code></pre></div>
-</div>
 </div>
 <div class="section level2">
 <h2 id="package-capabilities">Package capabilities<a class="anchor" aria-label="anchor" href="#package-capabilities"></a>
@@ -147,6 +142,11 @@ competing models for the CATE using <code><a href="../reference/abc.html">abc()<
 <div class="section level2">
 <h2 id="recommended-workflow">Recommended workflow<a class="anchor" aria-label="anchor" href="#recommended-workflow"></a>
 </h2>
+<p>Chapter 19 discusses validation strategies and the assessment of
+discrimination, calibration, and decision accuracy <span class="citation">(<a href="#ref-thao2026validation">Thao et al.
+2026</a>)</span>. Chapter 20 provides practical guidance on validation
+curves, ABC statistics, and responder diagnostics, including examples
+using <code>precmed</code> <span class="citation">(<a href="#ref-jiang2026visualization">Jiang et al. 2026</a>)</span>.</p>
 <p>We recommend the following workflow to develop a model for estimating
 the CATE in order to identify treatment effect heterogeneity:</p>
 <ol style="list-style-type: decimal">
@@ -180,7 +180,7 @@ variability of the ATE with a bootstrap approach.</li>
 <p>In the vignettes, we will adopt a different workflow to gradually
 expose the user from simple to more complex methods.</p>
 <div class="section level3">
-<h3 id="user-input">User input<a class="anchor" aria-label="anchor" href="#user-input"></a>
+<h3 id="specify-model-inputs">Specify model inputs<a class="anchor" aria-label="anchor" href="#specify-model-inputs"></a>
 </h3>
 <p>When applying <code><a href="../reference/catefit.html">catefit()</a></code> or <code><a href="../reference/catecv.html">catecv()</a></code>, the
 user has to (at least) input:</p>
@@ -211,8 +211,11 @@ previous_treatment)</li>
 <div class="section level2">
 <h2 id="overview-of-the-vignettes">Overview of the vignettes<a class="anchor" aria-label="anchor" href="#overview-of-the-vignettes"></a>
 </h2>
-<p><a href="precmed.html">1. General introduction</a><br><a href="Count-examples.html">2. Examples for count outcome</a><br><a href="Survival-examples.html">3. Examples for survival
-outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br><a href="Theoretical-details.html">5. Theoretical details</a></p>
+<p><a href="precmed.html">1. Getting started with precmed</a><br><a href="Count-examples.html">2. Estimating and validating treatment
+effects for count outcomes</a><br><a href="Survival-examples.html">3. Estimating and validating treatment
+effects for survival outcomes</a><br><a href="Additional-examples.html">4. Customizing CATE models and
+validation</a><br><a href="Theoretical-details.html">5. Methods for estimating and
+validating treatment effects</a></p>
 </div>
 <div class="section level2">
 <h2 id="abbreviations">Abbreviations<a class="anchor" aria-label="anchor" href="#abbreviations"></a>
@@ -278,10 +281,34 @@ outcome</a><br><a href="Additional-examples.html">4. Additional examples</a><br>
 </tbody>
 </table>
 </div>
-<div class="section level2">
+<div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-hoogland2026introduction" class="csl-entry">
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. <span>“Introduction to Methods for Personalizing
+Medicine.”</span> Chap. 17 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">https://doi.org/10.1201/9781003300809-17</a>.
+</div>
+<div id="ref-jiang2026visualization" class="csl-entry">
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. <span>“Visualization and Interpretation
+of Individualized Treatment Rule Results.”</span> Chap. 20 in
+<em>Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-20" class="external-link">https://doi.org/10.1201/9781003300809-20</a>.
+</div>
+<div id="ref-thao2026validation" class="csl-entry">
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. <span>“Validation of Prediction Models
+for Patient Outcomes and Individualized Treatment Effect.”</span> Chap.
+19 in <em>Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long
+Nguyen, and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-19" class="external-link">https://doi.org/10.1201/9781003300809-19</a>.
+</div>
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
 and Lu Tian. 2021. <span>“Estimation and Validation of Ratio-Based

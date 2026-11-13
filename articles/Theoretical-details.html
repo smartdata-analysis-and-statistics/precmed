@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Theoretical details • precmed</title>
+<title>Methods for estimating and validating treatment effects • precmed</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -16,7 +16,7 @@
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<meta property="og:title" content="Theoretical details">
+<meta property="og:title" content="Methods for estimating and validating treatment effects">
 <script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script>
 </head>
 <body>
@@ -44,10 +44,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a></li>
+<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
@@ -68,7 +68,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Theoretical details</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Methods for estimating and validating treatment effects</h1>
             <h3 data-toc-skip class="subtitle">Vignette 4 of 4</h3>
             
             <h4 data-toc-skip class="date">November 13, 2026</h4>
@@ -81,19 +81,16 @@
     
 <!-- badges: start -->
 <p><a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://www.r-pkg.org/badges/version/precmed" alt="CRAN_Status_Badge"></a> <a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/last-month/precmed" alt="metacran downloads"></a> <!-- badges: end --></p>
-<h1>
-precmed: Precision Medicine in R
-</h1>
-<p>A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects</p>
+<p>This vignette explains the ratio-based CATE estimators and validation
+procedures implemented in <code>precmed</code> for count and survival
+outcomes. It covers the scoring methods, validation curves, and ABC
+statistics used in the worked examples.</p>
 <div class="section level2">
 <h2 id="background-and-further-reading">Background and further reading<a class="anchor" aria-label="anchor" href="#background-and-further-reading"></a>
 </h2>
-<p>This vignette describes the ratio-based CATE estimators and
-validation procedures implemented in <code>precmed</code>. A CATE
-describes the average treatment effect among patients with the same
-measured baseline characteristics; it does not identify an individual
-patient’s unobservable treatment effect. Chapter 17 of <span class="citation">Debray et al. (2026)</span> introduces the principles
+<p>A CATE describes the average treatment effect among patients with the
+same measured baseline characteristics; it does not identify an
+individual patient’s unobservable treatment effect. Chapter 17 of <span class="citation">Debray et al. (2026)</span> introduces the principles
 of treatment effect prediction, model development in randomized and
 non-randomized data, and the assumptions needed to identify CATEs <span class="citation">(Hoogland et al. 2026)</span>.</p>
 <p>The primary methodological reference for the two-regression and
@@ -114,7 +111,7 @@ including examples using <code>precmed</code> <span class="citation">(Jiang et a
 </ul>
 </div>
 <div class="section level2">
-<h2 id="theoretical-details---count-outcomes">Theoretical details - Count outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---count-outcomes"></a>
+<h2 id="estimation-and-validation-for-count-outcomes">Estimation and validation for count outcomes<a class="anchor" aria-label="anchor" href="#estimation-and-validation-for-count-outcomes"></a>
 </h2>
 <p>For count outcomes, the CATE score is expressed as a log-rate ratio
 conditional on baseline covariates. It can be estimated with boosting,
@@ -429,7 +426,7 @@ ATE</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="theoretical-details---survival-outcomes">Theoretical details - Survival outcomes<a class="anchor" aria-label="anchor" href="#theoretical-details---survival-outcomes"></a>
+<h2 id="estimation-and-validation-for-survival-outcomes">Estimation and validation for survival outcomes<a class="anchor" aria-label="anchor" href="#estimation-and-validation-for-survival-outcomes"></a>
 </h2>
 <p>For survival outcomes, the CATE score is expressed as a log-ratio of
 restricted mean time lost conditional on baseline covariates. It can be
@@ -771,10 +768,13 @@ ATE.</p>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
-<p><a href="Count-examples.html">1. Examples for count outcome</a><br><a href="Survival-examples.html">2. Examples for survival
-outcome</a><br><a href="Additional-examples.html">3. Additional examples</a><br><a href="Theoretical-details.html">4. Theoretical details</a></p>
+<p><a href="Count-examples.html">1. Estimating and validating treatment
+effects for count outcomes</a><br><a href="Survival-examples.html">2. Estimating and validating treatment
+effects for survival outcomes</a><br><a href="Additional-examples.html">3. Customizing CATE models and
+validation</a><br><a href="Theoretical-details.html">4. Methods for estimating and
+validating treatment effects</a></p>
 </div>
-<div class="section level2">
+<div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">

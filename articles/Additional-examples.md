@@ -1,21 +1,16 @@
-# Additional examples
+# Customizing CATE models and validation
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-# precmed: Precision Medicine in R
-
-A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects
-
-## Additional examples for the `precmed` package
-
-**precmed** can be flexible given the many arguments that the user can
-specify. The example described above is one of the many ways to perform
-the analysis with most argument values kept as default. We provide a few
-more examples below to show what other options the user has and how to
-be more creative in using **precmed**.
+This vignette builds on the worked examples for [count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+and [survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md).
+It shows how to customize initial outcome models, define responder
+subgroups, and choose censoring models and follow-up settings for CATE
+estimation and validation.
 
 ## Load required packages
 
@@ -26,15 +21,16 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## Additional examples with count outcomes
+## Customize models for count outcomes
 
 ### Initial predictor method
 
 If you choose two regressions or contrast regression as the scoring
 method, there is an option to specify how the initial outcome regression
 estimates ($`\hat\mu_r^k`$ where $`r = 0,1`$ is the treatment and $`k`$
-is the CV fold) are calculated. See [Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+is the CV fold) are calculated. See [Methods for estimating and
+validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section for the background of these initial predictors and how they are
 used in two and contrast regressions. Here is a list of all 3 options:
 
@@ -42,7 +38,7 @@ used in two and contrast regressions. Here is a list of all 3 options:
   [`glm()`](https://rdrr.io/r/stats/glm.html) function)
   - generalized linear model, strong assumption on Poisson distribution,
     fast
-- “boosting” (gradient boosting machine from the `gbm` R package)
+- “boosting” (gradient boosting machine from the `gbm3` R package)
   - ensemble method, typically tree-based, slow
 - “gam” (generalized additive model from the `mgcv` package)
   - a combination of generalized linear model and additive models where
@@ -59,8 +55,7 @@ as well.
 ``` r
 
 # An example of using GBM as the initial predictor method
-catecv(response = "count",
-       data = countExample,
+catecvcount(data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
        n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
@@ -73,8 +68,7 @@ catecv(response = "count",
        verbose = 0)
 
 # An example of using GAM as the initial predictor method
-catecv(response = "count",
-       data = countExample,
+catecvcount(data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
        n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
@@ -105,6 +99,12 @@ is somewhere in between with longer computational time as the number of
 smooth terms increases.
 
 ### Subgroup proportion
+
+Chapter 20, “Visualization and interpretation of individualized
+treatment rule results”, provides background on defining responder
+subgroups and interpreting the resulting validation curves and responder
+diagnostics (Jiang et al. 2026). The examples below show how to specify
+these subgroups in `precmed`.
 
 The ATE by subgroups and validation curve results depend on how the
 subgroups are defined, which is determined by the sorted CATE scores.
@@ -160,8 +160,6 @@ output_catecv2 <- catecv(response = "count",
                          seed = 999,
                          plot.gbmperf = FALSE,
                          verbose = 0)
-#> Warning in prop.multi == c(0, 1): longer object length is not a multiple of
-#> shorter object length
 #> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -195,14 +193,14 @@ plot(output_catecv2)
 
 ![](Additional-examples_files/figure-html/subgroup_proportion3_count-1.png)
 
-The validation curves depend on `prop.cutoff` and are now smoother than
-the one presented in the main example because they contain 10 subgroups
-instead of 5. The ABC statistic is not affected by the change in
-`prop.cutoff` because the calculation of ABC statistics depends on the
-minimum and maximum of the `prop.cutoff` vector and is always calculated
-based on 100 evenly-spaced cutoffs created from this range. See more
-theoretical details on ABC calculation in the [Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+The validation curves use the 11 nested subgroup cutoffs specified
+above, so they contain more line segments than the main example. The ABC
+statistic is not affected by the change in `prop.cutoff` because the
+calculation of ABC statistics depends on the minimum and maximum of the
+`prop.cutoff` vector and is always calculated based on 100 evenly-spaced
+cutoffs created from this range. See more theoretical details on ABC
+calculation in the [Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section.
 
 ``` r
@@ -262,37 +260,37 @@ output_catecv3 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:13:05 2026 
+#>    Fri Nov 13 20:35:57 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:13:08 2026 
+#>    Fri Nov 13 20:36:00 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:13:13 2026 
+#>    Fri Nov 13 20:36:03 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:13:18 2026 
+#>    Fri Nov 13 20:36:07 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:13:23 2026 
+#>    Fri Nov 13 20:36:12 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 24.5 secs
+#> Total runtime : 19.46 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2          cv3          cv4       cv5
 #> prop0.01 0.5746485        NA 6.858623e+04 1.901224e+06        NA
@@ -331,15 +329,16 @@ and `prop.multi`:
     `prop.multi` can be time consuming. It is recommended to start from
     a smaller length and you can increase the length as needed.
 
-## Additional examples for survival outcomes
+## Customize models for survival outcomes
 
 ### Initial predictor method
 
 If you choose two and/or contrast regression as the scoring method,
 there is an option to specify how the initial outcome regression
 estimates ($`\hat\mu_r^k`$ where $`r = 0,1`$ is the treatment and $`k`$
-is the cross validation fold) are calculated. See [Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+is the cross validation fold) are calculated. See [Methods for
+estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section for the background of these initial predictors and how they are
 used in the two and contrast regression. Here is a list of all 3
 options:
@@ -348,7 +347,7 @@ options:
   [`glm()`](https://rdrr.io/r/stats/glm.html) function)
   - generalized linear model, strong assumption on binomial
     distribution, fast
-- “boosting” (gradient boosting machine from the `gbm` R package)
+- “boosting” (gradient boosting machine from the `gbm3` R package)
   - ensemble method, typically tree-based, assume the time-to-event
     outcome as Gaussian distributed, slow
 - “randomForest” (random survival forest model from the
@@ -371,7 +370,6 @@ tau0 <- with(survivalExample,
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,
@@ -392,7 +390,6 @@ catecv(response = "survival",
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,
@@ -481,8 +478,6 @@ output_catecv2 <- catecv(response = "survival",
                 seed = 999,
                 plot.gbmperf = FALSE,
                 verbose = 0)
-#> Warning in prop.multi == c(0, 1): longer object length is not a multiple of
-#> shorter object length
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -521,8 +516,9 @@ the calculation of ABC statistics depends on the minimum and maximum of
 the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are
 created from this range. The highest proportion cutoff that is not 1 in
 the main example was 0.9 and it is now 0.95. See more theoretical
-details on ABC calculation in the [Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+details on ABC calculation in the [Methods for estimating and validating
+treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section.
 
 ``` r
@@ -588,37 +584,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:14:54 2026 
+#>    Fri Nov 13 20:37:25 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:14:58 2026 
+#>    Fri Nov 13 20:37:28 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:15:02 2026 
+#>    Fri Nov 13 20:37:31 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:15:06 2026 
+#>    Fri Nov 13 20:37:34 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 17:15:10 2026 
+#>    Fri Nov 13 20:37:38 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 20.02 secs
+#> Total runtime : 15.63 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -738,11 +734,20 @@ plot(output_catecv5)
 
 ## Other `precmed` vignettes in this series
 
-[1. Examples for count
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Examples for survival
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+[1. Estimating and validating treatment effects for count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
+[2. Estimating and validating treatment effects for survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
+[3. Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
+[4. Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+
+## References
+
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
+Individualized Treatment Rule Results.” Chap. 20 in *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*,
+edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.

@@ -28,10 +28,10 @@ linear regression (continuous only), and generalized additive model (continuous 
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -317,7 +317,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments for <code>gbm()</code></p></dd>
+<dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -387,19 +387,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                 ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>, higher.y <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">999</span>, n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Loaded gbm 2.3.1</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This version of gbm is no longer under development. Consider transitioning to gbm3, https://github.com/gbm-developers/gbm3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 5 </span>
 <span class="r-plt img"><img src="catefit-1.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CV: 5 </span>
 <span class="r-plt img"><img src="catefit-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_2</span><span class="op">)</span></span></span>

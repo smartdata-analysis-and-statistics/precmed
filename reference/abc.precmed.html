@@ -24,10 +24,10 @@ This should be run only after results of catecv() have been obtained.'><meta pro
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -143,12 +143,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 32.65 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 8.44 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1        cv2       cv3        cv4        cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.02467248 0.09600999 0.1476896 0.09256872 0.03928721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1       cv2       cv3      cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.02169982 0.1036127 0.1561285 0.092884 0.1916494</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -166,8 +166,8 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1327259 0.1975715 0.1851000 0.1753689 0.1733157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1300210 0.1931817 0.1834924 0.1734281 0.1663412</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1803157 0.1961921 0.1802890 0.1708749 0.2003345</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1762970 0.1935613 0.1768664 0.1690100 0.2017604</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

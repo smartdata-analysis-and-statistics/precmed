@@ -22,10 +22,10 @@
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Example with count outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Example with survival outcome</a></li>
-    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Additional examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Theoretical details</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -46,7 +46,9 @@
 <h2 class="pkg-version" data-toc-text="development version" id="precmed-development-version">precmed (development version)<a class="anchor" aria-label="anchor" href="#precmed-development-version"></a></h2>
 <div class="section level3">
 <h3 id="major-changes-development-version">Major changes<a class="anchor" aria-label="anchor" href="#major-changes-development-version"></a></h3>
-<ul><li><p>Added C backends, enabled by default, for count and survival contrast regression, Cox restricted mean survival integration, and LASSO propensity-score interaction screening. Installing from source now requires a C compiler and R’s standard BLAS/LAPACK libraries.</p></li>
+<ul><li><p>Replaced the <code>gbm</code> dependency with <code>gbm3</code> for boosting models across count, survival, and internal continuous-outcome methods. Existing tuning argument names and the learning rate of 0.1 are preserved, rather than adopting the GBM3 learning-rate default of 0.001. Parallel controls map to GBM3 threads. Stored boosting fits now have class <code>GBMFit</code>. Results can differ from <code>gbm</code> even with identical settings and random seeds because random-number usage and Poisson updates for zero-event leaves differ between the packages.</p></li>
+<li><p>Fixed continuous boosting predictions by retaining the selected tree count for each treatment arm, and forwarding additional boosting controls.</p></li>
+<li><p>Added C backends, enabled by default, for count and survival contrast regression, Cox restricted mean survival integration, and LASSO propensity-score interaction screening. Installing from source now requires a C compiler and R’s standard BLAS/LAPACK libraries.</p></li>
 <li><p>Added <code>contrast.control</code>, <code>rmst.control</code>, and <code>ps.control</code> to select numerical backends independently of model-fitting arguments. Set <code>solver = "R"</code> in the relevant list to use the R implementation. <code>contrast.control</code> also accepts Newton-Raphson settings and nested <code>optim.control</code> options for fallback optimization. Small floating-point differences between backends are possible.</p></li>
 </ul></div>
 <div class="section level3">

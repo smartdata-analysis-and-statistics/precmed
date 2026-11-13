@@ -1,15 +1,8 @@
-# A general introduction
+# Getting started with precmed
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
-
-# precmed: Precision Medicine in R
-
-A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects.
-
-## General introduction
 
 **precmed** was developed to help researchers with the implementation of
 precision medicine in R. A key objective of precision medicine is to
@@ -28,7 +21,12 @@ randomized data from a clinical trial ([Zhao et al.
 non-randomized study ([Yadlowsky et al.
 2021](#ref-yadlowsky2020estimation)).
 
-### How to install?
+For an introduction to CATE prediction, model development, and the
+assumptions needed to identify treatment effects, see Chapter 17,
+“Introduction to methods for personalizing medicine” ([Hoogland et al.
+2026](#ref-hoogland2026introduction)).
+
+## Install precmed
 
 The `precmed` package can be installed from CRAN as follows:
 
@@ -65,6 +63,13 @@ The **precmed** package contains functions to
   ([Zhao et al. 2013](#ref-zhao2013effectively))
 
 ## Recommended workflow
+
+Chapter 19 discusses validation strategies and the assessment of
+discrimination, calibration, and decision accuracy ([Thao et al.
+2026](#ref-thao2026validation)). Chapter 20 provides practical guidance
+on validation curves, ABC statistics, and responder diagnostics,
+including examples using `precmed` ([Jiang et al.
+2026](#ref-jiang2026visualization)).
 
 We recommend the following workflow to develop a model for estimating
 the CATE in order to identify treatment effect heterogeneity:
@@ -103,7 +108,7 @@ the CATE in order to identify treatment effect heterogeneity:
 In the vignettes, we will adopt a different workflow to gradually expose
 the user from simple to more complex methods.
 
-### User input
+### Specify model inputs
 
 When applying
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -122,16 +127,16 @@ the user has to (at least) input:
 
 ## Overview of the vignettes
 
-[1. General
-introduction](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md)  
-[2. Examples for count
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[3. Examples for survival
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[4. Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[5. Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+[1. Getting started with
+precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md)  
+[2. Estimating and validating treatment effects for count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
+[3. Estimating and validating treatment effects for survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
+[4. Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
+[5. Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## Abbreviations
 
@@ -152,6 +157,28 @@ details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Th
 | twoReg       | Two regressions                          |
 
 ## References
+
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. “Introduction to Methods for Personalizing Medicine.”
+Chap. 17 in *Comparative Effectiveness and Personalized Medicine
+Research Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long
+Nguyen, and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-17>.
+
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
+Individualized Treatment Rule Results.” Chap. 20 in *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*,
+edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. “Validation of Prediction Models for
+Patient Outcomes and Individualized Treatment Effect.” Chap. 19 in
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen, and
+Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-19>.
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
 and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional

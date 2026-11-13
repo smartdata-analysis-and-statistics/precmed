@@ -1,18 +1,24 @@
-# Examples for count outcome
+# Estimating and validating treatment effects for count outcomes
 
 [![CRAN
 Status](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-# precmed: Precision Medicine in R
+This vignette demonstrates how to use `precmed` to estimate average and
+conditional average treatment effects (ATEs and CATEs) for count
+outcomes. Using simulated multiple sclerosis data, we model relapse
+rates, compare CATE scoring methods through internal validation, and
+interpret treatment effects in responder subgroups.
 
-A doubly robust precision medicine approach to estimate and validate
-conditional average treatment effects
+For background on CATE prediction and model development, see Chapter 17,
+“Introduction to methods for personalizing medicine” (Hoogland et al.
+2026). Chapter 20, “Visualization and interpretation of individualized
+treatment rule results”, provides practical guidance on interpreting
+treatment rules and responder diagnostics, including examples using
+`precmed` (Jiang et al. 2026).
 
-## Applying precmed to count outcome data
-
-### Load required packages
+## Load required packages
 
 ``` r
 
@@ -21,41 +27,13 @@ library(dplyr)
 library(ggplot2)
 ```
 
-### Example dataset
+## Example dataset
 
 We consider a simulated dataset that is based on real-world claims data
 from patients with multiple sclerosis. The dataset `countExample`
 includes 4,000 patients with information on the following 9 variables.
 
-|  | level | Overall | drug0 | drug1 |
-|:---|:---|:---|:---|:---|
-| Number of patients |  | 4000 | 998 | 3002 |
-| Age (mean (SD)) |  | 46.2 (9.8) | 46.1 (10.1) | 46.3 (9.7) |
-| Gender (%) | male | 987 (24.7) | 247 (24.7) | 740 (24.7) |
-|  | female | 3013 (75.3) | 751 (75.3) | 2262 (75.3) |
-| Previous treatment (%) | drugA | 1787 (44.7) | 457 (45.8) | 1330 (44.3) |
-|  | drugB | 435 (10.9) | 110 (11.0) | 325 (10.8) |
-|  | drugC | 1778 (44.5) | 431 (43.2) | 1347 (44.9) |
-| Previous medical cost (\$) (mean (SD)) |  | 13823.8 (20172.3) | 14181.0 (21591.3) | 13705.1 (19680.3) |
-| Previous number of symptoms (%) | 0 | 332 ( 8.3) | 73 ( 7.3) | 259 ( 8.6) |
-|  | 1 | 2669 (66.7) | 662 (66.3) | 2007 (66.9) |
-|  | \>=2 | 999 (25.0) | 263 (26.4) | 736 (24.5) |
-| Previous number of relapses (%) | 0 | 2603 (65.1) | 646 (64.7) | 1957 (65.2) |
-|  | 1 | 1114 (27.9) | 280 (28.1) | 834 (27.8) |
-|  | 2 | 245 ( 6.1) | 59 ( 5.9) | 186 ( 6.2) |
-|  | 3 | 32 ( 0.8) | 12 ( 1.2) | 20 ( 0.7) |
-|  | 4 | 4 ( 0.1) | 1 ( 0.1) | 3 ( 0.1) |
-|  | 5 | 2 ( 0.0) | 0 ( 0.0) | 2 ( 0.1) |
-| Number of relapses during follow-up (%) | 0 | 3086 (77.1) | 763 (76.5) | 2323 (77.4) |
-|  | 1 | 640 (16.0) | 170 (17.0) | 470 (15.7) |
-|  | 2 | 173 ( 4.3) | 49 ( 4.9) | 124 ( 4.1) |
-|  | 3 | 54 ( 1.4) | 9 ( 0.9) | 45 ( 1.5) |
-|  | 4 | 30 ( 0.8) | 5 ( 0.5) | 25 ( 0.8) |
-|  | 5 | 8 ( 0.2) | 1 ( 0.1) | 7 ( 0.2) |
-|  | 6 | 5 ( 0.1) | 1 ( 0.1) | 4 ( 0.1) |
-|  | 7 | 2 ( 0.0) | 0 ( 0.0) | 2 ( 0.1) |
-|  | 8 | 2 ( 0.0) | 0 ( 0.0) | 2 ( 0.1) |
-| Length of follow-up (years) (mean (SD)) |  | 1.2 (1.2) | 1.2 (1.3) | 1.2 (1.2) |
+[TABLE]
 
 ------------------------------------------------------------------------
 
@@ -76,23 +54,19 @@ centered at 48 years old and the medical costs in the year prior to
 treatment initiation `previous_cost` was centered at 13,824 USD and
 scaled with standard deviation 20,172 USD.
 
-The final dataset `countExample` looked like this:
+The first six records of the final dataset `countExample` are shown
+below:
 
-    #> 'data.frame':    4000 obs. of  9 variables:
-    #>  $ age                     : num [1:4000, 1] -21.22 -2.22 -10.22 6.78 4.78 ...
-    #>   ..- attr(*, "scaled:center")= num 46.2
-    #>  $ female                  : int  0 1 1 0 1 0 1 0 1 1 ...
-    #>  $ previous_treatment      : Factor w/ 3 levels "drugA","drugB",..: 1 1 1 1 3 3 3 3 3 1 ...
-    #>  $ previous_cost           : num [1:4000, 1] 0.451 -0.194 -0.534 -0.337 -0.271 ...
-    #>   ..- attr(*, "scaled:center")= num 13824
-    #>   ..- attr(*, "scaled:scale")= num 20172
-    #>  $ previous_number_symptoms: Factor w/ 3 levels "0","1",">=2": 2 2 2 2 2 2 2 3 2 1 ...
-    #>  $ previous_number_relapses: int  0 0 1 1 0 0 0 0 1 1 ...
-    #>  $ trt                     : Factor w/ 2 levels "drug0","drug1": 2 1 1 2 2 1 2 2 2 2 ...
-    #>  $ y                       : int  0 0 0 0 1 0 0 0 0 0 ...
-    #>  $ years                   : num  0.2847 0.6105 2.653 0.0383 2.2697 ...
+| age | female | previous_treatment | previous_cost | previous_number_symptoms | previous_number_relapses | trt | y | years |
+|---:|---:|:---|---:|:---|---:|:---|---:|---:|
+| -21.21875 | 0 | drugA | 0.4507466 | 1 | 0 | drug1 | 0 | 0.2847365 |
+| -2.21875 | 1 | drugA | -0.1943336 | 1 | 0 | drug0 | 0 | 0.6105407 |
+| -10.21875 | 1 | drugA | -0.5336635 | 1 | 1 | drug0 | 0 | 2.6529774 |
+| 6.78125 | 0 | drugA | -0.3370594 | 1 | 1 | drug1 | 0 | 0.0383299 |
+| 4.78125 | 1 | drugC | -0.2710085 | 1 | 0 | drug1 | 1 | 2.2696783 |
+| -11.21875 | 0 | drugC | 0.1602817 | 1 | 0 | drug0 | 0 | 0.3668720 |
 
-### Estimation of the ATE with `atefit()`
+## Estimation of the ATE with `atefit()`
 
 First, one might be interested in the effect of the drug (trt) on the
 number of relapses during follow-up (y). Lets test this using simple
@@ -204,24 +178,32 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 (“pvalue”) for the log rate ratio (`$log.rate.ratio`) as well as the
 point estimate for the rate in the 2 treatment groups (`$rate0` and
 `$rate1`). For example, the log rate ratio of 0.06 and the 95%
-confidence interval of (-0.26, 0.38) are displayed in the output. The
-user can retrieve the rate ratio to facilitate the interpretation:
+confidence interval of (-0.26, 0.38) are displayed in the output. Use
+[`coef()`](https://rdrr.io/r/stats/coef.html) and
+[`confint()`](https://rdrr.io/r/stats/confint.html) to extract the log
+rate ratio and its confidence interval, then exponentiate them to obtain
+the rate ratio and its interval. The default confidence level is 95%;
+specify `level`, for example `level = 0.90`, to request a different
+level. Intervals use the bootstrap standard error already stored in the
+fitted object:
 
 ``` r
 
-rate.ratio <- exp(output_atefit$log.rate.ratio$estimate)
+rate.ratio <- exp(coef(output_atefit))
 rate.ratio
-#> [1] 1.065152
-CI.rate.ratio <- exp(output_atefit$log.rate.ratio$estimate + c(-1, 1) * qnorm(0.975) * sqrt(output_atefit$log.rate.ratio$SE))
+#> log.rate.ratio 
+#>       1.065152
+CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))
 CI.rate.ratio
-#> [1] 0.4834326 2.3468602
+#>                    2.5 %   97.5 %
+#> log.rate.ratio 0.7747033 1.464495
 ```
 
-The rate ratio of 1.07 along with the 95% confidence interval of (0.48,
-2.35) suggest that drug 0 is superior to drug 1 because the ratio is
-greater than 1 and lower outcomes are preferred, but that this
-superiority is not statistically significant given the p-value of 0.7 in
-the output (`$log.rate.ratio$pvalue`).
+The rate ratio of 1.07 along with the 95% confidence interval of (0.77,
+1.46) indicate a higher estimated relapse rate under drug 1 than drug 0.
+However, the confidence interval includes 1, so there is insufficient
+evidence of a treatment difference, consistent with the p-value of 0.7
+in the output (`$log.rate.ratio$pvalue`).
 
 Using `plot(output_atefit)`, a histograms is generated of the point
 estimates across the `n.boot` bootstrap iterations for the log rate
@@ -233,7 +215,7 @@ the bootstrap estimates.
 Histograms of bootstrap log rate ratio estimators after 500 bootstrap
 iterations.
 
-### Estimation of the CATE score with `catefit()`
+## Estimation of the CATE score with `catefit()`
 
 Now we have calculated the ATE we know the effect of both treatments on
 average, but this effect might not be the same for all patients. Thus,
@@ -294,21 +276,9 @@ output_catefit <- catefit(response = "count",
                           seed = 999,
                           n.cores = 1)
 #> Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Loaded gbm 2.3.1
-#> This version of gbm is no longer under development. Consider transitioning to gbm3, https://github.com/gbm-developers/gbm3
-#> CV: 1 
-#> CV: 2 
-#> CV: 3 
-#> CV: 4 
-#> CV: 5 
-#> CV: 1 
-#> CV: 2 
-#> CV: 3 
-#> CV: 4 
-#> CV: 5
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 4.64039 secs
+#> Time difference of 3.970264 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -417,7 +387,12 @@ dataplot %>%
 
 ![](Count-examples_files/figure-html/plot_score-1.png)
 
-### Internal validation via `catecv()`
+## Internal validation via `catecv()`
+
+For broader guidance on validation strategies and the assessment of
+discrimination, calibration, and decision accuracy, see Chapter 19,
+“Validation of prediction models for patient outcomes and individualized
+treatment effect” (Thao et al. 2026).
 
 The
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -525,8 +500,8 @@ data and problem at hand: `initial.predictor.method`, `higher.y`,
 
 There are many other non-mandatory arguments that
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-can accept. Please see the [Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+can accept. Please see the [Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
 vignette for more examples and the [Function
 description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html)
 section for details. If you run into errors or warnings with your data,
@@ -554,37 +529,37 @@ output_catecv <- catecv(response = "count",
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:16:05 2026 
+#>    Fri Nov 13 20:38:22 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:16:08 2026 
+#>    Fri Nov 13 20:38:25 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:16:14 2026 
+#>    Fri Nov 13 20:38:29 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:16:19 2026 
+#>    Fri Nov 13 20:38:34 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 17:16:25 2026 
+#>    Fri Nov 13 20:38:38 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 26.82 secs
+#> Total runtime : 21.93 secs
 ```
 
 The output of
@@ -719,7 +694,7 @@ subgroup with the 33% lowest estimated CATE scores, 1.07 as the RR for
 subgroup with the 33% middle estimated CATE scores, and 0.483 as the RR
 for subgroup with the 33% highest estimated CATE scores.
 
-### Comparison of methods with `abc()`
+## Comparison of methods with `abc()`
 
 The ABC statistics is calculated by
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
@@ -740,7 +715,7 @@ section for a detailed illustration of the relationship between
 
 ``` r
 
-output_abc <- abc(x = output_catecv)
+output_abc <- abc(output_catecv)
 output_abc
 #>                    cv1       cv2        cv3        cv4       cv5
 #> poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204
@@ -768,7 +743,13 @@ In this example, negative binomial also offers the best overall
 performance because it has the highest average ABC, followed closely by
 Poisson.
 
-### Visualization of the validation curves with `plot()`
+## Visualization of the validation curves with `plot()`
+
+Chapter 20 discusses validation curves, ABC statistics, and their
+interpretation as responder diagnostics (Jiang et al. 2026). These
+summaries assess how well a score ranks patients by treatment benefit;
+they do not, by themselves, establish calibration of the predicted CATEs
+or the clinical value of a treatment rule (Thao et al. 2026).
 
 The ATEs of nested subgroups of high responders to drug1 (e.g.,
 `output_catecv$ate.contrastReg$ate.est.train.high.cv` and
@@ -794,7 +775,7 @@ while generalizing well to unseen data.
 
 ``` r
 
-plot(x = output_catecv)
+plot(output_catecv)
 ```
 
 ![](Count-examples_files/figure-html/example_plot_lineplot1-1.png)
@@ -816,7 +797,7 @@ FALSE.
 
 ``` r
 
-plot(x = output_catecv, 
+plot(output_catecv, 
      show.abc = FALSE, 
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
 ```
@@ -830,7 +811,7 @@ specifying `cv.i` = 2 and in grayscale by specifying `grayscale` = TRUE.
 
 ``` r
 
-plot(x = output_catecv, 
+plot(output_catecv, 
      cv.i = 2, 
      grayscale = TRUE, 
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
@@ -844,7 +825,7 @@ the user can also choose to use the median (instead of mean \[default\])
 of the ATEs across CV iterations by specifying the argument `combine` =
 “median” in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
-### Visualization of the ATE in subgroups with `boxplot()`
+## Visualization of the ATE in subgroups with `boxplot()`
 
 The ATEs of multi-category subgroups that are mutually exclusive can be
 visualized as box plots, with one box plot for each scoring method. Only
@@ -860,23 +841,17 @@ iterations, instead of a summary statistics like mean or median in
 
 ``` r
 
-boxplot(x = output_catecv,
+boxplot(output_catecv,
         ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 ```
 
 ![](Count-examples_files/figure-html/example_plot_boxplot-1.png)
 
-For this toy example, we can see why the two regressions method has the
-highest ABC and performs the best in the validation curves in the
-previous sections. Two regression has a decreasing RR as we go from the
-subgroup with the 33% lowest CATE scores (0-33%) to subgroup with the
-33% highest CATE scores (66-100%), implying that there is some evidence
-of heterogeneous treatment effect and the CATE scores estimated with two
-regressions can distinguish the treatment heterogeneity in the data. In
-comparison, the other 3 methods seem to struggle with the validation
-data. Even tough they show different subgroups, we can see that the box
-plots correspond to the other 2 metrics. Note that the y-axis can have
-different scales for different scoring methods.
+The box plots compare estimated rate ratios across mutually exclusive
+score-based subgroups. Read them alongside the validation curves and ABC
+statistics to assess how each scoring method separates patients by
+treatment benefit and how estimates vary across CV iterations. Note that
+the y-axis can have different scales for different scoring methods.
 
   
   
@@ -892,16 +867,38 @@ different scales for different scoring methods.
 
 ## Other `precmed` vignettes in this series
 
-[1. Examples for count
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Examples for survival
-outcome](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Additional
-examples](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Theoretical
-details](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+[1. Estimating and validating treatment effects for count
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
+[2. Estimating and validating treatment effects for survival
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
+[3. Customizing CATE models and
+validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
+[4. Methods for estimating and validating treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
+
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. “Introduction to Methods for Personalizing Medicine.”
+Chap. 17 in *Comparative Effectiveness and Personalized Medicine
+Research Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long
+Nguyen, and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-17>.
+
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
+Individualized Treatment Rule Results.” Chap. 20 in *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*,
+edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
+and Thomas P. A. Debray. 2026. “Validation of Prediction Models for
+Patient Outcomes and Individualized Treatment Effect.” Chap. 19 in
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen, and
+Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-19>.
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
 and Lu Tian. 2021. “Estimation and Validation of Ratio-Based Conditional

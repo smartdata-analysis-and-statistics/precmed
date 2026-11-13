@@ -244,7 +244,8 @@ catecvcount(
 
 - ...:
 
-  Additional arguments for `gbm()`
+  Additional boosting arguments; see
+  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value
 
@@ -451,7 +452,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.11 secs 
+#> Total runtime : 7.4 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

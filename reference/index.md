@@ -27,6 +27,10 @@
   Check arguments that are common to all types of outcome USed inside
   [`arg.checks()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.md)
 
+- [`coef(`*`<atefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit-extract.md)
+  [`confint(`*`<atefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit-extract.md)
+  : Extract average treatment effect estimates and confidence intervals
+
 - [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   : Doubly robust estimator of and inference for the average treatment
   effect for count, survival and continuous data
@@ -67,6 +71,9 @@
   The ratio of treated and controls is maintained in the training and
   validation sets 2) The covariate distributions are balanced between
   the training and validation sets
+
+- [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md)
+  : Boosting controls and GBM3 backend
 
 - [`boxplot(`*`<precmed>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boxplot.precmed.md)
   :

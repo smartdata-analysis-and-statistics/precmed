@@ -249,7 +249,8 @@ catecvmean(
 
 - ...:
 
-  Additional arguments for `gbm()`
+  Additional boosting arguments; see
+  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value
 

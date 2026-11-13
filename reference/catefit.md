@@ -293,7 +293,8 @@ catefit(
 
 - ...:
 
-  Additional arguments for `gbm()`
+  Additional boosting arguments; see
+  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value
 
@@ -368,19 +369,7 @@ fit_2 <- catefit(response = "survival",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Loaded gbm 2.3.1
-#> This version of gbm is no longer under development. Consider transitioning to gbm3, https://github.com/gbm-developers/gbm3
-#> CV: 1 
-#> CV: 2 
-#> CV: 3 
-#> CV: 4 
-#> CV: 5 
 
-#> CV: 1 
-#> CV: 2 
-#> CV: 3 
-#> CV: 4 
-#> CV: 5 
 
 
 coef(fit_2)
