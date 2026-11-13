@@ -6,6 +6,9 @@
 docs
 inst/doc
 
+# Generated knitr vignette caches
+/vignettes/*_cache/
+
 # Native build outputs
 src/*.o
 src/*.so
