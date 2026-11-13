@@ -25,31 +25,31 @@ options(width = 60, digits = 3)
 
 **precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
-## Free learning resources
+## Learning resources
 
-### An Introduction to Precision Medicine
+The theory behind **precmed** is discussed in [*Comparative Effectiveness and Personalized Medicine Research Using Real-World Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter 20](https://doi.org/10.1201/9781003300809-20) explains how to visualize and interpret individualized treatment rule results using the package [@jiang2026visualization].
 
-Learn the foundations of precision medicine through recorded webinars, exercises, and readings.
+Two free courses complement the book, introducing **precmed**, its practical use, and the underlying statistical methods:
+
+### [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
+
+Recorded webinars, exercises, and readings introduce individualized treatment effects, the foundations of precision medicine, and practical use of **precmed**.
+
+**Teachers:** Thomas Debray, Tri-Long Nguyen, and Phoebe Jiang.
 
 <div class="thinkific-product-card" data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff" data-btn-bg-color="#005a80" data-card-type="card" data-link-type="landing_page" data-product="3112887" data-embed-version="0.0.2" data-card-txt-color="#243746" data-card-bg-color="#ffffff" data-store-url="https://sdas.thinkific.com/embeds/products/show">
 <div class="iframe-container"></div>
 </div>
 
-[Start learning for free](https://sdas.thinkific.com/courses/precmedintro)
+### [Free Companion Course to the Real-World Data Handbook](https://sdas.thinkific.com/courses/rwd-book)
 
-### Free Companion Course to the Real-World Data Handbook
+Background materials, example R code, and curated references connect the book's methods to practical analyses. The [chapter companion tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html) demonstrates **precmed** with worked examples.
 
-Explore background materials, example R code, and curated references that complement the book.
+**Book editors:** Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
 
 <div class="thinkific-product-card" data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff" data-btn-bg-color="#005a80" data-card-type="card" data-link-type="landing_page" data-product="3591896" data-embed-version="0.0.2" data-card-txt-color="#243746" data-card-bg-color="#ffffff" data-store-url="https://sdas.thinkific.com/embeds/products/show">
 <div class="iframe-container"></div>
 </div>
-
-[View the free companion course](https://sdas.thinkific.com/courses/rwd-book)
-
-### Further reading
-
-For guidance on visualizing and interpreting individualized treatment rules, see Chapter 20, ["Visualization and interpretation of individualized treatment rule results"](https://doi.org/10.1201/9781003300809-20), by Jiang et al. in *Comparative Effectiveness and Personalized Medicine Research Using Real-World Data* [@jiang2026visualization]. The [companion tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html) includes examples using **precmed**.
 
 ## Installation
 

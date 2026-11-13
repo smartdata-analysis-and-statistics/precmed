@@ -27,12 +27,25 @@ randomized data from a clinical trial (Zhao et al. 2013) or using
 real-world data (RWD) from a non-randomized study (Yadlowsky et al.
 2020).
 
-## Free learning resources
+## Learning resources
 
-### An Introduction to Precision Medicine
+The theory behind **precmed** is discussed in [*Comparative
+Effectiveness and Personalized Medicine Research Using Real-World
+Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter
+20](https://doi.org/10.1201/9781003300809-20) explains how to visualize
+and interpret individualized treatment rule results using the package
+(Jiang et al. 2026).
 
-Learn the foundations of precision medicine through recorded webinars,
-exercises, and readings.
+Two free courses complement the book, introducing **precmed**, its
+practical use, and the underlying statistical methods:
+
+### [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
+
+Recorded webinars, exercises, and readings introduce individualized
+treatment effects, the foundations of precision medicine, and practical
+use of **precmed**.
+
+**Teachers:** Thomas Debray, Tri-Long Nguyen, and Phoebe Jiang.
 
 <div class="thinkific-product-card"
 data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
@@ -48,13 +61,15 @@ data-store-url="https://sdas.thinkific.com/embeds/products/show">
 
 </div>
 
-[Start learning for
-free](https://sdas.thinkific.com/courses/precmedintro)
+### [Free Companion Course to the Real-World Data Handbook](https://sdas.thinkific.com/courses/rwd-book)
 
-### Free Companion Course to the Real-World Data Handbook
+Background materials, example R code, and curated references connect the
+book’s methods to practical analyses. The [chapter companion
+tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
+demonstrates **precmed** with worked examples.
 
-Explore background materials, example R code, and curated references
-that complement the book.
+**Book editors:** Thomas P. A. Debray, Tri-Long Nguyen, and Robert W.
+Platt.
 
 <div class="thinkific-product-card"
 data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
@@ -69,20 +84,6 @@ data-store-url="https://sdas.thinkific.com/embeds/products/show">
 </div>
 
 </div>
-
-[View the free companion
-course](https://sdas.thinkific.com/courses/rwd-book)
-
-### Further reading
-
-For guidance on visualizing and interpreting individualized treatment
-rules, see Chapter 20, [“Visualization and interpretation of
-individualized treatment rule
-results”](https://doi.org/10.1201/9781003300809-20), by Jiang et al. in
-*Comparative Effectiveness and Personalized Medicine Research Using
-Real-World Data* (Jiang et al. 2026). The [companion
-tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
-includes examples using **precmed**.
 
 ## Installation
 
