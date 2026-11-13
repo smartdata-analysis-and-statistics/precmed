@@ -559,15 +559,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
         if (initial.predictor.method == "boosting") {
           # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
           cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
-          fit1.boosting <- gbm(y ~ . - time + offset(time),
-                               data = data1,
-                               distribution = "poisson",
-                               interaction.depth = tree.depth,
-                               n.trees = n.trees.boosting,
-                               cv.folds = cate.cvfold, ...)
-          best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
-
-
+          # Fit each treatment arm once per cross-fitting fold.
           fit1.boosting <- gbm(y ~ . - time + offset(time), data = data1, distribution = "poisson",
                                interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
           best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))

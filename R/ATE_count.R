@@ -276,6 +276,48 @@ drcount <- function(y, trt, x.cate, x.ps, time,
   return(list(log.rate.ratio = logrr, rate0 = mu0dr, rate1 = mu1dr))
 }
 
+# Matrix-only equivalent of drcount(..., ps.method = "glm", interactions = TRUE).
+# Used by balanced splitting to avoid rebuilding model frames on each attempt.
+# outcome.design already includes the intercept; x.ps is the PS design matrix.
+drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
+                           minPS = 0.01, maxPS = 0.99) {
+  withCallingHandlers({
+    beta.ps <- stats::glm.fit(x.ps, trt, family = families$propensity,
+                              intercept = FALSE)$coefficients
+    keep <- !is.na(beta.ps)
+    ps <- as.vector(1 / (1 + exp(-x.ps[, keep, drop = FALSE] %*% beta.ps[keep])))
+    ps <- pmax(pmin(ps, maxPS), minPS)
+
+    predict.rate <- function(beta, design) {
+      keep <- !is.na(beta)
+      as.vector(exp(design[, keep, drop = FALSE] %*% beta[keep]))
+    }
+    if (min(sum(trt), length(y) - sum(trt)) > 10) {
+      id1 <- trt == 1
+      id0 <- trt == 0
+      beta1 <- stats::glm.fit(outcome.design[id1, , drop = FALSE], y[id1],
+                               offset = time[id1], family = families$outcome)$coefficients
+      beta0 <- stats::glm.fit(outcome.design[id0, , drop = FALSE], y[id0],
+                               offset = time[id0], family = families$outcome)$coefficients
+      y1hat <- predict.rate(beta1, outcome.design)
+      y0hat <- predict.rate(beta0, outcome.design)
+    } else {
+      beta <- stats::glm.fit(cbind(outcome.design, trt), y,
+                              offset = time, family = families$outcome)$coefficients
+      y1hat <- predict.rate(beta, cbind(outcome.design, 1))
+      y0hat <- predict.rate(beta, cbind(outcome.design, 0))
+    }
+    mu1dr <- sum(y1hat + (y / exp(time) - y1hat) * trt / ps) / length(y)
+    mu0dr <- sum(y0hat + (y / exp(time) - y0hat) * (1 - trt) / (1 - ps)) / length(y)
+    logrr <- if (!is.na(mu1dr / mu0dr) && mu1dr / mu0dr > 0) log(mu1dr / mu0dr) else NA
+    list(log.rate.ratio = logrr, rate0 = mu0dr, rate1 = mu1dr)
+  }, warning = function(w) {
+    if (grepl("numerically 0|1 occurred|glm.fit: algorithm did not converge|glm.fit: fitted rates numerically 0 occurred",
+              conditionMessage(w))) invokeRestart("muffleWarning")
+  })
+}
+
+
 
 #' Estimate the Average Treatment Effect of the log risk ratio in multiple
 #' bi-level subgroups defined by the proportions

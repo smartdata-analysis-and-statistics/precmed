@@ -3022,6 +3022,17 @@ balance.split <- function(y, trt, x.cate, x.ps, time,
   x <- x[, !duplicated(colnames(x)), drop = FALSE]
   sdx <- apply(x, 2, sd)
 
+  # These numeric designs do not change across candidate splits. Keep the
+  # formula-based path for inputs outside the complete numeric matrix case.
+  matrix.fits <- is.matrix(x.cate) && is.numeric(x.cate) &&
+    is.matrix(x.ps) && is.numeric(x.ps) &&
+    all(is.finite(x.cate)) && all(is.finite(x.ps)) &&
+    all(is.finite(y)) && all(is.finite(time)) && all(is.finite(trt))
+  if (matrix.fits) {
+    outcome.design <- cbind(1, x.cate)
+    families <- list(outcome = poisson(), propensity = binomial())
+  }
+
   n1 <- sum(trt)
   n0 <- sum(1 - trt)
   m1 <- round(n1 * train.prop, digits = 0)
@@ -3054,10 +3065,21 @@ balance.split <- function(y, trt, x.cate, x.ps, time,
     diffx <- colMeans(x.train) - colMeans(x.valid)
     errorx <- max(abs(diffx / sdx))
 
-    est.valid  <- drcount(y = y.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid, time = time.valid,
-                          ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$log.rate.ratio
-    est.train <- drcount(y = y.train, x.cate = x.train, x.ps = x.ps.train, trt = trt.train, time = time.train,
-                         ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$log.rate.ratio
+    if (matrix.fits) {
+      est.valid <- drcount.matrix(y[id.valid], trt[id.valid],
+                                  outcome.design[id.valid, , drop = FALSE],
+                                  x.ps[id.valid, , drop = FALSE], time[id.valid],
+                                  families, minPS, maxPS)$log.rate.ratio
+      est.train <- drcount.matrix(y[-id.valid], trt[-id.valid],
+                                  outcome.design[-id.valid, , drop = FALSE],
+                                  x.ps[-id.valid, , drop = FALSE], time[-id.valid],
+                                  families, minPS, maxPS)$log.rate.ratio
+    } else {
+      est.valid  <- drcount(y = y.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, trt = trt.valid, time = time.valid,
+                            ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$log.rate.ratio
+      est.train <- drcount(y = y.train, x.cate = x.train, x.ps = x.ps.train, trt = trt.train, time = time.train,
+                           ps.method = "glm", minPS = minPS, maxPS = maxPS, interactions = TRUE)$log.rate.ratio
+    }
 
     error <- max(2 * abs(est.valid - est.train) / (abs(est.valid) + abs(est.train)), errorx)
     if (is.na(error) == FALSE & error < errorbest) {

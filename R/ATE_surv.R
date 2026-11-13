@@ -479,9 +479,10 @@ ipcw.surv <- function(y, d, x.ipcw, yf = NULL, ipcw.method = "breslow", tau0, su
     time0 <- detail$time
     score <- exp(as.vector(xnew[, is.na(beta0) == FALSE, drop = FALSE] %*% beta0[is.na(beta0) == FALSE]))
 
-    for (i in seq(n)) {
-      surv.prob[i] <- exp(-sum(hazard0[time0 <= min(tau0, y[i])]) * score[i])
-    }
+    # Include events at the observation time, matching the original <= rule.
+    cumulative.hazard <- c(0, cumsum(hazard0))
+    index <- findInterval(pmin(tau0, y), time0)
+    surv.prob <- exp(-cumulative.hazard[index + 1L] * score)
   } else {
     distribution <- str_extract(string = ipcw.method, pattern = "(?<=aft \\().*(?=\\))")
     fit.cen <- survreg(Surv(yfnew, dfnew) ~ xnew, dist = distribution)

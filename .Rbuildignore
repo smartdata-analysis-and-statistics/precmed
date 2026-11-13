@@ -11,3 +11,4 @@ README.Rmd
 ^pkgdown$
 vignettes
 ^\.github$
+^tests/local$
