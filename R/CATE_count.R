@@ -163,6 +163,13 @@
 #'                     ps.model = trt ~ age + previous_treatment,
 #'                     higher.y = FALSE,
 #'                     seed = 999, verbose = 1)
+#' @param contrast.control A named list of options for count-outcome contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Only count
+#' outcomes support this list; other outcomes retain their existing solver.
 #' @export
 
 catefitcount <- function(data,
@@ -186,8 +193,11 @@ catefitcount <- function(data,
                          seed = NULL,
                          plot.gbmperf = FALSE,
                          verbose = 0,
+                         contrast.control = list(),
                          ...) {
 
+
+  resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   # Set seed once for reproducibility
   set.seed(seed)
@@ -227,7 +237,8 @@ catefitcount <- function(data,
                    xvar.smooth = xvar.smooth,
                    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
-                   error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
+                   error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
+                   contrast.control = contrast.control, ...)
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste0("The best boosting iteration was iteration number",
@@ -371,36 +382,67 @@ onearmglmcount.dr <- function(y, x.cate, time, trt, ps, f.predictor) {
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #'
+#' @param solver Numerical backend: \code{"C"} (default) or \code{"R"}. The C
+#' backend implements the NR loop and fallback score evaluations in native code;
+#' both backends retain the same \code{stats::optim} fallback and covariance formula.
+#' Floating-point rounding can lead to small differences between backends.
+#' @param optim.control Named controls passed to \code{stats::optim} if NR fails
+#' to converge, for example \code{list(maxit = 1000, reltol = 1e-10)}.
+#' \code{max.iterNR} governs NR; \code{optim.control$maxit} governs fallback only.
+#'
 #' @return coef: Doubly robust estimators of the regression coefficients \code{delta_0}; vector of size \code{p} + 1 (intercept included)
 #'         vcov: Variance-covariance matrix of the estimated coefficient \code{delta_0}; matrix of size \code{p} + 1 by \code{p} + 1
 #'         converge: Indicator that the Newton Raphson algorithm converged for \code{delta_0}; boolean
 twoarmglmcount.dr <- function(y, x.cate, time, trt,
                               ps, f1.predictor, f0.predictor,
-                              error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0)) {
+                              error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0),
+                              solver = c("C", "R"), optim.control = list()) {
+
+  solver <- match.arg(solver)
+  validate_contrast_controls(error.maxNR, max.iterNR, tune, optim.control)
 
   y <- y * exp(-time)
   x.aug <- cbind(1, x.cate)
   p.aug <- length(x.aug[1, ])
 
-  # Estimate coefficients with NR algorithm
-  beta <- rep(0, p.aug)
-  mae <- Inf
-  iter <- 0
-  epsilon.min <- Inf
-  while (mae > error.maxNR && iter <= max.iterNR && epsilon.min > 0) {
-    eta <- as.numeric(exp(x.aug %*% beta))
-    error <- (trt * (y - eta * f0.predictor / 2 - f1.predictor / 2) * (1 - ps) - (1 - trt) * (eta * y - eta * f0.predictor / 2 - f1.predictor / 2) * ps) / (eta * ps + (1 - ps))
-    score <- colSums(x.aug * error)
-    slopewt <- (y + f0.predictor * (trt / ps - 1) / 2 + f1.predictor * ((1 - trt) / (1 - ps) - 1) / 2) * eta * ps * (1 - ps) / (eta * ps + (1 - ps))^2
-    slope <- t(x.aug * slopewt) %*% x.aug
-    epsilon.min <- eigen(slope, only.values = TRUE)$value[p.aug]
-    if (iter == 0) epsilon0 <- epsilon.min + epsilon.min * (epsilon.min < 0) # fixed to all iterations
-    beta <- beta + solve(slope + diag(tune[2] * abs(epsilon0), p.aug, p.aug)) %*% score * tune[1] # adding the diagonal matrix to slove potential singualrity issues
-    mae <- sum(abs(score))
-    iter <- iter + 1
+  if (solver == "C") {
+    x.aug <- as.matrix(x.aug)
+    storage.mode(x.aug) <- "double"
+    n <- nrow(x.aug)
+    vectors <- list(y, trt, ps, f1.predictor, f0.predictor)
+    if (!n || !ncol(x.aug) || any(!is.finite(x.aug)) ||
+        any(vapply(vectors, function(v) !is.numeric(v) || length(v) != n ||
+                     any(!is.finite(v)), logical(1))) ||
+        any(ps <= 0 | ps >= 1) || any(!trt %in% c(0, 1))) {
+      stop("C solver requires finite numeric data, binary treatment and 0 < ps < 1.")
+    }
+    native.data <- c(list(x.aug), lapply(vectors, as.double))
+    nr <- .Call(precmed_contrast_nr, native.data, as.double(error.maxNR),
+                as.integer(max.iterNR), as.double(tune))
+    beta <- nr[[1L]]
+    converge1 <- as.integer(nr[[2L]])
+  } else {
+    # Estimate coefficients with NR algorithm
+    beta <- rep(0, p.aug)
+    mae <- Inf
+    iter <- 0
+    epsilon.min <- Inf
+    while (mae > error.maxNR && iter <= max.iterNR && epsilon.min > 0) {
+      eta <- as.numeric(exp(x.aug %*% beta))
+      error <- (trt * (y - eta * f0.predictor / 2 - f1.predictor / 2) * (1 - ps) - (1 - trt) * (eta * y - eta * f0.predictor / 2 - f1.predictor / 2) * ps) / (eta * ps + (1 - ps))
+      score <- colSums(x.aug * error)
+      slopewt <- (y + f0.predictor * (trt / ps - 1) / 2 + f1.predictor * ((1 - trt) / (1 - ps) - 1) / 2) * eta * ps * (1 - ps) / (eta * ps + (1 - ps))^2
+      slope <- t(x.aug * slopewt) %*% x.aug
+      epsilon.min <- eigen(slope, only.values = TRUE)$value[p.aug]
+      if (iter == 0) epsilon0 <- epsilon.min + epsilon.min * (epsilon.min < 0) # fixed to all iterations
+      beta <- beta + solve(slope + diag(tune[2] * abs(epsilon0), p.aug, p.aug)) %*% score * tune[1] # adding the diagonal matrix to slove potential singualrity issues
+      mae <- sum(abs(score))
+      iter <- iter + 1
+    }
+
+    converge1 <- 1 * (mae <= error.maxNR)
   }
 
-  converge1 <- 1 * (mae <= error.maxNR)
   converge2 <- 0
 
   # If NP did not converge, solve for minimizing the L2-norm (sum of squares) of the score function to avoid inversing the slope inverse (generally slower than NP)
@@ -412,8 +454,12 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
       return(sum(score^2))
     }
 
+    if (solver == "C") {
+      lossf <- function(beta) .Call(precmed_contrast_loss, native.data, as.double(beta))
+    }
+
     initial.value <- lossf(rep(0, p.aug))
-    fit <- optim(rep(0, p.aug), fn = lossf) #, control=list(trace=T))
+    fit <- optim(rep(0, p.aug), fn = lossf, control = optim.control)
     beta <- fit$par
     converge2 <- 1 * (fit$value < initial.value / 100)
   }
@@ -488,6 +534,13 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param ... Additional arguments for \code{gbm()}
 #'
+#' @param contrast.control A named list of options for count-outcome contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Only count
+#' outcomes support this list; other outcomes retain their existing solver.
 #' @return Depending on what score.method is, the outputs is a combination of the following:
 #'           result.boosting: Results of boosting fit and best iteration, for trt = 0 and trt = 1 separately
 #'           result.poisson: Naive Poisson estimator (beta1 - beta0); vector of length \code{p.cate} + 1
@@ -505,7 +558,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
                       initial.predictor.method = "boosting",
                       xvar.smooth = NULL,
                       tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
-                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), ...) {
+                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ...) {
+
+  contrast.args <- resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
@@ -627,9 +682,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
       if ("contrastReg" %in% score.method) {
         ## bb-th cross fitting contrast regression estimator
-        fit_two <- twoarmglmcount.dr(y = y, x.cate = x.cate, time = time, trt = trt, ps = pscv,
-                                     f1.predictor = f1.predictcv, f0.predictor = f0.predictcv,
-                                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune)
+        fit_two <- do.call(twoarmglmcount.dr, c(list(
+          y = y, x.cate = x.cate, time = time, trt = trt, ps = pscv,
+          f1.predictor = f1.predictcv, f0.predictor = f0.predictcv), contrast.args))
         delta.contrastReg.mat[bb, ] <- fit_two$coef
         converge[bb] <- fit_two$converge
         if (converge[bb]) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov

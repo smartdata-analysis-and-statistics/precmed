@@ -95,6 +95,11 @@
 #' @export
 #'
 #' @importFrom dplyr mutate
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @importFrom tidyr gather
 
 atefitsurv <- function(data,
@@ -110,7 +115,9 @@ atefitsurv <- function(data,
                        surv.min = 0.025,
                        n.boot = 500,
                        seed = NULL,
-                       verbose = 0) {
+                       verbose = 0, rmst.control = list()) {
+  resolve_rmst_control(rmst.control)
+
 
   # Set seed once for reproducibility
   set.seed(seed)
@@ -148,7 +155,7 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method)
+                ipcw.method = ipcw.method, rmst.control = rmst.control)
 
   est <- unlist(est)
 
@@ -170,7 +177,7 @@ atefitsurv <- function(data,
                        x.ipcw = x.ipcw[idsub.boot, ],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
     save.boot[i,] <- unlist(est.boot)
 
     if (verbose == 1) setTxtProgressBar(pb, i)
@@ -238,11 +245,18 @@ atefitsurv <- function(data,
 #'   \item{\code{log.rmtl.ratio}: } A numeric value of the estimated log rmtl ratio.
 #'   \item{\code{log.hazard.ratio}: } A numeric value of the estimated log hazard ratio.
 #' }
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @importFrom survival Surv coxph coxph.detail survreg
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow") {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
+  rmst.args <- resolve_rmst_control(rmst.control)
+
 
   if (ps.method == "lasso") {
     ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
@@ -261,9 +275,9 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   weightc <- dnew / surv.new
   weightc <- weightc / mean(weightc)
 
-  coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, ]), xnew = x.cate, tau0 = tau0)
+  coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver)
 
-  coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, ]), xnew = x.cate, tau0 = tau0)
+  coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver)
 
   rmst1 <- mean((ynew - coxest1) * weightc * trt / ps) / mean(trt / ps) + mean(coxest1)
   rmst0 <- mean((ynew - coxest0) * weightc * (1 - trt) / (1 - ps)) / mean((1 - trt) / (1 - ps)) + mean(coxest0)
@@ -314,6 +328,11 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 #' @param ipcw.method The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
 #' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.
 #'
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @return ate.rmtl.high: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned.
 #'         ate.rmtl.low: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the lower-than-cutoff category;
@@ -326,7 +345,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 
 estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 = tau0,
                                       score, higher.y, prop, onlyhigh,
-                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow") {
+                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -344,7 +363,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
     idsub1 <- (score >= cut[b])
     fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, ], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
                                  trt = trt[idsub1], yf = yf[idsub1],
-                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method))
+                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
     ate.rmtl.high[b] <- fit.high$log.rmtl.ratio
     hr.high[b] <- fit.high$log.hazard.ratio
     warn.high[b] <- list(fit.high$warnings)
@@ -354,7 +373,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
       idsub0 <- (score < cut[b])
       fit.low <- survCatch(drsurv(y = y[idsub0], d = d[idsub0], x.cate = as.matrix(x.cate[idsub0, ]), x.ps = x.ps[idsub0, ], x.ipcw = as.matrix(x.ipcw[idsub0, ]),
                                   trt = trt[idsub0], yf = yf[idsub0],
-                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method))
+                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
       ate.rmtl.low[b] <- fit.low$log.rmtl.ratio
       hr.low[b] <- fit.low$log.hazard.ratio
       warn.low[b] <- list(fit.low$warnings)
@@ -405,6 +424,11 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 #' @param ipcw.method The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
 #' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.
 #'
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @return ate.rmtl: estimated ATEs (ratio of RMTL) of all categories in the one multilevel subgroup;
 #' vector of size equal to the length of categories in the multilevel subgroup.
 #'         ate.hr: unadjusted hazard ratio of all categories in the one multilevel subgroup;
@@ -412,7 +436,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 
 estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 = tau0,
                                          score, higher.y, prop, surv.min = 0.025,
-                                         ps.method = 'glm', minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow") {
+                                         ps.method = 'glm', minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list()) {
 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, prop)
@@ -425,7 +449,7 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
     idsub <- (score >= cut[b] & score <= cut[b + 1])
     fit <- survCatch(drsurv(y = y[idsub], d = d[idsub], x.cate = as.matrix(x.cate[idsub, ]), x.ps = x.ps[idsub, ], x.ipcw = as.matrix(x.ipcw[idsub, ]),
                             trt = trt[idsub], yf = yf[idsub],
-                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method))
+                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
     ate.rmtl[b] <- fit$log.rmtl.ratio
     hr[b] <- fit$log.hazard.ratio
     warn[b] <- list(fit$warnings)

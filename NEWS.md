@@ -1,5 +1,15 @@
 # precmed (development version)
 
+* Added optional C integration for Cox restricted mean survival times. Set
+  `rmst.control = list(solver = "C")` for survival ATE, fit, or CV workflows
+  to avoid allocating patient-by-event-time matrices. C is the default; the R backend remains available.
+
+* Added an optional C backend for count contrast regression, selected with
+  `contrast.control = list(solver = "C")` in `catefit()`/`catecv()` or their
+  count variants. C is the default; fallback optimizer settings can be
+  supplied through `optim.control`. Installing from source now requires a C
+  compiler and R's standard BLAS/LAPACK libraries.
+
 * Compute Breslow censoring probabilities with one cumulative-hazard lookup
   rather than repeatedly scanning and summing hazards for every patient.
 

@@ -26,6 +26,7 @@ catefitcount(
   seed = NULL,
   plot.gbmperf = FALSE,
   verbose = 0,
+  contrast.control = list(),
   ...
 )
 }
@@ -118,6 +119,14 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
+
+\item{contrast.control}{A named list of options for count-outcome contrast
+regression. Supported names are \code{solver} (\code{"C"}, the default, or
+\code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+\code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from \code{...}, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

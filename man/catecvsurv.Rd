@@ -36,7 +36,8 @@ catecvsurv(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 0
+  verbose = 0,
+  rmst.control = list()
 )
 }
 \arguments{
@@ -173,6 +174,12 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model \code{contrast.control}.}
 }
 \value{
 Returns a list containing the following components saved as a \code{"precmed"} object:

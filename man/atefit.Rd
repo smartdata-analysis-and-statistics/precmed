@@ -20,7 +20,8 @@ atefit(
   interactions = TRUE,
   n.boot = 500,
   seed = NULL,
-  verbose = 0
+  verbose = 0,
+  rmst.control = list()
 )
 }
 \arguments{
@@ -86,6 +87,12 @@ Default is \code{NULL}, corresponding to no seed.}
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model \code{contrast.control}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{atefitcount}()}.

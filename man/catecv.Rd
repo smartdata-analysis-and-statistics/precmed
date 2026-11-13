@@ -40,7 +40,9 @@ catecv(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 0
+  verbose = 0,
+  contrast.control = list(),
+  rmst.control = list()
 )
 }
 \arguments{
@@ -200,6 +202,20 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.}
+
+\item{contrast.control}{A named list of options for count-outcome contrast
+regression. Supported names are \code{solver} (\code{"C"}, the default, or
+\code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+\code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from \code{...}, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model \code{contrast.control}.}
 }
 \value{
 For count response, see description of outputs in \code{\link{catecvcount}()}.

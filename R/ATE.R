@@ -93,6 +93,11 @@
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @importFrom tidyr gather
 
 atefit <- function(response,
@@ -110,11 +115,14 @@ atefit <- function(response,
                    interactions = TRUE,
                    n.boot = 500,
                    seed = NULL,
-                   verbose = 0) {
+                   verbose = 0, rmst.control = list()) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
+  if (length(rmst.control) && response != "survival")
+    stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  if (response != "survival") .args$rmst.control <- NULL
   switch(response,
          count = {
            atefitout <- do.call(atefitcount, .args)

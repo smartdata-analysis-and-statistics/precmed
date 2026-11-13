@@ -5,3 +5,10 @@
 .Ruserdata
 docs
 inst/doc
+
+# Native build outputs
+src/*.o
+src/*.so
+src/*.dll
+src/*.dylib
+src/symbols.rds

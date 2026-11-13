@@ -48,7 +48,7 @@ RoxygenNote: 7.3.2
 Imports: dplyr, gbm, gam, ggplot2 (>= 3.4.0), glmnet, graphics, MASS, mgcv,
         rlang, stringr, tidyr, survival, randomForestSRC
 Suggests: knitr, rmarkdown, tableone, testthat
-NeedsCompilation: no
+NeedsCompilation: yes
 BugReports: https://github.com/smartdata-analysis-and-statistics/precmed/issues
 URL: https://github.com/smartdata-analysis-and-statistics/precmed,
     https://smartdata-analysis-and-statistics.github.io/precmed/

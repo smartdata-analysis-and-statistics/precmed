@@ -4,7 +4,7 @@
 \alias{cox.rmst}
 \title{Estimate restricted mean survival time (RMST) based on Cox regression model}
 \usage{
-cox.rmst(y, d, x.cate, xnew, tau0)
+cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"))
 }
 \arguments{
 \item{y}{Observed survival or censoring time; vector of size \code{n}.}
@@ -16,6 +16,10 @@ cox.rmst(y, d, x.cate, xnew, tau0)
 \item{xnew}{Matrix of \code{p.cate} baseline covariates for which we want an estimate of the RMST; dimension \code{m} (observations in the new data set) by \code{p.cate}}
 
 \item{tau0}{The truncation time for defining restricted mean time lost.}
+
+\item{solver}{Integration backend: \code{"C"} (default) or \code{"R"}.
+Both use the same fitted Cox model and step-function integration; the C
+implementation avoids the patient-by-event-time survival matrix.}
 }
 \value{
 The estimated RMST for new subjects with covariates \code{xnew}; vector of size \code{m}.

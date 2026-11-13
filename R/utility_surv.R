@@ -7,9 +7,14 @@
 #' @param xnew Matrix of \code{p.cate} baseline covariates for which we want an estimate of the RMST; dimension \code{m} (observations in the new data set) by \code{p.cate}
 #' @param tau0 The truncation time for defining restricted mean time lost.
 #'
+#' @param solver Integration backend: \code{"C"} (default) or \code{"R"}.
+#' Both use the same fitted Cox model and step-function integration; the C
+#' implementation avoids the patient-by-event-time survival matrix.
+#'
 #' @return The estimated RMST for new subjects with covariates \code{xnew}; vector of size \code{m}.
 #'
-cox.rmst <- function(y, d, x.cate, xnew, tau0) {
+cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R")) {
+  solver <- match.arg(solver)
   xnew <- as.matrix(xnew)
   x <- as.matrix(x.cate)
 
@@ -31,10 +36,13 @@ cox.rmst <- function(y, d, x.cate, xnew, tau0) {
   surv0 <- surv0[time <= tau0]
   time <- time[time <= tau0]
   hr <- exp(as.vector(xnew[, is.na(beta) == FALSE, drop = FALSE] %*% beta[is.na(beta) == FALSE, drop = FALSE]))
-  surv <- crossprod(t(rep(1, n)), surv0)^hr
-
   gap <- c(time, tau0) - c(0, time)
-  coxest <- colSums(t(cbind(1, surv)) * gap)
+  if (solver == "C") {
+    coxest <- .Call(precmed_rmst, as.double(surv0), as.double(hr), as.double(gap))
+  } else {
+    surv <- crossprod(t(rep(1, n)), surv0)^hr
+    coxest <- colSums(t(cbind(1, surv)) * gap)
+  }
 
   return(coxest)
 }

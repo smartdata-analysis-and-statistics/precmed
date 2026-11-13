@@ -17,7 +17,8 @@ drsurv(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  ipcw.method = "breslow"
+  ipcw.method = "breslow",
+  rmst.control = list()
 )
 }
 \arguments{
@@ -53,6 +54,12 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 
 \item{ipcw.method}{The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
 \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model \code{contrast.control}.}
 }
 \value{
 Return a list of 4 elements:

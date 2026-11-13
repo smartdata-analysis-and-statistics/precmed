@@ -200,6 +200,18 @@
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom survival Surv coxph coxph.detail survreg
+#' @param contrast.control A named list of options for count-outcome contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Only count
+#' outcomes support this list; other outcomes retain their existing solver.
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @importFrom utils setTxtProgressBar txtProgressBar
 
 catecv <- function(response,
@@ -237,12 +249,19 @@ catecv <- function(response,
                    tune = c(0.5, 2),
                    seed = NULL,
                    plot.gbmperf = TRUE,
-                   verbose = 0) {
+                   verbose = 0,
+                   contrast.control = list(), rmst.control = list()) {
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
 
+  if (length(contrast.control) && response != "count")
+    stop("contrast.control is currently supported only for count outcomes.")
+  if (length(rmst.control) && response != "survival")
+    stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  if (response != "survival") .args$rmst.control <- NULL
+  if (response != "count") .args$contrast.control <- NULL
 
   switch(response,
          count = {
@@ -560,6 +579,11 @@ catecv <- function(response,
 #' @importFrom gam gam
 #' @importFrom stringr str_replace
 #' @importFrom glmnet cv.glmnet glmnet
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @importFrom dplyr %>%
 #'
 catecvsurv <- function(data,
@@ -593,7 +617,9 @@ catecvsurv <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        plot.gbmperf = TRUE,
-                       verbose = 0) {
+                       verbose = 0, rmst.control = list()) {
+  resolve_rmst_control(rmst.control)
+
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -744,13 +770,13 @@ catecvsurv <- function(data,
     # Calculate the ATE in the training and validation sets (for abc, plot, boxplot)
     overall.train <- drsurv(y = y.train, d = d.train, x.cate = x.cate.train, x.ps = x.ps.train,
                             x.ipcw = x.ipcw.train, trt = trt.train, yf = yf.train, tau0 = tau0, surv.min = surv.min,
-                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
     result$overall.ate.train[cv.i] <- exp(overall.train$log.rmtl.ratio)
     result$overall.hr.train[cv.i] <- exp(overall.train$log.hazard.ratio)
 
     overall.valid <- drsurv(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid,
                             x.ipcw = x.ipcw.valid, trt = trt.valid, yf = yf.valid, tau0 = tau0, surv.min = surv.min,
-                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                            ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
     result$overall.ate.valid[cv.i] <- exp(overall.valid$log.rmtl.ratio)
     result$overall.hr.valid[cv.i] <- exp(overall.valid$log.hazard.ratio)
 
@@ -792,7 +818,7 @@ catecvsurv <- function(data,
     if (prop.onlyhigh[n.subgroup.onlyhigh] == 1) {
       est.prop1 <- survCatch(drsurv(y = y.train, d = d.train, x.cate = x.cate.train, x.ps = x.ps.train, x.ipcw = x.ipcw.train,
                                     trt = trt.train, yf = yf.train,
-                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method))
+                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
     } else {
@@ -808,7 +834,7 @@ catecvsurv <- function(data,
                                           tau0 = tau0, surv.min = surv.min,
                                           score = score.train, higher.y = higher.y,
                                           prop = prop.bi, onlyhigh = FALSE,
-                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <- c(est.bi$ate.rmtl.high, est.prop1$ate.rmtl.high)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <- est.bi$ate.rmtl.low
       result[[str_replace(name, "score", "hr")]]$hr.est.train.high.cv[, cv.i] <- c(est.bi$hr.high, est.prop1$hr.high)
@@ -835,7 +861,7 @@ catecvsurv <- function(data,
                                                 tau0 = tau0, surv.min = surv.min,
                                                 score = score.train, higher.y = higher.y,
                                                 prop = prop.multi,
-                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.train.group.cv[, cv.i] <- est.multi$hr
 
@@ -873,7 +899,7 @@ catecvsurv <- function(data,
     if (prop.onlyhigh[n.subgroup.onlyhigh] == 1) {
       est.prop1 <- survCatch(drsurv(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, x.ipcw = x.ipcw.valid,
                                     trt = trt.valid, yf = yf.valid,
-                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method))
+                                    tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control))
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
     } else {
@@ -889,7 +915,7 @@ catecvsurv <- function(data,
                                           tau0 = tau0, surv.min = surv.min,
                                           score = score.valid, higher.y = higher.y,
                                           prop = prop.bi, onlyhigh = FALSE,
-                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                                          ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <- c(est.bi$ate.rmtl.high, est.prop1$ate.rmtl.high)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <- est.bi$ate.rmtl.low
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.high.cv[, cv.i] <- c(est.bi$hr.high, est.prop1$hr.high)
@@ -918,7 +944,7 @@ catecvsurv <- function(data,
                                                 tau0 = tau0, surv.min = surv.min,
                                                 score = score.valid, higher.y = higher.y,
                                                 prop = prop.multi,
-                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                                                ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.group.cv[, cv.i] <- est.multi$hr
 
@@ -936,7 +962,7 @@ catecvsurv <- function(data,
         temp.abc <- log(estsurv.bilevel.subgroups(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid, x.ipcw = x.ipcw.valid,
                                                   trt = trt.valid, yf = yf.valid, tau0 = tau0, surv.min = surv.min,
                                                   score = score.valid, higher.y = higher.y, prop = prop.abc, onlyhigh = TRUE,
-                                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)$ate.rmtl.high)
+                                                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)$ate.rmtl.high)
 
         if (higher.y == FALSE) {
           # if higher.y=FALSE, higher scores are better and ABC requires subtracting the ATE from validation curve
@@ -1271,6 +1297,13 @@ catecvsurv <- function(data,
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
 #' @importFrom glmnet cv.glmnet glmnet
+#' @param contrast.control A named list of options for count-outcome contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Only count
+#' outcomes support this list; other outcomes retain their existing solver.
 #' @importFrom MASS glm.nb
 
 catecvcount <- function(data,
@@ -1300,7 +1333,10 @@ catecvcount <- function(data,
                         seed = NULL,
                         plot.gbmperf = TRUE,
                         verbose = 0,
+                        contrast.control = list(),
                         ...) {
+
+  resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -1429,7 +1465,8 @@ catecvcount <- function(data,
                      ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                      tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
                      Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
-                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune, ...)
+                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
+                     contrast.control = contrast.control, ...)
 
     if ("contrastReg" %in% score.method) converge.contrastReg.cv[cv.i] <-
       fit$result.contrastReg$converge.contrastReg

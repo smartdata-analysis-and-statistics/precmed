@@ -35,6 +35,8 @@ catefit(
   seed = NULL,
   plot.gbmperf = TRUE,
   verbose = 0,
+  contrast.control = list(),
+  rmst.control = list(),
   ...
 )
 }
@@ -168,6 +170,20 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
+
+\item{contrast.control}{A named list of options for count-outcome contrast
+regression. Supported names are \code{solver} (\code{"C"}, the default, or
+\code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+\code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from \code{...}, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.
+Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model \code{contrast.control}.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

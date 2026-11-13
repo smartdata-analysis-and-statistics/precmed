@@ -24,6 +24,7 @@ intxcount(
   error.maxNR = 0.001,
   max.iterNR = 150,
   tune = c(0.5, 2),
+  contrast.control = list(),
   ...
 )
 }
@@ -98,6 +99,14 @@ Default is \code{150}.}
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
 Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+
+\item{contrast.control}{A named list of options for count-outcome contrast
+regression. Supported names are \code{solver} (\code{"C"}, the default, or
+\code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+\code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from \code{...}, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.}
 
 \item{...}{Additional arguments for \code{gbm()}}
 }

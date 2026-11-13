@@ -15,7 +15,9 @@ twoarmglmcount.dr(
   f0.predictor,
   error.maxNR = 0.001,
   max.iterNR = 150,
-  tune = c(0.5, 2)
+  tune = c(0.5, 2),
+  solver = c("C", "R"),
+  optim.control = list()
 )
 }
 \arguments{
@@ -47,6 +49,15 @@ Default is \code{150}.}
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
 Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+
+\item{solver}{Numerical backend: \code{"C"} (default) or \code{"R"}. The C
+backend implements the NR loop and fallback score evaluations in native code;
+both backends retain the same \code{stats::optim} fallback and covariance formula.
+Floating-point rounding can lead to small differences between backends.}
+
+\item{optim.control}{Named controls passed to \code{stats::optim} if NR fails
+to converge, for example \code{list(maxit = 1000, reltol = 1e-10)}.
+\code{max.iterNR} governs NR; \code{optim.control$maxit} governs fallback only.}
 }
 \value{
 coef: Doubly robust estimators of the regression coefficients \code{delta_0}; vector of size \code{p} + 1 (intercept included)

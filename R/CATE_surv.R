@@ -212,6 +212,11 @@
 #' coef(fit)
 #' }
 #'
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of count-model \code{contrast.control}.
 #' @export
 
 catefitsurv <- function(data,
@@ -240,7 +245,9 @@ catefitsurv <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        ...) {
+                        rmst.control = list(), ...) {
+  resolve_rmst_control(rmst.control)
+
 
   # Set seed for reproducibility
   set.seed(seed)
@@ -323,7 +330,7 @@ catefitsurv <- function(data,
   if (prop[length(prop)] == 1) {
     est.prop1 <- survCatch(drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
                                   tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  ipcw.method = ipcw.method))
+                                  ipcw.method = ipcw.method, rmst.control = rmst.control))
     est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
     est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
   }
@@ -336,7 +343,7 @@ catefitsurv <- function(data,
                                               tau0 = tau0, surv.min = surv.min,
                                               score = score, higher.y = higher.y,
                                               prop = prop.no1, onlyhigh = TRUE,
-                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method)
+                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control)
     result[[str_replace(name, "score", "ate")]] <- c(est.onlyhigh$ate.rmtl.high, est.prop1$ate.rmtl.high)
     result[[str_replace(name, "score", "hr")]] <- c(est.onlyhigh$hr.high, est.prop1$hr.high)
 
