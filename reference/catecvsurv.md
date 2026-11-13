@@ -43,7 +43,8 @@ catecvsurv(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 0
+  verbose = 0,
+  rmst.control = list()
 )
 ```
 
@@ -262,6 +263,15 @@ catecvsurv(
   messages should be printed. `0` means no outputs. `1` means only
   progress bar and run time. `2` means progress bar, run time, and all
   errors and warnings. Default is `0`.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration. Supported
+  entry: `solver = "C"` (default) or `solver = "R"`. The C backend
+  accumulates each patient's integral without allocating a
+  patient-by-event-time matrix. Cox model fitting is unchanged.
+  Available only for survival outcomes; independent of count-model
+  `contrast.control`.
 
 ## Value
 
@@ -506,33 +516,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 13:45:56 2026 
+#>    Fri Nov 13 15:42:25 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 13:46:01 2026 
+#>    Fri Nov 13 15:42:29 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 13:46:06 2026 
+#>    Fri Nov 13 15:42:32 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 13:46:11 2026 
+#>    Fri Nov 13 15:42:36 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 13:46:16 2026 
+#>    Fri Nov 13 15:42:40 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 24.99 secs 
+#> Total runtime : 18.15 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

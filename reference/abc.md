@@ -104,12 +104,12 @@ cv_count <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 21.67 secs 
+#> Total runtime : 5.19 secs 
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_count)
-#>                cv1       cv2       cv3       cv4        cv5
-#> poisson 0.08812336 0.1104963 0.1330659 0.1575424 0.02692571
+#>                cv1        cv2       cv3        cv4        cv5
+#> poisson 0.07170714 0.04922164 0.2098343 0.04123612 0.03833486
 
 # Survival outcome
 library(survival)
@@ -127,8 +127,8 @@ cv_surv <- catecv(response = "survival",
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_surv)
 #>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1919649 0.1833382 0.1896584 0.1801085 0.1679119
-#> randomForest 0.1798301 0.1793711 0.1873965 0.1784168 0.1626819
+#> poisson      0.1996041 0.2204930 0.1810515 0.1744779 0.1843091
+#> randomForest 0.1950771 0.2117509 0.1766982 0.1714277 0.1800200
 
 # }
 ```

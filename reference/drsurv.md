@@ -20,7 +20,8 @@ drsurv(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  ipcw.method = "breslow"
+  ipcw.method = "breslow",
+  rmst.control = list()
 )
 ```
 
@@ -94,6 +95,15 @@ drsurv(
   with Breslow estimator of the baseline survivor function),
   `'aft (exponential)'`, `'aft (weibull)'`, `'aft (lognormal)'` or
   `'aft (loglogistic)'`. Default is `'breslow'`.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration. Supported
+  entry: `solver = "C"` (default) or `solver = "R"`. The C backend
+  accumulates each patient's integral without allocating a
+  patient-by-event-time matrix. Cox model fitting is unchanged.
+  Available only for survival outcomes; independent of count-model
+  `contrast.control`.
 
 ## Value
 

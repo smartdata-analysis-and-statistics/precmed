@@ -77,6 +77,7 @@ negative binomial.</p>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -216,6 +217,16 @@ be printed. <code>0</code> means no outputs. <code>1</code> means only progress 
 <code>2</code> means progress, run time, and all errors and warnings. Default is <code>0</code>.</p></dd>
 
 
+<dt id="arg-contrast-control">contrast.control<a class="anchor" aria-label="anchor" href="#arg-contrast-control"></a></dt>
+<dd><p>A named list of options for count-outcome contrast
+regression. Supported names are <code>solver</code> (<code>"C"</code>, the default, or
+<code>"R"</code>), <code>error.maxNR</code>, <code>max.iterNR</code>, <code>tune</code>, and
+<code>optim.control</code> (a named list passed to <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim</a></code> on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from <code>...</code>, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments for <code>gbm()</code></p></dd>
 
@@ -312,7 +323,7 @@ observational data. Journal of the American Statistical Association, 1-18.</em> 
 <span class="r-in"><span>                    higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                    seed <span class="op">=</span> <span class="fl">999</span>, verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 0.17 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 0.12 secs </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

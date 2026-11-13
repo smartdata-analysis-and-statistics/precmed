@@ -71,7 +71,8 @@ inference.</p>
 <span>  interactions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -172,6 +173,14 @@ Default is <code>NULL</code>, corresponding to no seed.</p></dd>
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>An integer value indicating whether intermediate progress messages and histograms should
 be printed. <code>1</code> indicates messages are printed and <code>0</code> otherwise. Default is <code>0</code>.</p></dd>
+
+
+<dt id="arg-rmst-control">rmst.control<a class="anchor" aria-label="anchor" href="#arg-rmst-control"></a></dt>
+<dd><p>Named options for Cox restricted mean survival integration.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model <code>contrast.control</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

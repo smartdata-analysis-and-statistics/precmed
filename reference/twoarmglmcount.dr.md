@@ -16,7 +16,9 @@ twoarmglmcount.dr(
   f0.predictor,
   error.maxNR = 0.001,
   max.iterNR = 150,
-  tune = c(0.5, 2)
+  tune = c(0.5, 2),
+  solver = c("C", "R"),
+  optim.control = list()
 )
 ```
 
@@ -76,6 +78,22 @@ twoarmglmcount.dr(
   specifies a quantity to be added to diagonal of the slope matrix to
   prevent singularity. Used only if `score.method = 'contrastReg'`.
   Default is `c(0.5, 2)`.
+
+- solver:
+
+  Numerical backend: `"C"` (default) or `"R"`. The C backend implements
+  the NR loop and fallback score evaluations in native code; both
+  backends retain the same
+  [`stats::optim`](https://rdrr.io/r/stats/optim.html) fallback and
+  covariance formula. Floating-point rounding can lead to small
+  differences between backends.
+
+- optim.control:
+
+  Named controls passed to
+  [`stats::optim`](https://rdrr.io/r/stats/optim.html) if NR fails to
+  converge, for example `list(maxit = 1000, reltol = 1e-10)`.
+  `max.iterNR` governs NR; `optim.control$maxit` governs fallback only.
 
 ## Value
 

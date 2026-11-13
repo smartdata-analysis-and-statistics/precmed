@@ -6,7 +6,7 @@ model
 ## Usage
 
 ``` r
-cox.rmst(y, d, x.cate, xnew, tau0)
+cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"))
 ```
 
 ## Arguments
@@ -34,6 +34,12 @@ cox.rmst(y, d, x.cate, xnew, tau0)
 - tau0:
 
   The truncation time for defining restricted mean time lost.
+
+- solver:
+
+  Integration backend: `"C"` (default) or `"R"`. Both use the same
+  fitted Cox model and step-function integration; the C implementation
+  avoids the patient-by-event-time survival matrix.
 
 ## Value
 

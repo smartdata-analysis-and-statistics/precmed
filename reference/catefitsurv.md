@@ -35,6 +35,7 @@ catefitsurv(
   tune = c(0.5, 2),
   seed = NULL,
   verbose = 0,
+  rmst.control = list(),
   ...
 )
 ```
@@ -215,6 +216,15 @@ catefitsurv(
   messages should be printed. `0` means no outputs. `1` means only
   progress and run time. `2` means progress, run time, and all errors
   and warnings. Default is `0`.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration. Supported
+  entry: `solver = "C"` (default) or `solver = "R"`. The C backend
+  accumulates each patient's integral without allocating a
+  patient-by-event-time matrix. Cox model fitting is unchanged.
+  Available only for survival outcomes; independent of count-model
+  `contrast.control`.
 
 - ...:
 

@@ -44,7 +44,9 @@ catecv(
   tune = c(0.5, 2),
   seed = NULL,
   plot.gbmperf = TRUE,
-  verbose = 0
+  verbose = 0,
+  contrast.control = list(),
+  rmst.control = list()
 )
 ```
 
@@ -303,6 +305,26 @@ catecv(
   progress bar and run time. `2` means progress bar, run time, and all
   errors and warnings. Default is `0`.
 
+- contrast.control:
+
+  A named list of options for count-outcome contrast regression.
+  Supported names are `solver` (`"C"`, the default, or `"R"`),
+  `error.maxNR`, `max.iterNR`, `tune`, and `optim.control` (a named list
+  passed to [`stats::optim`](https://rdrr.io/r/stats/optim.html) on
+  fallback). List entries override the corresponding top-level NR
+  arguments. Options are kept separate from `...`, which is forwarded to
+  boosting. Only count outcomes support this list; other outcomes retain
+  their existing solver.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration. Supported
+  entry: `solver = "C"` (default) or `solver = "R"`. The C backend
+  accumulates each patient's integral without allocating a
+  patient-by-event-time matrix. Cox model fitting is unchanged.
+  Available only for survival outcomes; independent of count-model
+  `contrast.control`.
+
 ## Value
 
 For count response, see description of outputs in
@@ -381,7 +403,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 10.28 secs 
+#> Total runtime : 7.09 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

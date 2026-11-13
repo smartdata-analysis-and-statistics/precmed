@@ -26,6 +26,7 @@ intxcount(
   error.maxNR = 0.001,
   max.iterNR = 150,
   tune = c(0.5, 2),
+  contrast.control = list(),
   ...
 )
 ```
@@ -147,6 +148,17 @@ intxcount(
   specifies a quantity to be added to diagonal of the slope matrix to
   prevent singularity. Used only if `score.method = 'contrastReg'`.
   Default is `c(0.5, 2)`.
+
+- contrast.control:
+
+  A named list of options for count-outcome contrast regression.
+  Supported names are `solver` (`"C"`, the default, or `"R"`),
+  `error.maxNR`, `max.iterNR`, `tune`, and `optim.control` (a named list
+  passed to [`stats::optim`](https://rdrr.io/r/stats/optim.html) on
+  fallback). List entries override the corresponding top-level NR
+  arguments. Options are kept separate from `...`, which is forwarded to
+  boosting. Only count outcomes support this list; other outcomes retain
+  their existing solver.
 
 - ...:
 

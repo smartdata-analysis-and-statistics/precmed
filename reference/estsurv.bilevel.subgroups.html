@@ -75,7 +75,8 @@ Scores are adjusted to the opposite sign if <code>higher.y</code> == FALSE; scor
 <span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span></span>
+<span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
+<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -160,6 +161,14 @@ truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.
 <dt id="arg-ipcw-method">ipcw.method<a class="anchor" aria-label="anchor" href="#arg-ipcw-method"></a></dt>
 <dd><p>The censoring model. Allowed values are: <code>'breslow'</code> (Cox regression with Breslow estimator of the baseline survivor function),
 <code>'aft (exponential)'</code>, <code>'aft (weibull)'</code>, <code>'aft (lognormal)'</code> or <code>'aft (loglogistic)'</code>. Default is <code>'breslow'</code>.</p></dd>
+
+
+<dt id="arg-rmst-control">rmst.control<a class="anchor" aria-label="anchor" href="#arg-rmst-control"></a></dt>
+<dd><p>Named options for Cox restricted mean survival integration.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model <code>contrast.control</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

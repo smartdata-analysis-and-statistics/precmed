@@ -29,6 +29,7 @@ catefitcount(
   seed = NULL,
   plot.gbmperf = FALSE,
   verbose = 0,
+  contrast.control = list(),
   ...
 )
 ```
@@ -172,6 +173,17 @@ catefitcount(
   progress and run time. `2` means progress, run time, and all errors
   and warnings. Default is `0`.
 
+- contrast.control:
+
+  A named list of options for count-outcome contrast regression.
+  Supported names are `solver` (`"C"`, the default, or `"R"`),
+  `error.maxNR`, `max.iterNR`, `tune`, and `optim.control` (a named list
+  passed to [`stats::optim`](https://rdrr.io/r/stats/optim.html) on
+  fallback). List entries override the corresponding top-level NR
+  arguments. Options are kept separate from `...`, which is forwarded to
+  boosting. Only count outcomes support this list; other outcomes retain
+  their existing solver.
+
 - ...:
 
   Additional arguments for `gbm()`
@@ -296,5 +308,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.17 secs 
+#> Total runtime : 0.12 secs 
 ```

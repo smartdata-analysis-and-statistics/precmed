@@ -89,6 +89,8 @@ linear regression (continuous only), and generalized additive model (continuous 
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  plot.gbmperf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -285,6 +287,24 @@ or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</c
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>An integer value indicating whether intermediate progress messages and histograms should
 be printed. <code>1</code> indicates messages are printed and <code>0</code> otherwise. Default is <code>0</code>.</p></dd>
+
+
+<dt id="arg-contrast-control">contrast.control<a class="anchor" aria-label="anchor" href="#arg-contrast-control"></a></dt>
+<dd><p>A named list of options for count-outcome contrast
+regression. Supported names are <code>solver</code> (<code>"C"</code>, the default, or
+<code>"R"</code>), <code>error.maxNR</code>, <code>max.iterNR</code>, <code>tune</code>, and
+<code>optim.control</code> (a named list passed to <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim</a></code> on fallback).
+List entries override the corresponding top-level NR arguments. Options are
+kept separate from <code>...</code>, which is forwarded to boosting. Only count
+outcomes support this list; other outcomes retain their existing solver.</p></dd>
+
+
+<dt id="arg-rmst-control">rmst.control<a class="anchor" aria-label="anchor" href="#arg-rmst-control"></a></dt>
+<dd><p>Named options for Cox restricted mean survival integration.
+Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
+The C backend accumulates each patient's integral without allocating a
+patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+for survival outcomes; independent of count-model <code>contrast.control</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

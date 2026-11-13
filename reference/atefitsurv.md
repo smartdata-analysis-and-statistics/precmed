@@ -21,7 +21,8 @@ atefitsurv(
   surv.min = 0.025,
   n.boot = 500,
   seed = NULL,
-  verbose = 0
+  verbose = 0,
+  rmst.control = list()
 )
 ```
 
@@ -117,6 +118,15 @@ atefitsurv(
   An integer value indicating whether intermediate progress messages
   should be printed. `1` indicates messages are printed and `0`
   otherwise. Default is `0`.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration. Supported
+  entry: `solver = "C"` (default) or `solver = "R"`. The C backend
+  accumulates each patient's integral without allocating a
+  patient-by-event-time matrix. Cox model fitting is unchanged.
+  Available only for survival outcomes; independent of count-model
+  `contrast.control`.
 
 ## Value
 

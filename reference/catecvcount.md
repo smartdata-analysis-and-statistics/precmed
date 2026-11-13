@@ -39,6 +39,7 @@ catecvcount(
   seed = NULL,
   plot.gbmperf = TRUE,
   verbose = 0,
+  contrast.control = list(),
   ...
 )
 ```
@@ -220,6 +221,17 @@ catecvcount(
   messages should be printed. `0` means no outputs. `1` means only
   progress bar and run time. `2` means progress bar, run time, and all
   errors and warnings. Default is `0`.
+
+- contrast.control:
+
+  A named list of options for count-outcome contrast regression.
+  Supported names are `solver` (`"C"`, the default, or `"R"`),
+  `error.maxNR`, `max.iterNR`, `tune`, and `optim.control` (a named list
+  passed to [`stats::optim`](https://rdrr.io/r/stats/optim.html) on
+  fallback). List entries override the corresponding top-level NR
+  arguments. Options are kept separate from `...`, which is forwarded to
+  boosting. Only count outcomes support this list; other outcomes retain
+  their existing solver.
 
 - ...:
 
@@ -430,7 +442,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 10.15 secs 
+#> Total runtime : 7.21 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 
