@@ -36,8 +36,9 @@ License: Apache License (== 2.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
-Imports: dplyr, gbm, gam, ggplot2, glmnet, graphics, MASS, mgcv,
+Imports: dplyr, gbm, gam, ggplot2 (>= 3.4.0), glmnet, graphics, MASS, mgcv,
         rlang, stringr, tidyr, survival, randomForestSRC
+Suggests: knitr, rmarkdown, tableone, testthat
 NeedsCompilation: no
 BugReports: https://github.com/smartdata-analysis-and-statistics/precmed/issues
 URL: https://github.com/smartdata-analysis-and-statistics/precmed,

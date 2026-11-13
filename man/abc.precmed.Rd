@@ -68,6 +68,13 @@ abc(cv_surv)
 Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
 \emph{Effectively selecting a target population for a future comparative study.
 Journal of the American Statistical Association, 108(502), 527-539.}
+
+Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+Visualization and interpretation of individualized treatment rule results. In
+T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+\emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+(Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+\url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
 }
 \seealso{
 \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for

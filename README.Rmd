@@ -25,6 +25,8 @@ options(width = 60, digits = 3)
 
 **precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
+For guidance on visualizing and interpreting individualized treatment rules, see Chapter 20, "Visualization and interpretation of individualized treatment rule results", by Jiang et al. in *Comparative Effectiveness and Personalized Medicine Research Using Real-World Data* [@jiang2026visualization]. The [companion tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html) includes examples using **precmed**.
+
 ## Installation
 
 

@@ -27,6 +27,14 @@ randomized data from a clinical trial (Zhao et al. 2013) or using
 real-world data (RWD) from a non-randomized study (Yadlowsky et al.
 2020).
 
+For guidance on visualizing and interpreting individualized treatment
+rules, see Chapter 20, “Visualization and interpretation of
+individualized treatment rule results”, by Jiang et al. in *Comparative
+Effectiveness and Personalized Medicine Research Using Real-World Data*
+(Jiang et al. 2026). The [companion
+tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
+includes examples using **precmed**.
+
 ## Installation
 
 The `precmed` package can be installed from CRAN as follows:
@@ -46,13 +54,13 @@ devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 
 The main functions in the **precmed** package are:
 
-| Function                                                                                                | Description                                                                                                                            |
-|---------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [catefit](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.html)()         | Estimation of the conditional average treatment effect (CATE)                                                                          |
-| [atefit](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.html)()           | Doubly robust estimator for the average treatment effect (ATE)                                                                         |
-| [catecv](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.html)()           | Development and cross-validation of the CATE                                                                                           |
-| [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)()                 | Compute the area between the average treatment difference curve of competing models for the CATE (Zhao et al. 2013)                    |
-| [plot](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.html)()       | Two side-by-side line plots of validation curves from the `precmed` object                                                             |
+| Function | Description |
+|----|----|
+| [catefit](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.html)() | Estimation of the conditional average treatment effect (CATE) |
+| [atefit](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.html)() | Doubly robust estimator for the average treatment effect (ATE) |
+| [catecv](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.html)() | Development and cross-validation of the CATE |
+| [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)() | Compute the area between the average treatment difference curve of competing models for the CATE (Zhao et al. 2013) |
+| [plot](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.html)() | Two side-by-side line plots of validation curves from the `precmed` object |
 | [boxplot](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boxplot.precmed.html)() | Plot the proportion of subjects with an estimated treatment effect no less than $c$ over a range of values for $c$ (Zhao et al. 2013). |
 
 For more info:
@@ -121,6 +129,18 @@ input:
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
+
+<div id="ref-jiang2026visualization" class="csl-entry">
+
+Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
+Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
+Individualized Treatment Rule Results.” In *Comparative Effectiveness
+and Personalized Medicine Research Using Real-World Data*, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36.
+Chapman & Hall/CRC.
+<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>.
+
+</div>
 
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 

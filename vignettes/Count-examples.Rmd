@@ -18,7 +18,18 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
-doc.cache <- T #for cran; change to F
+doc.cache <- TRUE
+# Recompute cached results after R or dependency updates.
+vignette.packages <- c("precmed", tools::package_dependencies(
+  "precmed", db = utils::installed.packages(),
+  which = c("Depends", "Imports"), recursive = TRUE
+)[["precmed"]])
+knitr::opts_chunk$set(cache.extra = list(
+  R = R.version.string,
+  packages = vapply(setdiff(vignette.packages, "R"), function(pkg) {
+    as.character(utils::packageVersion(pkg))
+  }, character(1))
+))
 ```
 
 <h1>precmed: Precision Medicine in R</h1>
@@ -37,10 +48,6 @@ A doubly robust precision medicine approach to estimate and validate conditional
 #
 # Contributors: Phoebe Jiang, Gabrielle Simoneau
 ###################################################################
-library(parallel)
-n.cores <- detectCores()
-options(mc.cores = n.cores-1) # for faster knitting
-#options(mc.cores = 2) # R CMD check allows at most two cores
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -62,10 +69,7 @@ countExample$previous_cost <- round(as.numeric(countExample$previous_cost* attr(
 countExample$female <- factor(countExample$female, levels = c(0, 1), labels = c("male", "female"))
 
 
-if (!require(tableone)){
-install.packages('tableone', repos = "http://cran.us.r-project.org")
 library(tableone)
-}
 
 ## Vector of variables to summarize
 myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "years")
@@ -181,7 +185,7 @@ Now we have calculated the ATE we know the effect of both treatments on average,
 When we have selected a PS method that fits the data (or multiple methods), we can run the `catefit()` function with the same variables as the `atefit()` function.
 The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html) section for details. 
 
-If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
+If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. We use `n.cores = 1` for boosting so that the example also runs when automatic core detection is unavailable.
 
 ```{r example_catefit, eval = T, echo = T, cache = doc.cache}
 t0 <- Sys.time()
@@ -192,7 +196,8 @@ output_catefit <- catefit(response = "count",
                           ps.model = trt ~ age + previous_treatment,
                           initial.predictor.method = "poisson",
                           higher.y = FALSE, 
-                          seed = 999)
+                          seed = 999,
+                          n.cores = 1)
 t1 <- Sys.time()
 t1 - t0
 ```

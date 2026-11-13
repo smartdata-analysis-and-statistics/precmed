@@ -20,7 +20,18 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
-doc.cache <- T #for cran; change to F
+doc.cache <- TRUE
+# Recompute cached results after R or dependency updates.
+vignette.packages <- c("precmed", tools::package_dependencies(
+  "precmed", db = utils::installed.packages(),
+  which = c("Depends", "Imports"), recursive = TRUE
+)[["precmed"]])
+knitr::opts_chunk$set(cache.extra = list(
+  R = R.version.string,
+  packages = vapply(setdiff(vignette.packages, "R"), function(pkg) {
+    as.character(utils::packageVersion(pkg))
+  }, character(1))
+))
 ```
 
 
@@ -43,7 +54,7 @@ If you choose two regressions or contrast regression as the scoring method, ther
 
 * "poisson" (Poisson regression from the `glm()` function) 
   * generalized linear model, strong assumption on Poisson distribution, fast
-* "gbm" (gradient boosting machine from the `gbm` R package)
+* "boosting" (gradient boosting machine from the `gbm` R package)
   * ensemble method, typically tree-based, slow
 * "gam" (generalized additive model from the `mgcv` package)
   * a combination of generalized linear model and additive models where the linear predictor is an additive function of the covariates, can be slow
@@ -55,6 +66,7 @@ The main example above used a Poisson regression but you can try the other 2 non
 catecv(response = "count",
        data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
+       n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
        ps.model = trt ~ age + previous_treatment, 
        higher.y = FALSE,
@@ -68,6 +80,7 @@ catecv(response = "count",
 catecv(response = "count",
        data = countExample,
        score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
+       n.cores = 1,
        cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
        ps.model = trt ~ age + previous_treatment, 
        higher.y = FALSE, 
@@ -81,7 +94,7 @@ catecv(response = "count",
 
 Note that for the GAM method, there is an additional argument called `xvar.smooth`. If left as default (which is NULL), GAM will include all independent variables in `cate.model` as smooth terms with function `s()` in the linear predictor. You can choose to specify only a subset of the dependent variables as the smooth terms. In the example above, the specifications `cate.model` and `xvar.smooth` lead to the following GAM formula: `y ~ female + previous_treatment + previous_number_relapses + s(age) + s(previous_cost)`, where only age and previous medical costs are wrapped in the smooth function and the remaining 3 independent variables are not. 
 
-Generally speaking, the "poisson" initial predictor method is the fastest and "gbm" is the slowest among the 3 methods, while "gam" is somewhere in between with longer computational time as the number of smooth terms increases.
+Generally speaking, the "poisson" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "gam" is somewhere in between with longer computational time as the number of smooth terms increases.
 
 
 ## Subgroup proportion
@@ -197,6 +210,7 @@ tau0 <- with(survivalExample,
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
+       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,
@@ -217,6 +231,7 @@ catecv(response = "survival",
 catecv(response = "survival",
        data = survivalExample,
        score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
+       n.cores = 1,
        cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
        ps.model = trt ~ age + previous_treatment,
        ipcw.model = NULL,

@@ -138,6 +138,13 @@
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
+#' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+#' Visualization and interpretation of individualized treatment rule results. In
+#' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#'
 #' @seealso \code{\link{catefit}()} function and \code{\link{boxplot}()}, \code{\link{abc}} methods for
 #' \code{"precmed"} objects.
 #'
@@ -2314,6 +2321,13 @@ abc.default <- function(x, ...){
 #' \emph{Effectively selecting a target population for a future comparative study.
 #' Journal of the American Statistical Association, 108(502), 527-539.}
 #'
+#' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+#' Visualization and interpretation of individualized treatment rule results. In
+#' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
+#'
 #' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
 #' \code{"precmed"} objects.
 #'
@@ -2430,6 +2444,13 @@ abc.precmed <- function(x, ...) {
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
+#'
+#' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+#' Visualization and interpretation of individualized treatment rule results. In
+#' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
 #'
 #' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
@@ -2699,7 +2720,7 @@ plot.precmed <- function(x,
            abc = ifelse(sprintf('%.3f', abc) == "NA", "", paste("ABC:", sprintf('%.3f', abc))),
            score.abc = ifelse(abc == "", NA, paste0(.data$score, "\nValidation ", abc))) %>%
     group_by(.data$score) %>%
-    tidyr::fill(.data$score.abc, .direction = "downup") %>%
+    tidyr::fill("score.abc", .direction = "downup") %>%
     ungroup() %>%
     filter(.data$prop >= xlim[1] & .data$prop <= xlim[2])
 
@@ -2729,7 +2750,7 @@ plot.precmed <- function(x,
 
   p <- dat %>%
     ggplot(aes(x = .data$prop, y = .data$ate.cv, color = .data$score)) +
-    geom_line(size = 1.2) +
+    geom_line(linewidth = 1.2) +
     facet_wrap(~ .data$set, ncol = 2) +
     scale_y_continuous(limits = c(lowery, uppery)) +
     labs(y = ylab, x = xlab, title = title) +
@@ -2746,7 +2767,7 @@ plot.precmed <- function(x,
   }
 
   p <- p + geom_hline(data = abline, aes(yintercept = .data$yintercept),
-                      linetype = 2, color = "gray90", size = 0.8)
+                      linetype = 2, color = "gray90", linewidth = 0.8)
 
   return(p)
 }
@@ -2789,6 +2810,13 @@ plot.precmed <- function(x,
 #' Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
+#'
+#' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+#' Visualization and interpretation of individualized treatment rule results. In
+#' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+#' \url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
 #'
 #' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'
@@ -2935,7 +2963,7 @@ boxplot.precmed <- function(x, ylab = NULL,
 
   p <- results %>%
     mutate_at(c(1:l), as.numeric) %>%
-    pivot_longer(-(.data$CV:.data$Method), names_to = "Subgroup", values_to = "ate") %>%
+    pivot_longer(-c("CV", "Method"), names_to = "Subgroup", values_to = "ate") %>%
     mutate(Method = factor(.data$Method, levels = mapped.method),
            Subgroup = factor(.data$Subgroup, levels = subgroup_label)) %>%
     ggplot(aes(x = .data$Subgroup, y = .data$ate)) +

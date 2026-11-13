@@ -93,6 +93,13 @@ boxplot(eval_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 \emph{Estimation and validation of ratio-based conditional average treatment effects using
 observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
+
+Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
+Visualization and interpretation of individualized treatment rule results. In
+T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+\emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+(Chapter 20, pp. 513--536). Chapman & Hall/CRC.
+\url{https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748}
 }
 \seealso{
 \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
