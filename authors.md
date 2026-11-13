@@ -9,7 +9,11 @@
 - **Gabrielle Simoneau**. Author.
   [](https://orcid.org/0000-0001-9310-6274)
 
-- **Biogen MA Inc.**. Copyright holder.
+- **Biogen MA Inc.**. Copyright holder.  
+  Copyright holder of the original implementation through version 1.1.0
+
+- **Smart Data Analysis and Statistics B.V.**. Copyright holder.  
+  Copyright holder of its contributions after version 1.1.0
 
 - **Thomas Debray**. Contributor, maintainer.
   [](https://orcid.org/0000-0002-1790-2719)

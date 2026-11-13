@@ -501,50 +501,38 @@ catecv <- catecvsurv(data = survivalExample,
                      higher.y = TRUE,
                      cv.n = 5, seed = 999, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> 
-  |                                                                            
-  |                                                                      |   0%
+#>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 12:31:59 2026 
-#> 
-  |                                                                            
-  |==============                                                        |  20%
+#>    Fri Nov 13 13:07:38 2026 
+#>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 12:32:02 2026 
-#> 
-  |                                                                            
-  |============================                                          |  40%
+#>    Fri Nov 13 13:07:42 2026 
+#>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 12:32:05 2026 
-#> 
-  |                                                                            
-  |==========================================                            |  60%
+#>    Fri Nov 13 13:07:46 2026 
+#>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 12:32:09 2026 
-#> 
-  |                                                                            
-  |========================================================              |  80%
+#>    Fri Nov 13 13:07:51 2026 
+#>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 13 12:32:12 2026 
-#> 
-  |                                                                            
-  |======================================================================| 100%
-#> Total runtime : 15.59 secs 
+#>    Fri Nov 13 13:07:55 2026 
+#>   |                                                                              |======================================================================| 100%
+#> Total runtime : 21.66 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

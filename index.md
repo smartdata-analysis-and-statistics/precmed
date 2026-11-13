@@ -18,13 +18,35 @@ randomized data from a clinical trial (Zhao et al. 2013) or using
 real-world data (RWD) from a non-randomized study (Yadlowsky et al.
 2020).
 
-For guidance on visualizing and interpreting individualized treatment
-rules, see Chapter 20, “Visualization and interpretation of
-individualized treatment rule results”, by Jiang et al. in *Comparative
-Effectiveness and Personalized Medicine Research Using Real-World Data*
-(Jiang et al. 2026). The [companion
+## Learning resources
+
+The theory behind **precmed** is discussed in [*Comparative
+Effectiveness and Personalized Medicine Research Using Real-World
+Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter
+20](https://doi.org/10.1201/9781003300809-20) explains how to visualize
+and interpret individualized treatment rule results using the package
+(Jiang et al. 2026).
+
+Two free courses complement the book, introducing **precmed**, its
+practical use, and the underlying statistical methods:
+
+### [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
+
+Recorded webinars, exercises, and readings introduce individualized
+treatment effects, the foundations of precision medicine, and practical
+use of **precmed**.
+
+**Teachers:** Thomas Debray, Tri-Long Nguyen, and Phoebe Jiang.
+
+### [Free Companion Course to the Real-World Data Handbook](https://sdas.thinkific.com/courses/rwd-book)
+
+Background materials, example R code, and curated references connect the
+book’s methods to practical analyses. The [chapter companion
 tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
-includes examples using **precmed**.
+demonstrates **precmed** with worked examples.
+
+**Book editors:** Thomas P. A. Debray, Tri-Long Nguyen, and Robert W.
+Platt.
 
 ## Installation
 
@@ -133,8 +155,7 @@ Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of
 Individualized Treatment Rule Results.” In *Comparative Effectiveness
 and Personalized Medicine Research Using Real-World Data*, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36.
-Chapman & Hall/CRC.
-<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>.
+Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
 
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,
 and Lu Tian. 2020. “Estimation and Validation of Ratio-Based Conditional

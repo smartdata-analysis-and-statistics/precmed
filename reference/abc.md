@@ -78,9 +78,7 @@ cv_count <- catecv(response = "count",
                    ps.model = trt ~ age + previous_treatment,
                    higher.y = FALSE, cv.n = 5, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> 
-  |                                                                            
-  |                                                                      |   0%
+#>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
@@ -106,12 +104,12 @@ cv_count <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 17.32 secs 
+#> Total runtime : 18.7 secs 
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_count)
-#>               cv1        cv2        cv3       cv4       cv5
-#> poisson 0.1292732 0.02685113 0.06268272 0.1306942 0.1150846
+#>                cv1        cv2     cv3        cv4       cv5
+#> poisson 0.03411311 0.05190876 0.16328 0.03701455 0.0741237
 
 # Survival outcome
 library(survival)
@@ -129,8 +127,8 @@ cv_surv <- catecv(response = "survival",
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_surv)
 #>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1780833 0.1734946 0.1948758 0.1709223 0.1827724
-#> randomForest 0.1796403 0.1689650 0.1927227 0.1679180 0.1793655
+#> poisson      0.1857687 0.1841103 0.1883640 0.1651222 0.1397254
+#> randomForest 0.1819275 0.1700429 0.1799049 0.1592782 0.1387142
 
 # }
 ```

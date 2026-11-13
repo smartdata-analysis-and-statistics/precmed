@@ -333,7 +333,7 @@ L. (2026). Visualization and interpretation of individualized treatment
 rule results. In T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 *Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data* (Chapter 20, pp. 513–536). Chapman & Hall/CRC.
-<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>
+[doi:10.1201/9781003300809-20](https://doi.org/10.1201/9781003300809-20)
 
 ## See also
 
@@ -355,9 +355,7 @@ cate_1 <- catecv(response = "count",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = FALSE, cv.n = 5, seed = 999, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> 
-  |                                                                            
-  |                                                                      |   0%
+#>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
@@ -383,7 +381,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 5.56 secs 
+#> Total runtime : 9.45 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

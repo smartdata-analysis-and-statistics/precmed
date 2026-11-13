@@ -290,7 +290,7 @@ L. (2026). Visualization and interpretation of individualized treatment
 rule results. In T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 *Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data* (Chapter 20, pp. 513–536). Chapman & Hall/CRC.
-<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>
+[doi:10.1201/9781003300809-20](https://doi.org/10.1201/9781003300809-20)
 
 ## See also
 

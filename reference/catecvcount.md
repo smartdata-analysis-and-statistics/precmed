@@ -404,9 +404,7 @@ catecv <- catecvcount(data = countExample,
                       plot.gbmperf = FALSE,
                       verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> 
-  |                                                                            
-  |                                                                      |   0%
+#>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
@@ -432,7 +430,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 5.63 secs 
+#> Total runtime : 9.62 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

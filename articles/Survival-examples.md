@@ -219,15 +219,15 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower  CI.upper    pvalue
-#> log.rmtl.ratio   0.0701553 0.03236713 0.006716898 0.1335937 0.0301978
-#> log.hazard.ratio 2.7133243 0.20813279 2.305391515 3.1212571 0.0000000
+#>                   estimate         SE    CI.lower  CI.upper     pvalue
+#> log.rmtl.ratio   0.0701553 0.03335327 0.004784091 0.1355265 0.03543074
+#> log.hazard.ratio 2.7133243 0.20917446 2.303349892 3.1232987 0.00000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 6.362381 160.3909 185.3309      0
-#> rmst0 196.5603 8.541616 179.8190 213.3015      0
+#> rmst1 172.8609 7.015331 159.1111 186.6107      0
+#> rmst0 196.5603 8.283562 180.3248 212.7957      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -247,9 +247,9 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 - the log HR (`$log.hazard.ratio`).
 
 For example, the log RMTL ratio of 0.07 and the 95% confidence interval
-of (0.01, 0.13) are displayed in the output. The RMTL ratio of along
-with the 95% confidence interval suggest that drug 0 is superior to drug
-1 because the ratio is significantly greater than 1. When we check the
+of (0, 0.14) are displayed in the output. The RMTL ratio of along with
+the 95% confidence interval suggest that drug 0 is superior to drug 1
+because the ratio is significantly greater than 1. When we check the
 estimated RMST, we also see that the estimated rmst1 is lower compared
 to rmst0, indicating that patients that received drug0 have a longer
 mean survival time compared to drug1.
@@ -658,37 +658,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 12:38:06 2026 
+#>    Fri Nov 13 13:16:42 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 12:38:15 2026 
+#>    Fri Nov 13 13:16:56 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 12:38:24 2026 
+#>    Fri Nov 13 13:17:09 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 12:38:33 2026 
+#>    Fri Nov 13 13:17:22 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 12:38:41 2026 
+#>    Fri Nov 13 13:17:35 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 44.5 secs
+#> Total runtime : 1.12 mins
 ```
 
 The output of

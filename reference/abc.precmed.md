@@ -60,7 +60,7 @@ L. (2026). Visualization and interpretation of individualized treatment
 rule results. In T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
 *Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data* (Chapter 20, pp. 513–536). Chapman & Hall/CRC.
-<https://www.routledge.com/Comparative-Effectiveness-and-Personalized-Medicine-Research-Using-Rea/Debray-Nguyen-Platt/p/book/9781032292748>
+[doi:10.1201/9781003300809-20](https://doi.org/10.1201/9781003300809-20)
 
 ## See also
 
@@ -83,9 +83,7 @@ cv_count <- catecv(response = "count",
                    ps.model = trt ~ age + previous_treatment,
                    higher.y = FALSE, cv.n = 5, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> 
-  |                                                                            
-  |                                                                      |   0%
+#>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
@@ -111,12 +109,12 @@ cv_count <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.22 secs 
+#> Total runtime : 10.97 secs 
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_count)
-#>              cv1        cv2          cv3        cv4       cv5
-#> poisson 0.199451 0.06017986 -0.002766803 0.01864222 0.1219328
+#>                cv1        cv2        cv3       cv4       cv5
+#> poisson 0.07580113 0.01210551 0.08498095 0.1016287 0.1119581
 
 # Survival outcome
 library(survival)
@@ -134,8 +132,8 @@ cv_surv <- catecv(response = "survival",
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_surv)
 #>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1650242 0.1879929 0.1675454 0.1916310 0.1785711
-#> randomForest 0.1594901 0.1878796 0.1608223 0.1862528 0.1686392
+#> poisson      0.1446261 0.1763770 0.1622691 0.1840382 0.1894334
+#> randomForest 0.1452013 0.1700051 0.1623183 0.1803672 0.1917884
 
 # }
 ```

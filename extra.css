@@ -1,0 +1,115 @@
+/* Shared palette and reading layout from the RWD book practicals. */
+:root {
+  --sdas-navy: #26476b;
+  --sdas-green: #80c42b;
+  --sdas-muted: #5d6873;
+  --sdas-border: #d8e1e8;
+}
+
+body > .container.sdas-header {
+  min-height: 0;
+  margin-top: 0;
+  padding-top: 4.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.sdas-header::after {
+  display: block;
+  height: 4px;
+  margin-top: 1rem;
+  background: var(--sdas-green);
+  border-radius: 999px;
+  content: "";
+}
+
+.sdas-logo {
+  display: block;
+  width: min(15rem, 72vw);
+  height: auto;
+}
+
+main {
+  line-height: 1.65;
+}
+
+.sdas-header ~ .container main,
+.sdas-header ~ .container aside {
+  margin-top: 1rem;
+}
+
+main h1, main h2, main h3 {
+  color: var(--sdas-navy);
+  line-height: 1.25;
+}
+
+main h2 {
+  margin-top: 2rem;
+  border-left: 5px solid var(--sdas-green);
+  padding-left: 0.75rem;
+}
+
+main a, aside a {
+  color: var(--sdas-navy);
+}
+
+main a:hover, main a:focus, aside a:hover, aside a:focus {
+  color: #5c8f18;
+}
+
+aside {
+  border-left: 1px solid var(--sdas-border);
+  padding-left: 1.25rem;
+}
+
+aside h2 {
+  color: var(--sdas-navy);
+  font-size: 1.05rem;
+}
+
+main pre {
+  border: 1px solid var(--sdas-border);
+  background: #f6f8fa;
+}
+
+main pre code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+main table thead th {
+  color: #fff;
+  background: var(--sdas-navy);
+}
+
+main table tbody tr:nth-child(even) {
+  background: #eef4f8;
+}
+
+.thinkific-product-card {
+  margin: 1rem 0 1.5rem;
+  max-width: 100%;
+}
+
+.thinkific-product-card iframe {
+  max-width: 100%;
+  border: 0;
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1180px;
+  }
+}
+
+@media (max-width: 767px) {
+  .sdas-logo {
+    width: min(13rem, 70vw);
+  }
+
+  aside {
+    margin-top: 2rem;
+    border-top: 1px solid var(--sdas-border);
+    border-left: 0;
+    padding-top: 1rem;
+  }
+}
