@@ -2,10 +2,13 @@
 
 ## Major changes
 
-* Migrated boosting to GBM3 using its current API. Existing tuning argument
-  names and the learning rate of 0.1 are preserved. Parallel controls map to
-  GBM3 threads. Stored boosting fits now have class `GBMFit`; results can
-  differ from GBM even with identical settings and random seeds.
+* Replaced the `gbm` dependency with `gbm3` for boosting models across count,
+  survival, and internal continuous-outcome methods. Existing tuning argument
+  names and the learning rate of 0.1 are preserved, rather than adopting the
+  GBM3 learning-rate default of 0.001. Parallel controls map to GBM3 threads.
+  Stored boosting fits now have class `GBMFit`. Results can differ from `gbm`
+  even with identical settings and random seeds because random-number usage
+  and Poisson updates for zero-event leaves differ between the packages.
 
 * Fixed continuous boosting predictions by retaining the selected tree count
   for each treatment arm, and forwarding additional boosting controls.
