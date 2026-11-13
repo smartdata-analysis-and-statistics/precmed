@@ -308,7 +308,7 @@ output_catefit <- catefit(response = "count",
 #> CV: 5
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 3.638714 secs
+#> Time difference of 4.706744 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -554,37 +554,37 @@ output_catecv <- catecv(response = "count",
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 13:13:24 2026 
+#>    Fri Nov 13 13:53:03 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 13:13:27 2026 
+#>    Fri Nov 13 13:53:07 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 13:13:32 2026 
+#>    Fri Nov 13 13:53:13 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 13:13:38 2026 
+#>    Fri Nov 13 13:53:19 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 13 13:13:43 2026 
+#>    Fri Nov 13 13:53:25 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 26.5 secs
+#> Total runtime : 29.85 secs
 ```
 
 The output of

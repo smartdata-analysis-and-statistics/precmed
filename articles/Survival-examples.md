@@ -220,14 +220,14 @@ output_atefit
 #> Average treatment effect:
 #> 
 #>                   estimate         SE    CI.lower  CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03335327 0.004784091 0.1355265 0.03543074
-#> log.hazard.ratio 2.7133243 0.20917446 2.303349892 3.1232987 0.00000000
+#> log.rmtl.ratio   0.0701553 0.03510707 0.001346701 0.1389639 0.04568157
+#> log.hazard.ratio 2.7133243 0.20787277 2.305901149 3.1207474 0.00000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 7.015331 159.1111 186.6107      0
-#> rmst0 196.5603 8.283562 180.3248 212.7957      0
+#> rmst1 172.8609 6.755260 159.6208 186.1010      0
+#> rmst0 196.5603 8.669296 179.5687 213.5518      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -658,37 +658,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 13:16:42 2026 
+#>    Fri Nov 13 13:56:35 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 13:16:56 2026 
+#>    Fri Nov 13 13:56:51 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 13:17:09 2026 
+#>    Fri Nov 13 13:57:06 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 13:17:22 2026 
+#>    Fri Nov 13 13:57:21 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 13:17:35 2026 
+#>    Fri Nov 13 13:57:36 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 1.12 mins
+#> Total runtime : 1.27 mins
 ```
 
 The output of

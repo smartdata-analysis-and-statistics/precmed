@@ -44,7 +44,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="precmed-development-version">precmed (development version)<a class="anchor" aria-label="anchor" href="#precmed-development-version"></a></h2>
-<ul><li><p>Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.</p></li>
+<ul><li><p>Compute Breslow censoring probabilities with one cumulative-hazard lookup rather than repeatedly scanning and summing hazards for every patient.</p></li>
+<li><p>Reuse numeric model designs and GLM families during count-data balanced splitting, avoiding repeated formula and model-frame construction.</p></li>
+<li><p>Avoid fitting and discarding a duplicate treated-arm boosting model in count cross-fitting. Seeded boosting results can change because fewer random draws are consumed.</p></li>
+<li><p>Added Smart Data Analysis and Statistics B.V. as copyright holder for its contributions after version 1.1.0, alongside the existing Biogen attribution.</p></li>
 <li><p>Added the book chapter by Jiang et al. (2026) to the package description, references, and README.</p></li>
 <li><p>Fixed display-math formatting of the weighted estimating equation in the theoretical details vignette.</p></li>
 <li><p>Updated validation plots to use ggplot2’s <code>linewidth</code> argument and require ggplot2 &gt;= 3.4.0.</p></li>
