@@ -416,6 +416,14 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
     trt <- as.numeric(trt == 1)
   }
 
+  ## Clarify the effect scale for outcomes coded as binary, once before fitting
+  if (length(y) > 0L && (is.numeric(y) || is.logical(y)) &&
+      all(y %in% c(0, 1))) {
+    effect.measure <- if (all(time == time[1L])) "log risk ratio" else "log rate ratio"
+    message("Binary outcome detected. The requested analysis estimates a ",
+            effect.measure, ". Please verify that this is the intended effect measure.")
+  }
+
   ## Assign default to initial.predictor.method if NULL
   if (is.null(initial.predictor.method) == TRUE & fun %in% c("pm", "cv")) initial.predictor.method <- "boosting"
 
