@@ -54,7 +54,7 @@ If you choose two regressions or contrast regression as the scoring method, ther
 
 * "poisson" (Poisson regression from the `glm()` function) 
   * generalized linear model, strong assumption on Poisson distribution, fast
-* "boosting" (gradient boosting machine from the `gbm` R package)
+* "boosting" (gradient boosting machine from the `gbm3` R package)
   * ensemble method, typically tree-based, slow
 * "gam" (generalized additive model from the `mgcv` package)
   * a combination of generalized linear model and additive models where the linear predictor is an additive function of the covariates, can be slow
@@ -191,7 +191,7 @@ If you choose two and/or contrast regression as the scoring method, there is an 
 -   "logistic" (logistic regression from the `glm()` function)
     -   generalized linear model, strong assumption on binomial
         distribution, fast
--   "boosting" (gradient boosting machine from the `gbm` R package)
+-   "boosting" (gradient boosting machine from the `gbm3` R package)
     -   ensemble method, typically tree-based, assume the time-to-event
         outcome as Gaussian distributed, slow
 -   "randomForest" (random survival forest model from the

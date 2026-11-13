@@ -77,7 +77,7 @@
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 #' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns a list containing the following components:
 #' \itemize{
@@ -494,7 +494,7 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
@@ -587,9 +587,9 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
 
           # TODO: if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
           ## Removed offset
-          fit1.boosting <- gbm(y ~ ., data = data1.init, distribution = "gaussian",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5)
-          best1.iter <- max(10, gbm.perf(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
+          fit1.boosting <- fit_boosting(y ~ ., data = data1.init, distribution = "gaussian",
+                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+          best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f1.predictcv[index == k] <- predict(object = fit1.boosting, newdata = datatot_valid_init, n.trees = best1.iter, type = "response")
           },
@@ -599,9 +599,9 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
               invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
           })
 
-          fit0.boosting <- gbm(y ~ ., data = data0.init, distribution = "gaussian",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5)
-          best0.iter <- max(10, gbm.perf(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
+          fit0.boosting <- fit_boosting(y ~ ., data = data0.init, distribution = "gaussian",
+                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+          best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f0.predictcv[index == k] <- predict(object = fit0.boosting, newdata = datatot_valid_init, n.trees = best0.iter, type = "response")
           },
@@ -697,25 +697,26 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
     # TODO: if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
     ##Changed poisson to gaussian, removed offset term
 
-    fit1.boosting <- meanCatch(gbm(y ~ ., data = data1.boosting, distribution = "gaussian",
-                                   interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5))
+    fit1.boosting <- meanCatch(fit_boosting(y ~ ., data = data1.boosting, distribution = "gaussian",
+                                   interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...))
     if (length(fit1.boosting$errors) > 0){
       best1.iter <- NA
     } else{
-      best1.iter <- max(10, gbm.perf(fit1.boosting$fit, method = "cv", plot.it = plot.gbmperf))
+      best1.iter <- max(10, best_boosting_iteration(fit1.boosting$fit, method = "cv", plot.it = plot.gbmperf))
     }
 
     data0.boosting <- datatot[trt == 0, ]
-    fit0.boosting <- meanCatch( gbm(y ~ ., data = data0.boosting, distribution = "gaussian",
-                                    interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5))
+    fit0.boosting <- meanCatch( fit_boosting(y ~ ., data = data0.boosting, distribution = "gaussian",
+                                    interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...))
 
     if (length(fit0.boosting$errors) > 0){
       best0.iter <- NA
     } else{
-      best0.iter <- max(10, gbm.perf(fit0.boosting$fit, method = "cv", plot.it = plot.gbmperf))
+      best0.iter <- max(10, best_boosting_iteration(fit0.boosting$fit, method = "cv", plot.it = plot.gbmperf))
     }
 
-    result$result.boosting <- list(fit1.boosting = fit1.boosting$fit, fit0.boosting = fit0.boosting$fit)
+    result$result.boosting <- list(fit1.boosting = fit1.boosting$fit, fit0.boosting = fit0.boosting$fit,
+                                   best1.iter = best1.iter, best0.iter = best0.iter)
 
     temp.iter <- c(best.iter, best1.iter, best0.iter)
     temp.iter <- temp.iter[!is.na(temp.iter)]

@@ -2,6 +2,14 @@
 
 ## Major changes
 
+* Migrated boosting to GBM3 using its current API. Existing tuning argument
+  names and the learning rate of 0.1 are preserved. Parallel controls map to
+  GBM3 threads. Stored boosting fits now have class `GBMFit`; results can
+  differ from GBM even with identical settings and random seeds.
+
+* Fixed continuous boosting predictions by retaining the selected tree count
+  for each treatment arm, and forwarding additional boosting controls.
+
 * Added C backends, enabled by default, for count and survival contrast
   regression, Cox restricted mean survival integration, and LASSO propensity-score
   interaction screening. Installing from source now requires a C compiler and

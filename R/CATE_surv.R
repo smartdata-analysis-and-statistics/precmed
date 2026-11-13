@@ -88,7 +88,7 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns an object of the class \code{catefit} containing the following components:
 #' \itemize{
@@ -667,7 +667,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
-#' @param ... Additional arguments for \code{gbm()}
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @param contrast.control A named list of contrast-regression options:
 #' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
@@ -790,10 +790,10 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
           weight1 <- weightnew_train[trt_train == 1]
           weight0 <- weightnew_train[trt_train == 0]
 
-          fit1.boosting <- gbm(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
+          fit1.boosting <- fit_boosting(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
                                cv.folds = 5, weights = weight1, ...)
-          best1.iter <- max(gbm.perf(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
-          f.predict.ini <- predict.gbm(object = fit1.boosting, newdata = data1, n.trees = best1.iter)
+          best1.iter <- max(best_boosting_iteration(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
+          f.predict.ini <- predict(object = fit1.boosting, newdata = data1, n.trees = best1.iter)
           f.predict.ini <- jitter(f.predict.ini, factor = 0.15)
           withCallingHandlers({
             fit1.gam <- mgcv::gam(as.formula(paste0("y ~ s(f.predict.ini) + ", paste0(setdiff(colnames(data1), "y"), collapse = "+"))),
@@ -808,10 +808,10 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
           colnames(newdata1) <- c("f.predict.ini", colnames(data1))
           f1.predictcv[index == k] <- predict(fit1.gam, newdata = newdata1, type = "response")
 
-          fit0.boosting <- gbm(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
+          fit0.boosting <- fit_boosting(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth, n.trees = n.trees.boosting,
                                cv.folds = 5, weights = weight0, ...)
-          best0.iter <- max(gbm.perf(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
-          f.predict.ini <- predict.gbm(object = fit0.boosting, newdata = data0, n.trees = best0.iter)
+          best0.iter <- max(best_boosting_iteration(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
+          f.predict.ini <- predict(object = fit0.boosting, newdata = data0, n.trees = best0.iter)
           f.predict.ini <- jitter(f.predict.ini, factor = 0.15)
           withCallingHandlers({
             fit0.gam <- mgcv::gam(as.formula(paste0("y ~ s(f.predict.ini) + ", paste0(setdiff(colnames(data0), "y"), collapse = "+"))),
@@ -821,7 +821,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
             if (grepl("non-integer", conditionMessage(w)))
               invokeRestart("muffleWarning") # suppress warnings in gam(): "In eval(family$initialize) : non-integer #successes in a binomial glm!"
           })
-          f0.predict.ini <- predict.gbm(fit0.boosting, newdata = datatot_valid, best0.iter)
+          f0.predict.ini <- predict(fit0.boosting, newdata = datatot_valid, best0.iter)
           newdata0 <- data.frame(f.predict.ini = f0.predict.ini, data.frame(datatot_valid))
           colnames(newdata0) <- c("f.predict.ini", colnames(data0))
           f0.predictcv[index == k] <- predict(fit0.gam, newdata = newdata0, type = "response")
@@ -908,9 +908,9 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
     data0 <- datatot[trt == 0, ]
     weight0 <- weightc[trt == 0]
 
-    fit1.boosting <- gbm(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth,
+    fit1.boosting <- fit_boosting(y ~ ., data = data1, distribution = "gaussian", interaction.depth = tree.depth,
                          n.trees = n.trees.boosting, cv.folds = 5, weights = weight1, ...)
-    best1.iter <- max(gbm.perf(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
+    best1.iter <- max(best_boosting_iteration(object = fit1.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
     f.predict.ini <- predict(object = fit1.boosting, newdata = data1, n.trees = best1.iter)
     f.predict.ini <- jitter(f.predict.ini, factor = 0.1)
     withCallingHandlers({
@@ -922,9 +922,9 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
         invokeRestart("muffleWarning") # suppress warnings in gam(): "In eval(family$initialize) : non-integer #successes in a binomial glm!"
     })
 
-    fit0.boosting <- gbm(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth,
+    fit0.boosting <- fit_boosting(y ~ ., data = data0, distribution = "gaussian", interaction.depth = tree.depth,
                          n.trees = n.trees.boosting, cv.folds = 5, weights = weight0, ...)
-    best0.iter <- max(gbm.perf(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
+    best0.iter <- max(best_boosting_iteration(object = fit0.boosting, plot.it = plot.gbmperf, method = "cv"), 10)
     f.predict.ini <- predict(object = fit0.boosting, newdata = data0, n.trees = best0.iter)
     f.predict.ini <- jitter(f.predict.ini, factor = 0.1)
     withCallingHandlers({
