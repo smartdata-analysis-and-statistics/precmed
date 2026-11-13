@@ -8,6 +8,11 @@ on:
 
 name: R-CMD-check
 
+# Keep only the latest run for each branch or pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
