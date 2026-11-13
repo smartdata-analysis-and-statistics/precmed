@@ -36,16 +36,16 @@ Data*](https://doi.org/10.1201/9781003300809) (2026). [Chapter
 and interpret individualized treatment rule results using the package
 (Jiang et al. 2026).
 
-Two free courses complement the book, introducing **precmed**, its
-practical use, and the underlying statistical methods:
+Two free courses complement the book and introduce **precmed**, its
+practical use, and the underlying statistical methods. [An Introduction
+to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
+covers the foundations through recorded webinars, exercises, and
+readings. The [free companion course to the
+book](https://sdas.thinkific.com/courses/rwd-book) provides background
+materials, example R code, and curated references to support practical
+analyses.
 
-### [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
-
-Recorded webinars, exercises, and readings introduce individualized
-treatment effects, the foundations of precision medicine, and practical
-use of **precmed**.
-
-**Teachers:** Thomas Debray, Tri-Long Nguyen, and Phoebe Jiang.
+<div class="learning-course-widgets">
 
 <div class="thinkific-product-card"
 data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
@@ -61,16 +61,6 @@ data-store-url="https://sdas.thinkific.com/embeds/products/show">
 
 </div>
 
-### [Free Companion Course to the Real-World Data Handbook](https://sdas.thinkific.com/courses/rwd-book)
-
-Background materials, example R code, and curated references connect the
-book’s methods to practical analyses. The [chapter companion
-tutorial](https://smartdata-analysis-and-statistics.github.io/comparative-effectiveness/chapter_18.html)
-demonstrates **precmed** with worked examples.
-
-**Book editors:** Thomas P. A. Debray, Tri-Long Nguyen, and Robert W.
-Platt.
-
 <div class="thinkific-product-card"
 data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff"
 data-btn-bg-color="#005a80" data-card-type="card"
@@ -80,6 +70,8 @@ data-card-bg-color="#ffffff"
 data-store-url="https://sdas.thinkific.com/embeds/products/show">
 
 <div class="iframe-container">
+
+</div>
 
 </div>
 
