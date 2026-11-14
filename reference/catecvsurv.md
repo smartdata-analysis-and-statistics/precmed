@@ -542,37 +542,37 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 18:10:51 2026 
+#>    Sat Nov 14 19:44:58 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 18:10:56 2026 
+#>    Sat Nov 14 19:45:03 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 18:11:01 2026 
+#>    Sat Nov 14 19:45:08 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 18:11:05 2026 
+#>    Sat Nov 14 19:45:12 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 18:11:10 2026 
+#>    Sat Nov 14 19:45:17 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 23.39 secs 
+#> Total runtime : 23.69 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 boxplot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Warning: Removed 4 rows containing non-finite outside the scale range
 #> (`stat_boxplot()`).

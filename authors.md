@@ -15,7 +15,7 @@
 - **Smart Data Analysis and Statistics B.V.**. Copyright holder.  
   Copyright holder of its contributions after version 1.1.0
 
-- **Thomas Debray**. Contributor, maintainer.
+- **Thomas Debray**. Author, contributor, maintainer.
   [](https://orcid.org/0000-0002-1790-2719)
 
 - **Stan Wijn**. Contributor. [](https://orcid.org/0000-0003-3782-6677)
@@ -27,13 +27,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/DESCRIPTION)
 
-Tian L, Jiang X, Simoneau G (2026). *precmed: Precision Medicine*. R
-package version 1.1.0.9000,
+Tian L, Jiang X, Simoneau G, Debray T (2026). *precmed: Precision
+Medicine*. R package version 1.1.0.9000,
 <https://github.com/smartdata-analysis-and-statistics/precmed>.
 
     @Manual{,
       title = {precmed: Precision Medicine},
-      author = {Lu Tian and Xiaotong Jiang and Gabrielle Simoneau},
+      author = {Lu Tian and Xiaotong Jiang and Gabrielle Simoneau and Thomas Debray},
       year = {2026},
       note = {R package version 1.1.0.9000},
       url = {https://github.com/smartdata-analysis-and-statistics/precmed},

@@ -190,28 +190,28 @@ eval_1 <- catecv(response = "count",
 
 # default setting
 plot(eval_1)
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # turn off ABC annotation
 plot(eval_1, show.abc = FALSE)
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # use a different theme
 plot(eval_1, theme = ggplot2::theme_bw())
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # plot the validation curves from the 2nd CV iteration instead of the mean
 # of all validation curves
 plot(eval_1, cv.i = 2)
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # median of the validation curves
 plot(eval_1, combine = "median")
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # plot validation curves in validation set only
 plot(eval_1, valid.only = TRUE)
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # Survival outcome
 library(survival)
@@ -233,12 +233,12 @@ eval_2 <- catecv(response = "survival",
 
 # default setting, plot RMTL ratios in both training and validation sets
 plot(eval_2)
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # plot hazard ratio
 plot(eval_2, measure = "cumulative_hr")
 #> Warning: Some subgroup cumulative hazard ratios are undefined; summaries use available folds.
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 
 # }
 ```

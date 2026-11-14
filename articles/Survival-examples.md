@@ -830,14 +830,9 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
 - We avoided generating the boosting performance plots by specifying
   `plot.gbmperf` = FALSE.
 
-- When `verbose` = 1, progress messages are printed in the R console but
-  errors and warnings are not printed. The current CV iteration is
-  printed, followed by the steps of the CV procedure (splitting the
-  data, training the models, validating the models). A timestamp and a
-  progress bar are also displayed upon completion of a CV iteration. If
-  `contrastReg` was selected as one of the methods in `score.method`, an
-  additional line of output message will indicate whether the algorithm
-  has converged.
+- We set `verbose = 0` to keep the example output concise. Set
+  `verbose = 1` to show CV progress, or `verbose = 2` to also report
+  errors and warnings from the CV procedure.
 
 There are many other non-mandatory arguments that
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -871,45 +866,8 @@ output_catecv <- catecv(response = "survival",
                         cv.n = 5,
                         seed = 999,
                         plot.gbmperf = FALSE,
-                        verbose = 1)
+                        verbose = 0)
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>   |                                                                              |                                                                      |   0%
-#> cv = 1 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   Contrast regression converged.
-#>    Sat Nov 14 18:21:27 2026 
-#>   |                                                                              |==============                                                        |  20%
-#> cv = 2 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   Contrast regression converged.
-#>    Sat Nov 14 18:21:45 2026 
-#>   |                                                                              |============================                                          |  40%
-#> cv = 3 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   Contrast regression converged.
-#>    Sat Nov 14 18:22:02 2026 
-#>   |                                                                              |==========================================                            |  60%
-#> cv = 4 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   Contrast regression converged.
-#>    Sat Nov 14 18:22:19 2026 
-#>   |                                                                              |========================================================              |  80%
-#> cv = 5 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   Contrast regression converged.
-#>    Sat Nov 14 18:22:37 2026 
-#>   |                                                                              |======================================================================| 100%
-#> Total runtime : 1.44 mins
 ```
 
 ### Inspect validation results
@@ -1108,9 +1066,13 @@ average_abc
 #>   0.02021868   0.02687192
 ```
 
-In this example, random forest also offers the best overall performance
-because it has the highest average ABC, followed closely by contrast
-regression.
+In this example, contrast regression has the higher average ABC,
+indicating greater validation-set separation of treatment benefit than
+random forest. This is consistent with the earlier suspicion that the
+wider distribution of random forest scores may partly reflect
+overfitting. However, the ABC comparison alone does not establish
+overfitting; differences in model flexibility or estimation noise may
+also contribute.
 
 ## Assess responder discrimination with validation curves
 

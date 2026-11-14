@@ -452,10 +452,10 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.32 secs 
+#> Total runtime : 9.37 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
-
+#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
 boxplot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 
 abc(catecv)

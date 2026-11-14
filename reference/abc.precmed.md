@@ -109,12 +109,12 @@ cv_count <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 13.12 secs 
+#> Total runtime : 10.59 secs 
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_count)
-#>              cv1        cv2       cv3       cv4       cv5
-#> poisson 0.126212 0.07270858 0.1768953 0.1317144 0.0893497
+#>                cv1       cv2        cv3         cv4        cv5
+#> poisson 0.09525526 0.1524051 0.04800281 0.002823545 0.08633814
 
 # Survival outcome
 library(survival)
@@ -128,15 +128,12 @@ cv_surv <- catecv(response = "survival",
                   cv.n = 5)
 #> Warning: No value supplied for tau0. Default sets tau0 to the maximum survival time.
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_surv)
 #>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1626641 0.2017690 0.1974538 0.1746788 0.1879429
-#> randomForest 0.1572664 0.1966721 0.1976005 0.1733730 0.1863366
+#> poisson      0.1620614 0.1825250 0.1745764 0.2101329 0.1723438
+#> randomForest 0.1547838 0.1727701 0.1697778 0.2047733 0.1680103
 
 # }
 ```
