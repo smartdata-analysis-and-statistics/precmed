@@ -98,32 +98,21 @@ interpret treatment effects in responder subgroups.</p>
 <div class="section level2">
 <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>
-<p>We generate fully synthetic data with
-<code><a href="../reference/simulate_survival.html">simulate_survival()</a></code>. Its treatment and outcome models are
-illustrative and do not use patient records or represent clinical
-estimates. The default event model simulates greater drug 1 benefit at
-older ages and with more previous relapses. These illustrative
-interactions preserve the direction of associations in the package’s
-original survival example but are much weaker; they should not be
-interpreted as clinical estimates. We generate 4,000 patients and set a
-seed for reproducibility. The propensity model assigns treatment, so the
-group sizes vary with the simulated data. Its default intercept targets
-approximately 54% receiving drug 1, similar to the aggregate treatment
-split in the package’s original 4,000-patient survival example;
-individual records are not used. The result contains nine variables: six
-baseline characteristics, treatment, observed time and an event
-indicator.</p>
+<p>We generate 4,000 synthetic observations with
+<code><a href="../reference/simulate_survival.html">simulate_survival()</a></code> and set a seed for reproducibility. The
+data contain baseline characteristics, treatment, observed time and an
+event indicator.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">survival_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_survival.html">simulate_survival</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, seed <span class="op">=</span> <span class="fl">20261114</span><span class="op">)</span></span></code></pre></div>
 <p>Treatment is assigned according to the propensity model; its weights
 can be changed to explore different treatment proportions and degrees of
 overlap. For example,
 <code>simulate_survival(n = 4000, seed = 1, ps_weights = c(intercept = -1), conditional_hr = 0.8)</code>
-changes the propensity intercept and the conditional HR at age 48. Named
-<code>ps_weights</code> and <code>lp_weights</code> override the
-specified defaults; see <code><a href="../reference/simulate_survival.html">?simulate_survival</a></code> for their
-definitions. The table below summarizes baseline characteristics by
-treatment group.</p>
+changes the propensity intercept and the conditional HR at age 48 with
+no previous relapses. Named <code>ps_weights</code> and
+<code>lp_weights</code> override the specified defaults; see
+<code><a href="../reference/simulate_survival.html">?simulate_survival</a></code> for their definitions. The table below
+summarizes baseline characteristics by treatment group.</p>
 <table class="table table table-striped" style="width: auto;">
 <thead><tr>
 <th style="text-align:left;">
@@ -135,10 +124,10 @@ level
 Overall<br>(n = 4000)
 </th>
 <th style="text-align:left;">
-drug0<br>(n = 1824)
+drug0<br>(n = 1873)
 </th>
 <th style="text-align:left;">
-drug1<br>(n = 2176)
+drug1<br>(n = 2127)
 </th>
 </tr></thead>
 <tbody>
@@ -152,10 +141,10 @@ Age (mean (SD))
 48.0 (8.8)
 </td>
 <td style="text-align:left;">
-46.9 (8.9)
+43.9 (8.1)
 </td>
 <td style="text-align:left;">
-48.8 (8.5)
+51.5 (7.8)
 </td>
 </tr>
 <tr>
@@ -169,10 +158,10 @@ male
 1139 (28.5)
 </td>
 <td style="text-align:left;">
-505 (27.7)
+520 (27.8)
 </td>
 <td style="text-align:left;">
-634 (29.1)
+619 (29.1)
 </td>
 </tr>
 <tr>
@@ -185,10 +174,10 @@ female
 2861 (71.5)
 </td>
 <td style="text-align:left;">
-1319 (72.3)
+1353 (72.2)
 </td>
 <td style="text-align:left;">
-1542 (70.9)
+1508 (70.9)
 </td>
 </tr>
 <tr>
@@ -202,10 +191,10 @@ drugA
 1827 (45.7)
 </td>
 <td style="text-align:left;">
-846 (46.4)
+857 (45.8)
 </td>
 <td style="text-align:left;">
-981 (45.1)
+970 (45.6)
 </td>
 </tr>
 <tr>
@@ -218,10 +207,10 @@ drugB
 1399 (35.0)
 </td>
 <td style="text-align:left;">
-604 (33.1)
+608 (32.5)
 </td>
 <td style="text-align:left;">
-795 (36.5)
+791 (37.2)
 </td>
 </tr>
 <tr>
@@ -234,10 +223,10 @@ drugC
 774 (19.4)
 </td>
 <td style="text-align:left;">
-374 (20.5)
+408 (21.8)
 </td>
 <td style="text-align:left;">
-400 (18.4)
+366 (17.2)
 </td>
 </tr>
 <tr>
@@ -250,10 +239,10 @@ Previous medical cost ($) (mean (SD))
 14581.8 (10056.0)
 </td>
 <td style="text-align:left;">
-14481.9 (9635.9)
+14455.3 (9675.7)
 </td>
 <td style="text-align:left;">
-14665.5 (10396.6)
+14693.1 (10380.4)
 </td>
 </tr>
 <tr>
@@ -267,10 +256,10 @@ Previous number of symptoms (%)
 1860 (46.5)
 </td>
 <td style="text-align:left;">
-835 (45.8)
+880 (47.0)
 </td>
 <td style="text-align:left;">
-1025 (47.1)
+980 (46.1)
 </td>
 </tr>
 <tr>
@@ -283,10 +272,10 @@ Previous number of symptoms (%)
 1365 (34.1)
 </td>
 <td style="text-align:left;">
-631 (34.6)
+642 (34.3)
 </td>
 <td style="text-align:left;">
-734 (33.7)
+723 (34.0)
 </td>
 </tr>
 <tr>
@@ -299,10 +288,10 @@ Previous number of symptoms (%)
 775 (19.4)
 </td>
 <td style="text-align:left;">
-358 (19.6)
+351 (18.7)
 </td>
 <td style="text-align:left;">
-417 (19.2)
+424 (19.9)
 </td>
 </tr>
 <tr>
@@ -316,10 +305,10 @@ Previous number of relapses (%)
 1782 (44.5)
 </td>
 <td style="text-align:left;">
-845 (46.3)
+850 (45.4)
 </td>
 <td style="text-align:left;">
-937 (43.1)
+932 (43.8)
 </td>
 </tr>
 <tr>
@@ -332,10 +321,10 @@ Previous number of relapses (%)
 1469 (36.7)
 </td>
 <td style="text-align:left;">
-638 (35.0)
+681 (36.4)
 </td>
 <td style="text-align:left;">
-831 (38.2)
+788 (37.0)
 </td>
 </tr>
 <tr>
@@ -348,10 +337,10 @@ Previous number of relapses (%)
 567 (14.2)
 </td>
 <td style="text-align:left;">
-251 (13.8)
+252 (13.5)
 </td>
 <td style="text-align:left;">
-316 (14.5)
+315 (14.8)
 </td>
 </tr>
 <tr>
@@ -364,10 +353,10 @@ Previous number of relapses (%)
 145 ( 3.6)
 </td>
 <td style="text-align:left;">
-71 ( 3.9)
+71 ( 3.8)
 </td>
 <td style="text-align:left;">
-74 ( 3.4)
+74 ( 3.5)
 </td>
 </tr>
 <tr>
@@ -380,7 +369,7 @@ Previous number of relapses (%)
 27 ( 0.7)
 </td>
 <td style="text-align:left;">
-14 ( 0.8)
+14 ( 0.7)
 </td>
 <td style="text-align:left;">
 13 ( 0.6)
@@ -414,7 +403,7 @@ first.</p></li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
 represents an event and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
-represents censoring. The censoring rate is 63.3%.</p></li>
+represents censoring. The censoring rate is 61.8%.</p></li>
 <li><p>We will use <code>trt</code> as the treatment variable, which has
 2 drugs (drug0 and drug1).</p></li>
 </ul>
@@ -456,7 +445,7 @@ are shown below:</p>
 <td align="left">&gt;=2</td>
 <td align="right">0</td>
 <td align="left">drug1</td>
-<td align="right">32.41104</td>
+<td align="right">25.33528</td>
 <td align="right">1</td>
 </tr>
 <tr class="even">
@@ -499,7 +488,7 @@ are shown below:</p>
 <td align="right">0.4815126</td>
 <td align="left">1</td>
 <td align="right">1</td>
-<td align="left">drug1</td>
+<td align="left">drug0</td>
 <td align="right">20.03475</td>
 <td align="right">0</td>
 </tr>
@@ -510,7 +499,7 @@ are shown below:</p>
 <td align="right">0.3129080</td>
 <td align="left">1</td>
 <td align="right">2</td>
-<td align="left">drug1</td>
+<td align="left">drug0</td>
 <td align="right">272.70155</td>
 <td align="right">0</td>
 </tr>
@@ -534,21 +523,19 @@ characteristics.</p>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; coxph(formula = Surv(y, d) ~ trt, data = survival_data)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   n= 4000, number of events= 1466 </span></span>
+<span><span class="co">#&gt;   n= 4000, number of events= 1530 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;              coef exp(coef) se(coef)      z Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; trtdrug1 -0.40665   0.66588  0.05243 -7.756 8.78e-15 ***</span></span>
-<span><span class="co">#&gt; ---</span></span>
-<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt;              coef exp(coef) se(coef)      z Pr(&gt;|z|)</span></span>
+<span><span class="co">#&gt; trtdrug1 -0.02602   0.97431  0.05118 -0.508    0.611</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;          exp(coef) exp(-coef) lower .95 upper .95</span></span>
-<span><span class="co">#&gt; trtdrug1    0.6659      1.502    0.6008    0.7379</span></span>
+<span><span class="co">#&gt; trtdrug1    0.9743      1.026    0.8813     1.077</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Concordance= 0.547  (se = 0.007 )</span></span>
-<span><span class="co">#&gt; Likelihood ratio test= 60.34  on 1 df,   p=8e-15</span></span>
-<span><span class="co">#&gt; Wald test            = 60.15  on 1 df,   p=9e-15</span></span>
-<span><span class="co">#&gt; Score (logrank) test = 60.98  on 1 df,   p=6e-15</span></span></code></pre></div>
-<p>The estimated hazard ratio (HR) for drug 1 versus drug 0 is 0.67. It
+<span><span class="co">#&gt; Concordance= 0.502  (se = 0.007 )</span></span>
+<span><span class="co">#&gt; Likelihood ratio test= 0.26  on 1 df,   p=0.6</span></span>
+<span><span class="co">#&gt; Wald test            = 0.26  on 1 df,   p=0.6</span></span>
+<span><span class="co">#&gt; Score (logrank) test = 0.26  on 1 df,   p=0.6</span></span></code></pre></div>
+<p>The estimated hazard ratio (HR) for drug 1 versus drug 0 is 0.97. It
 compares instantaneous relapse hazards among patients still event-free
 and does not by itself establish a causal treatment effect.</p>
 <p>We can examine the proportional-hazards assumption using scaled
@@ -559,8 +546,8 @@ uncertainty bands.</p>
 <code class="sourceCode R"><span><span class="va">ph_unadjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/cox.zph.html" class="external-link">cox.zph</a></span><span class="op">(</span><span class="va">output_cox</span>, transform <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ph_unadjusted</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        chisq df    p</span></span>
-<span><span class="co">#&gt; trt     1.52  1 0.22</span></span>
-<span><span class="co">#&gt; GLOBAL  1.52  1 0.22</span></span>
+<span><span class="co">#&gt; trt    0.221  1 0.64</span></span>
+<span><span class="co">#&gt; GLOBAL 0.221  1 0.64</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ph_unadjusted</span>, var <span class="op">=</span> <span class="st">"trt"</span>, hr <span class="op">=</span> <span class="cn">TRUE</span>, resid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Days since treatment initiation"</span>,</span>
 <span>     ylab <span class="op">=</span> <span class="st">"Unadjusted hazard ratio: drug1 vs drug0"</span><span class="op">)</span></span>
@@ -569,7 +556,7 @@ uncertainty bands.</p>
 <p>The dotted line is the constant HR from the Cox model. The smooth
 curve suggests how the treatment association may vary over time; it is a
 diagnostic rather than a precise estimate at every time point. The
-proportional-hazards test for the treatment term gives p = 0.217. This
+proportional-hazards test for the treatment term gives p = 0.638. This
 test assesses whether the treatment association changes over time; a
 large p-value does not prove that the HR is constant. Later follow-up is
 less informative when fewer patients remain at risk, as reflected in the
@@ -590,29 +577,29 @@ relapses using a Cox model:</p>
 <span><span class="co">#&gt; coxph(formula = Surv(y, d) ~ trt + age + female + previous_cost + </span></span>
 <span><span class="co">#&gt;     previous_number_relapses, data = survival_data)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   n= 4000, number of events= 1466 </span></span>
+<span><span class="co">#&gt;   n= 4000, number of events= 1530 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                               coef exp(coef)  se(coef)      z Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; trtdrug1                 -0.438415  0.645058  0.053296 -8.226  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; age                       0.007923  1.007954  0.002987  2.652  0.00800 ** </span></span>
-<span><span class="co">#&gt; female                    0.137659  1.147584  0.058880  2.338  0.01939 *  </span></span>
-<span><span class="co">#&gt; previous_cost             0.168180  1.183150  0.061517  2.734  0.00626 ** </span></span>
-<span><span class="co">#&gt; previous_number_relapses  0.073957  1.076761  0.029035  2.547  0.01086 *  </span></span>
+<span><span class="co">#&gt; trtdrug1                 -0.305526  0.736736  0.057627 -5.302 1.15e-07 ***</span></span>
+<span><span class="co">#&gt; age                       0.033694  1.034268  0.003299 10.215  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; female                    0.172062  1.187751  0.057885  2.972  0.00295 ** </span></span>
+<span><span class="co">#&gt; previous_cost             0.163731  1.177898  0.060511  2.706  0.00681 ** </span></span>
+<span><span class="co">#&gt; previous_number_relapses  0.059766  1.061588  0.028293  2.112  0.03465 *  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                          exp(coef) exp(-coef) lower .95 upper .95</span></span>
-<span><span class="co">#&gt; trtdrug1                    0.6451     1.5502    0.5811    0.7161</span></span>
-<span><span class="co">#&gt; age                         1.0080     0.9921    1.0021    1.0139</span></span>
-<span><span class="co">#&gt; female                      1.1476     0.8714    1.0225    1.2880</span></span>
-<span><span class="co">#&gt; previous_cost               1.1831     0.8452    1.0488    1.3348</span></span>
-<span><span class="co">#&gt; previous_number_relapses    1.0768     0.9287    1.0172    1.1398</span></span>
+<span><span class="co">#&gt; trtdrug1                    0.7367     1.3573    0.6581    0.8248</span></span>
+<span><span class="co">#&gt; age                         1.0343     0.9669    1.0276    1.0410</span></span>
+<span><span class="co">#&gt; female                      1.1878     0.8419    1.0604    1.3304</span></span>
+<span><span class="co">#&gt; previous_cost               1.1779     0.8490    1.0462    1.3262</span></span>
+<span><span class="co">#&gt; previous_number_relapses    1.0616     0.9420    1.0043    1.1221</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Concordance= 0.565  (se = 0.009 )</span></span>
-<span><span class="co">#&gt; Likelihood ratio test= 85.61  on 5 df,   p=&lt;2e-16</span></span>
-<span><span class="co">#&gt; Wald test            = 85.2  on 5 df,   p=&lt;2e-16</span></span>
-<span><span class="co">#&gt; Score (logrank) test = 86.09  on 5 df,   p=&lt;2e-16</span></span></code></pre></div>
-<p>The adjusted HR is 0.65, compared with 0.67 in the unadjusted model.
+<span><span class="co">#&gt; Concordance= 0.575  (se = 0.008 )</span></span>
+<span><span class="co">#&gt; Likelihood ratio test= 123.3  on 5 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Wald test            = 121.5  on 5 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Score (logrank) test = 121.7  on 5 df,   p=&lt;2e-16</span></span></code></pre></div>
+<p>The adjusted HR is 0.74, compared with 0.97 in the unadjusted model.
 The treatment groups have substantial overlap in age in this synthetic
 example; model adjustment and appropriate assumptions still matter. An
 adjusted HR is conditional on the included covariates and is not
@@ -620,23 +607,23 @@ automatically a causal average treatment effect.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ph_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/cox.zph.html" class="external-link">cox.zph</a></span><span class="op">(</span><span class="va">output_cox_adjusted</span>, transform <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ph_adjusted</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                           chisq df     p</span></span>
-<span><span class="co">#&gt; trt                      2.2505  1 0.134</span></span>
-<span><span class="co">#&gt; age                      2.7471  1 0.097</span></span>
-<span><span class="co">#&gt; female                   0.4168  1 0.519</span></span>
-<span><span class="co">#&gt; previous_cost            0.1446  1 0.704</span></span>
-<span><span class="co">#&gt; previous_number_relapses 0.0283  1 0.866</span></span>
-<span><span class="co">#&gt; GLOBAL                   4.6952  5 0.454</span></span>
+<span><span class="co">#&gt;                            chisq df    p</span></span>
+<span><span class="co">#&gt; trt                      1.33621  1 0.25</span></span>
+<span><span class="co">#&gt; age                      0.35186  1 0.55</span></span>
+<span><span class="co">#&gt; female                   0.00942  1 0.92</span></span>
+<span><span class="co">#&gt; previous_cost            0.25772  1 0.61</span></span>
+<span><span class="co">#&gt; previous_number_relapses 0.00558  1 0.94</span></span>
+<span><span class="co">#&gt; GLOBAL                   3.63924  5 0.60</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ph_adjusted</span>, var <span class="op">=</span> <span class="st">"trt"</span>, hr <span class="op">=</span> <span class="cn">TRUE</span>, resid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Days since treatment initiation"</span>,</span>
 <span>     ylab <span class="op">=</span> <span class="st">"Adjusted hazard ratio: drug1 vs drug0"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">output_cox_adjusted</span><span class="op">)</span><span class="op">[</span><span class="st">"trtdrug1"</span><span class="op">]</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"steelblue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/ph_adjusted-1.png" class="r-plt" alt="" width="672"></p>
 <p>For the adjusted model, the proportional-hazards test for the
-treatment term gives p = 0.134. This test assesses whether the treatment
+treatment term gives p = 0.248. This test assesses whether the treatment
 HR changes over time; it is not a test of whether the treatment effect
 is zero. A large p-value does not establish that the HR is constant. The
-global proportional-hazards test gives p = 0.454 and assesses the model
+global proportional-hazards test gives p = 0.602 and assesses the model
 covariates jointly, so evidence of non-proportional hazards may arise
 from covariates other than treatment.</p>
 </div>
@@ -688,8 +675,8 @@ percentile of observed follow-up in the two treatment groups.</p>
 <code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survival_data</span>,</span>
 <span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">tau0</span></span>
-<span><span class="co">#&gt; [1] 765.4456</span></span></code></pre></div>
-<p>The horizon is approximately 765.4 days. It defines the period over
+<span><span class="co">#&gt; [1] 778.4532</span></span></code></pre></div>
+<p>The horizon is approximately 778.5 days. It defines the period over
 which we will compare restricted mean outcomes. This choice is not
 derived from the proportional-hazards diagnostics and does not establish
 that the HR is constant before the horizon. It uses observed times,
@@ -767,18 +754,18 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                               estimate         SE   CI.lower   CI.upper</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio              -0.3129050 0.04510642 -0.4013120 -0.2244980</span></span>
-<span><span class="co">#&gt; log.cumulative.hazard.ratio -0.5504311 0.09158371 -0.7299318 -0.3709303</span></span>
-<span><span class="co">#&gt;                                   pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio              4.004019e-12</span></span>
-<span><span class="co">#&gt; log.cumulative.hazard.ratio 1.853611e-09</span></span>
+<span><span class="co">#&gt;                               estimate         SE   CI.lower    CI.upper</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              -0.1279897 0.04568911 -0.2175387 -0.03844067</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio -0.2639637 0.09846880 -0.4569590 -0.07096841</span></span>
+<span><span class="co">#&gt;                                  pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              0.005089449</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio 0.007347192</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 514.0616 7.961516 498.4573 529.6658      0</span></span>
-<span><span class="co">#&gt; rmst0 421.7052 9.071721 403.9249 439.4854      0</span></span>
+<span><span class="co">#&gt;       estimate        SE CI.lower CI.upper pvalue</span></span>
+<span><span class="co">#&gt; rmst1 467.9432 10.432618 447.4956 488.3908      0</span></span>
+<span><span class="co">#&gt; rmst0 425.5458  9.302363 407.3135 443.7781      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -819,10 +806,10 @@ Ratio
 Unadjusted Cox, all follow-up
 </td>
 <td style="text-align:right;">
-0.67
+0.97
 </td>
 <td style="text-align:left;">
-0.60 to 0.74
+0.88 to 1.08
 </td>
 </tr>
 <tr>
@@ -830,10 +817,10 @@ Unadjusted Cox, all follow-up
 Adjusted Cox, all follow-up
 </td>
 <td style="text-align:right;">
-0.65
+0.74
 </td>
 <td style="text-align:left;">
-0.58 to 0.72
+0.66 to 0.82
 </td>
 </tr>
 <tr>
@@ -841,10 +828,10 @@ Adjusted Cox, all follow-up
 Adjusted Cox, through tau0
 </td>
 <td style="text-align:right;">
-0.65
+0.74
 </td>
 <td style="text-align:left;">
-0.58 to 0.72
+0.66 to 0.83
 </td>
 </tr>
 <tr>
@@ -852,10 +839,10 @@ Adjusted Cox, through tau0
 AIPTW cumulative hazard ratio at tau0
 </td>
 <td style="text-align:right;">
-0.58
+0.77
 </td>
 <td style="text-align:left;">
-0.48 to 0.69
+0.63 to 0.93
 </td>
 </tr>
 </tbody>
@@ -864,8 +851,8 @@ AIPTW cumulative hazard ratio at tau0
 and the estimand and estimation method. In particular, the cumulative
 hazard ratio is not an instantaneous Cox HR; similarity or differences
 between the numbers alone do not establish which model is correct.</p>
-<p>For example, the log RMTL ratio of -0.31 and the 95% confidence
-interval of (-0.4, -0.22) are displayed in the output. The estimated
+<p>For example, the log RMTL ratio of -0.13 and the 95% confidence
+interval of (-0.22, -0.04) are displayed in the output. The estimated
 ratio and its interval can be obtained by exponentiating these log-scale
 values. A ratio above 1 indicates more time lost before
 <code>tau0</code> under drug 1; the interval describes uncertainty in
@@ -1036,7 +1023,7 @@ we show the CATE scores estimated with contrast regression for the first
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] -0.2745338  0.1813588 -0.4858946 -0.1780494 -0.2154102 -0.2017210</span></span></code></pre></div>
+<span><span class="co">#&gt; [1]  0.02667802  0.43303845 -0.30655826 -0.03183065 -0.05597842 -0.08235174</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <code>coefficients</code> contains the estimated coefficients of the
@@ -1049,12 +1036,12 @@ predicts the score) so they do not have coefficient results here.</li>
 </ol>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
-<span><span class="co">#&gt;                           contrastReg</span></span>
-<span><span class="co">#&gt; (Intercept)              -0.236152165</span></span>
-<span><span class="co">#&gt; age                      -0.027102807</span></span>
-<span><span class="co">#&gt; female                    0.044128300</span></span>
-<span><span class="co">#&gt; previous_cost            -0.008540983</span></span>
-<span><span class="co">#&gt; previous_number_relapses -0.122342558</span></span></code></pre></div>
+<span><span class="co">#&gt;                          contrastReg</span></span>
+<span><span class="co">#&gt; (Intercept)               0.09036581</span></span>
+<span><span class="co">#&gt; age                      -0.02371135</span></span>
+<span><span class="co">#&gt; female                   -0.13567528</span></span>
+<span><span class="co">#&gt; previous_cost             0.06657675</span></span>
+<span><span class="co">#&gt; previous_number_relapses -0.13289800</span></span></code></pre></div>
 <p>The contrast-regression coefficients above describe how the fitted
 log-RMTL score changes with each covariate. They are estimates from
 these synthetic data.</p>
@@ -1077,18 +1064,18 @@ specified scoring method. In this example, we show the estimated ATEs of
 subgroups identified by CATE scores of the contrast regression. For
 example, the estimated ATE for the subgroup of subjects constructed
 based on the 50% (“prop0.5”) lowest CATE scores estimated from the
-contrast regression is 0.6.</li>
+contrast regression is 0.74.</li>
 </ol>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.6020295 0.6054979 0.6340460 0.6701166 0.7011565 0.7313194</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.7427012 0.7494395 0.7727382 0.8214067 0.8349706 0.8798625</span></span></code></pre></div>
 <p>The corresponding subgroup cumulative hazard ratios are available
 as:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">chr.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.4122234 0.3910096 0.4437420 0.4706669 0.5303529 0.5767012</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.4647887 0.4834859 0.5528552 0.6324199 0.6834531 0.7680014</span></span></code></pre></div>
 <p>You are encouraged to summarize and visualize the outputs in
 whichever way that fits their particular situation outside the package’s
 functions. For example, it is possible to plot the densities of all CATE
@@ -1105,13 +1092,13 @@ variation in predicted treatment benefit across patients.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Estimated CATE score"</span>, y <span class="op">=</span> <span class="st">"Density"</span>, fill <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/plot_score-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<p>The random forest produces a wider distribution of estimated CATE
-scores than contrast regression. This may reflect greater flexibility,
-estimation noise or overfitting; the narrower distribution could also
-reflect constraints imposed by the contrast-regression model. The plot
-alone cannot distinguish these explanations. The internal validation
-below assesses whether the predicted differences in treatment benefit
-persist in patients not used to fit the scores.</p>
+<p>Compare the spread of the estimated scores for the two methods.
+Differences may reflect model flexibility, estimation noise or
+overfitting; a narrower distribution could also reflect constraints
+imposed by the contrast-regression model. The plot alone cannot
+distinguish these explanations. Internal validation assesses whether the
+predicted differences in treatment benefit persist in patients not used
+to fit the scores.</p>
 </div>
 <div class="section level2">
 <h2 id="internally-validate-cate-scores">Internally validate CATE scores<a class="anchor" aria-label="anchor" href="#internally-validate-cate-scores"></a>
@@ -1300,18 +1287,18 @@ both <code>higher.y</code> and outcome type.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.6 0.3963633 0.3754889 0.4010173 0.3997561 0.3641983</span></span>
-<span><span class="co">#&gt; prop0.7 0.4540380 0.4645004 0.4527744 0.4607592 0.4249463</span></span>
-<span><span class="co">#&gt; prop0.8 0.5178353 0.5463682 0.5448044 0.5484527 0.5157562</span></span>
-<span><span class="co">#&gt; prop0.9 0.6104817 0.6183804 0.6350983 0.6435192 0.6237003</span></span>
-<span><span class="co">#&gt; prop1   0.7319446 0.7402708 0.7466061 0.7498346 0.7381476</span></span>
+<span><span class="co">#&gt; prop0.6 0.4951334 0.4969934 0.5151479 0.4454503 0.5098675</span></span>
+<span><span class="co">#&gt; prop0.7 0.5650587 0.5658140 0.5932439 0.5542147 0.5670414</span></span>
+<span><span class="co">#&gt; prop0.8 0.6350284 0.6523356 0.6566739 0.6596998 0.6266324</span></span>
+<span><span class="co">#&gt; prop0.9 0.7244618 0.7306332 0.7341755 0.7429478 0.7287041</span></span>
+<span><span class="co">#&gt; prop1   0.8618214 0.8763156 0.8851667 0.8773175 0.8693505</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.6 0.6378214 0.6492408 0.6459395 0.6165065 0.6346245</span></span>
-<span><span class="co">#&gt; prop0.7 0.6544669 0.6751040 0.6365238 0.5930391 0.6517549</span></span>
-<span><span class="co">#&gt; prop0.8 0.6652150 0.6857915 0.7103078 0.6080198 0.6806425</span></span>
-<span><span class="co">#&gt; prop0.9 0.7175058 0.7202874 0.7091834 0.6386998 0.7083482</span></span>
-<span><span class="co">#&gt; prop1   0.7399158 0.7288633 0.6839708 0.6668245 0.7141957</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.6 0.8350406 0.8945916 0.7231150 0.8262132 0.8851521</span></span>
+<span><span class="co">#&gt; prop0.7 0.8656700 0.9046940 0.8007250 0.8038333 0.8946092</span></span>
+<span><span class="co">#&gt; prop0.8 0.8945529 0.8458138 0.7972482 0.8204835 0.8626967</span></span>
+<span><span class="co">#&gt; prop0.9 0.9062666 0.8430675 0.8332984 0.8355789 0.8782795</span></span>
+<span><span class="co">#&gt; prop1   0.9473602 0.8947570 0.8907424 0.8731632 0.9015339</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations, labeled from 1 to <code>cv.n</code>, and rows corresponding
 to nested subgroups. The nested subgroups of patients are defined by the
@@ -1323,9 +1310,9 @@ The rows in the output are labeled to reflect the user-specified
 proportions used to build the subgroups.</p>
 <p>For example, in the training set and in the 4th CV iteration (4th
 column labeled “cv4”), the subgroup defined with the 80% lowest CATE
-scores (3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.548.
+scores (3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.66.
 In contrast, the subgroup defined with all patients (last row labeled
-“prop1”) in the 4th CV iteration has an estimated RMTL ratio of 0.75.
+“prop1”) in the 4th CV iteration has an estimated RMTL ratio of 0.877.
 <!-- This suggests that the CATE score estimated with random forests identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RMTL ratio compared to all patients. If lower outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. --></p>
 </div>
 <div class="section level4">
@@ -1344,10 +1331,10 @@ outcome type.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
-<span><span class="co">#&gt; prop0.4 1.637613 1.881854 1.727037 1.730834 1.930266</span></span>
-<span><span class="co">#&gt; prop0.3 2.020644 2.264075 2.158462 2.122557 2.409761</span></span>
-<span><span class="co">#&gt; prop0.2 2.703428 2.995450 2.710862 2.867130 3.191465</span></span>
-<span><span class="co">#&gt; prop0.1 4.200552 6.760649 4.659918 3.994933 4.522125</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.4 2.057115 2.159150 1.999794 2.266325 2.100201</span></span>
+<span><span class="co">#&gt; prop0.3 2.705007 2.720842 2.353439 2.917494 2.686156</span></span>
+<span><span class="co">#&gt; prop0.2 3.682680 3.160212 3.048414 3.506051 3.923344</span></span>
+<span><span class="co">#&gt; prop0.1 7.417539 5.739000 7.007782 8.274179 5.738395</span></span></code></pre></div>
 <p>The outputs are also matrices with columns corresponding to the CV
 iterations and rows corresponding to nested subgroups.</p>
 <p>The output for the low responders brings additional information to
@@ -1358,8 +1345,8 @@ responders defined as patients with the 60% lowest (highest if
 low responders defined as patients with the 40% highest (lowest if
 <code>higher.y</code> = FALSE) estimated CATE scores, labeled as
 “prop0.4”. In the training set and in the first CV iterations, the
-estimated RMTL ratio is 0.396 in the 60% high responders to drug 1 and
-1.638 in the 40% low responders.</p>
+estimated RMTL ratio is 0.495 in the 60% high responders to drug 1 and
+2.057 in the 40% low responders.</p>
 </div>
 <div class="section level4">
 <h4 id="mutually-exclusive-subgroups">Mutually exclusive subgroups<a class="anchor" aria-label="anchor" href="#mutually-exclusive-subgroups"></a>
@@ -1372,14 +1359,14 @@ iterations.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5 1.4985779 1.6532249 1.5202768 1.5581822 1.5736821</span></span>
-<span><span class="co">#&gt; prop0.6 0.7923347 0.6210234 0.8840708 0.6910445 0.5844207</span></span>
-<span><span class="co">#&gt; prop1   0.2119696 0.2241247 0.2427091 0.2494675 0.2504984</span></span>
+<span><span class="co">#&gt; prop0.5 1.8052834 1.7416591 1.6387404 1.8250094 1.7116141</span></span>
+<span><span class="co">#&gt; prop0.6 0.8147914 0.8111590 0.8399463 0.8272714 0.7914137</span></span>
+<span><span class="co">#&gt; prop1   0.3096542 0.3470304 0.3596674 0.2849770 0.3553154</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.valid.group.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5 0.9028651 0.7961139 0.7710531 0.7887313 0.8056517</span></span>
-<span><span class="co">#&gt; prop0.6 0.6403685 0.3654429 0.4068363 0.4349393 0.6160842</span></span>
-<span><span class="co">#&gt; prop1   0.6419662 0.6668727 0.6936596 0.6092037 0.6000368</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.5 0.9334227 1.0050618 1.2091543 0.9415795 0.9468304</span></span>
+<span><span class="co">#&gt; prop0.6 0.9803391 1.3087144 0.6523681 0.6920507 1.1355205</span></span>
+<span><span class="co">#&gt; prop1   1.0424313 0.9003513 0.6066036 0.7876344 0.8759833</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the mutually exclusive subgroups.
 The previous 2 outputs only focus on binary subgroups (high or low
@@ -1390,10 +1377,10 @@ with the 50% lowest, 10% middle and 40% highest estimated CATE scores
 when <code>higher.y</code> = TRUE (as in this example), or with the 40%
 highest, 10% middle and 50% lowest estimated CATE scores when
 <code>higher.y</code> = FALSE. Taking the first column as an example,
-the first CV iteration calculated 1.499 as the RMTL ratio for the
-subgroup with the 50% lowest estimated CATE scores, 0.792 as the RMTL
+the first CV iteration calculated 1.805 as the RMTL ratio for the
+subgroup with the 50% lowest estimated CATE scores, 0.815 as the RMTL
 ratio for the subgroup with the middle 10% estimated CATE scores, and
-0.212 as the RMTL ratio for the subgroup with the 40% highest estimated
+0.31 as the RMTL ratio for the subgroup with the 40% highest estimated
 CATE scores.</p>
 </div>
 </div>
@@ -1409,7 +1396,9 @@ low-responder subgroups using the random forest method:</p>
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">`errors/warnings`</span><span class="op">$</span><span class="va">randomForest</span><span class="op">$</span><span class="va">est.train.low.cv</span><span class="op">$</span><span class="va">cv1</span></span>
 <span><span class="co">#&gt; NULL</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">`errors/warnings`</span><span class="op">$</span><span class="va">randomForest</span><span class="op">$</span><span class="va">est.valid.low.cv</span><span class="op">$</span><span class="va">cv1</span></span>
-<span><span class="co">#&gt; NULL</span></span></code></pre></div>
+<span><span class="co">#&gt; $warnings</span></span>
+<span><span class="co">#&gt; $warnings$`prop 0.1`</span></span>
+<span><span class="co">#&gt; [1] "Cumulative hazard ratio is undefined because an estimated survival probability is outside (0, 1)."</span></span></code></pre></div>
 <p>For mutually exclusive subgroups, inspect
 <code>output_catecv$`errors/warnings`$randomForest$est.train.group.cv</code>.
 Review any convergence warnings and interpret affected estimates with
@@ -1433,27 +1422,25 @@ diagnostic <span class="citation">(Jiang et al. 2026)</span>.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="va">output_abc</span></span>
-<span><span class="co">#&gt;                     cv1        cv2         cv3        cv4        cv5</span></span>
-<span><span class="co">#&gt; randomForest 0.03287103 0.01887424 0.002458051 0.02759943 0.01929065</span></span>
-<span><span class="co">#&gt; contrastReg  0.04410396 0.03072848 0.003506700 0.03757073 0.01844972</span></span></code></pre></div>
+<span><span class="co">#&gt;                     cv1         cv2        cv3        cv4         cv5</span></span>
+<span><span class="co">#&gt; randomForest 0.02392067 0.009108896 0.03794881 0.02452175 0.009546674</span></span>
+<span><span class="co">#&gt; contrastReg  0.03030992 0.038194989 0.04085908 0.02954575 0.030640717</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
 <code>score.method</code>. For example, random forest in CV iteration 1
-has an ABC of 0.033, in the first CV iteration; compare it with the
+has an ABC of 0.024, in the first CV iteration; compare it with the
 other scoring methods rather than relying on a single split. The user
 can combine the ABC for each method across iterations:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
-<span><span class="co">#&gt;   0.02021868   0.02687192</span></span></code></pre></div>
-<p>In this example, contrast regression has the higher average ABC,
-indicating greater validation-set separation of treatment benefit than
-random forest. This is consistent with the earlier suspicion that the
-wider distribution of random forest scores may partly reflect
-overfitting. However, the ABC comparison alone does not establish
-overfitting; differences in model flexibility or estimation noise may
-also contribute.</p>
+<span><span class="co">#&gt;   0.02100936   0.03391009</span></span></code></pre></div>
+<p>In this example, contrast regression has a higher average ABC than
+random forest, indicating greater validation-set separation of treatment
+benefit. The simulated settings were chosen for illustration, so this
+comparison does not establish that one method will perform better in
+other data.</p>
 </div>
 <div class="section level2">
 <h2 id="assess-responder-discrimination-with-validation-curves">Assess responder discrimination with validation curves<a class="anchor" aria-label="anchor" href="#assess-responder-discrimination-with-validation-curves"></a>
@@ -1489,13 +1476,9 @@ assessment.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="1056"></p>
-<p>The random forest shows stronger subgroup separation in training than
-in validation, consistent with possible overfitting. Its validation
-curve nevertheless rises toward the overall ratio as the selected
-subgroup expands. Contrast regression shows more similar training and
-validation curves, with a lower validation ratio for the selected
-subgroup than for the overall group. Both methods show some validation
-separation in the expected direction, but the plot does not show
+<p>The random forest shows much stronger subgroup separation in training
+than in validation, consistent with possible overfitting. Contrast
+regression also shows separation in validation. The plot does not show
 uncertainty and does not establish that either method will perform well
 in new patients. An independent evaluation is needed before drawing firm
 conclusions.</p>
@@ -1551,7 +1534,11 @@ instead of a summary statistics like mean or median in
 <p>Cumulative hazard ratios can also be shown for the mutually exclusive
 subgroups:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="st">"cumulative_hr"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="st">"cumulative_hr"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Some cumulative hazard ratios are undefined and are omitted from the</span></span>
+<span><span class="co">#&gt; plot.</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 row containing non-finite outside the scale range</span></span>
+<span><span class="co">#&gt; (`stat_boxplot()`).</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/boxplot_cumulative_hazard-1.png" class="r-plt" alt="" width="700"></p>
 <p>The box plots compare estimated RMTL ratios across mutually exclusive
 score-based subgroups for random forest and contrast regression. Read

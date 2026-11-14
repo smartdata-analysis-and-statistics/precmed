@@ -15,7 +15,7 @@
 - **Smart Data Analysis and Statistics B.V.**. Copyright holder.  
   Copyright holder of its contributions after version 1.1.0
 
-- **Thomas Debray**. Author, contributor, maintainer.
+- **Thomas Debray**. Author, maintainer.
   [](https://orcid.org/0000-0002-1790-2719)
 
 - **Stan Wijn**. Contributor. [](https://orcid.org/0000-0003-3782-6677)

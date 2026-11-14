@@ -5,13 +5,17 @@ Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
 interactions with age and previous relapses. Censoring is independent of covariates and
-event times. These data are illustrative and are not clinical estimates."><meta property="og:description" content="Generate fully synthetic data for demonstrating survival treatment-effect
+event times. Default coefficients are chosen to illustrate confounding and
+heterogeneous treatment effects; they are not clinical estimates and do not
+establish the relative performance of methods on other data."><meta property="og:description" content="Generate fully synthetic data for demonstrating survival treatment-effect
 methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
 interactions with age and previous relapses. Censoring is independent of covariates and
-event times. These data are illustrative and are not clinical estimates."><meta property="og:image" content="https://smartdata-analysis-and-statistics.github.io/precmed/logo.png"><script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script></head><body>
+event times. Default coefficients are chosen to illustrate confounding and
+heterogeneous treatment effects; they are not clinical estimates and do not
+establish the relative performance of methods on other data."><meta property="og:image" content="https://smartdata-analysis-and-statistics.github.io/precmed/logo.png"><script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 <div class="container sdas-header">
@@ -62,7 +66,9 @@ Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
 interactions with age and previous relapses. Censoring is independent of covariates and
-event times. These data are illustrative and are not clinical estimates.</p>
+event times. Default coefficients are chosen to illustrate confounding and
+heterogeneous treatment effects; they are not clinical estimates and do not
+establish the relative performance of methods on other data.</p>
     </div>
 
     <div class="section level2">
@@ -70,10 +76,10 @@ event times. These data are illustrative and are not clinical estimates.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_survival</span><span class="op">(</span></span>
 <span>  n <span class="op">=</span> <span class="fl">4000L</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">20261114L</span>,</span>
-<span>  ps_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0.11</span>, age <span class="op">=</span> <span class="fl">0.25</span>, drugB <span class="op">=</span> <span class="fl">0.25</span>, drugC <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  lp_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, age <span class="op">=</span> <span class="fl">0.2</span>, female <span class="op">=</span> <span class="fl">0.12</span>, previous_cost <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  ps_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0.11</span>, age <span class="op">=</span> <span class="fl">1.15</span>, drugB <span class="op">=</span> <span class="fl">0.25</span>, drugC <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
+<span>  lp_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, age <span class="op">=</span> <span class="fl">0.45</span>, female <span class="op">=</span> <span class="fl">0.12</span>, previous_cost <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>    previous_number_relapses <span class="op">=</span> <span class="fl">0.16</span>, treatment_age <span class="op">=</span> <span class="op">-</span><span class="fl">0.28</span>, treatment_relapses <span class="op">=</span> <span class="op">-</span><span class="fl">0.16</span><span class="op">)</span>,</span>
-<span>  conditional_hr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.35</span><span class="op">)</span></span>
+<span>  conditional_hr <span class="op">=</span> <span class="fl">0.9</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -143,13 +149,13 @@ where <code>age_in_years</code> is the uncentered age.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">toy</span><span class="op">$</span><span class="va">trt</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> drug0 drug1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    88   112 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    85   115 </span>
 <span class="r-in"><span><span class="va">toy_unequal</span> <span class="op">&lt;-</span> <span class="fu">simulate_survival</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  ps_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span>, conditional_hr <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">toy_unequal</span><span class="op">$</span><span class="va">trt</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> drug0 drug1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   143    57 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   145    55 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -4,6 +4,12 @@
 
 ### Major changes
 
+- Updated the default
+  [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
+  coefficients to illustrate confounding and heterogeneous treatment
+  effects. Simulated results for a given seed will differ from earlier
+  development versions.
+
 - Added the population-level `log.cumulative.hazard.ratio` at `tau0` to
   survival
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
