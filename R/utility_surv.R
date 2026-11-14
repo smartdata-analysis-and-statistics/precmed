@@ -13,7 +13,7 @@
 #'
 #' @return The estimated RMST for new subjects with covariates \code{xnew}; vector of size \code{m}.
 #'
-cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R")) {
+cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_survival = FALSE) {
   solver <- match.arg(solver)
   xnew <- as.matrix(xnew)
   x <- as.matrix(x.cate)
@@ -44,6 +44,10 @@ cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R")) {
     coxest <- colSums(t(cbind(1, surv)) * gap)
   }
 
+  if (return_survival) {
+    survival_at_tau <- if (length(surv0)) tail(surv0, 1)^hr else rep(1, n)
+    return(list(rmst = coxest, survival = survival_at_tau))
+  }
   return(coxest)
 }
 

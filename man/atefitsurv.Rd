@@ -104,8 +104,11 @@ Return an object of class \code{atefit} with 6 elements:
   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
   interval, and the p-value.
+  \item{\code{log.cumulative.hazard.ratio}: } The log ratio of marginal cumulative hazards at
+  \code{tau0}, estimated from AIPW treatment-specific survival probabilities, with bootstrap inference.
+  Undefined estimates or bootstrap replicates yield unavailable inference.
   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-  \code{log.rmtl.ratio} and \code{log.hazard.ratio} in each bootstrap sample.
+  \code{log.rmtl.ratio}, \code{log.hazard.ratio}, and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
   the interpretation of the remaining of the output.

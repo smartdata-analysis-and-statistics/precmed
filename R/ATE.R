@@ -188,9 +188,12 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
     est.df <- est.df %>% add_row(key = "log.rmtl.ratio", value = x$log.rmtl.ratio$estimate)
     est.df <- est.df %>% add_row(key = "log.hazard.ratio", value = x$log.hazard.ratio$estimate)
 
+    if (!is.null(x$log.cumulative.hazard.ratio))
+      est.df <- est.df %>% add_row(key = "log.cumulative.hazard.ratio", value = x$log.cumulative.hazard.ratio$estimate)
+
     x$trt.boot %>% as.data.frame() %>%
       gather(key = "key", value = "value") %>% na.omit() %>%
-      mutate(key = factor(.data$key, levels = c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio"))) %>%
+      mutate(key = factor(.data$key, levels = est.df$key)) %>%
       ggplot(aes(x = .data$value)) + geom_histogram(bins = bins, alpha = alpha) +
       facet_wrap(. ~ .data$key, scales = "free") +
       geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "red") +
@@ -225,7 +228,9 @@ print.atefit <- function(x, ...) {
   }
   if (x$response == "survival") {
     cat(paste0("Average treatment effect:\n\n"))
-    print(rbind(x$log.rmtl.ratio,x$log.hazard.ratio))
+    effects <- rbind(x$log.rmtl.ratio, x$log.hazard.ratio)
+    if (!is.null(x$log.cumulative.hazard.ratio)) effects <- rbind(effects, x$log.cumulative.hazard.ratio)
+    print(effects)
     cat(paste0("\nEstimated RMST:\n\n"))
     print(rbind(x$rmst1,x$rmst0))
   }

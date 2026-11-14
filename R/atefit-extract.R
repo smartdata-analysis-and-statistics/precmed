@@ -2,7 +2,7 @@
 #'
 #' Extract treatment effects from an \code{atefit} object on their native
 #' estimation scale: the log rate ratio for count outcomes, or the log RMTL
-#' ratio and log hazard ratio for survival outcomes. Exponentiate the returned
+#' ratio, conditional log hazard ratio, and log cumulative hazard ratio for survival outcomes. Exponentiate the returned
 #' estimates and interval limits to obtain ratios.
 #'
 #' @param object An object of class \code{atefit}.
@@ -28,7 +28,8 @@ NULL
 atefit_effect_terms <- function(object) {
   switch(object$response,
          count = "log.rate.ratio",
-         survival = c("log.rmtl.ratio", "log.hazard.ratio"),
+         survival = c("log.rmtl.ratio", "log.hazard.ratio",
+                      if (!is.null(object$log.cumulative.hazard.ratio)) "log.cumulative.hazard.ratio"),
          stop("Unsupported response in atefit object."))
 }
 

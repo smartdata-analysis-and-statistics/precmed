@@ -2,6 +2,14 @@
 
 ## Major changes
 
+* Added a population-level cumulative hazard ratio at `tau0` to survival
+  `atefit()` output. It uses the same outcome, propensity-score and censoring
+  models as the RMST analysis, with bootstrap inference. The new
+  `log.cumulative.hazard.ratio` is distinct from the existing conditional Cox
+  `log.hazard.ratio` and is included in printing, plotting, `coef()` and
+  `confint()`. Inference is unavailable if the estimate or any bootstrap
+  replicate is undefined.
+
 * Replaced the `gbm` dependency with `gbm3` for boosting models across count,
   survival, and internal continuous-outcome methods. Existing tuning argument
   names and the learning rate of 0.1 are preserved, rather than adopting the

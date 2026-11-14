@@ -58,7 +58,7 @@ library(ggplot2)
 
 ## Example data
 
-To show the functionalities of the `precmed` package for survival outcomes we first need data. For our examples we use simulated data that is located in the `survivalExample` data set. The data set `survivalExample` was simulated based on real-world claims data in multiple sclerosis and has 4,000 observations and 9 variables. 
+For these survival examples, we use the simulated dataset `survivalExample`, based on real-world claims data in multiple sclerosis. It contains 4,000 observations and 9 variables: six baseline characteristics, one treatment variable, and two survival outcome variables. The table below summarizes the baseline characteristics by treatment group.
 
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 data(survivalExample)
@@ -69,11 +69,11 @@ survivalExample$female <- factor(survivalExample$female, levels = c(0, 1), label
 library(tableone)
 
 ## Vector of variables to summarize
-myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses", "y", "d")
+myVars <- c("age", "female", "previous_treatment", "previous_cost", "previous_number_symptoms", "previous_number_relapses")
 ## Vector of categorical variables that need transformation
-catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses", "d")
+catVars <- c("female", "previous_treatment", "previous_number_symptoms", "previous_number_relapses")
 t.table1 <- print(CreateTableOne(vars = myVars, factorVars = catVars, strata = "trt", data = survivalExample, addOverall = T, test = F), showAllLevels = TRUE, contDigits = 1)
-row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", "", "Previous treatment (%)", "", "", "Previous medical cost ($) (mean (SD))", "Previous number of symptoms (%)", "", "", "Previous number of relapses (%)", rep("", 5), "Days until the first relapse (mean(SD))", "Event indicator (0: censoring, 1: relapse) (%)", "") 
+row.names(t.table1) <- c("Number of patients", "Age (mean (SD))", "Gender (%)", "", "Previous treatment (%)", "", "", "Previous medical cost ($) (mean (SD))", "Previous number of symptoms (%)", "", "", "Previous number of relapses (%)", rep("", 5))
 
 
 ```
@@ -91,7 +91,7 @@ knitr::kable(display.table, format = "html", escape = FALSE)
 
 --- 
 
-Most variables are baseline patient characteristics like age, gender, and previous treatment. 
+The treatment and survival outcome variables have distinct roles:
 
 * We will use `y` as the survival outcome, which is the number of days until the first relapse or censoring, whichever comes first.
 
@@ -135,34 +135,21 @@ plot(ph_unadjusted, var = "trt", hr = TRUE, resid = FALSE,
 abline(h = exp(coef(output_cox)[1]), lty = 3, col = "steelblue")
 ```
 
-The dotted line is the constant HR from the Cox model. The smooth curve suggests how the treatment association may vary over time; it is a diagnostic rather than a precise estimate at every time point. The treatment test p-value is `r signif(ph_unadjusted$table["trt", "p"], 2)`; later follow-up may be less informative when fewer patients remain at risk.
+The dotted line is the constant HR from the Cox model. The smooth curve suggests how the treatment association may vary over time; it is a diagnostic rather than a precise estimate at every time point. The treatment test gives p `r if (ph_unadjusted$table["trt", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_unadjusted$table["trt", "p"]))`, suggesting that the treatment HR varies over time. Later follow-up is less informative when fewer patients remain at risk, as reflected in the wider uncertainty bands.
 
 ### Covariate-adjusted treatment comparison
 
-Next, we adjust for age, sex, previous medical cost and previous relapses. We first choose an illustrative horizon: the smaller 95th percentile of observed follow-up in the two treatment groups.
-
-```{r define_tau0, eval = T, echo = T}
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-tau0
-```
-
-The horizon is approximately `r round(tau0, 1)` days. It defines the period over which we will compare restricted mean outcomes. This choice uses observed times, including censoring, and does not guarantee sufficient follow-up; inspect numbers at risk and censoring near the horizon in both groups and choose a clinically meaningful horizon with adequate support.
-
-For comparison with the adjusted HR later returned by `atefit()`, we censor follow-up at `tau0` and fit the same covariate-adjusted Cox model:
+Next, we adjust for age, sex, previous medical cost and previous relapses using a Cox model:
 
 ```{r adjusted_cox, eval = T, echo = T}
-cox_data <- survivalExample
-cox_data$time_tau <- pmin(cox_data$y, tau0)
-cox_data$event_tau <- cox_data$d * (cox_data$y <= tau0)
 output_cox_adjusted <- coxph(
-  Surv(time_tau, event_tau) ~ trt + age + female + previous_cost + previous_number_relapses,
-  data = cox_data
+  Surv(y, d) ~ trt + age + female + previous_cost + previous_number_relapses,
+  data = survivalExample
 )
 summary(output_cox_adjusted)
 ```
 
-The adjusted HR is `r round(exp(coef(output_cox_adjusted)["trtdrug1"]), 2)`, compared with `r round(exp(coef(output_cox)[1]), 2)` in the unadjusted model. These models differ in both covariate adjustment and follow-up horizon. Age differs substantially between groups and has limited overlap, so the adjusted comparison relies heavily on the model. An adjusted HR is conditional on the included covariates and is not automatically a causal average treatment effect.
+The adjusted HR is `r round(exp(coef(output_cox_adjusted)["trtdrug1"]), 2)`, compared with `r round(exp(coef(output_cox)[1]), 2)` in the unadjusted model. Age differs substantially between groups and has limited overlap, so the adjusted comparison relies heavily on the model. An adjusted HR is conditional on the included covariates and is not automatically a causal average treatment effect.
 
 ```{r ph_adjusted, fig.width = 7, fig.height = 4.5}
 ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
@@ -173,13 +160,29 @@ plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
 abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
 ```
 
-The adjusted treatment test p-value is `r signif(ph_adjusted$table["trt", "p"], 2)` and the global test p-value is `r signif(ph_adjusted$table["GLOBAL", "p"], 2)`. A large treatment p-value does not prove proportional hazards, and the global test also assesses the other covariates. The two plots use different models and follow-up periods, so differences between them cannot be attributed solely to adjustment.
+The adjusted treatment test gives p `r if (ph_adjusted$table["trt", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_adjusted$table["trt", "p"]))` and the global test gives p `r if (ph_adjusted$table["GLOBAL", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_adjusted$table["GLOBAL", "p"]))`. A large treatment p-value does not prove proportional hazards, and the global test also assesses the other covariates. The two plots describe the unadjusted and covariate-adjusted models, respectively.
 
-### Estimate the average treatment effect with `atefit()`
+### Population-level treatment comparison over a fixed horizon
 
-An alternative summary is the restricted mean survival time (RMST), the average event-free time up to `tau0`. Restricted mean time lost (RMTL) is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time lost under drug 0 over that horizon; for relapse, a ratio below 1 favors drug 1. Unlike a single Cox HR, this measure does not require the treatment HR to be constant over time. Results depend on the chosen horizon. Chapter 20 discusses RMTL for ratio-based treatment effects [@jiang2026visualization].
+The unadjusted Cox model compares treatment groups without accounting for differences in their characteristics. The adjusted Cox model accounts for the selected covariates, but its HR is conditional on those covariates and summarizes the treatment association using a single HR. The diagnostics suggest that this association may vary over time, and estimates become less informative later in follow-up. Neither comparison directly describes the average time patients remain relapse-free under each treatment.
 
-The `atefit()` function estimates the population-level RMTL ratio and also reports the adjusted Cox HR. The RMTL estimator is doubly robust with respect to the propensity score (PS) and outcome models: under the required assumptions, either model may be correctly specified. It also depends on inverse probability of censoring weights (IPCW) and a correctly specified censoring model. The function provides standard errors, confidence intervals and p-values based on bootstrap. If an out-of-range RMST estimate is replaced by an outcome-model estimate, that fallback does not retain the doubly robust guarantee.
+We now use `atefit()` to estimate population-level outcomes over a specified follow-up horizon. For restricted mean survival time (RMST) and restricted mean time lost (RMTL), it combines outcome and propensity score models with an adjustment for censoring to estimate population-level outcomes under each treatment. These measures summarize time over the chosen period without requiring a constant treatment HR. Under appropriate assumptions, the population-level comparison can be interpreted as a causal treatment effect. `atefit()` also estimates a population-level cumulative hazard ratio at the horizon and reports a separate covariate-adjusted Cox HR. It uses bootstrap resampling to estimate uncertainty for all reported measures.
+
+RMST is the average event-free time up to a chosen horizon, `tau0`; RMTL is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time lost under drug 0 over that horizon; for relapse, a ratio below 1 favors drug 1. Its interpretation depends on the horizon. Chapter 20 discusses RMTL for ratio-based treatment effects [@jiang2026visualization].
+
+The cumulative hazard ratio compares the cumulative hazards, $-\log(S(tau0))$, under the two treatments. `atefit()` estimates the treatment-specific survival probabilities using outcome, propensity score and censoring models. The calculation reuses the treatment-specific Cox outcome fits, propensity scores and censoring model used for RMST. This ratio is distinct from an instantaneous HR. If either estimated survival probability is outside the interval (0, 1), the ratio is undefined; bootstrap inference is also unavailable if any replicate is undefined. The separate covariate-adjusted Cox HR censors follow-up at `tau0` and does not use the propensity-score or censoring models.
+
+For this example, we choose an illustrative horizon of roughly 500 days: the smaller 95th percentile of observed follow-up in the two treatment groups.
+
+```{r define_tau0, eval = T, echo = T}
+tau0 <- with(survivalExample,
+             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+tau0
+```
+
+The horizon is approximately `r round(tau0, 1)` days. It defines the period over which we will compare restricted mean outcomes. This choice is not derived from the proportional-hazards diagnostics and does not establish that the HR is constant before the horizon. It uses observed times, including censoring, and does not guarantee sufficient follow-up; inspect numbers at risk and censoring near the horizon in both groups and choose a clinically meaningful horizon with adequate support.
+
+The RMTL estimator is doubly robust with respect to the propensity score (PS) and outcome models: under the required assumptions, either model may be correctly specified. It also depends on inverse probability of censoring weights (IPCW) and a correctly specified censoring model. The function provides standard errors, confidence intervals and p-values based on bootstrap. If an out-of-range RMST estimate is replaced by an outcome-model estimate, that fallback does not retain the doubly robust guarantee.
 
 IPCW adjusts for censoring by weighting patients according to their estimated probability of remaining uncensored. Causal interpretation requires assumptions including no unmeasured treatment confounding, adequate treatment overlap, appropriate censoring assumptions and sufficient follow-up. Chapter 17 discusses identification of treatment effects in non-randomized data [@hoogland2026introduction]. The Cox hazard ratio and the RMTL ratio describe different aspects of survival and should be interpreted separately.
 
@@ -194,7 +197,7 @@ The mandatory arguments for `atefit()` are:
 * The `ps.model` argument specifies the PS model as a formula, with the treatment variable `trt` on the left-hand side and the
     covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, "1" for active treatment and "0" for control or comparator. If it is not the case, `atefit()` will stop with error if `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and a warning message was left to the user (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt \~ 1. The PS model is used in the doubly robust RMTL estimation.
 
-* `tau0`: The horizon for RMST and RMTL. We reuse the value calculated above.
+We also specify the optional argument `tau0`, the horizon for RMST and RMTL, using the value calculated above.
 
 Now estimate the ATE using an outcome model with age, sex, previous cost and previous relapses, and a PS model with `age` and `previous_treatment`.
 
@@ -212,7 +215,7 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 ```
 
-The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95% confidence interval, and the p-value ("pvalue") for 4 estimands:
+The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95% confidence interval, and the p-value ("pvalue") for 5 estimands:
 
 * the restricted mean survival time under drug 1 (`$rmst1`)
 
@@ -220,9 +223,11 @@ The output of `atefit()` shows the point estimate, standard error ("SE"), lower 
 
 * the log RMTL ratio (`$log.rmtl.ratio`), which is the log of the ratio of `tau0` - `$rmst1` divided by `tau0` - `$rmst0`
 
-* the log HR (`$log.hazard.ratio`).
+* the log HR (`$log.hazard.ratio`)
 
-The log HR comes from a Cox model adjusted for the variables in `cate.model`, with follow-up censored at `tau0`. Exponentiating it gives the adjusted HR: `r round(exp(output_atefit$log.hazard.ratio$estimate), 2)`. This differs from the unadjusted HR above. In these simulated data, age differs substantially between treatment groups, and the groups have limited overlap in age; consequently, the adjusted comparison relies heavily on the model. The Cox HR is not the doubly robust RMTL estimate and should be interpreted separately.
+* the log population-level cumulative hazard ratio at `tau0` (`$log.cumulative.hazard.ratio`).
+
+The log HR comes from a Cox model adjusted for the variables in `cate.model`, with follow-up censored at `tau0`. Exponentiating it gives the adjusted HR: `r round(exp(output_atefit$log.hazard.ratio$estimate), 2)`. Because follow-up is censored at `tau0`, this may differ from the adjusted Cox HR above, which uses all available follow-up. In these simulated data, age differs substantially between treatment groups, and the groups have limited overlap in age; consequently, the adjusted comparison relies heavily on the model. The Cox HR is not the doubly robust RMTL estimate and should be interpreted separately.
 
 For example, the log RMTL ratio of `r round(output_atefit$log.rmtl.ratio$estimate, 2)` and the 95% confidence interval of (`r round(output_atefit$log.rmtl.ratio$CI.lower, 2)`, `r round(output_atefit$log.rmtl.ratio$CI.upper, 2)`) are displayed in the output. The estimated ratio and its interval can be obtained by exponentiating these log-scale values. A ratio above 1 indicates more time lost before `tau0` under drug 1; the interval describes uncertainty in that comparison. The RMST estimates provide the corresponding event-free times up to `tau0`. 
 
@@ -232,14 +237,14 @@ The output of `atefit()` is expressed in terms of treatment 0 vs 1, where the RM
 output_atefit$warning
 ```
 
-Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for 4 estimands (`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.hazard.ratio`). A red vertical line is added to each histogram with the mean of the bootstrap estimates.
+Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for 5 estimands (`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.hazard.ratio`, `log.cumulative.hazard.ratio`). A red vertical line marks the estimate from the original sample.
 
 
 ```{r, echo = F}
 knitr::include_graphics("atefit_bootstrap.png")
 ```
    
-Histograms of bootstrap estimators for 4 estimands after 500 bootstrap
+Histograms of bootstrap estimators for 5 estimands after 500 bootstrap
 
 
 ## Estimate CATE scores

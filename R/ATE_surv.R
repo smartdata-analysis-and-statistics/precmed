@@ -58,8 +58,11 @@
 #'   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
 #'   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
 #'   interval, and the p-value.
+#'   \item{\code{log.cumulative.hazard.ratio}: } The log ratio of marginal cumulative hazards at
+#'   \code{tau0}, estimated from AIPW treatment-specific survival probabilities, with bootstrap inference.
+#'   Undefined estimates or bootstrap replicates yield unavailable inference.
 #'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-#'   \code{log.rmtl.ratio} and \code{log.hazard.ratio} in each bootstrap sample.
+#'   \code{log.rmtl.ratio}, \code{log.hazard.ratio}, and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
 #'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
 #'   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
 #'   the interpretation of the remaining of the output.
@@ -165,14 +168,14 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
+                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE)
 
   est <- unlist(est)
 
   # Apply bootstrap
   n <- length(y)
   save.boot <- matrix(NA, nrow = n.boot, ncol = length(est))
-  colnames(save.boot) <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio")
+  colnames(save.boot) <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio", "log.cumulative.hazard.ratio")
 
   pb   <- txtProgressBar(min = 1,
                          max = n.boot,
@@ -189,7 +192,7 @@ atefitsurv <- function(data,
                        x.ipcw = x.ipcw[idsub.boot, ],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control),
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE),
       rmst_fallback = function(w) {
         fallback.in.sample <<- TRUE
         invokeRestart("muffleWarning")
@@ -204,6 +207,11 @@ atefitsurv <- function(data,
   if (fallback.boot > 0L) warning("RMST outcome-model fallback occurred in ",
                                   fallback.boot, " bootstrap sample(s); bootstrap inference includes these estimates.", call. = FALSE)
 
+  invalid.chr <- sum(!is.finite(save.boot[, "log.cumulative.hazard.ratio"]))
+  if (!is.finite(est["log.cumulative.hazard.ratio"]) || invalid.chr > 0L) {
+    warning("The cumulative hazard ratio is undefined for the original sample or ",
+            invalid.chr, " bootstrap sample(s); its bootstrap inference is unavailable.", call. = FALSE)
+  }
   se.est <- apply(save.boot, 2, sd)
   cil.est <- est - qnorm(0.975) * se.est
   ciu.est <- est + qnorm(0.975) * se.est
@@ -221,6 +229,7 @@ atefitsurv <- function(data,
   out$rmst0 <- data.frame(est.all[2, ])
   out$log.rmtl.ratio <- data.frame(est.all[3, ])
   out$log.hazard.ratio <- data.frame(est.all[4, ])
+  out$log.cumulative.hazard.ratio <- data.frame(est.all[5, ])
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
   out$warning <- preproc$warning
@@ -278,7 +287,7 @@ atefitsurv <- function(data,
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list()) {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE) {
   ps.args <- resolve_ps_control(ps.control)
 
   rmst.args <- resolve_rmst_control(rmst.control)
@@ -304,9 +313,16 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   weightc <- dnew / surv.new
   weightc <- weightc / mean(weightc)
 
-  coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver)
+  coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
 
-  coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver)
+  coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
+
+  if (cumulative.hr) {
+    survival1 <- coxest1$survival
+    survival0 <- coxest0$survival
+    coxest1 <- coxest1$rmst
+    coxest0 <- coxest0$rmst
+  }
 
   rmst1 <- mean((ynew - coxest1) * weightc * trt / ps) / mean(trt / ps) + mean(coxest1)
   rmst0 <- mean((ynew - coxest0) * weightc * (1 - trt) / (1 - ps)) / mean((1 - trt) / (1 - ps)) + mean(coxest0)
@@ -317,7 +333,22 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   delta.rmtl <- log((tau0 - rmst1) / (tau0 - rmst0))
   delta.hr <- as.vector(fit$coef[1])
 
-  return(list(rmst1 = rmst1, rmst0 = rmst0, log.rmtl.ratio = delta.rmtl, log.hazard.ratio = delta.hr))
+  result <- list(rmst1 = rmst1, rmst0 = rmst0, log.rmtl.ratio = delta.rmtl, log.hazard.ratio = delta.hr)
+  if (cumulative.hr) {
+    result$log.cumulative.hazard.ratio <- aipw_log_cumulative_hr(y, d, trt, survival0, survival1, ps, surv.new, tau0)
+  }
+  result
+}
+
+# AIPW survival probabilities at the horizon, using the existing censoring model.
+# Undefined probabilities are returned as NA rather than clipped into range.
+aipw_log_cumulative_hr <- function(y, d, trt, q0, q1, ps, censor_survival, tau0) {
+  alive <- as.numeric(y > tau0 | (y == tau0 & d == 0))
+  observed <- alive / censor_survival
+  s0 <- mean(q0 + (1 - trt) / (1 - ps) * (observed - q0))
+  s1 <- mean(q1 + trt / ps * (observed - q1))
+  if (!is.finite(s0) || !is.finite(s1) || s0 <= 0 || s0 >= 1 || s1 <= 0 || s1 >= 1) return(NA_real_)
+  log(-log(s1)) - log(-log(s0))
 }
 
 rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
