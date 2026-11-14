@@ -302,6 +302,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <li><p><code>ate.contrastReg</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
  Only provided if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
+<li><p><code>chr.&lt;method&gt;</code>:  Subgroup marginal cumulative hazard ratios at <code>tau0</code>, one for each selected scoring method and cutoff. Undefined estimates are <code>NA</code>; <code>hr.*</code> results are conditional Cox HRs.</p></li>
 <li><p><code>hr.randomForest</code>: A vector of numerical values of length <code>prop.cutoff</code>
  containing the adjusted hazard ratio in nested subgroups (defined by <code>prop.cutoff</code>)
  constructed based on the estimated CATE scores with random forest method.

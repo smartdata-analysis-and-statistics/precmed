@@ -143,12 +143,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 10.47 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 13.12 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1        cv2       cv3        cv4        cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1077156 0.05798617 0.1438656 0.07116735 0.09323406</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              cv1        cv2       cv3       cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.126212 0.07270858 0.1768953 0.1317144 0.0893497</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -162,12 +162,15 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                  cv.n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No value supplied for tau0. Default sets tau0 to the maximum survival time.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1857981 0.1534831 0.2006289 0.1954429 0.1698658</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1841175 0.1506194 0.1961406 0.1901578 0.1606378</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1626641 0.2017690 0.1974538 0.1746788 0.1879429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1572664 0.1966721 0.1976005 0.1733730 0.1863366</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

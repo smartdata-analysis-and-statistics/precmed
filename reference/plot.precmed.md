@@ -29,6 +29,8 @@ plot(
   xlim = NULL,
   title = waiver(),
   theme = theme_classic(),
+  hazard.type = c("cumulative", "conditional"),
+  measure = "rmtl",
   ...
 )
 ```
@@ -72,12 +74,26 @@ plot(
   curves in both the training and validation sets are plotted
   side-by-side (`FALSE`). Default is `FALSE`.
 
+- measure:
+
+  For survival outcomes, select `"rmtl"` (default), `"cumulative_hr"`
+  (cumulative hazard ratio), or `"conditional_hr"` (conditional Cox
+  hazard ratio fitted through `tau0`). Earlier measure names remain
+  supported as aliases. Supply a vector to display multiple measures in
+  separate panels.
+
 - plot.hr:
 
-  A logical value indicating whether the hazard ratios should be plotted
-  in the validation curves (`TRUE`). Otherwise, the restricted mean time
-  lost is plotted (`FALSE`). This argument is only applicable to
-  survival outcomes. Default is `FALSE`.
+  Deprecated; use `measure` instead. Whether to plot a hazard-based
+  ratio for survival outcomes instead of the RMTL ratio. The default
+  hazard-based measure is the marginal cumulative hazard ratio.
+
+- hazard.type:
+
+  Deprecated; use `measure` instead. Choose `"cumulative"` (default) or
+  `"conditional"` for the supplementary Cox HR when `plot.hr = TRUE`.
+  Older objects without cumulative ratios must be refitted or plotted
+  with `hazard.type = "conditional"`.
 
 - ylab:
 
@@ -220,8 +236,8 @@ plot(eval_2)
 
 
 # plot hazard ratio
-plot(eval_2, plot.hr = TRUE)
-#> Warning: ABC will not be shown in hazard ratio plot.
+plot(eval_2, measure = "cumulative_hr")
+#> Warning: Some subgroup cumulative hazard ratios are undefined; summaries use available folds.
 
 
 # }

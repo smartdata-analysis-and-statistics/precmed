@@ -67,7 +67,8 @@
 <span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
-<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  context <span class="op">=</span> <span class="st">"Count"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -137,6 +138,10 @@ Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code
 Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
+
+
+<dt id="arg-context">context<a class="anchor" aria-label="anchor" href="#arg-context"></a></dt>
+<dd><p>Label used to identify the analysis in subgroup warnings.</p></dd>
 
 </dl></div>
     <div class="section level2">

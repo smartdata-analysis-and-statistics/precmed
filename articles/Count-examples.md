@@ -307,7 +307,7 @@ output_catefit <- catefit(
 #> Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 3.886415 secs
+#> Time difference of 5.083662 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -591,37 +591,37 @@ output_catecv <- catecv(
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:47:26 2026 
+#>    Sat Nov 14 18:17:36 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:47:29 2026 
+#>    Sat Nov 14 18:17:40 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:47:33 2026 
+#>    Sat Nov 14 18:17:46 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:47:37 2026 
+#>    Sat Nov 14 18:17:52 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:47:42 2026 
+#>    Sat Nov 14 18:17:59 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 21.71 secs
+#> Total runtime : 29.74 secs
 ```
 
 ### Inspect validation results

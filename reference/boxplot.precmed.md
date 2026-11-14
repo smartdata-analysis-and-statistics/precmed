@@ -26,6 +26,8 @@ boxplot(
   plot.hr = FALSE,
   title = waiver(),
   theme = theme_classic(),
+  hazard.type = c("cumulative", "conditional"),
+  measure = "rmtl",
   ...
 )
 ```
@@ -42,12 +44,25 @@ boxplot(
   Default is `NULL`, which creates a default y-axis label based on
   available data.
 
+- measure:
+
+  For survival outcomes, select `"rmtl"` (default), `"cumulative_hr"`
+  (cumulative hazard ratio), or `"conditional_hr"` (conditional Cox
+  hazard ratio fitted through `tau0`). Earlier measure names remain
+  supported as aliases.
+
 - plot.hr:
 
-  A logical value indicating whether the hazard ratios should be plotted
-  in the validation curves (`TRUE`). Otherwise, the restricted mean time
-  lost is plotted (`FALSE`). This argument is only applicable to
-  survival outcomes. Default is `FALSE`.
+  Deprecated; use `measure` instead. Whether to plot a hazard-based
+  ratio for survival outcomes instead of the RMTL ratio. The default
+  hazard-based measure is the marginal cumulative hazard ratio.
+
+- hazard.type:
+
+  Deprecated; use `measure` instead. Choose `"cumulative"` (default) or
+  `"conditional"` for the supplementary Cox HR when `plot.hr = TRUE`.
+  Older objects without cumulative ratios must be refitted or plotted
+  with `hazard.type = "conditional"`.
 
 - title:
 

@@ -153,19 +153,17 @@ Return an object of class `atefit` with 6 elements:
   ratio of `trt=1` over `trt=0`, bootstrap standard error, lower and
   upper limits of 95% confidence interval, and the p-value.
 
-- `log.hazard.ratio`: A vector of numeric values of the estimated
-  adjusted log hazard ratio of `trt=1` over `trt=0`, bootstrap standard
-  error, lower and upper limits of 95% confidence interval, and the
-  p-value.
-
 - `log.cumulative.hazard.ratio`: The log ratio of marginal cumulative
-  hazards at `tau0`, estimated from AIPW treatment-specific survival
-  probabilities, with bootstrap inference. Undefined estimates or
-  bootstrap replicates yield unavailable inference.
+  hazards at `tau0`, estimated from augmented inverse probability of
+  treatment weighted (AIPTW) survival probabilities, with bootstrap
+  inference. Event times are not discretized. The estimator requires
+  appropriate censoring assumptions and a correctly specified censoring
+  model; its treatment-model double robustness does not protect against
+  censoring-model misspecification. Undefined estimates or bootstrap
+  replicates yield unavailable inference.
 
-- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio`,
-  `log.hazard.ratio`, and `log.cumulative.hazard.ratio` in each
-  bootstrap sample.
+- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio` and
+  `log.cumulative.hazard.ratio` in each bootstrap sample.
 
 - `warning`: A warning message produced if the treatment variable was
   not coded as 0/1. The key to map the original coding of the variable
@@ -180,14 +178,14 @@ is estimated with a doubly robust estimator that accounts for imbalances
 in covariate distributions between the two treatment groups with inverse
 probability treatment and censoring weighting. For survival outcomes,
 the estimated ATE is the estimated by RMTL ratio between treatment 1
-versus treatment 0. The log-transformed ATEs and log-transformed
-adjusted hazard ratios are returned, as well as the estimated RMST in
-either treatment group. The variability of the estimated RMTL ratio is
-calculated using bootstrap. Additional outputs include standard error of
-the log RMTL ratio, 95% confidence interval, p-value, and a histogram of
-the bootstrap estimates. If a doubly robust RMST estimate falls outside
-\[0, tau0\], the corresponding outcome-model estimate is substituted and
-a warning is issued. That fallback does not retain the doubly robust
+versus treatment 0. The log-transformed RMTL and cumulative hazard
+ratios are returned, as well as the estimated RMST in either treatment
+group. The variability of the estimated RMTL ratio is calculated using
+bootstrap. Additional outputs include standard error of the log RMTL
+ratio, 95% confidence interval, p-value, and a histogram of the
+bootstrap estimates. If a doubly robust RMST estimate falls outside \[0,
+tau0\], the corresponding outcome-model estimate is substituted and a
+warning is issued. That fallback does not retain the doubly robust
 guarantee.
 
 ## Examples
@@ -213,11 +211,9 @@ output
 #> 
 #>                               estimate         SE     CI.lower  CI.upper
 #> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.1330012
-#> log.hazard.ratio            3.39742723 0.29245335  2.824229195 3.9706253
 #> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.2302107
 #>                                 pvalue
 #> log.rmtl.ratio              0.02867542
-#> log.hazard.ratio            0.00000000
 #> log.cumulative.hazard.ratio 0.79471688
 #> 
 #> Estimated RMST:

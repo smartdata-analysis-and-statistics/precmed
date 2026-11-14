@@ -77,7 +77,8 @@ Scores are adjusted to the opposite sign if <code>higher.y</code> == FALSE; scor
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  cumulative.hr <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -178,6 +179,10 @@ Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code
 Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
+
+
+<dt id="arg-cumulative-hr">cumulative.hr<a class="anchor" aria-label="anchor" href="#arg-cumulative-hr"></a></dt>
+<dd><p>Whether to calculate subgroup cumulative hazard ratios.</p></dd>
 
 </dl></div>
     <div class="section level2">

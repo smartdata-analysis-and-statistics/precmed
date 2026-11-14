@@ -278,6 +278,10 @@ components:
   subgroups based the estimated CATE scores with contrast regression.
   Only provided if `score.method` includes `'contrastReg'`.
 
+- `chr.<method>`: Subgroup marginal cumulative hazard ratios at `tau0`,
+  one for each selected scoring method and cutoff. Undefined estimates
+  are `NA`; `hr.*` results are conditional Cox HRs.
+
 - `hr.randomForest`: A vector of numerical values of length
   `prop.cutoff` containing the adjusted hazard ratio in nested subgroups
   (defined by `prop.cutoff`) constructed based on the estimated CATE

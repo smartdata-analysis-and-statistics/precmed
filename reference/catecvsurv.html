@@ -372,6 +372,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
     The ith element indicates whether the algorithm converged in the ith cross-validation
     iteration.</p></li>
 </ul></li>
+<li><p><code>chr.&lt;method&gt;</code>:  Subgroup marginal cumulative hazard ratios at <code>tau0</code>, in training and validation matrices for high, low and disjoint groups. The corresponding overall estimates are <code>overall.chr.train</code> and <code>overall.chr.valid</code>. Undefined estimates are <code>NA</code>; <code>hr.*</code> results are conditional Cox HRs.</p></li>
 <li><p><code>hr.randomForest</code>: A list of adjusted hazard ratio if <code>score.method</code> includes
  <code>'randomForest'</code>:</p><ul><li><p><code>hr.est.train.high.cv</code>: A matrix of numerical values with
     <code>length(prop.cutoff)</code> rows and <code>cv.n</code> columns.
@@ -504,33 +505,33 @@ observational data. Journal of the American Statistical Association, 1-18.</em>.
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 16:42:05 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 18:10:51 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==============                                                        |  20%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 16:42:08 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 18:10:56 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |============================                                          |  40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 16:42:12 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 18:11:01 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==========================================                            |  60%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 16:42:16 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 18:11:05 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |========================================================              |  80%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 16:42:19 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Sat Nov 14 18:11:10 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |======================================================================| 100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 17.89 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 23.39 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Try:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>

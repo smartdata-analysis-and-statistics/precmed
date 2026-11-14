@@ -49,7 +49,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cox.rmst</span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span>, <span class="va">x.cate</span>, <span class="va">xnew</span>, <span class="va">tau0</span>, solver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"R"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cox.rmst</span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span>, <span class="va">x.cate</span>, <span class="va">xnew</span>, <span class="va">tau0</span>, solver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"R"</span><span class="op">)</span>, return_survival <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,10 +81,14 @@
 Both use the same fitted Cox model and step-function integration; the C
 implementation avoids the patient-by-event-time survival matrix.</p></dd>
 
+
+<dt id="arg-return-survival">return_survival<a class="anchor" aria-label="anchor" href="#arg-return-survival"></a></dt>
+<dd><p>Whether to also return predicted survival at <code>tau0</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The estimated RMST for new subjects with covariates <code>xnew</code>; vector of size <code>m</code>.</p>
+    <p>The estimated RMST for new subjects with covariates <code>xnew</code>; a vector of size <code>m</code>. If <code>return_survival = TRUE</code>, a list with <code>rmst</code> and <code>survival</code> vectors.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

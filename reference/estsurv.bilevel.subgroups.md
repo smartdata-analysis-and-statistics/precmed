@@ -29,7 +29,8 @@ estsurv.bilevel.subgroups(
   maxPS = 0.99,
   ipcw.method = "breslow",
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cumulative.hr = TRUE
 )
 ```
 
@@ -144,6 +145,10 @@ estsurv.bilevel.subgroups(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- cumulative.hr:
+
+  Whether to calculate subgroup cumulative hazard ratios.
 
 ## Value
 

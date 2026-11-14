@@ -266,7 +266,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 16:45:02 2026 
+#>    Sat Nov 14 18:14:37 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
@@ -275,7 +275,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 2: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 16:45:05 2026 
+#>    Sat Nov 14 18:14:40 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -286,7 +286,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 16:45:08 2026 
+#>    Sat Nov 14 18:14:45 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -297,7 +297,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 16:45:12 2026 
+#>    Sat Nov 14 18:14:50 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -310,9 +310,9 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 16:45:16 2026 
+#>    Sat Nov 14 18:14:55 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 18.63 secs
+#> Total runtime : 24.1 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2          cv3          cv4       cv5
 #> prop0.01        NA        NA 6.858623e+04 1.901224e+06        NA
@@ -606,37 +606,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:46:29 2026 
+#>    Sat Nov 14 18:16:24 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:46:32 2026 
+#>    Sat Nov 14 18:16:28 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:46:36 2026 
+#>    Sat Nov 14 18:16:32 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:46:39 2026 
+#>    Sat Nov 14 18:16:36 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:46:42 2026 
+#>    Sat Nov 14 18:16:40 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.23 secs
+#> Total runtime : 20.26 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA

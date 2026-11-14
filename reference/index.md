@@ -250,6 +250,9 @@
   follow-up time for specified scoring method methods for survival
   outcomes
 
+- [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
+  : Simulate an illustrative survival dataset
+
 - [`survCatch()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/survCatch.md)
   : Catch errors and warnings when estimating the ATEs in the nested
   subgroup

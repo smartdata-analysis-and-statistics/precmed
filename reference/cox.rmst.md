@@ -6,7 +6,7 @@ model
 ## Usage
 
 ``` r
-cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"))
+cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_survival = FALSE)
 ```
 
 ## Arguments
@@ -41,7 +41,12 @@ cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"))
   fitted Cox model and step-function integration; the C implementation
   avoids the patient-by-event-time survival matrix.
 
+- return_survival:
+
+  Whether to also return predicted survival at `tau0`.
+
 ## Value
 
-The estimated RMST for new subjects with covariates `xnew`; vector of
-size `m`.
+The estimated RMST for new subjects with covariates `xnew`; a vector of
+size `m`. If `return_survival = TRUE`, a list with `rmst` and `survival`
+vectors.

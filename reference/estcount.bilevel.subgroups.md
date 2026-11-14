@@ -23,7 +23,8 @@ estcount.bilevel.subgroups(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  ps.control = list()
+  ps.control = list(),
+  context = "Count"
 )
 ```
 
@@ -104,6 +105,10 @@ estcount.bilevel.subgroups(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- context:
+
+  Label used to identify the analysis in subgroup warnings.
 
 ## Value
 

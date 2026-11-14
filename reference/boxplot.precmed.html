@@ -71,6 +71,8 @@ method specified in <code><a href="catecv.html">catecv()</a></code>. This should
 <span>  plot.hr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  title <span class="op">=</span> <span class="fu">waiver</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  theme <span class="op">=</span> <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  hazard.type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cumulative"</span>, <span class="st">"conditional"</span><span class="op">)</span>,</span>
+<span>  measure <span class="op">=</span> <span class="st">"rmtl"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -88,10 +90,16 @@ method specified in <code><a href="catecv.html">catecv()</a></code>. This should
 which creates a default y-axis label based on available data.</p></dd>
 
 
+<dt id="arg-measure">measure<a class="anchor" aria-label="anchor" href="#arg-measure"></a></dt>
+<dd><p>For survival outcomes, select <code>"rmtl"</code> (default), <code>"cumulative_hr"</code> (cumulative hazard ratio), or <code>"conditional_hr"</code> (conditional Cox hazard ratio fitted through <code>tau0</code>). Earlier measure names remain supported as aliases.</p></dd>
+
+
 <dt id="arg-plot-hr">plot.hr<a class="anchor" aria-label="anchor" href="#arg-plot-hr"></a></dt>
-<dd><p>A logical value indicating whether the hazard ratios should be plotted in the
-validation curves (<code>TRUE</code>). Otherwise, the restricted mean time lost is plotted (<code>FALSE</code>).
-This argument is only applicable to survival outcomes. Default is <code>FALSE</code>.</p></dd>
+<dd><p>Deprecated; use <code>measure</code> instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio. The default hazard-based measure is the marginal cumulative hazard ratio.</p></dd>
+
+
+<dt id="arg-hazard-type">hazard.type<a class="anchor" aria-label="anchor" href="#arg-hazard-type"></a></dt>
+<dd><p>Deprecated; use <code>measure</code> instead. Choose <code>"cumulative"</code> (default) or <code>"conditional"</code> for the supplementary Cox HR when <code>plot.hr = TRUE</code>. Older objects without cumulative ratios must be refitted or plotted with <code>hazard.type = "conditional"</code>.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>

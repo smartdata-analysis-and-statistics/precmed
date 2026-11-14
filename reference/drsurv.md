@@ -22,7 +22,9 @@ drsurv(
   maxPS = 0.99,
   ipcw.method = "breslow",
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cumulative.hr = FALSE,
+  conditional.hr = TRUE
 )
 ```
 
@@ -114,9 +116,17 @@ drsurv(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
+- cumulative.hr:
+
+  Whether to estimate the marginal cumulative hazard ratio at `tau0`.
+
+- conditional.hr:
+
+  Whether to fit the supplementary conditional Cox hazard ratio.
+
 ## Value
 
-Return a list of 4 elements:
+Return a list of estimates:
 
 - `rmst1`: A numeric value of the estimated restricted mean survival
   time n the group `trt = 1`.
@@ -126,4 +136,8 @@ Return a list of 4 elements:
 
 - `log.rmtl.ratio`: A numeric value of the estimated log rmtl ratio.
 
-- `log.hazard.ratio`: A numeric value of the estimated log hazard ratio.
+- `log.hazard.ratio`: The conditional log hazard ratio, or `NA` if not
+  requested.
+
+- `log.cumulative.hazard.ratio`: The marginal log cumulative hazard
+  ratio, if requested.
