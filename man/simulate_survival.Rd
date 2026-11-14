@@ -7,10 +7,10 @@
 simulate_survival(
   n = 4000L,
   seed = 20261114L,
-  ps_weights = c(intercept = 0.11, age = 0.25, drugB = 0.25, drugC = -0.2),
-  lp_weights = c(intercept = 0, age = 0.2, female = 0.12, previous_cost = 0.1,
+  ps_weights = c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.2),
+  lp_weights = c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.1,
     previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
-  conditional_hr = exp(-0.35)
+  conditional_hr = 0.9
 )
 }
 \arguments{
@@ -58,7 +58,9 @@ Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
 interactions with age and previous relapses. Censoring is independent of covariates and
-event times. These data are illustrative and are not clinical estimates.
+event times. Default coefficients are chosen to illustrate confounding and
+heterogeneous treatment effects; they are not clinical estimates and do not
+establish the relative performance of methods on other data.
 }
 \details{
 Event times use a Weibull baseline with shape 1.15 and scale 650

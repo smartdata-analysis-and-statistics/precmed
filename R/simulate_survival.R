@@ -6,7 +6,9 @@
 #' each treatment group arise from those probabilities and vary by sample.
 #' Event times follow a Weibull proportional hazards model with treatment
 #' interactions with age and previous relapses. Censoring is independent of covariates and
-#' event times. These data are illustrative and are not clinical estimates.
+#' event times. Default coefficients are chosen to illustrate confounding and
+#' heterogeneous treatment effects; they are not clinical estimates and do not
+#' establish the relative performance of methods on other data.
 #'
 #' @param n Positive integer giving the total sample size. Default is 4,000.
 #'   Treatment group sizes are determined by the propensity model.
@@ -52,10 +54,10 @@
 #' @export
 simulate_survival <- function(
     n = 4000L, seed = 20261114L,
-    ps_weights = c(intercept = 0.11, age = 0.25, drugB = 0.25, drugC = -0.20),
-    lp_weights = c(intercept = 0, age = 0.20, female = 0.12, previous_cost = 0.10,
+    ps_weights = c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.20),
+    lp_weights = c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.10,
                    previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
-    conditional_hr = exp(-0.35)) {
+    conditional_hr = 0.9) {
   if (!is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 1 ||
       n != floor(n) || n > .Machine$integer.max)
     stop("n must be a positive integer.")
@@ -67,9 +69,9 @@ simulate_survival <- function(
     defaults
   }
   ps_weights <- merge_weights(ps_weights,
-    c(intercept = 0.11, age = 0.25, drugB = 0.25, drugC = -0.20), "ps_weights")
+    c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.20), "ps_weights")
   lp_weights <- merge_weights(lp_weights,
-    c(intercept = 0, age = 0.20, female = 0.12, previous_cost = 0.10,
+    c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.10,
       previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16), "lp_weights")
   if (!is.numeric(conditional_hr) || length(conditional_hr) != 1L ||
       !is.finite(conditional_hr) || conditional_hr <= 0)

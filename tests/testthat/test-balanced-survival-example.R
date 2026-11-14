@@ -12,13 +12,16 @@ test_that("survival simulator is reproducible and assigns treatment by propensit
 
 test_that("survival simulator responds to propensity and outcome controls", {
   base <- simulate_survival(seed = 19)
+  expect_identical(base, simulate_survival(seed = 19,
+    ps_weights = c(age = 1.15), lp_weights = c(age = 0.45),
+    conditional_hr = 0.9))
   ps <- stats::predict(stats::glm(trt ~ age + previous_treatment, data = base,
                                   family = stats::binomial()), type = "response")
   expect_equal(mean(base$trt == "drug1"), 2151 / 4000, tolerance = 0.03)
-  expect_gt(min(ps), 0.05)
-  expect_lt(max(ps), 0.95)
+  expect_gt(unname(quantile(ps, 0.05)), 0.05)
+  expect_lt(unname(quantile(ps, 0.95)), 0.95)
   tilted <- simulate_survival(seed = 19,
-    ps_weights = c(age = 1))
+    ps_weights = c(age = 1.6))
   age_gap <- function(x) diff(tapply(x$age, x$trt, mean))
   expect_gt(unname(age_gap(tilted)), unname(age_gap(base)))
   low <- simulate_survival(seed = 19, conditional_hr = 0.5)

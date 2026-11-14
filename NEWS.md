@@ -2,6 +2,10 @@
 
 ## Major changes
 
+* Updated the default `simulate_survival()` coefficients to illustrate
+  confounding and heterogeneous treatment effects. Simulated results for a
+  given seed will differ from earlier development versions.
+
 * Added the population-level `log.cumulative.hazard.ratio` at `tau0` to
   survival `atefit()`, with bootstrap inference. Inference is unavailable if
   the estimate or any bootstrap replicate is undefined. This replaces the

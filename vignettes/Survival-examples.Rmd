@@ -58,13 +58,13 @@ library(ggplot2)
 
 ## Example data
 
-We generate fully synthetic data with `simulate_survival()`. Its treatment and outcome models are illustrative and do not use patient records or represent clinical estimates. The default event model simulates greater drug 1 benefit at older ages and with more previous relapses. These illustrative interactions preserve the direction of associations in the package’s original survival example but are much weaker; they should not be interpreted as clinical estimates. We generate 4,000 patients and set a seed for reproducibility. The propensity model assigns treatment, so the group sizes vary with the simulated data. Its default intercept targets approximately 54% receiving drug 1, similar to the aggregate treatment split in the package's original 4,000-patient survival example; individual records are not used. The result contains nine variables: six baseline characteristics, treatment, observed time and an event indicator.
+We generate 4,000 synthetic observations with `simulate_survival()` and set a seed for reproducibility. The data contain baseline characteristics, treatment, observed time and an event indicator.
 
 ```{r simulate_survival, echo = TRUE}
 survival_data <- simulate_survival(n = 4000, seed = 20261114)
 ```
 
-Treatment is assigned according to the propensity model; its weights can be changed to explore different treatment proportions and degrees of overlap. For example, `simulate_survival(n = 4000, seed = 1, ps_weights = c(intercept = -1), conditional_hr = 0.8)` changes the propensity intercept and the conditional HR at age 48. Named `ps_weights` and `lp_weights` override the specified defaults; see `?simulate_survival` for their definitions. The table below summarizes baseline characteristics by treatment group.
+Treatment is assigned according to the propensity model; its weights can be changed to explore different treatment proportions and degrees of overlap. For example, `simulate_survival(n = 4000, seed = 1, ps_weights = c(intercept = -1), conditional_hr = 0.8)` changes the propensity intercept and the conditional HR at age 48 with no previous relapses. Named `ps_weights` and `lp_weights` override the specified defaults; see `?simulate_survival` for their definitions. The table below summarizes baseline characteristics by treatment group.
 
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 display_data <- survival_data
@@ -207,7 +207,7 @@ We also specify the optional argument `tau0`, the horizon for RMST and RMTL, usi
 
 Now estimate the ATE using an outcome model with age, sex, previous cost and previous relapses, and a PS model with `age` and `previous_treatment`.
 
-```{r run_atefit_stronger_hte, eval = T, echo = T, cache = doc.cache}
+```{r run_atefit_stronger_hte, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), survival_data)}
 output_atefit <- atefit(response = "survival",
                         data = survival_data,
                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
@@ -387,7 +387,7 @@ dataplot %>%
   labs(x = "Estimated CATE score", y = "Density", fill = "Method")
 ```
 
-The random forest produces a wider distribution of estimated CATE scores than contrast regression. This may reflect greater flexibility, estimation noise or overfitting; the narrower distribution could also reflect constraints imposed by the contrast-regression model. The plot alone cannot distinguish these explanations. The internal validation below assesses whether the predicted differences in treatment benefit persist in patients not used to fit the scores.
+Compare the spread of the estimated scores for the two methods. Differences may reflect model flexibility, estimation noise or overfitting; a narrower distribution could also reflect constraints imposed by the contrast-regression model. The plot alone cannot distinguish these explanations. Internal validation assesses whether the predicted differences in treatment benefit persist in patients not used to fit the scores.
 
 ## Internally validate CATE scores 
 
@@ -453,7 +453,7 @@ There are many other non-mandatory arguments that `catecv()` can accept. Please 
 
 We reuse the `tau0` calculated above so that validation estimates RMTL over the same horizon as the average treatment effect example.
 
-```{r example_catecv_stronger_hte, eval = T, echo = T, cache = doc.cache}
+```{r example_catecv_stronger_hte, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), survival_data)}
 output_catecv <- catecv(response = "survival",
                         data = survival_data,
                         score.method = c("randomForest", "contrastReg"),
@@ -544,7 +544,7 @@ average_abc <- apply(output_abc, 1, mean)
 average_abc
 ```
 
-In this example, contrast regression has the higher average ABC, indicating greater validation-set separation of treatment benefit than random forest. This is consistent with the earlier suspicion that the wider distribution of random forest scores may partly reflect overfitting. However, the ABC comparison alone does not establish overfitting; differences in model flexibility or estimation noise may also contribute.
+In this example, contrast regression has a higher average ABC than random forest, indicating greater validation-set separation of treatment benefit. The simulated settings were chosen for illustration, so this comparison does not establish that one method will perform better in other data.
 
 ## Assess responder discrimination with validation curves
 
@@ -558,7 +558,7 @@ Separation between the validation curve and the overall ATE can indicate that th
 plot(output_catecv)
 ```
 
-The random forest shows stronger subgroup separation in training than in validation, consistent with possible overfitting. Its validation curve nevertheless rises toward the overall ratio as the selected subgroup expands. Contrast regression shows more similar training and validation curves, with a lower validation ratio for the selected subgroup than for the overall group. Both methods show some validation separation in the expected direction, but the plot does not show uncertainty and does not establish that either method will perform well in new patients. An independent evaluation is needed before drawing firm conclusions.
+The random forest shows much stronger subgroup separation in training than in validation, consistent with possible overfitting. Contrast regression also shows separation in validation. The plot does not show uncertainty and does not establish that either method will perform well in new patients. An independent evaluation is needed before drawing firm conclusions.
 
 The dashed gray line is the overall treatment ratio in the corresponding training or validation sets, averaged across iterations. The curves meet it at a subgroup size of 100% because that subgroup includes everyone in each respective set.
 
