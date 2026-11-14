@@ -44,11 +44,49 @@ test_that("count scores and boosting nuisance fits work with GBM3", {
   expect_true(all(is.finite(scores$score.boosting)))
   expect_true(all(is.finite(scores$score.twoReg)))
   expect_s3_class(fit$result.boosting$fit0.boosting, "GBMFit")
-  # No-CV fitting supports the existing single-predictor OOB fallback.
-  one <- precmed:::fit_boosting(y ~ x1 + offset(time), d$data,
-    "poisson", n.trees = 20, cv.folds = 0)
-  expect_true(is.finite(suppressWarnings(
-    precmed:::best_boosting_iteration(one, "OOB", plot.it = FALSE))))
+})
+
+test_that("single-predictor count boosting works in fitting and validation", {
+  set.seed(81)
+  n <- 500L
+  dat <- data.frame(x = rnorm(n), trt = rep(0:1, each = n / 2),
+                    years = runif(n, 0.3, 2))
+  dat$y <- rpois(n, exp(0.4 + 0.25 * dat$x - 0.2 * dat$trt) * dat$years)
+  args <- list(data = dat, score.method = c("boosting", "twoReg", "contrastReg"),
+               cate.model = y ~ x + offset(log(years)), ps.model = trt ~ x,
+               initial.predictor.method = "boosting", B = 1, Kfold = 2,
+               n.trees.boosting = 30, plot.gbmperf = FALSE, n.cores = 1,
+               seed = 51)
+  messages <- character()
+  fit <- withCallingHandlers(do.call(catefitcount, args), warning = function(w) {
+    messages <<- c(messages, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  })
+  for (method in args$score.method) {
+    expect_true(all(is.finite(fit[[paste0("score.", method)]])))
+  }
+  expect_false(any(grepl("OOB|out.of.bag", messages, ignore.case = TRUE)))
+  messages <- character()
+  cv <- withCallingHandlers(do.call(catecvcount, c(args, list(cv.n = 1,
+    abc = FALSE, error.max = 0.5))), warning = function(w) {
+      messages <<- c(messages, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
+  for (method in args$score.method) {
+    expect_true(all(is.finite(cv[[paste0("ate.", method)]]$ate.est.valid.high.cv)))
+  }
+  expect_false(any(grepl("OOB|out.of.bag", messages, ignore.case = TRUE)))
+  args$score.method <- "boosting"
+  args$seed <- 11
+  messages <- character()
+  tied <- withCallingHandlers(do.call(catecvcount, c(args, list(cv.n = 1,
+    abc = TRUE, error.max = 0.5))), warning = function(w) {
+      messages <<- c(messages, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
+  expect_true(any(grepl("score.boosting, validation iteration 1, low subgroup", messages, fixed = TRUE)))
+  expect_true(anyNA(tied$ate.boosting$ate.est.valid.low.cv))
+  expect_true(any(is.finite(tied$ate.boosting$ate.est.valid.high.cv)))
 })
 
 test_that("continuous boosting retains both selected tree counts", {

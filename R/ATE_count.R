@@ -377,7 +377,7 @@ drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
 #'         vector of size equal to the length of prop; returned only when \code{onlyhigh} == TRUE
 estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher.y,
                                        prop, onlyhigh,
-                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()) {
+                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count") {
 
   if (!higher.y) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -386,14 +386,12 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
   if (onlyhigh == FALSE) ate.est.low <- rep(0, n.subgroup)
   for (b in 1:n.subgroup) {
       idsub1 <- (score >= cut[b])
-      ate.est.high[b] <- drcount(y = y[idsub1], x.cate = x.cate[idsub1, , drop = FALSE], x.ps = x.ps[idsub1, , drop = FALSE],
-                                 trt = trt[idsub1], time = time[idsub1], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                 interactions = FALSE, ps.control = ps.control)$log.rate.ratio
+      ate.est.high[b] <- count_subgroup_log_effect(idsub1, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
+                                                   paste0(context, ", high subgroup ", prop[b]))
       if (onlyhigh == FALSE) {
         idsub0 <- (score < cut[b])
-        ate.est.low[b] <- drcount(y = y[idsub0], x.cate = x.cate[idsub0, , drop = FALSE], x.ps = x.ps[idsub0, , drop = FALSE],
-                                  trt = trt[idsub0], time = time[idsub0], ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  interactions = FALSE, ps.control = ps.control)$log.rate.ratio
+        ate.est.low[b] <- count_subgroup_log_effect(idsub0, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
+                                                     paste0(context, ", low subgroup ", 1 - prop[b]))
       }
   }
   if (onlyhigh) {
@@ -440,7 +438,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' \code{...} and other numerical controls.
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, higher.y, prop,
-                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list()){
+                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count"){
 
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, prop)
@@ -448,14 +446,22 @@ estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, high
   ate.est <- rep(NA, n.subgroup)
   for (b in seq(n.subgroup)) {
     idsub <- (score >= cut[b] & score <= cut[b + 1])
-    ate.est[b] <- drcount(y = y[idsub],
-                          x.cate = x.cate[idsub, , drop = FALSE],
-                          x.ps = x.ps[idsub, , drop = FALSE],
-                          trt = trt[idsub], time = time[idsub],
-                          ps.method = ps.method,
-                          minPS = minPS,
-                          maxPS = maxPS,
-                          interactions = FALSE, ps.control = ps.control)$log.rate.ratio
+    ate.est[b] <- count_subgroup_log_effect(idsub, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
+                                             paste0(context, ", group ", prop[b], "-", prop[b + 1]))
   }
   return(exp(ate.est))
+}
+
+count_subgroup_log_effect <- function(selected, y, x.cate, x.ps, time, trt,
+                                      ps.method, minPS, maxPS, ps.control, label) {
+  counts <- c(sum(trt[selected] == 0), sum(trt[selected] == 1))
+  if (any(counts == 0)) {
+    warning(label, ": treatment effect unavailable (treatment 0: ", counts[1],
+            ", treatment 1: ", counts[2], "); returning NA.", call. = FALSE)
+    return(NA_real_)
+  }
+  drcount(y = y[selected], x.cate = x.cate[selected, , drop = FALSE],
+          x.ps = x.ps[selected, , drop = FALSE], time = time[selected],
+          trt = trt[selected], ps.method = ps.method, minPS = minPS,
+          maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$log.rate.ratio
 }

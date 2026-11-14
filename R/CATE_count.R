@@ -626,11 +626,9 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
         data0 <- datatot_train[trt_train == 0, ]
 
         if (initial.predictor.method == "boosting") {
-          # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
-          cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
           # Fit each treatment arm once per cross-fitting fold.
           fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
+                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
           best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f1.predictcv[index == k] <- predict(object = fit1.boosting, newdata = datatot_valid, n.trees = best1.iter, type = "response")
@@ -641,7 +639,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
           })
 
           fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
+                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
           best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
           withCallingHandlers({
             f0.predictcv[index == k] <- predict(object = fit0.boosting, newdata = datatot_valid, n.trees = best0.iter, type = "response")
@@ -709,19 +707,14 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   if ("boosting" %in% score.method) {
     ## Boosting method based on the entire data (score 1)
     data1 <- datatot[trt == 1, ]
-    # if model has a single predictor, GBM must have cv.folds = 0 https://github.com/zoonproject/zoon/issues/130
-    cate.cvfold <- ifelse(ncol(x.cate) == 1, 0, 5)
-    cate.gbmmethod <- ifelse(ncol(x.cate) == 1, "OOB", "cv")
-    if (cate.gbmmethod == "OOB") warning("If the model has a single predictor, GBM must use OOB")
-
     fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
-                           interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-    best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
+                           interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+    best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
 
     data0 <- datatot[trt == 0, ]
     fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
-                           interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = cate.cvfold, ...)
-    best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = cate.gbmmethod, plot.it = plot.gbmperf))
+                           interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+    best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
 
     result$result.boosting <- list(fit0.boosting = fit0.boosting, best0.iter = best0.iter, fit1.boosting = fit1.boosting, best1.iter = best1.iter)
     best.iter <- max(best.iter, best1.iter, best0.iter)

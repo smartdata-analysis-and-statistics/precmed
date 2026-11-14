@@ -397,7 +397,7 @@ The output is a matrix with columns corresponding to the CV iterations and rows 
 
 ### Inspect errors and warnings
 
-Subgroup estimates can be missing or unstable, for example when a subgroup has few patients or observed events. Check warnings after running `catecv()` and review affected estimates with caution:
+Subgroup estimates can be missing or unstable, for example when a subgroup has few patients or observed events. Tied scores can also leave a subgroup empty or change its size from the requested proportion. If a subgroup has no patients in one or both treatment arms, its estimate is `NA` and a warning identifies the method, iteration, subgroup and treatment counts. ABC is `NA` if a required estimate is unavailable. Check warnings after running `catecv()` and review affected estimates with caution:
 
 ```{r errwarn, eval = T, echo = T}
 warnings()

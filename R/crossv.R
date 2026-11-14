@@ -1546,7 +1546,8 @@ catecvcount <- function(data,
                                    time = time.train, trt = trt.train,
                                    score = score.train, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE, ps.method = ps.method,
-                                   minPS = minPS, maxPS = maxPS, ps.control = ps.control)
+                                   minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                   context = paste0(name, ", training iteration ", cv.i))
       result[[str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <-
         c(ate.train.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <-
@@ -1557,7 +1558,8 @@ catecvcount <- function(data,
                                      time = time.train, trt = trt.train,
                                      score = score.train, higher.y = higher.y,
                                      prop = prop.multi, ps.method = ps.method,
-                                     minPS = minPS, maxPS = maxPS, ps.control = ps.control)
+                                     minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                     context = paste0(name, ", training iteration ", cv.i))
     }
 
     ####### Construct the score in validation set ----------------------------------------------
@@ -1584,7 +1586,8 @@ catecvcount <- function(data,
                                    time = time.valid, trt = trt.valid,
                                    score = score.valid, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE,
-                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
+                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                   context = paste0(name, ", validation iteration ", cv.i))
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <-
         c(ate.valid.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <-
@@ -1595,7 +1598,8 @@ catecvcount <- function(data,
                                      time = time.valid, trt = trt.valid,
                                      score = score.valid, higher.y = higher.y,
                                      prop = prop.multi,
-                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
+                                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                     context = paste0(name, ", validation iteration ", cv.i))
 
       if (abc == TRUE) {
         temp.abc <- log(estcount.bilevel.subgroups(y = y.valid,
@@ -1603,7 +1607,8 @@ catecvcount <- function(data,
                                                    time = time.valid, trt = trt.valid,
                                                    score = score.valid, higher.y = higher.y,
                                                    prop = prop.abc, onlyhigh = TRUE,
-                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control))
+                                                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                                   context = paste0(name, ", ABC validation iteration ", cv.i)))
 
         if (higher.y == TRUE) {
           # if higher scores are better, ABC requires subtracting the ATE from validation curve
@@ -1612,8 +1617,14 @@ catecvcount <- function(data,
           #  if lower scores are better, ABC requires subtracting the validation curve from ATE
           ref <- log(result$overall.ate.valid[cv.i]) - temp.abc
         }
-        result[[str_replace(name, "score", "ate")]]$abc.valid[cv.i] <-
-          auc(x = prop.abc, y = ref, from = prop.abc[1], to = prop.abc[length(prop.abc)], type = "spline")
+        if (all(is.finite(ref))) {
+          result[[str_replace(name, "score", "ate")]]$abc.valid[cv.i] <-
+            auc(x = prop.abc, y = ref, from = prop.abc[1], to = prop.abc[length(prop.abc)], type = "spline")
+        } else {
+          warning(name, ", validation iteration ", cv.i,
+                  ": ABC unavailable because a required estimate is not finite; returning NA.", call. = FALSE)
+          result[[str_replace(name, "score", "ate")]]$abc.valid[cv.i] <- NA_real_
+        }
       }
 
     }

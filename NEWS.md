@@ -26,6 +26,14 @@
 
 ## Minor changes and bug fixes
 
+* Use GBM3 cross-validation for single-predictor count boosting fits and
+  boosting initial predictions, removing the legacy out-of-bag workaround and
+  fixing a cross-fitting error when selecting the number of trees.
+
+* Return `NA` with an informative warning for count-outcome responder subgroups
+  missing one or both treatment arms, instead of failing the analysis.
+  ABC is `NA` when a required validation estimate is unavailable.
+
 * Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead of
   treating observations beyond the horizon as events. This affects ATE,
   subgroup, and cross-validation hazard ratio estimates; RMST and RMTL
