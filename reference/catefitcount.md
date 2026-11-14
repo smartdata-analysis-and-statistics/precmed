@@ -318,5 +318,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.16 secs 
+#> Total runtime : 0.12 secs 
 ```

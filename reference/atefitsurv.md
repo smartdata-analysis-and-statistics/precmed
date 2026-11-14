@@ -179,7 +179,10 @@ adjusted hazard ratios are returned, as well as the estimated RMST in
 either treatment group. The variability of the estimated RMTL ratio is
 calculated using bootstrap. Additional outputs include standard error of
 the log RMTL ratio, 95% confidence interval, p-value, and a histogram of
-the bootstrap estimates.
+the bootstrap estimates. If a doubly robust RMST estimate falls outside
+\[0, tau0\], the corresponding outcome-model estimate is substituted and
+a warning is issued. That fallback does not retain the doubly robust
+guarantee.
 
 ## Examples
 
@@ -204,7 +207,7 @@ output
 #> 
 #>                   estimate         SE    CI.lower  CI.upper     pvalue
 #> log.rmtl.ratio   0.0701553 0.03206484 0.007309376 0.1330012 0.02867542
-#> log.hazard.ratio 2.7133243 0.20897752 2.303735883 3.1229127 0.00000000
+#> log.hazard.ratio 3.3974272 0.29245335 2.824229195 3.9706253 0.00000000
 #> 
 #> Estimated RMST:
 #> 

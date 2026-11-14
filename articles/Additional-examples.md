@@ -260,37 +260,37 @@ output_catecv3 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:47:36 2026 
+#>    Sat Nov 14 16:05:26 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:47:39 2026 
+#>    Sat Nov 14 16:05:29 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:47:44 2026 
+#>    Sat Nov 14 16:05:33 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:47:49 2026 
+#>    Sat Nov 14 16:05:37 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:47:54 2026 
+#>    Sat Nov 14 16:05:41 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 25.05 secs
+#> Total runtime : 19.54 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2          cv3          cv4       cv5
 #> prop0.01 0.5746485        NA 6.858623e+04 1.901224e+06        NA
@@ -584,37 +584,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:49:27 2026 
+#>    Sat Nov 14 16:06:53 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:49:31 2026 
+#>    Sat Nov 14 16:06:56 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:49:35 2026 
+#>    Sat Nov 14 16:06:59 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:49:40 2026 
+#>    Sat Nov 14 16:07:03 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:49:44 2026 
+#>    Sat Nov 14 16:07:06 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 20.9 secs
+#> Total runtime : 15.53 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA

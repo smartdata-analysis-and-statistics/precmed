@@ -371,6 +371,8 @@ fit_2 <- catefit(response = "survival",
 #> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 
+#>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" 
+#> Warning: Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson"; see 'errors/warnings'.
 
 coef(fit_2)
 #>                              poisson

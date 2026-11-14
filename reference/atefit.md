@@ -222,7 +222,7 @@ output2
 #> 
 #>                   estimate         SE    CI.lower CI.upper     pvalue
 #> log.rmtl.ratio   0.0701553 0.03420455 0.003115612 0.137195 0.04026192
-#> log.hazard.ratio 2.7133243 0.20390310 2.313681567 3.112967 0.00000000
+#> log.hazard.ratio 3.3974272 0.28220581 2.844314005 3.950540 0.00000000
 #> 
 #> Estimated RMST:
 #> 

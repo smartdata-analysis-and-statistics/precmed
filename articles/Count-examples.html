@@ -866,7 +866,7 @@ parallel settings; one thread is also the fallback when neither
 <span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 5.252095 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 3.953855 secs</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -983,6 +983,9 @@ with triple modes at around -0.5, 0, and 0.8.</p>
 <div class="section level2">
 <h2 id="internally-validate-cate-scores">Internally validate CATE scores<a class="anchor" aria-label="anchor" href="#internally-validate-cate-scores"></a>
 </h2>
+<div class="section level3">
+<h3 id="how-internal-validation-works">How internal validation works<a class="anchor" aria-label="anchor" href="#how-internal-validation-works"></a>
+</h3>
 <p>For broader guidance on validation strategies and the assessment of
 discrimination, calibration, and decision accuracy, see Chapter 19,
 “Validation of prediction models for patient outcomes and individualized
@@ -1039,9 +1042,13 @@ training and validation sets, separately, and estimate the ATE within
 each subgroup. Mutually exclusive subgroups are built by splitting the
 estimated CATE scores according to prop.multi.</p></li>
 </ul>
-<p>Oke, so now we can use the <code><a href="../reference/catecv.html">catecv()</a></code> function to run
-internal validation to compare the different scoring methods. The
-mandatory arguments are similar to <code><a href="../reference/atefit.html">atefit()</a></code> and
+</div>
+<div class="section level3">
+<h3 id="run-internal-validation">Run internal validation<a class="anchor" aria-label="anchor" href="#run-internal-validation"></a>
+</h3>
+<p>Now we can use the <code><a href="../reference/catecv.html">catecv()</a></code> function to run internal
+validation to compare the different scoring methods. The mandatory
+arguments are similar to <code><a href="../reference/atefit.html">atefit()</a></code> and
 <code><a href="../reference/catefit.html">catefit()</a></code>: The mandatory arguments are:
 <code>response</code>, <code>data</code>, <code>score.method</code>,
 <code>cate.model</code>, and <code>ps.model</code>. For this toy example
@@ -1115,37 +1122,41 @@ the default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 14:50:45 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:07:49 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 14:50:48 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:07:52 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 14:50:54 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:07:56 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 14:51:00 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:08:01 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 14:51:06 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:08:06 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 28.22 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 21.75 secs</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="inspect-validation-results">Inspect validation results<a class="anchor" aria-label="anchor" href="#inspect-validation-results"></a>
+</h3>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
@@ -1157,7 +1168,9 @@ output, which is described below, will be used in the functions
 the following 3 groups of outputs are generated: <code>high</code>,
 <code>low</code> and <code>group</code>. We use the results from
 <code>contrastReg</code> as an example.</p>
-<p><strong>1. ATEs in nested subgroups of high responders</strong></p>
+<div class="section level4">
+<h4 id="nested-subgroups-of-high-responders">Nested subgroups of high responders<a class="anchor" aria-label="anchor" href="#nested-subgroups-of-high-responders"></a>
+</h4>
 <p>This output stores the ATEs - the ratio of annualized relapse rate
 between drug1 vs drug0 in this example - in nested subgroups of patients
 of high responders to drug 1 in the training
@@ -1201,7 +1214,10 @@ In contrast, the subgroup defined with all patients (last row labeled
 “prop1”) has an estimated RR of 1.06.
 <!-- This suggests that the CATE score estimated with contrast regression identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RR compared to all patients. However, the same relationship between estimated RRs is not observed in the training set. This will be further visualized with valiation curves in the next section. 
 If higher outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. --></p>
-<p><strong>2. ATEs in nested subgroups of low responders</strong></p>
+</div>
+<div class="section level4">
+<h4 id="nested-subgroups-of-low-responders">Nested subgroups of low responders<a class="anchor" aria-label="anchor" href="#nested-subgroups-of-low-responders"></a>
+</h4>
 <p>This output stores the ATEs in nested subgroups of <em>low
 responders</em> to drug1 in the training
 (<code>$ate.est.train.low.cv</code>) and validation
@@ -1231,7 +1247,10 @@ responders defined as patients with the 40% highest (lowest if
 “prop0.4”. In the training set and in the first CV iterations, the
 estimated RR is 0.674 in the 60% high responders to drug 1 and 1.71 in
 the 40% low responders.</p>
-<p><strong>3. ATEs in mutually exclusive subgroups</strong></p>
+</div>
+<div class="section level4">
+<h4 id="mutually-exclusive-subgroups">Mutually exclusive subgroups<a class="anchor" aria-label="anchor" href="#mutually-exclusive-subgroups"></a>
+</h4>
 <p>This output stores the ATEs in mutually exclusive multi-category
 subgroups of patients in the training
 (<code>$ate.est.train.group.cv</code>) and validation
@@ -1263,6 +1282,20 @@ first CV iteration calculated 1.864 as the RR for the subgroup with the
 33% middle estimated CATE scores, and 0.483 as the RR for subgroup with
 the 33% highest estimated CATE scores.</p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="inspect-errors-and-warnings">Inspect errors and warnings<a class="anchor" aria-label="anchor" href="#inspect-errors-and-warnings"></a>
+</h3>
+<p>Subgroup estimates can be missing or unstable, for example when a
+subgroup has few patients or observed events. Check warnings after
+running <code><a href="../reference/catecv.html">catecv()</a></code> and review affected estimates with
+caution:</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/warnings.html" class="external-link">warnings</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>Unlike the survival output, the count output does not store a
+subgroup-specific <code>errors/warnings</code> list.</p>
+</div>
+</div>
 <div class="section level2">
 <h2 id="compare-scoring-methods-using-the-abc-statistic">Compare scoring methods using the ABC statistic<a class="anchor" aria-label="anchor" href="#compare-scoring-methods-using-the-abc-statistic"></a>
 </h2>
@@ -1279,7 +1312,7 @@ greater separation in the expected direction for this example. Chapter
 statistics</a> section for a detailed illustration of the relationship
 between <code>higher.y</code>, <code>abc</code>, and the validation
 curves.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2        cv3        cv4       cv5</span></span>
@@ -1293,7 +1326,7 @@ binomial (“negBin”) has an ABC of 0.145, which is the highest in this CV
 iteration, meaning that negative binomial offers the best performance in
 the first CV iteration. The user can combine the ABC for each method
 across iterations:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt;     poisson contrastReg      negBin </span></span>
@@ -1332,7 +1365,7 @@ heterogeneity is present. The method that has the steepest slope in the
 validation results would be selected because it captures the most
 treatment effect heterogeneity while generalizing well to unseen
 data.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="700"></p>
 <p>For this toy example, the methods are performing well in the training
@@ -1348,7 +1381,7 @@ description</a> section.</p>
 <p>The plot’s legend includes the ABC statistics in the validation set.
 The user can choose to mute the ABC annotations by specifying
 <code>show.abc</code> = FALSE.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, </span>
 <span>     show.abc <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>     ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -1358,7 +1391,7 @@ iteration instead of the average of all CV iterations. In the following
 example, we plot the validation curves of the second CV iteration by
 specifying <code>cv.i</code> = 2 and in grayscale by specifying
 <code>grayscale</code> = TRUE.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, </span>
 <span>     cv.i <span class="op">=</span> <span class="fl">2</span>, </span>
 <span>     grayscale <span class="op">=</span> <span class="cn">TRUE</span>, </span>
@@ -1389,7 +1422,7 @@ with the 33% lowest (0-33%), middle 33% (33-66%), and highest 33%
 (66-100%) estimated CATE scores. The box plot shows the distribution of
 the ATEs over all <code>cv.n</code> CV iterations, instead of a summary
 statistics like mean or median in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>,</span>
 <span>        ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/example_plot_boxplot-1.png" class="r-plt" alt="" width="700"></p>

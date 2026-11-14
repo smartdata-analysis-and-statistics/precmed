@@ -412,7 +412,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.1 secs 
+#> Total runtime : 7.62 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
@@ -451,7 +451,7 @@ boxplot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 abc(cate_2)
 #>                    cv1       cv2       cv3       cv4        cv5
 #> poisson      0.2165482 0.2183456 0.1012403 0.2153617 0.09806659
-#> randomForest 0.2258353 0.2027889 0.1511239 0.2427204 0.15484102
+#> randomForest 0.2252653 0.2063741 0.1461175 0.2431729 0.15440263
 
 # }
 ```

@@ -48,34 +48,26 @@ centered at 48 years old and the medical costs in the year prior to
 treatment initiation `previous_cost` was centered at 14,362 USD and
 scaled with standard deviation 24,266 USD.
 
-The final dataset `survivalExample` looked like this:
+The first six records of the final dataset `survivalExample` are shown
+below:
 
-    #> 'data.frame':    4000 obs. of  9 variables:
-    #>  $ age                     : num [1:4000, 1] -26.83 -2.83 -12.83 -20.83 6.17 ...
-    #>   ..- attr(*, "scaled:center")= num 45.8
-    #>  $ female                  : int  1 1 1 0 0 1 1 1 1 1 ...
-    #>  $ previous_treatment      : Factor w/ 3 levels "drugA","drugB",..: 3 1 3 1 3 1 3 3 3 1 ...
-    #>  $ previous_cost           : num [1:4000, 1] -0.341 -0.239 -0.171 -0.392 -0.518 ...
-    #>   ..- attr(*, "scaled:center")= num 14362
-    #>   ..- attr(*, "scaled:scale")= num 24266
-    #>  $ previous_number_symptoms: Factor w/ 3 levels "0","1",">=2": 2 2 2 3 3 2 3 2 2 2 ...
-    #>  $ previous_number_relapses: int  0 1 2 0 1 0 0 2 0 0 ...
-    #>  $ trt                     : Factor w/ 2 levels "drug0","drug1": 1 1 1 1 2 1 2 2 2 2 ...
-    #>  $ y                       : num  102.1 51.3 104.9 61.5 35.6 ...
-    #>  $ d                       : num  0 0 0 0 0 0 0 0 0 1 ...
+| age | female | previous_treatment | previous_cost | previous_number_symptoms | previous_number_relapses | trt | y | d |
+|---:|---:|:---|---:|:---|---:|:---|---:|---:|
+| -26.83375 | 1 | drugC | -0.3411389 | 1 | 0 | drug0 | 102.05014 | 0 |
+| -2.83375 | 1 | drugA | -0.2391696 | 1 | 1 | drug0 | 51.34050 | 0 |
+| -12.83375 | 1 | drugC | -0.1710498 | 1 | 2 | drug0 | 104.92599 | 0 |
+| -20.83375 | 0 | drugA | -0.3915099 | \>=2 | 0 | drug0 | 61.49291 | 0 |
+| 6.16625 | 0 | drugC | -0.5179329 | \>=2 | 1 | drug1 | 35.60818 | 0 |
+| -11.83375 | 1 | drugA | -0.4077500 | 1 | 0 | drug0 | 17.26454 | 0 |
 
 ## Estimate the average treatment effect
 
-Restricted mean survival time (RMST) is the average event-free time up
-to a chosen horizon `tau0`; restricted mean time lost (RMTL) is
-`tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time
-lost under drug 0 over that horizon. For relapse, a ratio below 1 favors
-drug 1. Results depend on the chosen horizon. Chapter 20 discusses RMTL
-for ratio-based treatment effects (Jiang et al. 2026).
+### Unadjusted treatment comparison
 
-First, one might be interested in the effect of the drug (trt) on the
-number of days until the first relapse or censoring (y). Lets test this
-using Cox regression.
+We first compare time to first relapse between treatment groups using a
+Cox model with treatment as the only predictor. This unadjusted,
+marginal association does not account for differences in patient
+characteristics.
 
 ``` r
 
@@ -101,23 +93,154 @@ summary(output_cox)
 #> Score (logrank) test = 160.9  on 1 df,   p=<2e-16
 ```
 
-We see from the Cox regression we see that drug1 resulted in a hazard
-ratio (HR) of 3.04 when compared to drug 0. This unadjusted hazard ratio
-compares the instantaneous relapse hazards, conditional on remaining
-event-free; it does not by itself establish a causal treatment effect.
+The estimated hazard ratio (HR) for drug 1 versus drug 0 is 3.04. It
+compares instantaneous relapse hazards among patients still event-free
+and does not by itself establish a causal treatment effect.
 
-Now we want to estimate the Average Treatment Effect (ATE) and correct
-for several covariates like age and previous treatment because they
-might influence the relation between treatment and outcome. The
+We can examine the proportional-hazards assumption using scaled
+Schoenfeld residuals. A roughly horizontal curve is consistent with a
+constant HR over time; the dashed curves show approximate 95%
+uncertainty bands.
+
+``` r
+
+ph_unadjusted <- cox.zph(output_cox, transform = "identity")
+print(ph_unadjusted)
+#>        chisq df       p
+#> trt     15.3  1 8.9e-05
+#> GLOBAL  15.3  1 8.9e-05
+plot(ph_unadjusted, var = "trt", hr = TRUE, resid = FALSE,
+     xlab = "Days since treatment initiation",
+     ylab = "Unadjusted hazard ratio: drug1 vs drug0")
+abline(h = exp(coef(output_cox)[1]), lty = 3, col = "steelblue")
+```
+
+![](Survival-examples_files/figure-html/ph_unadjusted-1.png)
+
+The dotted line is the constant HR from the Cox model. The smooth curve
+suggests how the treatment association may vary over time; it is a
+diagnostic rather than a precise estimate at every time point. The
+treatment test p-value is 8.9^{-5}; later follow-up may be less
+informative when fewer patients remain at risk.
+
+### Covariate-adjusted treatment comparison
+
+Next, we adjust for age, sex, previous medical cost and previous
+relapses. We first choose an illustrative horizon: the smaller 95th
+percentile of observed follow-up in the two treatment groups.
+
+``` r
+
+tau0 <- with(survivalExample,
+             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+tau0
+#> [1] 522.6618
+```
+
+The horizon is approximately 522.7 days. It defines the period over
+which we will compare restricted mean outcomes. This choice uses
+observed times, including censoring, and does not guarantee sufficient
+follow-up; inspect numbers at risk and censoring near the horizon in
+both groups and choose a clinically meaningful horizon with adequate
+support.
+
+For comparison with the adjusted HR later returned by
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
+we censor follow-up at `tau0` and fit the same covariate-adjusted Cox
+model:
+
+``` r
+
+cox_data <- survivalExample
+cox_data$time_tau <- pmin(cox_data$y, tau0)
+cox_data$event_tau <- cox_data$d * (cox_data$y <= tau0)
+output_cox_adjusted <- coxph(
+  Surv(time_tau, event_tau) ~ trt + age + female + previous_cost + previous_number_relapses,
+  data = cox_data
+)
+summary(output_cox_adjusted)
+#> Call:
+#> coxph(formula = Surv(time_tau, event_tau) ~ trt + age + female + 
+#>     previous_cost + previous_number_relapses, data = cox_data)
+#> 
+#>   n= 4000, number of events= 617 
+#> 
+#>                               coef exp(coef)  se(coef)       z Pr(>|z|)    
+#> trtdrug1                  3.397427 29.887108  0.182864  18.579  < 2e-16 ***
+#> age                      -0.113755  0.892477  0.007606 -14.957  < 2e-16 ***
+#> female                   -0.006535  0.993486  0.094564  -0.069 0.944902    
+#> previous_cost             0.078669  1.081846  0.022126   3.556 0.000377 ***
+#> previous_number_relapses -1.008998  0.364584  0.087938 -11.474  < 2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#>                          exp(coef) exp(-coef) lower .95 upper .95
+#> trtdrug1                   29.8871    0.03346   20.8848   42.7698
+#> age                         0.8925    1.12048    0.8793    0.9059
+#> female                      0.9935    1.00656    0.8254    1.1958
+#> previous_cost               1.0818    0.92435    1.0359    1.1298
+#> previous_number_relapses    0.3646    2.74285    0.3069    0.4332
+#> 
+#> Concordance= 0.76  (se = 0.014 )
+#> Likelihood ratio test= 571.5  on 5 df,   p=<2e-16
+#> Wald test            = 466.1  on 5 df,   p=<2e-16
+#> Score (logrank) test = 516.5  on 5 df,   p=<2e-16
+```
+
+The adjusted HR is 29.89, compared with 3.04 in the unadjusted model.
+These models differ in both covariate adjustment and follow-up horizon.
+Age differs substantially between groups and has limited overlap, so the
+adjusted comparison relies heavily on the model. An adjusted HR is
+conditional on the included covariates and is not automatically a causal
+average treatment effect.
+
+``` r
+
+ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
+print(ph_adjusted)
+#>                            chisq df      p
+#> trt                       0.0167  1 0.8972
+#> age                       0.6207  1 0.4308
+#> female                    0.0747  1 0.7846
+#> previous_cost             7.4645  1 0.0063
+#> previous_number_relapses  3.1394  1 0.0764
+#> GLOBAL                   15.3651  5 0.0089
+plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
+     xlab = "Days since treatment initiation",
+     ylab = "Adjusted hazard ratio: drug1 vs drug0")
+abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
+```
+
+![](Survival-examples_files/figure-html/ph_adjusted-1.png)
+
+The adjusted treatment test p-value is 0.9 and the global test p-value
+is 0.0089. A large treatment p-value does not prove proportional
+hazards, and the global test also assesses the other covariates. The two
+plots use different models and follow-up periods, so differences between
+them cannot be attributed solely to adjustment.
+
+### Estimate the average treatment effect with `atefit()`
+
+An alternative summary is the restricted mean survival time (RMST), the
+average event-free time up to `tau0`. Restricted mean time lost (RMTL)
+is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with
+time lost under drug 0 over that horizon; for relapse, a ratio below 1
+favors drug 1. Unlike a single Cox HR, this measure does not require the
+treatment HR to be constant over time. Results depend on the chosen
+horizon. Chapter 20 discusses RMTL for ratio-based treatment effects
+(Jiang et al. 2026).
+
+The
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-function allows estimating the ATE in terms of restricted mean time lost
-(RMTL) and HR (hazard ratio). The RMTL estimator is doubly robust,
-meaning that the estimator is consistent if the PS model (argument
-`ps.model`) or the outcome model (argument `cate.model`) or both are
-correctly specified. The estimator also depends on the estimation of
-Inverse Probability Censoring Weights (IPCW). The HR estimator is based
-on a Cox regression model. The function also provides standard error,
-confidence intervals, and p-values based on bootstrap.
+function estimates the population-level RMTL ratio and also reports the
+adjusted Cox HR. The RMTL estimator is doubly robust with respect to the
+propensity score (PS) and outcome models: under the required
+assumptions, either model may be correctly specified. It also depends on
+inverse probability of censoring weights (IPCW) and a correctly
+specified censoring model. The function provides standard errors,
+confidence intervals and p-values based on bootstrap. If an out-of-range
+RMST estimate is replaced by an outcome-model estimate, that fallback
+does not retain the doubly robust guarantee.
 
 IPCW adjusts for censoring by weighting patients according to their
 estimated probability of remaining uncensored. Causal interpretation
@@ -166,24 +289,15 @@ are:
   If the data are from a RCT, it suffices to specify `ps.model` = trt
   ~ 1. The PS model is used in the doubly robust RMTL estimation.
 
-- `tau0`: The horizon for RMST and RMTL. Below, we choose the smaller of
-  the 95th percentiles of observed follow-up times in the two treatment
-  groups. This illustrative choice limits extrapolation, but does not
-  guarantee adequate follow-up: inspect numbers at risk and censoring in
-  each group near the chosen horizon, and choose a clinically meaningful
-  horizon with sufficient support.
+- `tau0`: The horizon for RMST and RMTL. We reuse the value calculated
+  above.
 
-Let’s calculate the ATE for the effect of treatment on y and build an
-outcome model that contains all variables and a PS model with `age` and
+Now estimate the ATE using an outcome model with age, sex, previous cost
+and previous relapses, and a PS model with `age` and
 `previous_treatment`.
 
 ``` r
 
-#define tau0
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-
-#run atefit
 output_atefit <- atefit(response = "survival",
                         data = survivalExample,
                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
@@ -199,15 +313,15 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower  CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03517679 0.001210064 0.1391005 0.04611234
-#> log.hazard.ratio 2.7133243 0.19683887 2.327527199 3.0991214 0.00000000
+#>                   estimate         SE    CI.lower  CI.upper    pvalue
+#> log.rmtl.ratio   0.0701553 0.03415434 0.003214028 0.1370966 0.0399692
+#> log.hazard.ratio 3.3974272 0.27890929 2.850775065 3.9440794 0.0000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 6.923291 159.2915 186.4303      0
-#> rmst0 196.5603 8.512084 179.8769 213.2436      0
+#> rmst1 172.8609 6.559210 160.0051 185.7167      0
+#> rmst0 196.5603 8.793107 179.3261 213.7944      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -225,6 +339,14 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
   of `tau0` - `$rmst1` divided by `tau0` - `$rmst0`
 
 - the log HR (`$log.hazard.ratio`).
+
+The log HR comes from a Cox model adjusted for the variables in
+`cate.model`, with follow-up censored at `tau0`. Exponentiating it gives
+the adjusted HR: 29.89. This differs from the unadjusted HR above. In
+these simulated data, age differs substantially between treatment
+groups, and the groups have limited overlap in age; consequently, the
+adjusted comparison relies heavily on the model. The Cox HR is not the
+doubly robust RMTL estimate and should be interpreted separately.
 
 For example, the log RMTL ratio of 0.07 and the 95% confidence interval
 of (0, 0.14) are displayed in the output. The estimated ratio and its
@@ -479,13 +601,15 @@ dataplot %>%
   geom_density(alpha = 0.5) +
   theme_classic() + 
   labs(x = "Estimated CATE score", y = "Density", fill = "Method")
-#> Warning: Removed 5 rows containing non-finite outside the scale range
+#> Warning: Removed 6 rows containing non-finite outside the scale range
 #> (`stat_density()`).
 ```
 
 ![](Survival-examples_files/figure-html/plot_score-1.png)
 
 ## Internally validate CATE scores
+
+### How internal validation works
 
 For broader guidance on validation strategies and the assessment of
 discrimination, calibration, and decision accuracy, see Chapter 19,
@@ -551,7 +675,9 @@ The CV is applied by repeating the following steps `cv.n` times:
   each subgroup. Mutually exclusive subgroups are built by splitting the
   estimated CATE scores according to prop.multi.
 
-Oke, so now we can use the
+### Run internal validation
+
+Now we can use the
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 function to run internal validation to compare the different scoring
 methods. The mandatory arguments are similar to
@@ -627,10 +753,10 @@ be helpful to go over the descriptions to see if you need to alter the
 default values. In this toy example, we keep the default values of the
 remaining arguments.
 
-``` r
+We reuse the `tau0` calculated above so that validation estimates RMTL
+over the same horizon as the average treatment effect example.
 
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+``` r
 
 output_catecv <- catecv(response = "survival",
                         data = survivalExample,
@@ -656,38 +782,40 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:54:06 2026 
+#>    Sat Nov 14 16:10:25 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:54:21 2026 
+#>    Sat Nov 14 16:10:37 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:54:36 2026 
+#>    Sat Nov 14 16:10:48 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:54:50 2026 
+#>    Sat Nov 14 16:11:00 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 14:55:05 2026 
+#>    Sat Nov 14 16:11:12 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 1.23 mins
+#> Total runtime : 58.52 secs
 ```
+
+### Inspect validation results
 
 The output of
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -705,7 +833,7 @@ For each method specified in the argument `score.method`, the following
 3 groups of outputs are generated: `high`, `low` and `group`. We use the
 results from `randomForest` as an example.
 
-**1. ATEs in nested subgroups of high responders**
+#### Nested subgroups of high responders
 
 This output stores the ATEs - the ratio of RMTL between drug1 vs drug0
 in this example - in nested subgroups of patients of high responders to
@@ -722,17 +850,17 @@ outcome type.
 
 output_catecv$ate.randomForest$ate.est.train.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.6 0.4749922 0.5030279 0.4981575 0.5171575 0.5554420
-#> prop0.7 0.6201716 0.6770233 0.6175497 0.6582595 0.6266985
-#> prop0.8 0.7285812 0.7720559 0.7332510 0.7534121 0.7397380
-#> prop0.9 0.8915834 0.9372166 0.8941672 0.9168509 0.9032349
+#> prop0.6 0.4764099 0.5013222 0.4990364 0.5297222 0.4526175
+#> prop0.7 0.6137543 0.6730789 0.6144206 0.6557964 0.6252437
+#> prop0.8 0.7322197 0.7772825 0.7328209 0.7541395 0.7385821
+#> prop0.9 0.8910811 0.9386052 0.8935986 0.9172022 0.9027875
 #> prop1   1.0534514 1.1042633 1.0646558 1.0830122 1.0690691
 output_catecv$ate.randomForest$ate.est.valid.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.6 0.6507888 0.5255798 0.4978265 0.5925663 0.5055188
-#> prop0.7 0.6226787 0.5435506 0.6523691 0.5929241 0.6106757
-#> prop0.8 0.7969796 0.7092100 0.7952712 0.7284509 0.7506247
-#> prop0.9 0.9859877 0.8537926 0.9469109 0.8875706 0.9240364
+#> prop0.6 0.5081771 0.5297259 0.4985459 0.6066193 0.5059947
+#> prop0.7 0.6216010 0.5400918 0.6545261 0.5943399 0.6095601
+#> prop0.8 0.7980169 0.7090499 0.7976313 0.7349663 0.7510994
+#> prop0.9 0.9835271 0.8542591 0.9465652 0.8873658 0.9241468
 #> prop1   1.1465914 1.0194984 1.0968389 1.0526779 1.1027499
 ```
 
@@ -747,11 +875,11 @@ build the subgroups.
 
 For example, in the training set and in the 4th CV iteration (4th column
 labeled “cv4”), the subgroup defined with the 80% lowest CATE scores
-(3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.753. In
+(3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.754. In
 contrast, the subgroup defined with all patients (last row labeled
 “prop1”) in the 4th CV iteration has an estimated RMTL ratio of 1.083.
 
-**2. ATEs in nested subgroups of low responders**
+#### Nested subgroups of low responders
 
 This output stores the ATEs in nested subgroups of *low responders* to
 drug1 in the training (`$ate.est.train.low.cv`) and validation
@@ -765,11 +893,11 @@ both `higher.y` and outcome type.
 ``` r
 
 output_catecv$ate.randomForest$ate.est.train.low.cv
-#>               cv1      cv2       cv3       cv4       cv5
-#> prop0.4  7.795507  6.68852  9.612264  8.540335  7.353119
-#> prop0.3 37.739481 85.49910 95.881645 46.227020 66.235593
-#> prop0.2       Inf       NA       Inf       Inf       Inf
-#> prop0.1        NA       NA        NA        NA        NA
+#>               cv1       cv2       cv3       cv4       cv5
+#> prop0.4  7.379648  6.409209  9.396244  8.032503  7.383317
+#> prop0.3 38.586988 76.013246 51.077476 47.107327 65.348488
+#> prop0.2       Inf        NA       Inf       Inf       Inf
+#> prop0.1        NA        NA        NA        NA        NA
 ```
 
 The outputs are also matrices with columns corresponding to the CV
@@ -783,21 +911,51 @@ responders defined as patients with the 60% lowest (highest if
 responders defined as patients with the 40% highest (lowest if
 `higher.y` = FALSE) estimated CATE scores, labeled as “prop0.4”. In the
 training set and in the first CV iterations, the estimated RMTL ratio is
-0.475 in the 60% high responders to drug 1 and 7.796 in the 40% low
+0.476 in the 60% high responders to drug 1 and 7.38 in the 40% low
 responders.
 
-The 2 last rows have missing or infinite values and this can be due to
-many reasons. We record all errors and warnings and keep them as an
-element of the `cv` output. For example, we can use the following code
-to check specific errors and warnings of the first CV iteration (`$cv1`)
-using the random forest method (`$randomForest`) when estimating the ATE
-in the training sample in the low responder groups
-(`$est.train.low.cv`). It looks like there was no event observation in
-the 10% subgroup, possibly due to small sample size, which also relates
-to the convergence issue in the warning. Additionally, the warning for
-the 20% subgroup (`$warnings$'prop0.2'`) suggested that there was
-non-convergence of the Cox procedure and that the corresponding
-estimated ATE should be interpreted with caution.
+#### Mutually exclusive subgroups
+
+This output stores the ATEs in mutually exclusive multi-category
+subgroups of patients in the training (`$ate.est.train.group.cv`) and
+validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
+
+``` r
+
+output_catecv$ate.randomForest$ate.est.train.group.cv
+#>               cv1       cv2      cv3       cv4       cv5
+#> prop0.5 3.4146121 3.5645209 3.742203 3.6563886 3.6713271
+#> prop0.6 1.2830441 1.0480331 1.042360 1.1466844 0.8950199
+#> prop1   0.2886004 0.4076428 0.271536 0.2834448        NA
+output_catecv$ate.randomForest$ate.est.valid.group.cv
+#>               cv1      cv2       cv3       cv4      cv5
+#> prop0.5 4.8092876 3.439306 3.4391983 4.0584206 3.805918
+#> prop0.6 0.9988325 1.166552 5.0322856 0.8450476 1.402690
+#> prop1          NA       NA 0.3198583        NA       NA
+```
+
+The output is a matrix with columns corresponding to the CV iterations
+and rows corresponding to the mutually exclusive subgroups. The previous
+2 outputs only focus on binary subgroups (high or low responders). Here,
+the mutually exclusive subgroups can be more than 2 and are defined by
+the argument `prop.multi`. We use `c(0, 0.5, 0.6, 1)` which defines 3
+subgroups of patients with the 50% lowest, 10% middle and 40% highest
+estimated CATE scores when `higher.y` = TRUE (as in this example), or
+with the 40% highest, 10% middle and 50% lowest estimated CATE scores
+when `higher.y` = FALSE. Taking the first column as an example, the
+first CV iteration calculated 3.415 as the RMTL ratio for the subgroup
+with the 50% lowest estimated CATE scores, 1.283 as the RMTL ratio for
+the subgroup with the middle 10% estimated CATE scores, and 0.289 as the
+RMTL ratio for the subgroup with the 40% highest estimated CATE scores.
+
+### Inspect errors and warnings
+
+Subgroup estimates can be missing or unstable, for example when a
+subgroup has few patients or observed events. The
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+output records errors and warnings for each method, subgroup and
+iteration. The following code checks the first iteration for
+low-responder subgroups using the random forest method:
 
 ``` r
 
@@ -808,14 +966,20 @@ output_catecv$`errors/warnings`$randomForest$est.train.low.cv$cv1
 #> 
 #> 
 #> $warnings
+#> $warnings$`prop 0.3`
+#> [1] "Warning in NULL : Doubly robust RMST for treatment 1 is outside [0, tau0]; using the outcome-model estimate, which is not doubly robust."
+#> 
 #> $warnings$`prop 0.2`
-#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
-#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : one or more coefficients may be infinite"  
-#> [3] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : one or more coefficients may be infinite"  
+#> [3] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [4] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : one or more coefficients may be infinite"  
+#> [5] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
 #> 
 #> $warnings$`prop 0.1`
-#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
-#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
+#> [3] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
 output_catecv$`errors/warnings`$randomForest$est.valid.low.cv$cv1
 #> $errors
 #> $errors$`prop 0.2`
@@ -830,53 +994,23 @@ output_catecv$`errors/warnings`$randomForest$est.valid.low.cv$cv1
 #> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"
 #> 
 #> $warnings$`prop 0.3`
-#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"                         
-#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Loglik converged before variable  4 ; coefficient may be infinite. "
+#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"                         
+#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Ran out of iterations and did not converge"                         
+#> [3] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter) : Loglik converged before variable  4 ; coefficient may be infinite. "
 #> 
 #> $warnings$`prop 0.2`
-#> [1] "Warning in max(event[who2]) : glm.fit: algorithm did not converge"            
-#> [2] "Warning in max(event[who2]) : no non-missing arguments to max; returning -Inf"
+#> [1] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), max(event[who2]) : glm.fit: algorithm did not converge"            
+#> [2] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), max(event[who2]) : Ran out of iterations and did not converge"     
+#> [3] "Warning in coxph.fit(X, Y, istrat, offset, init, control, weights = weights, method = method, rname, nocenter = nocenter), max(event[who2]) : no non-missing arguments to max; returning -Inf"
 #> 
 #> $warnings$`prop 0.1`
 #> [1] "Warning in max(event[who2]) : no non-missing arguments to max; returning -Inf"
 ```
 
-**3. ATEs in mutually exclusive multi-category subgroups**
-
-This output stores the ATEs in mutually exclusive multi-category
-subgroups of patients in the training (`$ate.est.train.group.cv`) and
-validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
-
-``` r
-
-output_catecv$ate.randomForest$ate.est.train.group.cv
-#>               cv1       cv2      cv3       cv4       cv5
-#> prop0.5 3.4124876 3.5633593 3.737684 3.6563886 3.6699863
-#> prop0.6 1.3105527 1.0511322 1.048561 1.1470378 0.9082444
-#> prop1   0.2873749 0.4129138 0.271536 0.2827509        NA
-output_catecv$ate.randomForest$ate.est.valid.group.cv
-#>              cv1      cv2       cv3       cv4      cv5
-#> prop0.5 4.739424 3.439306 3.6636766 4.0561238 3.506197
-#> prop0.6 0.884929 1.193522 2.6257360 0.8480201 1.368189
-#> prop1         NA       NA 0.3218319        NA       NA
-```
-
-The output is a matrix with columns corresponding to the CV iterations
-and rows corresponding to the mutually exclusive subgroups. The previous
-2 outputs only focus on binary subgroups (high or low responders). Here,
-the mutually exclusive subgroups can be more than 2 and are defined by
-the argument `prop.multi`. We use `c(0, 0.5, 0.6, 1)` which defines 3
-subgroups of patients with the 50% lowest, 10% middle and 40% highest
-estimated CATE scores when `higher.y` = TRUE (as in this example), or
-with the 40% highest, 10% middle and 50% lowest estimated CATE scores
-when `higher.y` = FALSE. Taking the first column as an example, the
-first CV iteration calculated 3.412 as the RMTL ratio for the subgroup
-with the 50% lowest estimated CATE scores, 1.311 as the RMTL ratio for
-the subgroup with the middle 10% estimated CATE scores, and 0.287 as the
-RMTL ratio for the subgroup with the 40% highest estimated CATE scores.
-Use
-`` output_catecv$`errors/warnings`$randomForest$est.train.group.cv `` to
-learn more about the errors and warnings generated from these outputs.
+For mutually exclusive subgroups, inspect
+`` output_catecv$`errors/warnings`$randomForest$est.train.group.cv ``.
+Review any convergence warnings and interpret affected estimates with
+caution.
 
 ## Compare scoring methods using the ABC statistic
 
@@ -900,7 +1034,7 @@ et al. 2026).
 output_abc <- abc(output_catecv)
 output_abc
 #>                    cv1       cv2       cv3       cv4       cv5
-#> randomForest 0.1528127 0.1468651 0.1390613 0.1457913 0.1535596
+#> randomForest 0.1531551 0.1449994 0.1384612 0.1453344 0.1535235
 #> contrastReg  0.1415529 0.1304287 0.1366294 0.1303885 0.1519330
 ```
 
@@ -916,7 +1050,7 @@ can combine the ABC for each method across iterations:
 average_abc <- apply(output_abc, 1, mean)
 average_abc
 #> randomForest  contrastReg 
-#>    0.1476180    0.1381865
+#>    0.1470947    0.1381865
 ```
 
 In this example, random forest also offers the best overall performance

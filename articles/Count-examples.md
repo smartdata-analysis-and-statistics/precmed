@@ -307,7 +307,7 @@ output_catefit <- catefit(
 #> Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 5.252095 secs
+#> Time difference of 3.953855 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -435,6 +435,8 @@ ggplot(dataplot, aes(x = value, fill = score)) +
 
 ## Internally validate CATE scores
 
+### How internal validation works
+
 For broader guidance on validation strategies and the assessment of
 discrimination, calibration, and decision accuracy, see Chapter 19,
 “Validation of prediction models for patient outcomes and individualized
@@ -500,7 +502,9 @@ The CV is applied by repeating the following steps `cv.n` times:
   each subgroup. Mutually exclusive subgroups are built by splitting the
   estimated CATE scores according to prop.multi.
 
-Oke, so now we can use the
+### Run internal validation
+
+Now we can use the
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 function to run internal validation to compare the different scoring
 methods. The mandatory arguments are similar to
@@ -587,38 +591,40 @@ output_catecv <- catecv(
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:50:45 2026 
+#>    Sat Nov 14 16:07:49 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:50:48 2026 
+#>    Sat Nov 14 16:07:52 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:50:54 2026 
+#>    Sat Nov 14 16:07:56 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:51:00 2026 
+#>    Sat Nov 14 16:08:01 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 14:51:06 2026 
+#>    Sat Nov 14 16:08:06 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 28.22 secs
+#> Total runtime : 21.75 secs
 ```
+
+### Inspect validation results
 
 The output of
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -636,7 +642,7 @@ For each method specified in the argument `score.method`, the following
 3 groups of outputs are generated: `high`, `low` and `group`. We use the
 results from `contrastReg` as an example.
 
-**1. ATEs in nested subgroups of high responders**
+#### Nested subgroups of high responders
 
 This output stores the ATEs - the ratio of annualized relapse rate
 between drug1 vs drug0 in this example - in nested subgroups of patients
@@ -683,7 +689,7 @@ scores (first row labeled “prop0.5”) has an estimated RR of 0.59. In
 contrast, the subgroup defined with all patients (last row labeled
 “prop1”) has an estimated RR of 1.06.
 
-**2. ATEs in nested subgroups of low responders**
+#### Nested subgroups of low responders
 
 This output stores the ATEs in nested subgroups of *low responders* to
 drug1 in the training (`$ate.est.train.low.cv`) and validation
@@ -718,7 +724,7 @@ estimated CATE scores, labeled as “prop0.4”. In the training set and in
 the first CV iterations, the estimated RR is 0.674 in the 60% high
 responders to drug 1 and 1.71 in the 40% low responders.
 
-**3. ATEs in mutually exclusive subgroups**
+#### Mutually exclusive subgroups
 
 This output stores the ATEs in mutually exclusive multi-category
 subgroups of patients in the training (`$ate.est.train.group.cv`) and
@@ -751,6 +757,22 @@ example, the first CV iteration calculated 1.864 as the RR for the
 subgroup with the 33% lowest estimated CATE scores, 1.07 as the RR for
 subgroup with the 33% middle estimated CATE scores, and 0.483 as the RR
 for subgroup with the 33% highest estimated CATE scores.
+
+### Inspect errors and warnings
+
+Subgroup estimates can be missing or unstable, for example when a
+subgroup has few patients or observed events. Check warnings after
+running
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+and review affected estimates with caution:
+
+``` r
+
+warnings()
+```
+
+Unlike the survival output, the count output does not store a
+subgroup-specific `errors/warnings` list.
 
 ## Compare scoring methods using the ABC statistic
 
