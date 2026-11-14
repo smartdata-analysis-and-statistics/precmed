@@ -2676,7 +2676,7 @@ plot.precmed <- function(x,
       result$scales$scales <- Filter(function(scale) !"y" %in% scale$aesthetics, result$scales$scales)
       return(result + ggplot2::facet_grid(measure ~ set, scales = "free_y") +
                ggplot2::scale_y_continuous() +
-               labs(y = if (is.null(ylab)) "Treatment effect ratio" else ylab))
+               labs(y = if (is.null(ylab)) "Treatment effect" else ylab))
     }
     plot.hr <- measure != "rmtl"
     if (plot.hr && missing(show.abc)) show.abc <- FALSE
@@ -2759,9 +2759,9 @@ plot.precmed <- function(x,
 
   # Define x-axis label
   if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response == "continuous")) {
-    xlab <- "Subgroup size\n(proportion of subjects with lowest estimated CATE)"
+    xlab <- "Subgroup size\n(% of subjects with lowest estimated CATE)"
   } else {
-    xlab <- "Subgroup size\n(proportion of subjects with highest estimated CATE)"
+    xlab <- "Subgroup size\n(% of subjects with highest estimated CATE)"
   }
 
   # Detect the number of score methods
@@ -2876,11 +2876,13 @@ plot.precmed <- function(x,
   if (x$response == "survival") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(rep(rep(mapped.method, each = l), 2), "ABC:", sprintf('%.3f', abc)))
   if (x$response == "continuous") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(as.character(mapped.method), "ABC:", sprintf('%.3f', abc)))
 
+  cv.suffix <- if (is.null(cv.i)) "" else paste0(" (CV iteration ", cv.i, ")")
+  training.label <- paste0("Training set", cv.suffix)
+  validation.label <- paste0("Validation set", cv.suffix)
   dat <- data.frame(ate.cv = results,
-                    set = factor(c(rep(paste0("Training set CV", cv.i), l * m),
-                                   rep(paste0("Validation set CV", cv.i), l * m)),
-                                 levels = c(paste0("Training set CV", cv.i),
-                                            paste0("Validation set CV", cv.i))),
+                    set = factor(c(rep(training.label, l * m),
+                                   rep(validation.label, l * m)),
+                                 levels = c(training.label, validation.label)),
                     prop = rep(prop.onlyhigh, times = 2 * m),
                     score = factor(rep(rep(mapped.method, each = l), 2),
                                    levels = mapped.method)) %>%
@@ -2893,7 +2895,7 @@ plot.precmed <- function(x,
     filter(.data$prop >= xlim[1] & .data$prop <= xlim[2])
 
   if (valid.only == TRUE) {
-    dat <- dat %>% filter(.data$set == paste0("Validation set CV", cv.i))
+    dat <- dat %>% filter(.data$set == validation.label)
   }
 
   plot.values <- c(dat$ate.cv, overall.hline.train, overall.hline.valid)
@@ -2925,6 +2927,7 @@ plot.precmed <- function(x,
     ggplot(aes(x = .data$prop, y = .data$ate.cv, color = .data$score)) +
     geom_line(linewidth = 1.2) +
     facet_wrap(~ .data$set, ncol = 2) +
+    scale_x_continuous(labels = function(x) paste0(format(100 * x, trim = TRUE, scientific = FALSE), "%")) +
     scale_y_continuous(limits = c(lowery, uppery)) +
     labs(y = ylab, x = xlab, title = title) +
     theme +
@@ -2933,10 +2936,9 @@ plot.precmed <- function(x,
 
   # Add overall ATE
   abline <- data.frame(yintercept = c(overall.hline.train, overall.hline.valid),
-                       set = factor(c(paste0("Training set CV", cv.i),
-                                      paste0("Validation set CV", cv.i))))
+                       set = factor(c(training.label, validation.label)))
   if (valid.only == TRUE) {
-    abline <- abline %>% filter(.data$set == paste0("Validation set CV", cv.i))
+    abline <- abline %>% filter(.data$set == validation.label)
   }
 
   p <- p + geom_hline(data = abline, aes(yintercept = .data$yintercept),

@@ -446,7 +446,7 @@ We also specified the following non-mandatory arguments to fit with the data and
 
 * We avoided generating the boosting performance plots by specifying `plot.gbmperf` = FALSE.
 
-* When `verbose` = 1, progress messages are printed in the R console but errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If `contrastReg` was selected as one of the methods in `score.method`, an additional line of output message will indicate whether the algorithm has converged.
+* We set `verbose = 0` to keep the example output concise. Set `verbose = 1` to show CV progress, or `verbose = 2` to also report errors and warnings from the CV procedure.
 
 There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Customizing CATE models and validation](Additional-examples.html) vignette for more examples and the Function description [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.html) for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
@@ -470,7 +470,7 @@ output_catecv <- catecv(response = "survival",
                         cv.n = 5,
                         seed = 999,
                         plot.gbmperf = FALSE,
-                        verbose = 1)
+                        verbose = 0)
 ```
 
 
@@ -544,7 +544,7 @@ average_abc <- apply(output_abc, 1, mean)
 average_abc
 ```
 
-In this example, random forest also offers the best overall performance because it has the highest average ABC, followed closely by contrast regression.
+In this example, contrast regression has the higher average ABC, indicating greater validation-set separation of treatment benefit than random forest. This is consistent with the earlier suspicion that the wider distribution of random forest scores may partly reflect overfitting. However, the ABC comparison alone does not establish overfitting; differences in model flexibility or estimation noise may also contribute.
 
 ## Assess responder discrimination with validation curves
 
@@ -566,7 +566,7 @@ To inspect a single cross-validation iteration instead of the average, set `cv.i
 
 To compare both measures across the nested subgroups, use `measure = c("rmtl", "cumulative_hr")`. The panels show the RMTL ratio and the cumulative hazard ratio separately; the latter summarizes cumulative hazards up to `tau0` and is not an instantaneous Cox HR. ABC is shown only for the RMTL plot above.
 
-```{r plot_cumulative_hazard, eval = T, echo = T, fig.width = 11}
+```{r plot_cumulative_hazard, eval = T, echo = T, fig.width = 11, fig.height = 8}
 plot(output_catecv, measure = c("rmtl", "cumulative_hr"))
 ```
 
