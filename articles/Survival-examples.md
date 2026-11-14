@@ -19,7 +19,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-## Example dataset
+## Example data
 
 To show the functionalities of the `precmed` package for survival
 outcomes we first need data. For our examples we use simulated data that
@@ -64,11 +64,14 @@ The final dataset `survivalExample` looked like this:
     #>  $ y                       : num  102.1 51.3 104.9 61.5 35.6 ...
     #>  $ d                       : num  0 0 0 0 0 0 0 0 0 1 ...
 
-## Estimation of the ATE with `atefit()`
+## Estimate the average treatment effect
 
-Chapter 20, “Visualization and interpretation of individualized
-treatment rule results”, discusses restricted mean time lost (RMTL) as
-an outcome for ratio-based treatment effects (Jiang et al. 2026).
+Restricted mean survival time (RMST) is the average event-free time up
+to a chosen horizon `tau0`; restricted mean time lost (RMTL) is
+`tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time
+lost under drug 0 over that horizon. For relapse, a ratio below 1 favors
+drug 1. Results depend on the chosen horizon. Chapter 20 discusses RMTL
+for ratio-based treatment effects (Jiang et al. 2026).
 
 First, one might be interested in the effect of the drug (trt) on the
 number of days until the first relapse or censoring (y). Lets test this
@@ -99,8 +102,9 @@ summary(output_cox)
 ```
 
 We see from the Cox regression we see that drug1 resulted in a hazard
-ratio (HR) of 3.04 when compared to drug 0. This indicates that drug 0
-is superior to drug 1 because drug 1 increases the risk of a relapse.
+ratio (HR) of 3.04 when compared to drug 0. This unadjusted hazard ratio
+compares the instantaneous relapse hazards, conditional on remaining
+event-free; it does not by itself establish a causal treatment effect.
 
 Now we want to estimate the Average Treatment Effect (ATE) and correct
 for several covariates like age and previous treatment because they
@@ -115,6 +119,15 @@ Inverse Probability Censoring Weights (IPCW). The HR estimator is based
 on a Cox regression model. The function also provides standard error,
 confidence intervals, and p-values based on bootstrap.
 
+IPCW adjusts for censoring by weighting patients according to their
+estimated probability of remaining uncensored. Causal interpretation
+requires assumptions including no unmeasured treatment confounding,
+adequate treatment overlap, appropriate censoring assumptions and
+sufficient follow-up. Chapter 17 discusses identification of treatment
+effects in non-randomized data (Hoogland et al. 2026). The Cox hazard
+ratio and the RMTL ratio describe different aspects of survival and
+should be interpreted separately.
+
 The mandatory arguments for
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 are:
@@ -126,23 +139,6 @@ are:
 - The argument `data` indicates the data frame in which the outcome,
   treatment and covariates specified in either `cate.model` or
   `ps.model` should be fetched.
-
-- The `score.method` argument specifies the precision medicine (PM)
-  methods to be used to calculate the CATE scores. There are a total of
-  5 scoring methods implemented:
-
-  - `poisson` fits a Poisson model separately by treatment group.
-
-  - `boosting` uses gradient boosted regression models (GBM) separately
-    by treatment group.
-
-  - `randomForest` fits a random forest model by treatment group.
-
-  - `twoReg` implements the doubly robust two regressions estimator in
-    (Yadlowsky et al. 2021).
-
-  - `contrastReg` implements the doubly robust contrast regression
-    estimator from (Yadlowsky et al. 2021).
 
 - The argument `cate.model` specifies the CATE model as a formula, with
   the survival object from the `survival` package, `Surv(y, d)`,
@@ -161,19 +157,21 @@ are:
   variable `trt` must be supplied as a numeric variable taking only 2
   values, “1” for active treatment and “0” for control or comparator. If
   it is not the case,
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   will stop with error if `trt` takes more than 2 distinct values or
   will automatically transform `trt` into a numeric variable. In this
   example, `trt` (a factor variable taking values “drug0” and “drug1”)
   was transformed and a warning message was left to the user (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
   If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. Note that the PS model is only used in the estimation of the 2
-  doubly robust methods (two and contrast regressions).
+  ~ 1. The PS model is used in the doubly robust RMTL estimation.
 
-- `tau0`: The truncation time for defining restricted mean time lost.
-  Because our outcome `y` is skewed towards 0, we use the 95% upper
-  limit.
+- `tau0`: The horizon for RMST and RMTL. Below, we choose the smaller of
+  the 95th percentiles of observed follow-up times in the two treatment
+  groups. This illustrative choice limits extrapolation, but does not
+  guarantee adequate follow-up: inspect numbers at risk and censoring in
+  each group near the chosen horizon, and choose a clinically meaningful
+  horizon with sufficient support.
 
 Let’s calculate the ATE for the effect of treatment on y and build an
 outcome model that contains all variables and a PS model with `age` and
@@ -201,15 +199,15 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE      CI.lower  CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03586099 -0.0001309541 0.1404416 0.05042838
-#> log.hazard.ratio 2.7133243 0.19531152  2.3305207442 3.0961278 0.00000000
+#>                   estimate         SE    CI.lower  CI.upper     pvalue
+#> log.rmtl.ratio   0.0701553 0.03517679 0.001210064 0.1391005 0.04611234
+#> log.hazard.ratio 2.7133243 0.19683887 2.327527199 3.0991214 0.00000000
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 7.014662 159.1124 186.6094      0
-#> rmst0 196.5603 8.944020 179.0303 214.0902      0
+#> rmst1 172.8609 6.923291 159.2915 186.4303      0
+#> rmst0 196.5603 8.512084 179.8769 213.2436      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -229,12 +227,11 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 - the log HR (`$log.hazard.ratio`).
 
 For example, the log RMTL ratio of 0.07 and the 95% confidence interval
-of (0, 0.14) are displayed in the output. The RMTL ratio of along with
-the 95% confidence interval suggest that drug 0 is superior to drug 1
-because the ratio is significantly greater than 1. When we check the
-estimated RMST, we also see that the estimated rmst1 is lower compared
-to rmst0, indicating that patients that received drug0 have a longer
-mean survival time compared to drug1.
+of (0, 0.14) are displayed in the output. The estimated ratio and its
+interval can be obtained by exponentiating these log-scale values. A
+ratio above 1 indicates more time lost before `tau0` under drug 1; the
+interval describes uncertainty in that comparison. The RMST estimates
+provide the corresponding event-free times up to `tau0`.
 
 The output of
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -261,7 +258,14 @@ estimates.
 
 Histograms of bootstrap estimators for 4 estimands after 500 bootstrap
 
-## Estimation of the CATE score with `catefit()`
+## Estimate CATE scores
+
+Chapter 17 describes treatment effect heterogeneity and CATE prediction
+(Hoogland et al. 2026). In this example, scores are on the
+log-RMTL-ratio scale, so exponentiating a score gives an estimated
+conditional RMTL ratio. Lower scores indicate greater estimated benefit
+from drug 1. Fitting scores on the full dataset does not establish their
+performance in new patients.
 
 Now we have calculated the ATE we know the effect of both treatments on
 average, but this effect might not be the same for all patients. Thus,
@@ -340,19 +344,18 @@ data and problem at hand: `initial.predictor.method`, `tau0`,
   “logistic” because it is relatively faster than boosting methods and
   random forest.
 
-- `tau0` is the truncation time for defining restricted mean time lost
-  (RMTL). Because our outcome `y` is skewed towards 0, we use the 95%
-  upper limit.
+- `tau0` is the horizon for RMTL, chosen as described above; assess
+  follow-up support near this horizon in both treatment groups.
 
 - `higher.y` was set to `TRUE` because relapse is a negative event and
   longer time to first relapse is more desirable in our example. Hence,
   we are telling the function that subgroups of high responders to drug1
-  vs drug0 should have later onset of the first relapse. In other
-  situation, higher outcomes may be more favorable for time to a
-  positive event, e.g., time to discharge or time to improved
-  disability. It is important for this argument to match with the nature
-  of `y` outcome because it will affect how the subgroups are defined by
-  the CATE scores and the performance metrics.
+  vs drug0 should have later onset of the first relapse. For a positive
+  event such as discharge, a shorter time may instead be preferable, so
+  `higher.y = FALSE` may be appropriate. It is important for this
+  argument to match with the nature of `y` outcome because it will
+  affect how the subgroups are defined by the CATE scores and the
+  performance metrics.
 
 - We set a random seed `seed` = 999 to reproduce the results.
 
@@ -392,9 +395,10 @@ results in
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md):
 
 1.  `score` contains the log-transformed estimated CATE scores for each
-    subject. The CATE score is a linear combination of the variables
-    specified in the `cate.model` argument. Same as the outcome, lower
-    CATE scores are more desirable if `higher.y` = FALSE and vice versa.
+    subject. The relationship between covariates and the score depends
+    on the scoring method. For survival outcomes, lower scores
+    correspond to high responders to drug 1 when `higher.y` = TRUE;
+    higher scores correspond to high responders when `higher.y` = FALSE.
     In our example, the survival outcome is time to first relapse, which
     is a negative event, so higher values indicate later onset of the
     first relapse. Hence, we specify `higher.y` = TRUE in the example.
@@ -481,12 +485,20 @@ dataplot %>%
 
 ![](Survival-examples_files/figure-html/plot_score-1.png)
 
-## Internal validation via `catecv()`
+## Internally validate CATE scores
 
 For broader guidance on validation strategies and the assessment of
 discrimination, calibration, and decision accuracy, see Chapter 19,
 “Validation of prediction models for patient outcomes and individualized
 treatment effect” (Thao et al. 2026).
+
+In each iteration, scores are fitted in a training set and evaluated in
+a separate validation set. For example, the 60% of validation patients
+with the lowest scores form a high-responder subgroup in this example.
+Repeating the split shows variation across iterations. Selecting the
+best method using the same validation results can make its reported
+performance optimistic; an independent evaluation can assess the
+selected method.
 
 The
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -501,7 +513,7 @@ The CV is applied by repeating the following steps `cv.n` times:
 - Split the data into a training and validation set according to
   `train.prop` argument. The training and validation sets must be
   balanced with respect to covariate distributions and doubly robust
-  rate ratio estimates (see `error.max` argument).
+  treatment effect estimates (see `error.max` argument).
 
 - Estimate the CATE score in the training set with the specified scoring
   method.
@@ -515,15 +527,15 @@ The CV is applied by repeating the following steps `cv.n` times:
   `prop.cutoff[i] = 0.6`), take the following steps:
 
   - Identify high responders as observations with the 60% (i.e.,
-    `prop.cutoff[i]x100%`) highest (if `higher.y = TRUE`) or lowest (if
+    `prop.cutoff[i]x100%`) lowest (if `higher.y = TRUE`) or highest (if
     `higher.y = FALSE`) estimated CATE scores.
 
   - Estimate the ATE in the subgroup of high responders using a doubly
     robust estimator.
 
   - Conversely, identify low responders as observations with the 40%
-    (i.e., `1 - prop.cutoff[i]x100%`) lowest (if `higher.y = TRUE`) or
-    highest (if `higher.y = FALSE`) estimated CATE scores.
+    (i.e., `1 - prop.cutoff[i]x100%`) highest (if `higher.y = TRUE`) or
+    lowest (if `higher.y = FALSE`) estimated CATE scores.
 
   - Estimate the ATE in the subgroup of low responders using a doubly
     robust estimator.
@@ -567,19 +579,18 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
   set it default as `NULL`, which indicates unknown potential censoring
   time.
 
-- `tau0` is the truncation time for defining restricted mean time lost
-  (RMTL). Because our outcome `y` is skewed towards 0, we use the 95%
-  upper limit.
+- `tau0` is the horizon for RMTL, chosen as described above; assess
+  follow-up support near this horizon in both treatment groups.
 
 - `higher.y` was set to `TRUE` because relapse is a negative event and
   longer time to first relapse is more desirable in our example. Hence,
   we are telling the function that subgroups of high responders to drug1
-  vs drug0 should have later onset of the first relapse. In other
-  situation, higher outcomes may be more favorable for time to a
-  positive event, e.g., time to discharge or time to improved
-  disability. It is important for this argument to match with the nature
-  of `y` outcome because it will affect how the subgroups are defined by
-  the CATE scores and the performance metrics.
+  vs drug0 should have later onset of the first relapse. For a positive
+  event such as discharge, a shorter time may instead be preferable, so
+  `higher.y = FALSE` may be appropriate. It is important for this
+  argument to match with the nature of `y` outcome because it will
+  affect how the subgroups are defined by the CATE scores and the
+  performance metrics.
 
 - `surv.min` truncates the censoring probability estimated from the IPCW
   model with a lower limit to prevent extremely small censoring
@@ -645,37 +656,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 20:41:02 2026 
+#>    Sat Nov 14 14:54:06 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 20:41:14 2026 
+#>    Sat Nov 14 14:54:21 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 20:41:26 2026 
+#>    Sat Nov 14 14:54:36 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 20:41:38 2026 
+#>    Sat Nov 14 14:54:50 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 13 20:41:50 2026 
+#>    Sat Nov 14 14:55:05 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 1.01 mins
+#> Total runtime : 1.23 mins
 ```
 
 The output of
@@ -736,7 +747,7 @@ build the subgroups.
 
 For example, in the training set and in the 4th CV iteration (4th column
 labeled “cv4”), the subgroup defined with the 80% lowest CATE scores
-(4th row labeled “prop0.8”) has an estimated RMTL ratio of 0.753. In
+(3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.753. In
 contrast, the subgroup defined with all patients (last row labeled
 “prop1”) in the 4th CV iteration has an estimated RMTL ratio of 1.083.
 
@@ -770,9 +781,9 @@ high responders. For example, the complement of the subgroup of high
 responders defined as patients with the 60% lowest (highest if
 `higher.y` = FALSE) estimated CATE scores is the subgroup of low
 responders defined as patients with the 40% highest (lowest if
-`higher.y` = TRUE) estimated CATE scores, labeled as “prop0.4”. In the
+`higher.y` = FALSE) estimated CATE scores, labeled as “prop0.4”. In the
 training set and in the first CV iterations, the estimated RMTL ratio is
-0.62 in the 60% high responders to drug 1 and 37.739 in the 40% low
+0.475 in the 60% high responders to drug 1 and 7.796 in the 40% low
 responders.
 
 The 2 last rows have missing or infinite values and this can be due to
@@ -867,9 +878,9 @@ Use
 `` output_catecv$`errors/warnings`$randomForest$est.train.group.cv `` to
 learn more about the errors and warnings generated from these outputs.
 
-## Comparison of methods with `abc()`
+## Compare scoring methods using the ABC statistic
 
-The ABC statistics is calculated by
+The ABC statistic is calculated by
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
 for each scoring method specified in
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -878,17 +889,18 @@ and for each of the `cv.n` CV iterations using the output object
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
 The ABC corresponds to the area between the curve formed by the ATEs in
 subgroups of high responders in the validation set (e.g.,
-`output_catecv$ate.randomForest$ate.est.valid.cv` for random forest) and
-the horizontal line representing the ATE in the validation set. A higher
-ABC value means that the method captures more treatment effect
-heterogeneity.
+`output_catecv$ate.randomForest$ate.est.valid.high.cv` for random
+forest) and the horizontal line representing the ATE in the validation
+set. A higher ABC indicates greater separation in the expected direction
+in this example. Chapter 20 discusses this responder diagnostic (Jiang
+et al. 2026).
 
 ``` r
 
 output_abc <- abc(output_catecv)
 output_abc
 #>                    cv1       cv2       cv3       cv4       cv5
-#> randomForest 0.1529437 0.1468651 0.1390613 0.1457913 0.1535596
+#> randomForest 0.1528127 0.1468651 0.1390613 0.1457913 0.1535596
 #> contrastReg  0.1415529 0.1304287 0.1366294 0.1303885 0.1519330
 ```
 
@@ -904,14 +916,14 @@ can combine the ABC for each method across iterations:
 average_abc <- apply(output_abc, 1, mean)
 average_abc
 #> randomForest  contrastReg 
-#>    0.1476442    0.1381865
+#>    0.1476180    0.1381865
 ```
 
 In this example, random forest also offers the best overall performance
 because it has the highest average ABC, followed closely by contrast
 regression.
 
-## Visualization of the validation curves with `plot()`
+## Assess responder discrimination with validation curves
 
 Chapter 20 discusses validation curves, ABC statistics, and their
 interpretation as responder diagnostics (Jiang et al. 2026). These
@@ -933,15 +945,15 @@ and `drug1`) to specify a meaningful y-axis label. Otherwise, it is
 possible to customize the y-axis label via the `ylab`, for example, by
 specifying `ylab` = “RMTL ratio of drug1 vs drug0 in each subgroup”.
 
-Steeper slopes indicate more treatment effect heterogeneity between
-drug1 and drug0. Because `higher.y` = TRUE in this example, the slopes
-should be increasing from left (`prop.cutoff` = 0.6) to right
-(`prop.cutoff` = 1) if treatment effect heterogeneity is present (see
-section [Validation curves and the ABC
+A stronger separation between the curve and the overall ATE can indicate
+better ranking of patients by treatment benefit. Because `higher.y` =
+TRUE in this example, the slopes should be increasing from left
+(`prop.cutoff` = 0.6) to right (`prop.cutoff` = 1) if treatment effect
+heterogeneity is present (see section [Validation curves and the ABC
 statistics](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
-for illustration). The method that has the steepest slope in the
-validation results would be selected because it captures the most
-treatment effect heterogeneity while generalizing well to unseen data.
+for illustration). The validation curves and ABC can help compare
+methods, but selection on these same results warrants an independent
+assessment.
 
 ``` r
 
@@ -950,14 +962,13 @@ plot(output_catecv)
 
 ![](Survival-examples_files/figure-html/example_plot_lineplot1-1.png)
 
-For this toy example, the methods are performing well in the training
-data as per the steep, increasing slopes on the left plot. Moreover, all
-methods generalize well to the validation data, as indicated by the
-monotonous increasing curves in the validation data (right plot). The
-dashed gray line is the ATE in the entire data set, which is why all
-lines merge to this reference line when subgroup size is 100% of the
-data (`prop.cutoff` = 1). For more explanation on the validation curves,
-see the function description.
+In this example, the generally increasing validation curves suggest that
+the methods rank patients reasonably well by treatment benefit in the
+validation splits. The curves alone do not establish calibration or
+performance in a new population. The dashed gray line is the ATE in the
+entire data set, which is why all lines merge to this reference line
+when subgroup size is 100% of the data (`prop.cutoff` = 1). For more
+explanation on the validation curves, see the function description.
 
 The plot’s legend includes the ABC statistics in the validation set. The
 user can choose to mute the ABC annotations by specifying `show.abc` =
@@ -991,7 +1002,12 @@ The user can also choose to use the median (instead of mean \[default\])
 of the ATEs across CV iterations by specifying the argument `combine` =
 “median” in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
-## Visualization of the ATE in subgroups with `boxplot()`
+## Compare treatment effects across responder subgroups
+
+Unlike the nested groups in validation curves, these subgroups are
+mutually exclusive within each iteration. The boxes summarize variation
+in subgroup estimates across validation iterations. Chapter 20 compares
+these responder diagnostics (Jiang et al. 2026).
 
 The ATEs of multi-category subgroups that are mutually exclusive can be
 visualized as box plots, with 1 box plot for each scoring method. Only
@@ -1046,6 +1062,13 @@ validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles
 effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
+
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. “Introduction to Methods for Personalizing Medicine.”
+Chap. 17 in *Comparative Effectiveness and Personalized Medicine
+Research Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long
+Nguyen, and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-17>.
 
 Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
 Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of

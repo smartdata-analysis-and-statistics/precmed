@@ -71,7 +71,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Estimating and validating treatment effects for survival outcomes</h1>
             <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 13, 2026</h4>
+            <h4 data-toc-skip class="date">November 14, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Survival-examples.Rmd" class="external-link"><code>vignettes/Survival-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Survival-examples.Rmd</code></div>
@@ -96,7 +96,7 @@ subgroups.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example-dataset">Example dataset<a class="anchor" aria-label="anchor" href="#example-dataset"></a>
+<h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>
 <p>To show the functionalities of the <code>precmed</code> package for
 survival outcomes we first need data. For our examples we use simulated
@@ -469,11 +469,14 @@ USD.</p>
 <span><span class="co">#&gt;  $ d                       : num  0 0 0 0 0 0 0 0 0 1 ...</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="estimation-of-the-ate-with-atefit">Estimation of the ATE with <code>atefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-ate-with-atefit"></a>
+<h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
 </h2>
-<p>Chapter 20, “Visualization and interpretation of individualized
-treatment rule results”, discusses restricted mean time lost (RMTL) as
-an outcome for ratio-based treatment effects <span class="citation">(Jiang et al. 2026)</span>.</p>
+<p>Restricted mean survival time (RMST) is the average event-free time
+up to a chosen horizon <code>tau0</code>; restricted mean time lost
+(RMTL) is <code>tau0 - RMST</code>. The RMTL ratio compares time lost
+under drug 1 with time lost under drug 0 over that horizon. For relapse,
+a ratio below 1 favors drug 1. Results depend on the chosen horizon.
+Chapter 20 discusses RMTL for ratio-based treatment effects <span class="citation">(Jiang et al. 2026)</span>.</p>
 <p>First, one might be interested in the effect of the drug (trt) on the
 number of days until the first relapse or censoring (y). Lets test this
 using Cox regression.</p>
@@ -499,9 +502,10 @@ using Cox regression.</p>
 <span><span class="co">#&gt; Wald test            = 145.3  on 1 df,   p=&lt;2e-16</span></span>
 <span><span class="co">#&gt; Score (logrank) test = 160.9  on 1 df,   p=&lt;2e-16</span></span></code></pre></div>
 <p>We see from the Cox regression we see that drug1 resulted in a hazard
-ratio (HR) of 3.04 when compared to drug 0. This indicates that drug 0
-is superior to drug 1 because drug 1 increases the risk of a
-relapse.</p>
+ratio (HR) of 3.04 when compared to drug 0. This unadjusted hazard ratio
+compares the instantaneous relapse hazards, conditional on remaining
+event-free; it does not by itself establish a causal treatment
+effect.</p>
 <p>Now we want to estimate the Average Treatment Effect (ATE) and
 correct for several covariates like age and previous treatment because
 they might influence the relation between treatment and outcome. The
@@ -514,6 +518,14 @@ estimator also depends on the estimation of Inverse Probability
 Censoring Weights (IPCW). The HR estimator is based on a Cox regression
 model. The function also provides standard error, confidence intervals,
 and p-values based on bootstrap.</p>
+<p>IPCW adjusts for censoring by weighting patients according to their
+estimated probability of remaining uncensored. Causal interpretation
+requires assumptions including no unmeasured treatment confounding,
+adequate treatment overlap, appropriate censoring assumptions and
+sufficient follow-up. Chapter 17 discusses identification of treatment
+effects in non-randomized data <span class="citation">(Hoogland et al.
+2026)</span>. The Cox hazard ratio and the RMTL ratio describe different
+aspects of survival and should be interpreted separately.</p>
 <p>The mandatory arguments for <code><a href="../reference/atefit.html">atefit()</a></code> are:</p>
 <ul>
 <li><p>The <code>response</code> argument specifies the type of outcome
@@ -524,25 +536,6 @@ use.</p></li>
 the outcome, treatment and covariates specified in either
 <code>cate.model</code> or <code>ps.model</code> should be
 fetched.</p></li>
-<li>
-<p>The <code>score.method</code> argument specifies the precision
-medicine (PM) methods to be used to calculate the CATE scores. There are
-a total of 5 scoring methods implemented:</p>
-<ul>
-<li><p><code>poisson</code> fits a Poisson model separately by treatment
-group.</p></li>
-<li><p><code>boosting</code> uses gradient boosted regression models
-(GBM) separately by treatment group.</p></li>
-<li><p><code>randomForest</code> fits a random forest model by treatment
-group.</p></li>
-<li><p><code>twoReg</code> implements the doubly robust two regressions
-estimator in <span class="citation">(Yadlowsky et al.
-2021)</span>.</p></li>
-<li><p><code>contrastReg</code> implements the doubly robust contrast
-regression estimator from <span class="citation">(Yadlowsky et al.
-2021)</span>.</p></li>
-</ul>
-</li>
 <li><p>The argument <code>cate.model</code> specifies the CATE model as
 a formula, with the survival object from the <code>survival</code>
 package, <code>Surv(y, d)</code>, supplied on the left-hand side and the
@@ -558,7 +551,7 @@ formula, with the treatment variable <code>trt</code> on the left-hand
 side and the covariates (age and previous treatment in this example) on
 the right-hand side. The variable <code>trt</code> must be supplied as a
 numeric variable taking only 2 values, “1” for active treatment and “0”
-for control or comparator. If it is not the case, <code><a href="../reference/catecv.html">catecv()</a></code>
+for control or comparator. If it is not the case, <code><a href="../reference/atefit.html">atefit()</a></code>
 will stop with error if <code>trt</code> takes more than 2 distinct
 values or will automatically transform <code>trt</code> into a numeric
 variable. In this example, <code>trt</code> (a factor variable taking
@@ -566,11 +559,14 @@ values “drug0” and “drug1”) was transformed and a warning message was
 left to the user (see output below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
-= trt ~ 1. Note that the PS model is only used in the estimation of the
-2 doubly robust methods (two and contrast regressions).</p></li>
-<li><p><code>tau0</code>: The truncation time for defining restricted
-mean time lost. Because our outcome <code>y</code> is skewed towards 0,
-we use the 95% upper limit.</p></li>
+= trt ~ 1. The PS model is used in the doubly robust RMTL
+estimation.</p></li>
+<li><p><code>tau0</code>: The horizon for RMST and RMTL. Below, we
+choose the smaller of the 95th percentiles of observed follow-up times
+in the two treatment groups. This illustrative choice limits
+extrapolation, but does not guarantee adequate follow-up: inspect
+numbers at risk and censoring in each group near the chosen horizon, and
+choose a clinically meaningful horizon with sufficient support.</p></li>
 </ul>
 <p>Let’s calculate the ATE for the effect of treatment on y and build an
 outcome model that contains all variables and a PS model with
@@ -593,15 +589,15 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   estimate         SE      CI.lower  CI.upper     pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03586099 -0.0001309541 0.1404416 0.05042838</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.19531152  2.3305207442 3.0961278 0.00000000</span></span>
+<span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper     pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03517679 0.001210064 0.1391005 0.04611234</span></span>
+<span><span class="co">#&gt; log.hazard.ratio 2.7133243 0.19683887 2.327527199 3.0991214 0.00000000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 7.014662 159.1124 186.6094      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.944020 179.0303 214.0902      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.923291 159.2915 186.4303      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.512084 179.8769 213.2436      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -618,12 +614,12 @@ log of the ratio of <code>tau0</code> - <code>$rmst1</code> divided by
 <li><p>the log HR (<code>$log.hazard.ratio</code>).</p></li>
 </ul>
 <p>For example, the log RMTL ratio of 0.07 and the 95% confidence
-interval of (0, 0.14) are displayed in the output. The RMTL ratio of
-along with the 95% confidence interval suggest that drug 0 is superior
-to drug 1 because the ratio is significantly greater than 1. When we
-check the estimated RMST, we also see that the estimated rmst1 is lower
-compared to rmst0, indicating that patients that received drug0 have a
-longer mean survival time compared to drug1.</p>
+interval of (0, 0.14) are displayed in the output. The estimated ratio
+and its interval can be obtained by exponentiating these log-scale
+values. A ratio above 1 indicates more time lost before
+<code>tau0</code> under drug 1; the interval describes uncertainty in
+that comparison. The RMST estimates provide the corresponding event-free
+times up to <code>tau0</code>.</p>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> is expressed in terms of
 treatment 0 vs 1, where the RMTL and hazard ratios are expressed as the
 ratio of the treatment coded as 1 over the treatment coded as 0. If the
@@ -645,8 +641,14 @@ estimates.</p>
 bootstrap</p>
 </div>
 <div class="section level2">
-<h2 id="estimation-of-the-cate-score-with-catefit">Estimation of the CATE score with <code>catefit()</code><a class="anchor" aria-label="anchor" href="#estimation-of-the-cate-score-with-catefit"></a>
+<h2 id="estimate-cate-scores">Estimate CATE scores<a class="anchor" aria-label="anchor" href="#estimate-cate-scores"></a>
 </h2>
+<p>Chapter 17 describes treatment effect heterogeneity and CATE
+prediction <span class="citation">(Hoogland et al. 2026)</span>. In this
+example, scores are on the log-RMTL-ratio scale, so exponentiating a
+score gives an estimated conditional RMTL ratio. Lower scores indicate
+greater estimated benefit from drug 1. Fitting scores on the full
+dataset does not establish their performance in new patients.</p>
 <p>Now we have calculated the ATE we know the effect of both treatments
 on average, but this effect might not be the same for all patients.
 Thus, it might be worthwhile to check if there are subgroups that
@@ -720,19 +722,18 @@ Flexible models can be used such as GBM (“boosting”), random forests
 (“randomForest”) or logistic regression (“logistic”). We chose
 “logistic” because it is relatively faster than boosting methods and
 random forest.</p></li>
-<li><p><code>tau0</code> is the truncation time for defining restricted
-mean time lost (RMTL). Because our outcome <code>y</code> is skewed
-towards 0, we use the 95% upper limit.</p></li>
+<li><p><code>tau0</code> is the horizon for RMTL, chosen as described
+above; assess follow-up support near this horizon in both treatment
+groups.</p></li>
 <li><p><code>higher.y</code> was set to <code>TRUE</code> because
 relapse is a negative event and longer time to first relapse is more
 desirable in our example. Hence, we are telling the function that
 subgroups of high responders to drug1 vs drug0 should have later onset
-of the first relapse. In other situation, higher outcomes may be more
-favorable for time to a positive event, e.g., time to discharge or time
-to improved disability. It is important for this argument to match with
-the nature of <code>y</code> outcome because it will affect how the
-subgroups are defined by the CATE scores and the performance
-metrics.</p></li>
+of the first relapse. For a positive event such as discharge, a shorter
+time may instead be preferable, so <code>higher.y = FALSE</code> may be
+appropriate. It is important for this argument to match with the nature
+of <code>y</code> outcome because it will affect how the subgroups are
+defined by the CATE scores and the performance metrics.</p></li>
 <li><p>We set a random seed <code>seed</code> = 999 to reproduce the
 results.</p></li>
 <li><p>We avoided generating the boosting performance plots by
@@ -766,12 +767,13 @@ sets of results in <code><a href="../reference/catefit.html">catefit()</a></code
 <ol style="list-style-type: decimal">
 <li>
 <code>score</code> contains the log-transformed estimated CATE
-scores for each subject. The CATE score is a linear combination of the
-variables specified in the <code>cate.model</code> argument. Same as the
-outcome, lower CATE scores are more desirable if <code>higher.y</code> =
-FALSE and vice versa. In our example, the survival outcome is time to
-first relapse, which is a negative event, so higher values indicate
-later onset of the first relapse. Hence, we specify
+scores for each subject. The relationship between covariates and the
+score depends on the scoring method. For survival outcomes, lower scores
+correspond to high responders to drug 1 when <code>higher.y</code> =
+TRUE; higher scores correspond to high responders when
+<code>higher.y</code> = FALSE. In our example, the survival outcome is
+time to first relapse, which is a negative event, so higher values
+indicate later onset of the first relapse. Hence, we specify
 <code>higher.y</code> = TRUE in the example. Each subject has 1 CATE
 score so the length of this output is 4,000 for our toy example. Below
 we show the CATE scores estimated with contrast regression for the first
@@ -847,12 +849,19 @@ high estimated CATE scores but most of the samples fall between -10 and
 <p><img src="Survival-examples_files/figure-html/plot_score-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
-<h2 id="internal-validation-via-catecv">Internal validation via <code>catecv()</code><a class="anchor" aria-label="anchor" href="#internal-validation-via-catecv"></a>
+<h2 id="internally-validate-cate-scores">Internally validate CATE scores<a class="anchor" aria-label="anchor" href="#internally-validate-cate-scores"></a>
 </h2>
 <p>For broader guidance on validation strategies and the assessment of
 discrimination, calibration, and decision accuracy, see Chapter 19,
 “Validation of prediction models for patient outcomes and individualized
 treatment effect” <span class="citation">(Thao et al. 2026)</span>.</p>
+<p>In each iteration, scores are fitted in a training set and evaluated
+in a separate validation set. For example, the 60% of validation
+patients with the lowest scores form a high-responder subgroup in this
+example. Repeating the split shows variation across iterations.
+Selecting the best method using the same validation results can make its
+reported performance optimistic; an independent evaluation can assess
+the selected method.</p>
 <p>The <code><a href="../reference/catecv.html">catecv()</a></code> function provides the same estimation as
 the <code><a href="../reference/catefit.html">catefit()</a></code> but via cross-validation (CV). With the
 <code><a href="../reference/catecv.html">catecv()</a></code> function internal CV is applied to reduce optimism
@@ -863,7 +872,8 @@ effect heterogeneity. The CV is applied by repeating the following steps
 <li><p>Split the data into a training and validation set according to
 <code>train.prop</code> argument. The training and validation sets must
 be balanced with respect to covariate distributions and doubly robust
-rate ratio estimates (see <code>error.max</code> argument).</p></li>
+treatment effect estimates (see <code>error.max</code>
+argument).</p></li>
 <li><p>Estimate the CATE score in the training set with the specified
 scoring method.</p></li>
 <li><p>Predict the CATE score in the validation set using the scoring
@@ -875,14 +885,14 @@ subgroup. For each element i of <code>prop.cutoff</code> argument (e.g.,
 <code>prop.cutoff[i] = 0.6</code>), take the following steps:</p>
 <ul>
 <li><p>Identify high responders as observations with the 60% (i.e.,
-<code>prop.cutoff[i]x100%</code>) highest (if
-<code>higher.y = TRUE</code>) or lowest (if
+<code>prop.cutoff[i]x100%</code>) lowest (if
+<code>higher.y = TRUE</code>) or highest (if
 <code>higher.y = FALSE</code>) estimated CATE scores.</p></li>
 <li><p>Estimate the ATE in the subgroup of high responders using a
 doubly robust estimator.</p></li>
 <li><p>Conversely, identify low responders as observations with the 40%
-(i.e., <code>1 - prop.cutoff[i]x100%</code>) lowest (if
-<code>higher.y = TRUE</code>) or highest (if
+(i.e., <code>1 - prop.cutoff[i]x100%</code>) highest (if
+<code>higher.y = TRUE</code>) or lowest (if
 <code>higher.y = FALSE</code>) estimated CATE scores.</p></li>
 <li><p>Estimate the ATE in the subgroup of low responders using a doubly
 robust estimator.</p></li>
@@ -922,19 +932,18 @@ random forest.</p></li>
 <li><p><code>followup.time</code> specifies the maximum follow-up time
 in the data. We set it default as <code>NULL</code>, which indicates
 unknown potential censoring time.</p></li>
-<li><p><code>tau0</code> is the truncation time for defining restricted
-mean time lost (RMTL). Because our outcome <code>y</code> is skewed
-towards 0, we use the 95% upper limit.</p></li>
+<li><p><code>tau0</code> is the horizon for RMTL, chosen as described
+above; assess follow-up support near this horizon in both treatment
+groups.</p></li>
 <li><p><code>higher.y</code> was set to <code>TRUE</code> because
 relapse is a negative event and longer time to first relapse is more
 desirable in our example. Hence, we are telling the function that
 subgroups of high responders to drug1 vs drug0 should have later onset
-of the first relapse. In other situation, higher outcomes may be more
-favorable for time to a positive event, e.g., time to discharge or time
-to improved disability. It is important for this argument to match with
-the nature of <code>y</code> outcome because it will affect how the
-subgroups are defined by the CATE scores and the performance
-metrics.</p></li>
+of the first relapse. For a positive event such as discharge, a shorter
+time may instead be preferable, so <code>higher.y = FALSE</code> may be
+appropriate. It is important for this argument to match with the nature
+of <code>y</code> outcome because it will affect how the subgroups are
+defined by the CATE scores and the performance metrics.</p></li>
 <li><p><code>surv.min</code> truncates the censoring probability
 estimated from the IPCW model with a lower limit to prevent extremely
 small censoring probabilities. It is recommended to choose a small
@@ -992,37 +1001,37 @@ default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 20:41:02 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 14:54:06 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 20:41:14 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 14:54:21 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 20:41:26 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 14:54:36 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 20:41:38 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 14:54:50 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 13 20:41:50 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 14:55:05 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 1.01 mins</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 1.23 mins</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>output_catecv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
@@ -1072,7 +1081,7 @@ The rows in the output are labeled to reflect the user-specified
 proportions used to build the subgroups.</p>
 <p>For example, in the training set and in the 4th CV iteration (4th
 column labeled “cv4”), the subgroup defined with the 80% lowest CATE
-scores (4th row labeled “prop0.8”) has an estimated RMTL ratio of 0.753.
+scores (3rd row labeled “prop0.8”) has an estimated RMTL ratio of 0.753.
 In contrast, the subgroup defined with all patients (last row labeled
 “prop1”) in the 4th CV iteration has an estimated RMTL ratio of 1.083.
 <!-- This suggests that the CATE score estimated with random forests identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RMTL ratio compared to all patients. If lower outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. --></p>
@@ -1102,10 +1111,10 @@ high responders. For example, the complement of the subgroup of high
 responders defined as patients with the 60% lowest (highest if
 <code>higher.y</code> = FALSE) estimated CATE scores is the subgroup of
 low responders defined as patients with the 40% highest (lowest if
-<code>higher.y</code> = TRUE) estimated CATE scores, labeled as
+<code>higher.y</code> = FALSE) estimated CATE scores, labeled as
 “prop0.4”. In the training set and in the first CV iterations, the
-estimated RMTL ratio is 0.62 in the 60% high responders to drug 1 and
-37.739 in the 40% low responders.</p>
+estimated RMTL ratio is 0.475 in the 60% high responders to drug 1 and
+7.796 in the 40% low responders.</p>
 <p>The 2 last rows have missing or infinite values and this can be due
 to many reasons. We record all errors and warnings and keep them as an
 element of the <code>cv</code> output. For example, we can use the
@@ -1196,23 +1205,24 @@ to learn more about the errors and warnings generated from these
 outputs.</p>
 </div>
 <div class="section level2">
-<h2 id="comparison-of-methods-with-abc">Comparison of methods with <code>abc()</code><a class="anchor" aria-label="anchor" href="#comparison-of-methods-with-abc"></a>
+<h2 id="compare-scoring-methods-using-the-abc-statistic">Compare scoring methods using the ABC statistic<a class="anchor" aria-label="anchor" href="#compare-scoring-methods-using-the-abc-statistic"></a>
 </h2>
-<p>The ABC statistics is calculated by <code><a href="../reference/abc.html">abc()</a></code> for each
+<p>The ABC statistic is calculated by <code><a href="../reference/abc.html">abc()</a></code> for each
 scoring method specified in <code><a href="../reference/catecv.html">catecv()</a></code> and for each of the
 <code>cv.n</code> CV iterations using the output object
 <code>output_catecv</code> from <code><a href="../reference/catecv.html">catecv()</a></code>. The ABC
 corresponds to the area between the curve formed by the ATEs in
 subgroups of high responders in the validation set (e.g.,
-<code>output_catecv$ate.randomForest$ate.est.valid.cv</code> for random
-forest) and the horizontal line representing the ATE in the validation
-set. A higher ABC value means that the method captures more treatment
-effect heterogeneity.</p>
+<code>output_catecv$ate.randomForest$ate.est.valid.high.cv</code> for
+random forest) and the horizontal line representing the ATE in the
+validation set. A higher ABC indicates greater separation in the
+expected direction in this example. Chapter 20 discusses this responder
+diagnostic <span class="citation">(Jiang et al. 2026)</span>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; randomForest 0.1529437 0.1468651 0.1390613 0.1457913 0.1535596</span></span>
+<span><span class="co">#&gt; randomForest 0.1528127 0.1468651 0.1390613 0.1457913 0.1535596</span></span>
 <span><span class="co">#&gt; contrastReg  0.1415529 0.1304287 0.1366294 0.1303885 0.1519330</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
@@ -1225,13 +1235,13 @@ iterations:</p>
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
-<span><span class="co">#&gt;    0.1476442    0.1381865</span></span></code></pre></div>
+<span><span class="co">#&gt;    0.1476180    0.1381865</span></span></code></pre></div>
 <p>In this example, random forest also offers the best overall
 performance because it has the highest average ABC, followed closely by
 contrast regression.</p>
 </div>
 <div class="section level2">
-<h2 id="visualization-of-the-validation-curves-with-plot">Visualization of the validation curves with <code>plot()</code><a class="anchor" aria-label="anchor" href="#visualization-of-the-validation-curves-with-plot"></a>
+<h2 id="assess-responder-discrimination-with-validation-curves">Assess responder discrimination with validation curves<a class="anchor" aria-label="anchor" href="#assess-responder-discrimination-with-validation-curves"></a>
 </h2>
 <p>Chapter 20 discusses validation curves, ABC statistics, and their
 interpretation as responder diagnostics <span class="citation">(Jiang et
@@ -1253,26 +1263,26 @@ default, the function retrieves the name of the treatment variable
 is possible to customize the y-axis label via the <code>ylab</code>, for
 example, by specifying <code>ylab</code> = “RMTL ratio of drug1 vs drug0
 in each subgroup”.</p>
-<p>Steeper slopes indicate more treatment effect heterogeneity between
-drug1 and drug0. Because <code>higher.y</code> = TRUE in this example,
-the slopes should be increasing from left (<code>prop.cutoff</code> =
-0.6) to right (<code>prop.cutoff</code> = 1) if treatment effect
-heterogeneity is present (see section <a href="Theoretical-details.html">Validation curves and the ABC
-statistics</a> for illustration). The method that has the steepest slope
-in the validation results would be selected because it captures the most
-treatment effect heterogeneity while generalizing well to unseen
-data.</p>
+<p>A stronger separation between the curve and the overall ATE can
+indicate better ranking of patients by treatment benefit. Because
+<code>higher.y</code> = TRUE in this example, the slopes should be
+increasing from left (<code>prop.cutoff</code> = 0.6) to right
+(<code>prop.cutoff</code> = 1) if treatment effect heterogeneity is
+present (see section <a href="Theoretical-details.html">Validation
+curves and the ABC statistics</a> for illustration). The validation
+curves and ABC can help compare methods, but selection on these same
+results warrants an independent assessment.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="1056"></p>
-<p>For this toy example, the methods are performing well in the training
-data as per the steep, increasing slopes on the left plot. Moreover, all
-methods generalize well to the validation data, as indicated by the
-monotonous increasing curves in the validation data (right plot). The
-dashed gray line is the ATE in the entire data set, which is why all
-lines merge to this reference line when subgroup size is 100% of the
-data (<code>prop.cutoff</code> = 1). For more explanation on the
-validation curves, see the function description.</p>
+<p>In this example, the generally increasing validation curves suggest
+that the methods rank patients reasonably well by treatment benefit in
+the validation splits. The curves alone do not establish calibration or
+performance in a new population. The dashed gray line is the ATE in the
+entire data set, which is why all lines merge to this reference line
+when subgroup size is 100% of the data (<code>prop.cutoff</code> = 1).
+For more explanation on the validation curves, see the function
+description.</p>
 <p>The plot’s legend includes the ABC statistics in the validation set.
 The user can choose to mute the ABC annotations by specifying
 <code>show.abc</code> = FALSE.</p>
@@ -1297,9 +1307,13 @@ specifying <code>cv.i</code> = 2 and in grayscale by specifying
 <code>combine</code> = “median” in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="visualization-of-the-ate-in-subgroups-with-boxplot">Visualization of the ATE in subgroups with
-<code>boxplot()</code><a class="anchor" aria-label="anchor" href="#visualization-of-the-ate-in-subgroups-with-boxplot"></a>
+<h2 id="compare-treatment-effects-across-responder-subgroups">Compare treatment effects across responder subgroups<a class="anchor" aria-label="anchor" href="#compare-treatment-effects-across-responder-subgroups"></a>
 </h2>
+<p>Unlike the nested groups in validation curves, these subgroups are
+mutually exclusive within each iteration. The boxes summarize variation
+in subgroup estimates across validation iterations. Chapter 20 compares
+these responder diagnostics <span class="citation">(Jiang et al.
+2026)</span>.</p>
 <p>The ATEs of multi-category subgroups that are mutually exclusive can
 be visualized as box plots, with 1 box plot for each scoring method.
 Only validation results are visualized here. The x-axis is determined by
@@ -1347,6 +1361,14 @@ validating treatment effects</a></p>
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-hoogland2026introduction" class="csl-entry">
+Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
+Nguyen. 2026. <span>“Introduction to Methods for Personalizing
+Medicine.”</span> Chap. 17 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">https://doi.org/10.1201/9781003300809-17</a>.
+</div>
 <div id="ref-jiang2026visualization" class="csl-entry">
 Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
 Carl de Moor, and Lu Tian. 2026. <span>“Visualization and Interpretation
