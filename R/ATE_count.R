@@ -371,6 +371,7 @@ drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
+#' @param context Label used to identify the analysis in subgroup warnings.
 #' @return ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned
 #'         ate.est.low: estimated ATEs in the multiple bi-level subgroups that are in the lower-than-cutoff category;
@@ -436,6 +437,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
+#' @param context Label used to identify the analysis in subgroup warnings.
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, higher.y, prop,
                                          ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count"){

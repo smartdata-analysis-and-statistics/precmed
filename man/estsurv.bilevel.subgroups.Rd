@@ -23,7 +23,8 @@ estsurv.bilevel.subgroups(
   maxPS = 0.99,
   ipcw.method = "breslow",
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cumulative.hr = TRUE
 )
 }
 \arguments{
@@ -83,6 +84,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{cumulative.hr}{Whether to calculate subgroup cumulative hazard ratios.}
 }
 \value{
 ate.rmtl.high: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the higher-than-cutoff category;

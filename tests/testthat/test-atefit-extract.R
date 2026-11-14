@@ -7,7 +7,7 @@ make_atefit_fixture <- function(response = "count") {
   structure(list(response = response,
                  log.rate.ratio = effect(log(2), 0.2),
                  log.rmtl.ratio = effect(log(0.8), 0.1),
-                 log.hazard.ratio = effect(log(0.7), 0.15),
+                 log.cumulative.hazard.ratio = effect(log(0.7), 0.15),
                  rate0 = data.frame(estimate = 0.1)), class = "atefit")
 }
 
@@ -28,7 +28,7 @@ test_that("count effects and intervals are extracted on the log scale", {
 
 test_that("survival effects support selection by name and position", {
   fit <- make_atefit_fixture("survival")
-  expect_equal(coef(fit), c(log.rmtl.ratio = log(0.8), log.hazard.ratio = log(0.7)))
+  expect_equal(coef(fit), c(log.rmtl.ratio = log(0.8), log.cumulative.hazard.ratio = log(0.7)))
   ci <- confint(fit)
   expect_equal(dim(ci), c(2L, 2L))
   for (term in names(coef(fit))) {
@@ -36,7 +36,7 @@ test_that("survival effects support selection by name and position", {
                  unlist(fit[[term]][c("CI.lower", "CI.upper")], use.names = FALSE))
   }
   expect_equal(confint(fit, parm = 2), ci[2, , drop = FALSE])
-  expect_equal(confint(fit, parm = "log.hazard.ratio"), ci[2, , drop = FALSE])
+  expect_equal(confint(fit, parm = "log.cumulative.hazard.ratio"), ci[2, , drop = FALSE])
   expect_equal(confint(fit, parm = c(2, 1)), ci[c(2, 1), , drop = FALSE])
 })
 

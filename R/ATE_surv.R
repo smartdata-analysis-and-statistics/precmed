@@ -55,14 +55,15 @@
 #'   \item{\code{log.rmtl.ratio}: } A vector of numeric values of the estimated log RMTL ratio of
 #'   \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
 #'   interval, and the p-value.
-#'   \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
-#'   of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
-#'   interval, and the p-value.
 #'   \item{\code{log.cumulative.hazard.ratio}: } The log ratio of marginal cumulative hazards at
-#'   \code{tau0}, estimated from AIPW treatment-specific survival probabilities, with bootstrap inference.
+#'   \code{tau0}, estimated from augmented inverse probability of treatment weighted
+#'   (AIPTW) survival probabilities, with bootstrap inference. Event times are not discretized.
+#'   The estimator requires appropriate censoring assumptions and a correctly specified
+#'   censoring model; its treatment-model double robustness does not protect against
+#'   censoring-model misspecification.
 #'   Undefined estimates or bootstrap replicates yield unavailable inference.
 #'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-#'   \code{log.rmtl.ratio}, \code{log.hazard.ratio}, and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
+#'   \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
 #'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
 #'   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
 #'   the interpretation of the remaining of the output.
@@ -72,7 +73,7 @@
 #' treatment groups in a given dataset. The ATE is estimated with a doubly robust estimator that accounts for
 #' imbalances in covariate distributions between the two treatment groups with inverse probability treatment and
 #' censoring weighting. For survival outcomes, the estimated ATE is the estimated by RMTL ratio between treatment
-#' 1 versus treatment 0. The log-transformed ATEs and log-transformed adjusted hazard ratios are returned, as well
+#' 1 versus treatment 0. The log-transformed RMTL and cumulative hazard ratios are returned, as well
 #' as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 #' using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 #' p-value, and a histogram of the bootstrap estimates.
@@ -168,14 +169,15 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE)
+                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE)
 
-  est <- unlist(est)
+  effect.names <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.cumulative.hazard.ratio")
+  est <- unlist(est)[effect.names]
 
   # Apply bootstrap
   n <- length(y)
   save.boot <- matrix(NA, nrow = n.boot, ncol = length(est))
-  colnames(save.boot) <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio", "log.cumulative.hazard.ratio")
+  colnames(save.boot) <- effect.names
 
   pb   <- txtProgressBar(min = 1,
                          max = n.boot,
@@ -192,13 +194,13 @@ atefitsurv <- function(data,
                        x.ipcw = x.ipcw[idsub.boot, ],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE),
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE),
       rmst_fallback = function(w) {
         fallback.in.sample <<- TRUE
         invokeRestart("muffleWarning")
       })
     fallback.boot <- fallback.boot + as.integer(fallback.in.sample)
-    save.boot[i,] <- unlist(est.boot)
+    save.boot[i,] <- unlist(est.boot)[effect.names]
 
     if (verbose == 1) setTxtProgressBar(pb, i)
   }
@@ -228,8 +230,7 @@ atefitsurv <- function(data,
   out$rmst1 <- data.frame(est.all[1, ])
   out$rmst0 <- data.frame(est.all[2, ])
   out$log.rmtl.ratio <- data.frame(est.all[3, ])
-  out$log.hazard.ratio <- data.frame(est.all[4, ])
-  out$log.cumulative.hazard.ratio <- data.frame(est.all[5, ])
+  out$log.cumulative.hazard.ratio <- data.frame(est.all[4, ])
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
   out$warning <- preproc$warning
@@ -266,12 +267,15 @@ atefitsurv <- function(data,
 #' @param ipcw.method The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
 #' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.
 #'
-#' @return Return a list of 4 elements:
+#' @param cumulative.hr Whether to estimate the marginal cumulative hazard ratio at \code{tau0}.
+#' @param conditional.hr Whether to fit the supplementary conditional Cox hazard ratio.
+#' @return Return a list of estimates:
 #' \itemize{
 #'   \item{\code{rmst1}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 1}.
 #'   \item{\code{rmst0}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 0}.
 #'   \item{\code{log.rmtl.ratio}: } A numeric value of the estimated log rmtl ratio.
-#'   \item{\code{log.hazard.ratio}: } A numeric value of the estimated log hazard ratio.
+#'   \item{\code{log.hazard.ratio}: } The conditional log hazard ratio, or \code{NA} if not requested.
+#'   \item{\code{log.cumulative.hazard.ratio}: } The marginal log cumulative hazard ratio, if requested.
 #' }
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
@@ -287,7 +291,7 @@ atefitsurv <- function(data,
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE) {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE, conditional.hr = TRUE) {
   ps.args <- resolve_ps_control(ps.control)
 
   rmst.args <- resolve_rmst_control(rmst.control)
@@ -306,7 +310,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   # Reaching the horizon completes follow-up for RMST weighting, but is
   # administrative censoring in the Cox model unless an event occurred there.
   d.cox <- survival_event_at_horizon(y, d, tau0)
-  fit <- coxph(Surv(ynew, d.cox) ~ trt + x.cate)
+  if (conditional.hr) fit <- coxph(Surv(ynew, d.cox) ~ trt + x.cate)
 
   surv.new <- ipcw.surv(y = y, d = d, x.ipcw = x.ipcw, yf = yf, ipcw.method = ipcw.method, tau0 = tau0, surv.min = surv.min)
 
@@ -331,7 +335,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   rmst0 <- rmst_outcome_fallback(rmst0, coxest0, tau0, 0)
 
   delta.rmtl <- log((tau0 - rmst1) / (tau0 - rmst0))
-  delta.hr <- as.vector(fit$coef[1])
+  delta.hr <- if (conditional.hr) as.vector(fit$coef[1]) else NA_real_
 
   result <- list(rmst1 = rmst1, rmst0 = rmst0, log.rmtl.ratio = delta.rmtl, log.hazard.ratio = delta.hr)
   if (cumulative.hr) {
@@ -409,6 +413,7 @@ rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
+#' @param cumulative.hr Whether to calculate subgroup cumulative hazard ratios.
 #' @return ate.rmtl.high: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the higher-than-cutoff category;
 #' vector of size equal to the length of prop; always returned.
 #'         ate.rmtl.low: estimated ATEs (ratio of RMTL) in the multiple bi-level subgroups that are in the lower-than-cutoff category;
@@ -421,16 +426,16 @@ rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
 
 estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 = tau0,
                                       score, higher.y, prop, onlyhigh,
-                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list()) {
+                                      surv.min = 0.025, ps.method = "glm", minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = TRUE) {
 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, 1 - prop)
   n.subgroup <- length(prop)
-  ate.rmtl.high <- hr.high <- rep(0, n.subgroup)
+  ate.rmtl.high <- hr.high <- chr.high <- rep(NA_real_, n.subgroup)
   warn.high <- err.high <- vector("list", length = n.subgroup)
   names(warn.high) <- names(err.high) <- paste("prop", round(prop, 2))
   if (onlyhigh == FALSE) {
-    ate.rmtl.low <- hr.low <- rep(0, n.subgroup)
+    ate.rmtl.low <- hr.low <- chr.low <- rep(NA_real_, n.subgroup)
     warn.low <- err.low <- vector("list", length = n.subgroup)
     names(warn.low) <- names(err.low) <- paste("prop", round(1 - prop, 2))
   }
@@ -439,9 +444,10 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
     idsub1 <- (score >= cut[b])
     fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
                                  trt = trt[idsub1], yf = yf[idsub1],
-                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
+                                 tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = cumulative.hr))
     ate.rmtl.high[b] <- fit.high$log.rmtl.ratio
     hr.high[b] <- fit.high$log.hazard.ratio
+    chr.high[b] <- if (cumulative.hr) fit.high$log.cumulative.hazard.ratio else NA_real_
     warn.high[b] <- list(fit.high$warnings)
     err.high[b] <- list(fit.high$errors)
 
@@ -449,18 +455,19 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
       idsub0 <- (score < cut[b])
       fit.low <- survCatch(drsurv(y = y[idsub0], d = d[idsub0], x.cate = as.matrix(x.cate[idsub0, ]), x.ps = x.ps[idsub0, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub0, ]),
                                   trt = trt[idsub0], yf = yf[idsub0],
-                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
+                                  tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = cumulative.hr))
       ate.rmtl.low[b] <- fit.low$log.rmtl.ratio
       hr.low[b] <- fit.low$log.hazard.ratio
+      chr.low[b] <- if (cumulative.hr) fit.low$log.cumulative.hazard.ratio else NA_real_
       warn.low[b] <- list(fit.low$warnings)
       err.low[b] <- list(fit.low$errors)
     }
   }
 
   if (onlyhigh == TRUE) {
-    return(list(ate.rmtl.high = exp(ate.rmtl.high), hr.high = exp(hr.high), warn.high = warn.high, err.high = err.high))
+    return(list(ate.rmtl.high = exp(ate.rmtl.high), hr.high = exp(hr.high), chr.high = exp(chr.high), warn.high = warn.high, err.high = err.high))
   } else {
-    return(list(ate.rmtl.high = exp(ate.rmtl.high), ate.rmtl.low = exp(ate.rmtl.low), hr.high = exp(hr.high), hr.low = exp(hr.low),
+    return(list(ate.rmtl.high = exp(ate.rmtl.high), ate.rmtl.low = exp(ate.rmtl.low), hr.high = exp(hr.high), hr.low = exp(hr.low), chr.high = exp(chr.high), chr.low = exp(chr.low),
                 warn.high = warn.high, warn.low = warn.low, err.high = err.high, err.low = err.low))
   }
 }
@@ -522,7 +529,7 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, prop)
   n.subgroup <- length(cut) - 1
-  ate.rmtl <- hr <- rep(NA, n.subgroup)
+  ate.rmtl <- hr <- chr <- rep(NA_real_, n.subgroup)
   warn <- err <- vector("list", length = n.subgroup)
   names(warn) <- names(err) <- paste("prop",  round(prop[-1], 2))
 
@@ -530,13 +537,14 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
     idsub <- (score >= cut[b] & score <= cut[b + 1])
     fit <- survCatch(drsurv(y = y[idsub], d = d[idsub], x.cate = as.matrix(x.cate[idsub, ]), x.ps = x.ps[idsub, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub, ]),
                             trt = trt[idsub], yf = yf[idsub],
-                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
+                            tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE))
     ate.rmtl[b] <- fit$log.rmtl.ratio
     hr[b] <- fit$log.hazard.ratio
+    chr[b] <- fit$log.cumulative.hazard.ratio
     warn[b] <- list(fit$warnings)
     err[b] <- list(fit$errors)
   }
-  return(list(ate.rmtl = exp(ate.rmtl), hr = exp(hr), warn = warn, err = err))
+  return(list(ate.rmtl = exp(ate.rmtl), hr = exp(hr), chr = exp(chr), warn = warn, err = err))
 }
 
 #' Probability of being censored

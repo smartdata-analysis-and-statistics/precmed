@@ -10,6 +10,8 @@
   plot.hr = FALSE,
   title = waiver(),
   theme = theme_classic(),
+  hazard.type = c("cumulative", "conditional"),
+  measure = "rmtl",
   ...
 )
 }
@@ -19,9 +21,11 @@
 \item{ylab}{A character value for the y-axis label to describe what the ATE is. Default is \code{NULL},
 which creates a default y-axis label based on available data.}
 
-\item{plot.hr}{A logical value indicating whether the hazard ratios should be plotted in the
-validation curves (\code{TRUE}). Otherwise, the restricted mean time lost is plotted (\code{FALSE}).
-This argument is only applicable to survival outcomes. Default is \code{FALSE}.}
+\item{measure}{For survival outcomes, select \code{"rmtl"} (default), \code{"cumulative_hr"} (cumulative hazard ratio), or \code{"conditional_hr"} (conditional Cox hazard ratio fitted through \code{tau0}). Earlier measure names remain supported as aliases.}
+
+\item{plot.hr}{Deprecated; use \code{measure} instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio. The default hazard-based measure is the marginal cumulative hazard ratio.}
+
+\item{hazard.type}{Deprecated; use \code{measure} instead. Choose \code{"cumulative"} (default) or \code{"conditional"} for the supplementary Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative ratios must be refitted or plotted with \code{hazard.type = "conditional"}.}
 
 \item{title}{The text for the title}
 

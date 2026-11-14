@@ -188,6 +188,7 @@ Returns an object of the class \code{catefit} containing the following component
  \item{\code{ate.contrastReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
  Only provided if \code{score.method} includes \code{'contrastReg'}.
+ \item{\code{chr.<method>}: } Subgroup marginal cumulative hazard ratios at \code{tau0}, one for each selected scoring method and cutoff. Undefined estimates are \code{NA}; \code{hr.*} results are conditional Cox HRs.
  \item{\code{hr.randomForest}: }A vector of numerical values of length \code{prop.cutoff}
  containing the adjusted hazard ratio in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with random forest method.

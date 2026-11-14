@@ -19,7 +19,9 @@ drsurv(
   maxPS = 0.99,
   ipcw.method = "breslow",
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cumulative.hr = FALSE,
+  conditional.hr = TRUE
 )
 }
 \arguments{
@@ -67,14 +69,19 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{cumulative.hr}{Whether to estimate the marginal cumulative hazard ratio at \code{tau0}.}
+
+\item{conditional.hr}{Whether to fit the supplementary conditional Cox hazard ratio.}
 }
 \value{
-Return a list of 4 elements:
+Return a list of estimates:
 \itemize{
   \item{\code{rmst1}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 1}.
   \item{\code{rmst0}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 0}.
   \item{\code{log.rmtl.ratio}: } A numeric value of the estimated log rmtl ratio.
-  \item{\code{log.hazard.ratio}: } A numeric value of the estimated log hazard ratio.
+  \item{\code{log.hazard.ratio}: } The conditional log hazard ratio, or \code{NA} if not requested.
+  \item{\code{log.cumulative.hazard.ratio}: } The marginal log cumulative hazard ratio, if requested.
 }
 }
 \description{

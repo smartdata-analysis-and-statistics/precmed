@@ -1,4 +1,4 @@
-test_that("survival hazard ratio censors follow-up beyond the horizon", {
+test_that("survival horizon preserves events and removes the conditional HR from ATE output", {
   data(survivalExample, package = "precmed")
   dat <- survivalExample
   tau <- unname(quantile(dat$y, 0.85))
@@ -11,18 +11,9 @@ test_that("survival hazard ratio censors follow-up beyond the horizon", {
     ps.model = trt ~ age + previous_treatment,
     tau0 = tau, n.boot = 2, seed = 123, rmst.control = list(solver = "R")
   ), "recoded to 0/1")
-  dat$time_at_horizon <- pmin(dat$y, tau)
-  dat$event_at_horizon <- dat$d * (dat$y <= tau)
-  expected <- survival::coxph(
-    survival::Surv(time_at_horizon, event_at_horizon) ~
-      trt + age + female + previous_cost + previous_number_relapses,
-    data = dat
-  )
-  expect_equal(fit$log.hazard.ratio$estimate, unname(coef(expected)[1]), tolerance = 1e-8)
-  set.seed(123)
-  expected.boot <- replicate(2, {
-    sample.dat <- dat[sample(nrow(dat), replace = TRUE), ]
-    unname(coef(update(expected, data = sample.dat))[1])
-  })
-  expect_equal(unname(fit$trt.boot[, "log.hazard.ratio"]), expected.boot, tolerance = 1e-8)
+  expect_null(fit$log.hazard.ratio)
+  expect_false("log.hazard.ratio" %in% colnames(fit$trt.boot))
+  expect_true("log.cumulative.hazard.ratio" %in% colnames(fit$trt.boot))
+  expect_equal(survival_event_at_horizon(c(tau, tau, tau + 1), c(1, 0, 1), tau),
+               c(1, 0, 0))
 })

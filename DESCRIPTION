@@ -35,7 +35,11 @@ Authors@R: c(person(given = "Lu",
                    role = "ctb"))
 Description: A doubly robust precision medicine approach to fit, cross-validate
     and visualize prediction models for the conditional average treatment effect
-    (CATE). It implements doubly robust estimation and semiparametric modeling
+    (CATE). For time-to-event outcomes, it also estimates restricted mean
+    survival and marginal cumulative hazard ratios at a specified horizon.
+    The cumulative hazard ratio uses augmented inverse probability of treatment
+    weighting with outcome and censoring models, without discretizing event times.
+    It implements doubly robust estimation and semiparametric modeling
     approach of treatment-covariate interactions as proposed by Yadlowsky et al.
     (2020) <doi:10.1080/01621459.2020.1772080>. The visualization and interpretation
     of individualized treatment rules are discussed in the book chapter by

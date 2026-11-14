@@ -29,7 +29,7 @@ treatment effect and columns for the lower and upper confidence limits.
 \description{
 Extract treatment effects from an \code{atefit} object on their native
 estimation scale: the log rate ratio for count outcomes, or the log RMTL
-ratio, conditional log hazard ratio, and log cumulative hazard ratio for survival outcomes. Exponentiate the returned
+ratio and log cumulative hazard ratio for survival outcomes. Exponentiate the returned
 estimates and interval limits to obtain ratios.
 }
 \details{

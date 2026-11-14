@@ -11,7 +11,9 @@
 #' Both use the same fitted Cox model and step-function integration; the C
 #' implementation avoids the patient-by-event-time survival matrix.
 #'
-#' @return The estimated RMST for new subjects with covariates \code{xnew}; vector of size \code{m}.
+#' @param return_survival Whether to also return predicted survival at \code{tau0}.
+#' @return The estimated RMST for new subjects with covariates \code{xnew}; a vector of size \code{m}.
+#' If \code{return_survival = TRUE}, a list with \code{rmst} and \code{survival} vectors.
 #'
 cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_survival = FALSE) {
   solver <- match.arg(solver)
@@ -45,7 +47,7 @@ cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_surv
   }
 
   if (return_survival) {
-    survival_at_tau <- if (length(surv0)) tail(surv0, 1)^hr else rep(1, n)
+    survival_at_tau <- if (length(surv0)) utils::tail(surv0, 1)^hr else rep(1, n)
     return(list(rmst = coxest, survival = survival_at_tau))
   }
   return(coxest)
@@ -69,7 +71,7 @@ survCatch <- function(fun) {
              error = function(e) {
                err.msg <<- conditionMessage(e)
                err.call <<- conditionCall(e)
-               list(log.rmtl.ratio = NA, log.hazard.ratio = NA)
+               list(log.rmtl.ratio = NA_real_, log.hazard.ratio = NA_real_, log.cumulative.hazard.ratio = NA_real_)
              }),
     warning = function(w) {
       warn.msg <<- append(warn.msg, conditionMessage(w))
@@ -94,6 +96,9 @@ survCatch <- function(fun) {
   out <- c()
   out$log.rmtl.ratio <- fit$log.rmtl.ratio
   out$log.hazard.ratio <- fit$log.hazard.ratio
+  out$log.cumulative.hazard.ratio <- fit$log.cumulative.hazard.ratio
+  if (!is.null(fit$log.cumulative.hazard.ratio) && !is.finite(fit$log.cumulative.hazard.ratio) && is.null(errors))
+    warnings <- c(warnings, "Cumulative hazard ratio is undefined because an estimated survival probability is outside (0, 1).")
   out$warnings <- warnings
   out$errors <- errors
   return(out)

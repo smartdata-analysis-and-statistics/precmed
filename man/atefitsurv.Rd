@@ -101,14 +101,15 @@ Return an object of class \code{atefit} with 6 elements:
   \item{\code{log.rmtl.ratio}: } A vector of numeric values of the estimated log RMTL ratio of
   \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
   interval, and the p-value.
-  \item{\code{log.hazard.ratio}: } A vector of numeric values of the estimated adjusted log hazard ratio
-  of \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
-  interval, and the p-value.
   \item{\code{log.cumulative.hazard.ratio}: } The log ratio of marginal cumulative hazards at
-  \code{tau0}, estimated from AIPW treatment-specific survival probabilities, with bootstrap inference.
+  \code{tau0}, estimated from augmented inverse probability of treatment weighted
+  (AIPTW) survival probabilities, with bootstrap inference. Event times are not discretized.
+  The estimator requires appropriate censoring assumptions and a correctly specified
+  censoring model; its treatment-model double robustness does not protect against
+  censoring-model misspecification.
   Undefined estimates or bootstrap replicates yield unavailable inference.
   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-  \code{log.rmtl.ratio}, \code{log.hazard.ratio}, and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
+  \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
   the interpretation of the remaining of the output.
@@ -123,7 +124,7 @@ This helper function estimates the average treatment effect (ATE) for survival d
 treatment groups in a given dataset. The ATE is estimated with a doubly robust estimator that accounts for
 imbalances in covariate distributions between the two treatment groups with inverse probability treatment and
 censoring weighting. For survival outcomes, the estimated ATE is the estimated by RMTL ratio between treatment
-1 versus treatment 0. The log-transformed ATEs and log-transformed adjusted hazard ratios are returned, as well
+1 versus treatment 0. The log-transformed RMTL and cumulative hazard ratios are returned, as well
 as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 p-value, and a histogram of the bootstrap estimates.

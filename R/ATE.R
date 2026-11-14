@@ -186,7 +186,8 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
     est.df <- est.df %>% add_row(key = "rmst1", value = x$rmst1$estimate)
     est.df <- est.df %>% add_row(key = "rmst0", value = x$rmst0$estimate)
     est.df <- est.df %>% add_row(key = "log.rmtl.ratio", value = x$log.rmtl.ratio$estimate)
-    est.df <- est.df %>% add_row(key = "log.hazard.ratio", value = x$log.hazard.ratio$estimate)
+    if (!is.null(x$log.hazard.ratio))
+      est.df <- est.df %>% add_row(key = "log.hazard.ratio", value = x$log.hazard.ratio$estimate)
 
     if (!is.null(x$log.cumulative.hazard.ratio))
       est.df <- est.df %>% add_row(key = "log.cumulative.hazard.ratio", value = x$log.cumulative.hazard.ratio$estimate)
@@ -209,7 +210,7 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
 #' @param ... Other parameters
 #'
 #' @details Display the estimated treatment effects for survival outcomes (log
-#' restricted mean time lost ratio and log hazard ratio) and count outcomes
+#' restricted mean time lost ratio and log cumulative hazard ratio) and count outcomes
 #' (the log rate ratio).
 #'
 #' @return No return value
@@ -228,7 +229,8 @@ print.atefit <- function(x, ...) {
   }
   if (x$response == "survival") {
     cat(paste0("Average treatment effect:\n\n"))
-    effects <- rbind(x$log.rmtl.ratio, x$log.hazard.ratio)
+    effects <- x$log.rmtl.ratio
+    if (!is.null(x$log.hazard.ratio)) effects <- rbind(effects, x$log.hazard.ratio)
     if (!is.null(x$log.cumulative.hazard.ratio)) effects <- rbind(effects, x$log.cumulative.hazard.ratio)
     print(effects)
     cat(paste0("\nEstimated RMST:\n\n"))

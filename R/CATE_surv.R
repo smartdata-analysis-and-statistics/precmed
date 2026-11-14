@@ -108,6 +108,9 @@
 #'  \item{\code{ate.contrastReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with contrast regression.
 #'  Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'  \item{\code{chr.<method>}: } A vector of subgroup marginal cumulative hazard
+#'  ratios at \code{tau0}, for each selected scoring method. Undefined estimates
+#'  are \code{NA}; existing \code{hr.*} results are conditional Cox HRs.
 #'  \item{\code{hr.randomForest}: }A vector of numerical values of length \code{prop.cutoff}
 #'  containing the adjusted hazard ratio in nested subgroups (defined by \code{prop.cutoff})
 #'  constructed based on the estimated CATE scores with random forest method.
@@ -346,9 +349,10 @@ catefitsurv <- function(data,
   if (prop[length(prop)] == 1) {
     est.prop1 <- survCatch(drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
                                   tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control))
+                                  ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE))
     est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
     est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
+    est.prop1$chr.high <- exp(est.prop1$log.cumulative.hazard.ratio)
   }
 
   for (name in names(fit.score)) {
@@ -362,9 +366,11 @@ catefitsurv <- function(data,
                                               ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
     result[[str_replace(name, "score", "ate")]] <- c(est.onlyhigh$ate.rmtl.high, est.prop1$ate.rmtl.high)
     result[[str_replace(name, "score", "hr")]] <- c(est.onlyhigh$hr.high, est.prop1$hr.high)
+    result[[str_replace(name, "score", "chr")]] <- c(est.onlyhigh$chr.high, est.prop1$chr.high)
 
     names(result[[str_replace(name, "score", "ate")]]) <-
-      names(result[[str_replace(name, "score", "hr")]]) <- paste0("prop", round(prop, 2))
+      names(result[[str_replace(name, "score", "hr")]]) <-
+      names(result[[str_replace(name, "score", "chr")]]) <- paste0("prop", round(prop, 2))
 
     est.onlyhigh$err.high$`prop 1.0` <- est.prop1$errors
     err.onlyhigh <- est.onlyhigh$err.high[!sapply(est.onlyhigh$err.high, is.null)]

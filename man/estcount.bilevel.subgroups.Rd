@@ -18,7 +18,8 @@ estcount.bilevel.subgroups(
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  ps.control = list()
+  ps.control = list(),
+  context = "Count"
 )
 }
 \arguments{
@@ -63,6 +64,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{context}{Label used to identify the analysis in subgroup warnings.}
 }
 \value{
 ate.est.high: estimated ATEs in the multiple bi-level subgroups that are in the higher-than-cutoff category;

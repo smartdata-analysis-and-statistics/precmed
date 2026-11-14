@@ -243,6 +243,7 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     The ith element indicates whether the algorithm converged in the ith cross-validation
     iteration.
  }
+ \item{\code{chr.<method>}: } Subgroup marginal cumulative hazard ratios at \code{tau0}, in training and validation matrices for high, low and disjoint groups. The corresponding overall estimates are \code{overall.chr.train} and \code{overall.chr.valid}. Undefined estimates are \code{NA}; \code{hr.*} results are conditional Cox HRs.
  \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if \code{score.method} includes
  \code{'randomForest'}:
  \itemize{

@@ -12,3 +12,6 @@ README.Rmd
 vignettes
 ^\.github$
 ^tests/local$
+
+^\.venv$
+^data-raw$

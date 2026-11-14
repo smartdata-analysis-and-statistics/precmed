@@ -276,6 +276,16 @@ print.catefit <- function(x, ...) {
   print(out)
   cat("\n")
 
+  if (identical(x$response, "survival")) {
+    chr.methods <- evalm[vapply(evalm, function(method) !is.null(x[[paste0("chr.", method)]]), logical(1))]
+    if (length(chr.methods)) {
+      chr.out <- do.call(rbind, lapply(chr.methods, function(method) x[[paste0("chr.", method)]]))
+      rownames(chr.out) <- chr.methods
+      cat("Cumulative hazard ratio in the nested subgroups:\n\n")
+      print(chr.out)
+      cat("\n")
+    }
+  }
   print(coef(x))
 
   if (!is.null(x$warning)) {
