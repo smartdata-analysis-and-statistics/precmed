@@ -102,19 +102,19 @@ Most variables are baseline patient characteristics like age, gender, and previo
 
 To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 14,362 USD and scaled with standard deviation 24,266 USD.
 
-The final dataset `survivalExample` looked like this:
+The first six records of the final dataset `survivalExample` are shown below:
 
 ```{r, echo = F, eval = T}
 data(survivalExample) #get clean dataset
-str(survivalExample)
+knitr::kable(head(survivalExample), row.names = FALSE)
 ```
 
 
 ## Estimate the average treatment effect 
 
-Restricted mean survival time (RMST) is the average event-free time up to a chosen horizon `tau0`; restricted mean time lost (RMTL) is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time lost under drug 0 over that horizon. For relapse, a ratio below 1 favors drug 1. Results depend on the chosen horizon. Chapter 20 discusses RMTL for ratio-based treatment effects [@jiang2026visualization].
+### Unadjusted treatment comparison
 
-First, one might be interested in the effect of the drug (trt) on the number of days until the first relapse or censoring (y). Lets test this using Cox regression. 
+We first compare time to first relapse between treatment groups using a Cox model with treatment as the only predictor. This unadjusted, marginal association does not account for differences in patient characteristics.
 
 ```{r, eval = T, echo = T}
 library(survival)
@@ -122,9 +122,64 @@ output_cox <- coxph(Surv(y, d) ~ trt, data = survivalExample)
 summary(output_cox)
 ```
 
-We see from the Cox regression we see that drug1 resulted in a hazard ratio (HR) of `r round(exp(output_cox$coefficients),2)` when compared to drug 0. This unadjusted hazard ratio compares the instantaneous relapse hazards, conditional on remaining event-free; it does not by itself establish a causal treatment effect. 
+The estimated hazard ratio (HR) for drug 1 versus drug 0 is `r round(exp(output_cox$coefficients), 2)`. It compares instantaneous relapse hazards among patients still event-free and does not by itself establish a causal treatment effect.
 
-Now we want to estimate the Average Treatment Effect (ATE) and correct for several covariates like age and previous treatment because they might influence the relation between treatment and outcome. The `atefit()` function allows estimating the ATE in terms of restricted mean time lost (RMTL) and HR (hazard ratio). The RMTL estimator is doubly robust, meaning that the estimator is consistent if the PS model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified. The estimator also depends on the estimation of Inverse Probability Censoring Weights (IPCW). The HR estimator is based on a Cox regression model. The function also provides standard error, confidence intervals, and p-values based on bootstrap.
+We can examine the proportional-hazards assumption using scaled Schoenfeld residuals. A roughly horizontal curve is consistent with a constant HR over time; the dashed curves show approximate 95% uncertainty bands.
+
+```{r ph_unadjusted, fig.width = 7, fig.height = 4.5}
+ph_unadjusted <- cox.zph(output_cox, transform = "identity")
+print(ph_unadjusted)
+plot(ph_unadjusted, var = "trt", hr = TRUE, resid = FALSE,
+     xlab = "Days since treatment initiation",
+     ylab = "Unadjusted hazard ratio: drug1 vs drug0")
+abline(h = exp(coef(output_cox)[1]), lty = 3, col = "steelblue")
+```
+
+The dotted line is the constant HR from the Cox model. The smooth curve suggests how the treatment association may vary over time; it is a diagnostic rather than a precise estimate at every time point. The treatment test p-value is `r signif(ph_unadjusted$table["trt", "p"], 2)`; later follow-up may be less informative when fewer patients remain at risk.
+
+### Covariate-adjusted treatment comparison
+
+Next, we adjust for age, sex, previous medical cost and previous relapses. We first choose an illustrative horizon: the smaller 95th percentile of observed follow-up in the two treatment groups.
+
+```{r define_tau0, eval = T, echo = T}
+tau0 <- with(survivalExample,
+             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+tau0
+```
+
+The horizon is approximately `r round(tau0, 1)` days. It defines the period over which we will compare restricted mean outcomes. This choice uses observed times, including censoring, and does not guarantee sufficient follow-up; inspect numbers at risk and censoring near the horizon in both groups and choose a clinically meaningful horizon with adequate support.
+
+For comparison with the adjusted HR later returned by `atefit()`, we censor follow-up at `tau0` and fit the same covariate-adjusted Cox model:
+
+```{r adjusted_cox, eval = T, echo = T}
+cox_data <- survivalExample
+cox_data$time_tau <- pmin(cox_data$y, tau0)
+cox_data$event_tau <- cox_data$d * (cox_data$y <= tau0)
+output_cox_adjusted <- coxph(
+  Surv(time_tau, event_tau) ~ trt + age + female + previous_cost + previous_number_relapses,
+  data = cox_data
+)
+summary(output_cox_adjusted)
+```
+
+The adjusted HR is `r round(exp(coef(output_cox_adjusted)["trtdrug1"]), 2)`, compared with `r round(exp(coef(output_cox)[1]), 2)` in the unadjusted model. These models differ in both covariate adjustment and follow-up horizon. Age differs substantially between groups and has limited overlap, so the adjusted comparison relies heavily on the model. An adjusted HR is conditional on the included covariates and is not automatically a causal average treatment effect.
+
+```{r ph_adjusted, fig.width = 7, fig.height = 4.5}
+ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
+print(ph_adjusted)
+plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
+     xlab = "Days since treatment initiation",
+     ylab = "Adjusted hazard ratio: drug1 vs drug0")
+abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
+```
+
+The adjusted treatment test p-value is `r signif(ph_adjusted$table["trt", "p"], 2)` and the global test p-value is `r signif(ph_adjusted$table["GLOBAL", "p"], 2)`. A large treatment p-value does not prove proportional hazards, and the global test also assesses the other covariates. The two plots use different models and follow-up periods, so differences between them cannot be attributed solely to adjustment.
+
+### Estimate the average treatment effect with `atefit()`
+
+An alternative summary is the restricted mean survival time (RMST), the average event-free time up to `tau0`. Restricted mean time lost (RMTL) is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with time lost under drug 0 over that horizon; for relapse, a ratio below 1 favors drug 1. Unlike a single Cox HR, this measure does not require the treatment HR to be constant over time. Results depend on the chosen horizon. Chapter 20 discusses RMTL for ratio-based treatment effects [@jiang2026visualization].
+
+The `atefit()` function estimates the population-level RMTL ratio and also reports the adjusted Cox HR. The RMTL estimator is doubly robust with respect to the propensity score (PS) and outcome models: under the required assumptions, either model may be correctly specified. It also depends on inverse probability of censoring weights (IPCW) and a correctly specified censoring model. The function provides standard errors, confidence intervals and p-values based on bootstrap. If an out-of-range RMST estimate is replaced by an outcome-model estimate, that fallback does not retain the doubly robust guarantee.
 
 IPCW adjusts for censoring by weighting patients according to their estimated probability of remaining uncensored. Causal interpretation requires assumptions including no unmeasured treatment confounding, adequate treatment overlap, appropriate censoring assumptions and sufficient follow-up. Chapter 17 discusses identification of treatment effects in non-randomized data [@hoogland2026introduction]. The Cox hazard ratio and the RMTL ratio describe different aspects of survival and should be interpreted separately.
 
@@ -139,15 +194,11 @@ The mandatory arguments for `atefit()` are:
 * The `ps.model` argument specifies the PS model as a formula, with the treatment variable `trt` on the left-hand side and the
     covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, "1" for active treatment and "0" for control or comparator. If it is not the case, `atefit()` will stop with error if `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and a warning message was left to the user (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt \~ 1. The PS model is used in the doubly robust RMTL estimation.
 
-* `tau0`: The horizon for RMST and RMTL. Below, we choose the smaller of the 95th percentiles of observed follow-up times in the two treatment groups. This illustrative choice limits extrapolation, but does not guarantee adequate follow-up: inspect numbers at risk and censoring in each group near the chosen horizon, and choose a clinically meaningful horizon with sufficient support. 
+* `tau0`: The horizon for RMST and RMTL. We reuse the value calculated above.
 
-Let's calculate the ATE for the effect of treatment on y and build an outcome model that contains all variables and a PS model with `age` and `previous_treatment`. 
+Now estimate the ATE using an outcome model with age, sex, previous cost and previous relapses, and a PS model with `age` and `previous_treatment`.
+
 ```{r run_atefit, eval = T, echo = T, cache = doc.cache}
-#define tau0
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-
-#run atefit
 output_atefit <- atefit(response = "survival",
                         data = survivalExample,
                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
@@ -170,6 +221,8 @@ The output of `atefit()` shows the point estimate, standard error ("SE"), lower 
 * the log RMTL ratio (`$log.rmtl.ratio`), which is the log of the ratio of `tau0` - `$rmst1` divided by `tau0` - `$rmst0`
 
 * the log HR (`$log.hazard.ratio`).
+
+The log HR comes from a Cox model adjusted for the variables in `cate.model`, with follow-up censored at `tau0`. Exponentiating it gives the adjusted HR: `r round(exp(output_atefit$log.hazard.ratio$estimate), 2)`. This differs from the unadjusted HR above. In these simulated data, age differs substantially between treatment groups, and the groups have limited overlap in age; consequently, the adjusted comparison relies heavily on the model. The Cox HR is not the doubly robust RMTL estimate and should be interpreted separately.
 
 For example, the log RMTL ratio of `r round(output_atefit$log.rmtl.ratio$estimate, 2)` and the 95% confidence interval of (`r round(output_atefit$log.rmtl.ratio$CI.lower, 2)`, `r round(output_atefit$log.rmtl.ratio$CI.upper, 2)`) are displayed in the output. The estimated ratio and its interval can be obtained by exponentiating these log-scale values. A ratio above 1 indicates more time lost before `tau0` under drug 1; the interval describes uncertainty in that comparison. The RMST estimates provide the corresponding event-free times up to `tau0`. 
 
@@ -297,6 +350,8 @@ dataplot %>%
 
 ## Internally validate CATE scores 
 
+### How internal validation works
+
 For broader guidance on validation strategies and the assessment of discrimination, calibration, and decision accuracy, see Chapter 19, "Validation of prediction models for patient outcomes and individualized treatment effect" [@thao2026validation].
 
 In each iteration, scores are fitted in a training set and evaluated in a separate validation set. For example, the 60% of validation patients with the lowest scores form a high-responder subgroup in this example. Repeating the split shows variation across iterations. Selecting the best method using the same validation results can make its reported performance optimistic; an independent evaluation can assess the selected method.
@@ -325,7 +380,9 @@ The `catecv()` function provides the same estimation as the `catefit()` but via 
 * Build mutually exclusive subgroups of treatment responders in the training and validation sets, separately, and estimate the ATE within each subgroup. Mutually exclusive subgroups are built by splitting the estimated CATE scores according to prop.multi.
 
 
-Oke, so now we can use the `catecv()` function to run internal validation to compare the different scoring methods. The mandatory arguments are similar to `atefit()` and `catefit()`: 
+### Run internal validation
+
+Now we can use the `catecv()` function to run internal validation to compare the different scoring methods. The mandatory arguments are similar to `atefit()` and `catefit()`: 
 The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. See above for more details on these arguments. For this toy example we again selected `randomForest` and `contrastReg` limit run time. 
 
 We also specified the following non-mandatory arguments to fit with the data and problem at hand: `initial.predictor.method`, `ipcw.model`, `verbose`, `followup.time`, `tau0`, `higher.y`, `cv.n`, `surv.min`, `seed`, and `plot.gbmperf`.
@@ -351,10 +408,9 @@ We also specified the following non-mandatory arguments to fit with the data and
 There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Customizing CATE models and validation](Additional-examples.html) vignette for more examples and the Function description [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.html) for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
 
-```{r example_catecv, eval = T, echo = T, cache = doc.cache}
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
+We reuse the `tau0` calculated above so that validation estimates RMTL over the same horizon as the average treatment effect example.
 
+```{r example_catecv, eval = T, echo = T, cache = doc.cache}
 output_catecv <- catecv(response = "survival",
                         data = survivalExample,
                         score.method = c("randomForest", "contrastReg"),
@@ -375,11 +431,13 @@ output_catecv <- catecv(response = "survival",
 ```
 
 
+### Inspect validation results
+
 The output of `catecv()` is an object of class "precmed" and here we named it `output_catecv`. It carries the relevant information to use in the next step of the workflow which selects the method (among those specified in the argument `score.method`) capturing the highest level of treatment effect heterogeneity. The output, which is described below, will be used in the functions `abc()`, `plot()` and `boxplot()`. 
 
 For each method specified in the argument `score.method`, the following 3 groups of outputs are generated: `high`, `low` and `group`. We use the results from `randomForest` as an example.
 
-**1. ATEs in nested subgroups of high responders**
+#### Nested subgroups of high responders
 
 This output stores the ATEs - the ratio of RMTL between drug1 vs drug0 in this example - in nested subgroups of patients of high responders to drug 1 in the training (`$ate.est.train.high.cv`) and validation (`$ate.est.valid.high.cv`) sets across all CV iterations. When `higher.y` = TRUE for survival outcomes, which is the case in this example, lower CATE scores correspond to high responders to drug1. When `higher.y` = FALSE for survival outcomes, higher CATE scores correspond to high responders to drug1. Note that this is different for count outcomes. The direction of CATE scores depends on both `higher.y` and outcome type.
 
@@ -393,7 +451,7 @@ The output is a matrix with columns corresponding to the CV iterations, labeled 
 For example, in the training set and in the 4th CV iteration (4th column labeled "cv4"), the subgroup defined with the 80% lowest CATE scores (3rd row labeled "prop0.8") has an estimated RMTL ratio of `r round(output_catecv$ate.randomForest$ate.est.train.high.cv[3,4], 3)`. In contrast, the subgroup defined with all patients (last row labeled "prop1") in the 4th CV iteration has an estimated RMTL ratio of `r round(output_catecv$ate.randomForest$ate.est.train.high.cv[5,4], 3)`.
 <!-- This suggests that the CATE score estimated with random forests identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RMTL ratio compared to all patients. If lower outcomes were preferable (as specified through the argument `higher.y`), subgroups would be defined with proportion of patients with *highest* estimated CATE score and *higher* RR would be better. -->
 
-**2. ATEs in nested subgroups of low responders**
+#### Nested subgroups of low responders
 
 This output stores the ATEs in nested subgroups of *low responders* to drug1 in the training (`$ate.est.train.low.cv`) and validation (`$ate.est.valid.low.cv`) sets across all CV iterations. When `higher.y` = TRUE for survival outcomes, higher CATE scores correspond to low responders to drug1. When `higher.y` = FALSE for survival outcomes, lower CATE scores correspond to low responders to drug1. Again, this is different for count outcomes. The direction of CATE scores depends on both `higher.y` and outcome type. 
 
@@ -405,14 +463,7 @@ The outputs are also matrices with columns corresponding to the CV iterations an
 
 The output for the low responders brings additional information to the user. It gives the ATEs in the complement of each nested subgroup of high responders. For example, the complement of the subgroup of high responders defined as patients with the 60% lowest (highest if `higher.y` = FALSE) estimated CATE scores is the subgroup of low responders defined as patients with the 40% highest (lowest if `higher.y` = FALSE) estimated CATE scores, labeled as "prop0.4". In the training set and in the first CV iterations, the estimated RMTL ratio is `r round(output_catecv$ate.randomForest$ate.est.train.high.cv[1,1], 3)` in the 60% high responders to drug 1 and `r round(output_catecv$ate.randomForest$ate.est.train.low.cv[1,1], 3)` in the 40% low responders.
 
-The 2 last rows have missing or infinite values and this can be due to many reasons. We record all errors and warnings and keep them as an element of the `cv` output. For example, we can use the following code to check specific errors and warnings of the first CV iteration (`$cv1`) using the random forest method (`$randomForest`) when estimating the ATE in the training sample in the low responder groups (`$est.train.low.cv`). It looks like there was no event observation in the 10% subgroup, possibly due to small sample size, which also relates to the convergence issue in the warning. Additionally, the warning for the 20% subgroup (`$warnings$'prop0.2'`) suggested that there was non-convergence of the Cox procedure and that the corresponding estimated ATE should be interpreted with caution.
-
-```{r errwarn, eval = T, echo = T}
-output_catecv$`errors/warnings`$randomForest$est.train.low.cv$cv1
-output_catecv$`errors/warnings`$randomForest$est.valid.low.cv$cv1
-```
-
-**3. ATEs in mutually exclusive multi-category subgroups**
+#### Mutually exclusive subgroups
 
 This output stores the ATEs in mutually exclusive multi-category subgroups of patients in the training (`$ate.est.train.group.cv`) and validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
 
@@ -421,7 +472,18 @@ output_catecv$ate.randomForest$ate.est.train.group.cv
 output_catecv$ate.randomForest$ate.est.valid.group.cv
 ```
 
-The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the mutually exclusive subgroups. The previous 2 outputs only focus on binary subgroups (high or low responders). Here, the mutually exclusive subgroups can be more than 2 and are defined by the argument `prop.multi`. We use `c(0, 0.5, 0.6, 1)` which defines 3 subgroups of patients with the 50% lowest, 10% middle and 40% highest estimated CATE scores when `higher.y` = TRUE (as in this example), or with the 40% highest, 10% middle and 50% lowest estimated CATE scores when `higher.y` = FALSE. Taking the first column as an example, the first CV iteration calculated `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[1,1], 3)` as the RMTL ratio for the subgroup with the 50% lowest estimated CATE scores, `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[2,1], 3)` as the RMTL ratio for the subgroup with the middle 10% estimated CATE scores, and `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[3,1], 3)` as the RMTL ratio for the subgroup with the 40% highest estimated CATE scores. Use ``output_catecv$`errors/warnings`$randomForest$est.train.group.cv `` to learn more about the errors and warnings generated from these outputs.
+The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the mutually exclusive subgroups. The previous 2 outputs only focus on binary subgroups (high or low responders). Here, the mutually exclusive subgroups can be more than 2 and are defined by the argument `prop.multi`. We use `c(0, 0.5, 0.6, 1)` which defines 3 subgroups of patients with the 50% lowest, 10% middle and 40% highest estimated CATE scores when `higher.y` = TRUE (as in this example), or with the 40% highest, 10% middle and 50% lowest estimated CATE scores when `higher.y` = FALSE. Taking the first column as an example, the first CV iteration calculated `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[1,1], 3)` as the RMTL ratio for the subgroup with the 50% lowest estimated CATE scores, `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[2,1], 3)` as the RMTL ratio for the subgroup with the middle 10% estimated CATE scores, and `r round(output_catecv$ate.randomForest$ate.est.train.group.cv[3,1], 3)` as the RMTL ratio for the subgroup with the 40% highest estimated CATE scores.
+
+### Inspect errors and warnings
+
+Subgroup estimates can be missing or unstable, for example when a subgroup has few patients or observed events. The `catecv()` output records errors and warnings for each method, subgroup and iteration. The following code checks the first iteration for low-responder subgroups using the random forest method:
+
+```{r errwarn, eval = T, echo = T}
+output_catecv$`errors/warnings`$randomForest$est.train.low.cv$cv1
+output_catecv$`errors/warnings`$randomForest$est.valid.low.cv$cv1
+```
+
+For mutually exclusive subgroups, inspect ``output_catecv$`errors/warnings`$randomForest$est.train.group.cv``. Review any convergence warnings and interpret affected estimates with caution.
 
 ## Compare scoring methods using the ABC statistic
 

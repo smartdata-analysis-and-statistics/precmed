@@ -124,6 +124,9 @@ censoring weighting. For survival outcomes, the estimated ATE is the estimated b
 as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 p-value, and a histogram of the bootstrap estimates.
+If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
+outcome-model estimate is substituted and a warning is issued. That fallback
+does not retain the doubly robust guarantee.
 }
 \examples{
 \donttest{

@@ -26,6 +26,18 @@
 
 ## Minor changes and bug fixes
 
+* Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead of
+  treating observations beyond the horizon as events. This affects ATE,
+  subgroup, and cross-validation hazard ratio estimates; RMST and RMTL
+  calculations are unchanged.
+
+* Fixed survival random forest event coding at `tau0` and integrated predicted
+  survival curves through the full horizon when computing RMST. Survival forest
+  scores and scores using forest initial predictions may change.
+
+* Warn when an out-of-range doubly robust RMST estimate is replaced by an
+  outcome-model estimate, including when this occurs during bootstrap inference.
+
 * Fixed intercept-only propensity models in survival cross-fitting, subgroup
   evaluation, and bootstrap ATE estimation by preserving matrix dimensions.
 

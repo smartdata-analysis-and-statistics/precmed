@@ -434,3 +434,18 @@ balancesurv.split <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, train.
               x.ps.valid = x.ps.valid, x.ipcw.valid = x.ipcw.valid, yf.valid = yf.valid))
 }
 
+# Event status for survival models with administrative censoring at tau0.
+survival_event_at_horizon <- function(y, d, tau0) d * (y <= tau0)
+
+# Integrate right-continuous forest survival curves through the requested horizon.
+integrate_forest_survival <- function(time, survival, tau0) {
+  survival <- as.matrix(survival)
+  stopifnot(ncol(survival) == length(time), length(tau0) == 1L,
+            is.finite(tau0), tau0 > 0, all(is.finite(time)),
+            all(time >= 0), !is.unsorted(time, strictly = TRUE))
+  breaks <- c(0, time[time > 0 & time < tau0], tau0)
+  indices <- findInterval(breaks[-length(breaks)], time)
+  curves <- cbind(1, survival)
+  as.vector(curves[, indices + 1L, drop = FALSE] %*% diff(breaks))
+}
+

@@ -73,6 +73,9 @@
 #' as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 #' using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 #' p-value, and a histogram of the bootstrap estimates.
+#' If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
+#' outcome-model estimate is substituted and a warning is issued. That fallback
+#' does not retain the doubly robust guarantee.
 #'
 #' @examples
 #' \donttest{
@@ -175,22 +178,31 @@ atefitsurv <- function(data,
                          max = n.boot,
                          style = 3)
 
+  fallback.boot <- 0L
   for (i in seq(n.boot)) {
     idsub.boot <- sample(n, size = n, replace  = TRUE)
-    est.boot <- drsurv(y = y[idsub.boot],
+    fallback.in.sample <- FALSE
+    est.boot <- withCallingHandlers(drsurv(y = y[idsub.boot],
                        d = d[idsub.boot],
                        x.cate = x.cate[idsub.boot, ],
                        x.ps = x.ps[idsub.boot, , drop = FALSE],
                        x.ipcw = x.ipcw[idsub.boot, ],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control),
+      rmst_fallback = function(w) {
+        fallback.in.sample <<- TRUE
+        invokeRestart("muffleWarning")
+      })
+    fallback.boot <- fallback.boot + as.integer(fallback.in.sample)
     save.boot[i,] <- unlist(est.boot)
 
     if (verbose == 1) setTxtProgressBar(pb, i)
   }
 
   close(pb)
+  if (fallback.boot > 0L) warning("RMST outcome-model fallback occurred in ",
+                                  fallback.boot, " bootstrap sample(s); bootstrap inference includes these estimates.", call. = FALSE)
 
   se.est <- apply(save.boot, 2, sd)
   cil.est <- est - qnorm(0.975) * se.est
@@ -282,7 +294,10 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   dnew <- d
   dnew[ynew == tau0] <- 1
 
-  fit <- coxph(Surv(ynew, dnew) ~ trt + x.cate)
+  # Reaching the horizon completes follow-up for RMST weighting, but is
+  # administrative censoring in the Cox model unless an event occurred there.
+  d.cox <- survival_event_at_horizon(y, d, tau0)
+  fit <- coxph(Surv(ynew, d.cox) ~ trt + x.cate)
 
   surv.new <- ipcw.surv(y = y, d = d, x.ipcw = x.ipcw, yf = yf, ipcw.method = ipcw.method, tau0 = tau0, surv.min = surv.min)
 
@@ -296,13 +311,24 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   rmst1 <- mean((ynew - coxest1) * weightc * trt / ps) / mean(trt / ps) + mean(coxest1)
   rmst0 <- mean((ynew - coxest0) * weightc * (1 - trt) / (1 - ps)) / mean((1 - trt) / (1 - ps)) + mean(coxest0)
 
-  if ((rmst1 > tau0 || rmst1 < 0) & (!is.na(rmst1))) rmst1 <- mean(coxest1)
-  if ((rmst0 > tau0 || rmst0 < 0) & (!is.na(rmst0))) rmst0 <- mean(coxest0)
+  rmst1 <- rmst_outcome_fallback(rmst1, coxest1, tau0, 1)
+  rmst0 <- rmst_outcome_fallback(rmst0, coxest0, tau0, 0)
 
   delta.rmtl <- log((tau0 - rmst1) / (tau0 - rmst0))
   delta.hr <- as.vector(fit$coef[1])
 
   return(list(rmst1 = rmst1, rmst0 = rmst0, log.rmtl.ratio = delta.rmtl, log.hazard.ratio = delta.hr))
+}
+
+rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
+  if (!is.na(estimate) && (estimate < 0 || estimate > tau0)) {
+    w <- simpleWarning(paste0("Doubly robust RMST for treatment ", arm,
+                              " is outside [0, tau0]; using the outcome-model estimate, which is not doubly robust."))
+    class(w) <- c("rmst_fallback", class(w))
+    warning(w)
+    return(mean(predictions))
+  }
+  estimate
 }
 
 

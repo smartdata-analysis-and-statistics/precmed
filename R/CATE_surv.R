@@ -727,7 +727,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
   weightc <- dnew / surv.new
   weightc <- weightc / mean(weightc)
 
-  datatotrf <- data.frame("y" = ynew, "d" = dnew, x.cate)
+  # The restricted-time observation indicator is not a survival event status.
+  datatotrf <- data.frame("y" = ynew, "d" = survival_event_at_horizon(y, d, tau0), x.cate)
   datatot <- data.frame("y" = ynew / tau0, x.cate)
 
   # Generate indices for N1 (normal order) and N0 (reverse order)
@@ -763,17 +764,13 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
           fit1 <- rfsrc(Surv(y, d) ~ ., data = data1rf, ntree = n.trees.rf)
           surv1.prd <- predict(object = fit1, newdata = datatot_valid)$survival
           time1 <- fit1$time
-          m1 <- length(time1)
-          timegap1 <- time1 - c(0, time1[-m1])
-          f1.predictcv[index == k] <- colSums(timegap1 * rbind(1, t(surv1.prd[, -m1]))) / tau0
+          f1.predictcv[index == k] <- integrate_forest_survival(time1, surv1.prd, tau0) / tau0
 
           data0rf <- datatot_train[trt_train == 0,]
           fit0 <- rfsrc(Surv(y, d) ~ ., data = data0rf, ntree = n.trees.rf)
           surv0.prd <- predict(object = fit0, newdata = datatot_valid)$survival
           time0 <- fit0$time
-          m0 <- length(time0)
-          timegap0 <- time0 - c(0, time0[-m0])
-          f0.predictcv[index == k] <- colSums(timegap0 * rbind(1, t(surv0.prd[, -m0]))) / tau0
+          f0.predictcv[index == k] <- integrate_forest_survival(time0, surv0.prd, tau0) / tau0
 
         } else if (initial.predictor.method == "boosting") {
 
@@ -1017,15 +1014,11 @@ scoresurv <- function(fit, x.cate, tau0,
 
     predict0 <- predict(object = fit0.rf, newdata = datanew)$survival
     time0 <- fit0.rf$time
-    m0 <- length(time0)
-    timegap0 <- time0 - c(0, time0[-m0])
-    rmst0 <- colSums(timegap0 * rbind(1, t(predict0[,-m0])))
+    rmst0 <- integrate_forest_survival(time0, predict0, tau0)
 
     predict1 <- predict(object = fit1.rf, newdata = datanew)$survival
     time1 <- fit1.rf$time
-    m1 <- length(time1)
-    timegap1 <- time1 - c(0, time1[-m1])
-    rmst1 <- colSums(timegap1 * rbind(1, t(predict1[,-m1])))
+    rmst1 <- integrate_forest_survival(time1, predict1, tau0)
 
     result$score.randomForest <- log(tau0 - rmst1) - log(tau0 - rmst0)
   }
