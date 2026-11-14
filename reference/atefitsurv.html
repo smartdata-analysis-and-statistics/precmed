@@ -187,8 +187,11 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <li><p><code>log.hazard.ratio</code>:  A vector of numeric values of the estimated adjusted log hazard ratio
   of <code>trt=1</code> over <code>trt=0</code>, bootstrap standard error, lower and upper limits of 95% confidence
   interval, and the p-value.</p></li>
+<li><p><code>log.cumulative.hazard.ratio</code>:  The log ratio of marginal cumulative hazards at
+  <code>tau0</code>, estimated from AIPW treatment-specific survival probabilities, with bootstrap inference.
+  Undefined estimates or bootstrap replicates yield unavailable inference.</p></li>
 <li><p><code>trt.boot</code>:  Estimates of <code>rmst1</code>, <code>rmst0</code>,
-  <code>log.rmtl.ratio</code> and <code>log.hazard.ratio</code> in each bootstrap sample.</p></li>
+  <code>log.rmtl.ratio</code>, <code>log.hazard.ratio</code>, and <code>log.cumulative.hazard.ratio</code> in each bootstrap sample.</p></li>
 <li><p><code>warning</code>:  A warning message produced if the treatment variable was not coded as 0/1.
   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
   the interpretation of the remaining of the output.</p></li>
@@ -228,9 +231,14 @@ does not retain the doubly robust guarantee.</p>
 <span class="r-in"><span><span class="va">output</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average treatment effect:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   estimate         SE    CI.lower  CI.upper     pvalue</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio   0.0701553 0.03206484 0.007309376 0.1330012 0.02867542</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.hazard.ratio 3.3974272 0.29245335 2.824229195 3.9706253 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               estimate         SE     CI.lower  CI.upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.1330012</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.hazard.ratio            3.39742723 0.29245335  2.824229195 3.9706253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.2302107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                 pvalue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.02867542</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.hazard.ratio            0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.79471688</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimated RMST:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

@@ -307,7 +307,7 @@ output_catefit <- catefit(
 #> Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 3.953855 secs
+#> Time difference of 3.886415 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -591,37 +591,37 @@ output_catecv <- catecv(
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:07:49 2026 
+#>    Sat Nov 14 16:47:26 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:07:52 2026 
+#>    Sat Nov 14 16:47:29 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:07:56 2026 
+#>    Sat Nov 14 16:47:33 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:08:01 2026 
+#>    Sat Nov 14 16:47:37 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 16:08:06 2026 
+#>    Sat Nov 14 16:47:42 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 21.75 secs
+#> Total runtime : 21.71 secs
 ```
 
 ### Inspect validation results
@@ -761,8 +761,12 @@ for subgroup with the 33% highest estimated CATE scores.
 ### Inspect errors and warnings
 
 Subgroup estimates can be missing or unstable, for example when a
-subgroup has few patients or observed events. Check warnings after
-running
+subgroup has few patients or observed events. Tied scores can also leave
+a subgroup empty or change its size from the requested proportion. If a
+subgroup has no patients in one or both treatment arms, its estimate is
+`NA` and a warning identifies the method, iteration, subgroup and
+treatment counts. ABC is `NA` if a required estimate is unavailable.
+Check warnings after running
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 and review affected estimates with caution:
 

@@ -2,8 +2,9 @@
 
 Extract treatment effects from an `atefit` object on their native
 estimation scale: the log rate ratio for count outcomes, or the log RMTL
-ratio and log hazard ratio for survival outcomes. Exponentiate the
-returned estimates and interval limits to obtain ratios.
+ratio, conditional log hazard ratio, and log cumulative hazard ratio for
+survival outcomes. Exponentiate the returned estimates and interval
+limits to obtain ratios.
 
 ## Usage
 

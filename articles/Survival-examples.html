@@ -98,12 +98,12 @@ subgroups.</p>
 <div class="section level2">
 <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>
-<p>To show the functionalities of the <code>precmed</code> package for
-survival outcomes we first need data. For our examples we use simulated
-data that is located in the <code>survivalExample</code> data set. The
-data set <code>survivalExample</code> was simulated based on real-world
-claims data in multiple sclerosis and has 4,000 observations and 9
-variables.</p>
+<p>For these survival examples, we use the simulated dataset
+<code>survivalExample</code>, based on real-world claims data in
+multiple sclerosis. It contains 4,000 observations and 9 variables: six
+baseline characteristics, one treatment variable, and two survival
+outcome variables. The table below summarizes the baseline
+characteristics by treatment group.</p>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -382,60 +382,10 @@ Previous number of relapses (%)
 1 ( 0.0)
 </td>
 </tr>
-<tr>
-<td style="text-align:left;">
-Days until the first relapse (mean(SD))
-</td>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-141.6 (262.2)
-</td>
-<td style="text-align:left;">
-152.6 (275.5)
-</td>
-<td style="text-align:left;">
-132.1 (249.9)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Event indicator (0: censoring, 1: relapse) (%)
-</td>
-<td style="text-align:left;">
-0
-</td>
-<td style="text-align:left;">
-3352 (83.8)
-</td>
-<td style="text-align:left;">
-1695 (91.7)
-</td>
-<td style="text-align:left;">
-1657 (77.0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-</td>
-<td style="text-align:left;">
-1
-</td>
-<td style="text-align:left;">
-648 (16.2)
-</td>
-<td style="text-align:left;">
-154 ( 8.3)
-</td>
-<td style="text-align:left;">
-494 (23.0)
-</td>
-</tr>
 </tbody>
 </table>
 <hr>
-<p>Most variables are baseline patient characteristics like age, gender,
-and previous treatment.</p>
+<p>The treatment and survival outcome variables have distinct roles:</p>
 <ul>
 <li><p>We will use <code>y</code> as the survival outcome, which is the
 number of days until the first relapse or censoring, whichever comes
@@ -600,113 +550,138 @@ uncertainty bands.</p>
 <p>The dotted line is the constant HR from the Cox model. The smooth
 curve suggests how the treatment association may vary over time; it is a
 diagnostic rather than a precise estimate at every time point. The
-treatment test p-value is 8.9^{-5}; later follow-up may be less
-informative when fewer patients remain at risk.</p>
+treatment test gives p &lt; 0.001, suggesting that the treatment HR
+varies over time. Later follow-up is less informative when fewer
+patients remain at risk, as reflected in the wider uncertainty
+bands.</p>
 </div>
 <div class="section level3">
 <h3 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
 </h3>
 <p>Next, we adjust for age, sex, previous medical cost and previous
-relapses. We first choose an illustrative horizon: the smaller 95th
-percentile of observed follow-up in the two treatment groups.</p>
+relapses using a Cox model:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
-<span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">tau0</span></span>
-<span><span class="co">#&gt; [1] 522.6618</span></span></code></pre></div>
-<p>The horizon is approximately 522.7 days. It defines the period over
-which we will compare restricted mean outcomes. This choice uses
-observed times, including censoring, and does not guarantee sufficient
-follow-up; inspect numbers at risk and censoring near the horizon in
-both groups and choose a clinically meaningful horizon with adequate
-support.</p>
-<p>For comparison with the adjusted HR later returned by
-<code><a href="../reference/atefit.html">atefit()</a></code>, we censor follow-up at <code>tau0</code> and fit
-the same covariate-adjusted Cox model:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cox_data</span> <span class="op">&lt;-</span> <span class="va">survivalExample</span></span>
-<span><span class="va">cox_data</span><span class="op">$</span><span class="va">time_tau</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="va">cox_data</span><span class="op">$</span><span class="va">y</span>, <span class="va">tau0</span><span class="op">)</span></span>
-<span><span class="va">cox_data</span><span class="op">$</span><span class="va">event_tau</span> <span class="op">&lt;-</span> <span class="va">cox_data</span><span class="op">$</span><span class="va">d</span> <span class="op">*</span> <span class="op">(</span><span class="va">cox_data</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;=</span> <span class="va">tau0</span><span class="op">)</span></span>
-<span><span class="va">output_cox_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time_tau</span>, <span class="va">event_tau</span><span class="op">)</span> <span class="op">~</span> <span class="va">trt</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  data <span class="op">=</span> <span class="va">cox_data</span></span>
+<code class="sourceCode R"><span><span class="va">output_cox_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">trt</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">survivalExample</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">output_cox_adjusted</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; coxph(formula = Surv(time_tau, event_tau) ~ trt + age + female + </span></span>
-<span><span class="co">#&gt;     previous_cost + previous_number_relapses, data = cox_data)</span></span>
+<span><span class="co">#&gt; coxph(formula = Surv(y, d) ~ trt + age + female + previous_cost + </span></span>
+<span><span class="co">#&gt;     previous_number_relapses, data = survivalExample)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   n= 4000, number of events= 617 </span></span>
+<span><span class="co">#&gt;   n= 4000, number of events= 648 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                               coef exp(coef)  se(coef)       z Pr(&gt;|z|)    </span></span>
-<span><span class="co">#&gt; trtdrug1                  3.397427 29.887108  0.182864  18.579  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; age                      -0.113755  0.892477  0.007606 -14.957  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; female                   -0.006535  0.993486  0.094564  -0.069 0.944902    </span></span>
-<span><span class="co">#&gt; previous_cost             0.078669  1.081846  0.022126   3.556 0.000377 ***</span></span>
-<span><span class="co">#&gt; previous_number_relapses -1.008998  0.364584  0.087938 -11.474  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt;                              coef exp(coef) se(coef)       z Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; trtdrug1                  3.28163  26.61900  0.17858  18.377  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; age                      -0.11015   0.89570  0.00740 -14.885  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; female                   -0.03142   0.96907  0.09175  -0.342  0.73204    </span></span>
+<span><span class="co">#&gt; previous_cost             0.07103   1.07361  0.02235   3.178  0.00148 ** </span></span>
+<span><span class="co">#&gt; previous_number_relapses -0.95943   0.38311  0.08335 -11.511  &lt; 2e-16 ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                          exp(coef) exp(-coef) lower .95 upper .95</span></span>
-<span><span class="co">#&gt; trtdrug1                   29.8871    0.03346   20.8848   42.7698</span></span>
-<span><span class="co">#&gt; age                         0.8925    1.12048    0.8793    0.9059</span></span>
-<span><span class="co">#&gt; female                      0.9935    1.00656    0.8254    1.1958</span></span>
-<span><span class="co">#&gt; previous_cost               1.0818    0.92435    1.0359    1.1298</span></span>
-<span><span class="co">#&gt; previous_number_relapses    0.3646    2.74285    0.3069    0.4332</span></span>
+<span><span class="co">#&gt; trtdrug1                   26.6190    0.03757   18.7580   37.7743</span></span>
+<span><span class="co">#&gt; age                         0.8957    1.11645    0.8828    0.9088</span></span>
+<span><span class="co">#&gt; female                      0.9691    1.03191    0.8096    1.1600</span></span>
+<span><span class="co">#&gt; previous_cost               1.0736    0.93144    1.0276    1.1217</span></span>
+<span><span class="co">#&gt; previous_number_relapses    0.3831    2.61021    0.3254    0.4511</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Concordance= 0.76  (se = 0.014 )</span></span>
-<span><span class="co">#&gt; Likelihood ratio test= 571.5  on 5 df,   p=&lt;2e-16</span></span>
-<span><span class="co">#&gt; Wald test            = 466.1  on 5 df,   p=&lt;2e-16</span></span>
-<span><span class="co">#&gt; Score (logrank) test = 516.5  on 5 df,   p=&lt;2e-16</span></span></code></pre></div>
-<p>The adjusted HR is 29.89, compared with 3.04 in the unadjusted model.
-These models differ in both covariate adjustment and follow-up horizon.
+<span><span class="co">#&gt; Concordance= 0.759  (se = 0.014 )</span></span>
+<span><span class="co">#&gt; Likelihood ratio test= 550.9  on 5 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Wald test            = 453.8  on 5 df,   p=&lt;2e-16</span></span>
+<span><span class="co">#&gt; Score (logrank) test = 498.3  on 5 df,   p=&lt;2e-16</span></span></code></pre></div>
+<p>The adjusted HR is 26.62, compared with 3.04 in the unadjusted model.
 Age differs substantially between groups and has limited overlap, so the
 adjusted comparison relies heavily on the model. An adjusted HR is
 conditional on the included covariates and is not automatically a causal
 average treatment effect.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ph_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/cox.zph.html" class="external-link">cox.zph</a></span><span class="op">(</span><span class="va">output_cox_adjusted</span>, transform <span class="op">=</span> <span class="st">"identity"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ph_adjusted</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                            chisq df      p</span></span>
-<span><span class="co">#&gt; trt                       0.0167  1 0.8972</span></span>
-<span><span class="co">#&gt; age                       0.6207  1 0.4308</span></span>
-<span><span class="co">#&gt; female                    0.0747  1 0.7846</span></span>
-<span><span class="co">#&gt; previous_cost             7.4645  1 0.0063</span></span>
-<span><span class="co">#&gt; previous_number_relapses  3.1394  1 0.0764</span></span>
-<span><span class="co">#&gt; GLOBAL                   15.3651  5 0.0089</span></span>
+<span><span class="co">#&gt;                             chisq df       p</span></span>
+<span><span class="co">#&gt; trt                       1.74752  1  0.1862</span></span>
+<span><span class="co">#&gt; age                       0.00364  1  0.9519</span></span>
+<span><span class="co">#&gt; female                    0.78487  1  0.3757</span></span>
+<span><span class="co">#&gt; previous_cost             7.56093  1  0.0060</span></span>
+<span><span class="co">#&gt; previous_number_relapses  9.19476  1  0.0024</span></span>
+<span><span class="co">#&gt; GLOBAL                   37.69160  5 4.4e-07</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ph_adjusted</span>, var <span class="op">=</span> <span class="st">"trt"</span>, hr <span class="op">=</span> <span class="cn">TRUE</span>, resid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"Days since treatment initiation"</span>,</span>
 <span>     ylab <span class="op">=</span> <span class="st">"Adjusted hazard ratio: drug1 vs drug0"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">output_cox_adjusted</span><span class="op">)</span><span class="op">[</span><span class="st">"trtdrug1"</span><span class="op">]</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"steelblue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/ph_adjusted-1.png" class="r-plt" alt="" width="672"></p>
-<p>The adjusted treatment test p-value is 0.9 and the global test
-p-value is 0.0089. A large treatment p-value does not prove proportional
+<p>The adjusted treatment test gives p = 0.186 and the global test gives
+p &lt; 0.001. A large treatment p-value does not prove proportional
 hazards, and the global test also assesses the other covariates. The two
-plots use different models and follow-up periods, so differences between
-them cannot be attributed solely to adjustment.</p>
+plots describe the unadjusted and covariate-adjusted models,
+respectively.</p>
 </div>
 <div class="section level3">
-<h3 id="estimate-the-average-treatment-effect-with-atefit">Estimate the average treatment effect with
-<code>atefit()</code><a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect-with-atefit"></a>
+<h3 id="population-level-treatment-comparison-over-a-fixed-horizon">Population-level treatment comparison over a fixed horizon<a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-over-a-fixed-horizon"></a>
 </h3>
-<p>An alternative summary is the restricted mean survival time (RMST),
-the average event-free time up to <code>tau0</code>. Restricted mean
-time lost (RMTL) is <code>tau0 - RMST</code>. The RMTL ratio compares
-time lost under drug 1 with time lost under drug 0 over that horizon;
-for relapse, a ratio below 1 favors drug 1. Unlike a single Cox HR, this
-measure does not require the treatment HR to be constant over time.
-Results depend on the chosen horizon. Chapter 20 discusses RMTL for
-ratio-based treatment effects <span class="citation">(Jiang et al.
-2026)</span>.</p>
-<p>The <code><a href="../reference/atefit.html">atefit()</a></code> function estimates the population-level
-RMTL ratio and also reports the adjusted Cox HR. The RMTL estimator is
-doubly robust with respect to the propensity score (PS) and outcome
-models: under the required assumptions, either model may be correctly
-specified. It also depends on inverse probability of censoring weights
-(IPCW) and a correctly specified censoring model. The function provides
-standard errors, confidence intervals and p-values based on bootstrap.
-If an out-of-range RMST estimate is replaced by an outcome-model
-estimate, that fallback does not retain the doubly robust guarantee.</p>
+<p>The unadjusted Cox model compares treatment groups without accounting
+for differences in their characteristics. The adjusted Cox model
+accounts for the selected covariates, but its HR is conditional on those
+covariates and summarizes the treatment association using a single HR.
+The diagnostics suggest that this association may vary over time, and
+estimates become less informative later in follow-up. Neither comparison
+directly describes the average time patients remain relapse-free under
+each treatment.</p>
+<p>We now use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate population-level
+outcomes over a specified follow-up horizon. For restricted mean
+survival time (RMST) and restricted mean time lost (RMTL), it combines
+outcome and propensity score models with an adjustment for censoring to
+estimate population-level outcomes under each treatment. These measures
+summarize time over the chosen period without requiring a constant
+treatment HR. Under appropriate assumptions, the population-level
+comparison can be interpreted as a causal treatment effect.
+<code><a href="../reference/atefit.html">atefit()</a></code> also estimates a population-level cumulative
+hazard ratio at the horizon and reports a separate covariate-adjusted
+Cox HR. It uses bootstrap resampling to estimate uncertainty for all
+reported measures.</p>
+<p>RMST is the average event-free time up to a chosen horizon,
+<code>tau0</code>; RMTL is <code>tau0 - RMST</code>. The RMTL ratio
+compares time lost under drug 1 with time lost under drug 0 over that
+horizon; for relapse, a ratio below 1 favors drug 1. Its interpretation
+depends on the horizon. Chapter 20 discusses RMTL for ratio-based
+treatment effects <span class="citation">(Jiang et al. 2026)</span>.</p>
+<p>The cumulative hazard ratio compares the cumulative hazards,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mi>a</mi><mi>u</mi><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">-\log(S(tau0))</annotation></semantics></math>,
+under the two treatments. <code><a href="../reference/atefit.html">atefit()</a></code> estimates the
+treatment-specific survival probabilities using outcome, propensity
+score and censoring models. The calculation reuses the
+treatment-specific Cox outcome fits, propensity scores and censoring
+model used for RMST. This ratio is distinct from an instantaneous HR. If
+either estimated survival probability is outside the interval (0, 1),
+the ratio is undefined; bootstrap inference is also unavailable if any
+replicate is undefined. The separate covariate-adjusted Cox HR censors
+follow-up at <code>tau0</code> and does not use the propensity-score or
+censoring models.</p>
+<p>For this example, we choose an illustrative horizon of roughly 500
+days: the smaller 95th percentile of observed follow-up in the two
+treatment groups.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">tau0</span></span>
+<span><span class="co">#&gt; [1] 522.6618</span></span></code></pre></div>
+<p>The horizon is approximately 522.7 days. It defines the period over
+which we will compare restricted mean outcomes. This choice is not
+derived from the proportional-hazards diagnostics and does not establish
+that the HR is constant before the horizon. It uses observed times,
+including censoring, and does not guarantee sufficient follow-up;
+inspect numbers at risk and censoring near the horizon in both groups
+and choose a clinically meaningful horizon with adequate support.</p>
+<p>The RMTL estimator is doubly robust with respect to the propensity
+score (PS) and outcome models: under the required assumptions, either
+model may be correctly specified. It also depends on inverse probability
+of censoring weights (IPCW) and a correctly specified censoring model.
+The function provides standard errors, confidence intervals and p-values
+based on bootstrap. If an out-of-range RMST estimate is replaced by an
+outcome-model estimate, that fallback does not retain the doubly robust
+guarantee.</p>
 <p>IPCW adjusts for censoring by weighting patients according to their
 estimated probability of remaining uncensored. Causal interpretation
 requires assumptions including no unmeasured treatment confounding,
@@ -750,9 +725,9 @@ left to the user (see output below):
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
 = trt ~ 1. The PS model is used in the doubly robust RMTL
 estimation.</p></li>
-<li><p><code>tau0</code>: The horizon for RMST and RMTL. We reuse the
-value calculated above.</p></li>
 </ul>
+<p>We also specify the optional argument <code>tau0</code>, the horizon
+for RMST and RMTL, using the value calculated above.</p>
 <p>Now estimate the ATE using an outcome model with age, sex, previous
 cost and previous relapses, and a PS model with <code>age</code> and
 <code>previous_treatment</code>.</p>
@@ -769,19 +744,24 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                   estimate         SE    CI.lower  CI.upper    pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio   0.0701553 0.03415434 0.003214028 0.1370966 0.0399692</span></span>
-<span><span class="co">#&gt; log.hazard.ratio 3.3974272 0.27890929 2.850775065 3.9440794 0.0000000</span></span>
+<span><span class="co">#&gt;                               estimate         SE     CI.lower  CI.upper</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              0.07015530 0.03490277  0.001747139 0.1385635</span></span>
+<span><span class="co">#&gt; log.hazard.ratio            3.39742723 0.27725516  2.854017097 3.9408374</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio 0.02697948 0.11277419 -0.194053869 0.2480128</span></span>
+<span><span class="co">#&gt;                                 pvalue</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              0.04442894</span></span>
+<span><span class="co">#&gt; log.hazard.ratio            0.00000000</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio 0.81092373</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 172.8609 6.559210 160.0051 185.7167      0</span></span>
-<span><span class="co">#&gt; rmst0 196.5603 8.793107 179.3261 213.7944      0</span></span>
+<span><span class="co">#&gt; rmst1 172.8609 6.895660 159.3457 186.3761      0</span></span>
+<span><span class="co">#&gt; rmst0 196.5603 8.847615 179.2192 213.9013      0</span></span>
 <span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
-of the 95% confidence interval, and the p-value (“pvalue”) for 4
+of the 95% confidence interval, and the p-value (“pvalue”) for 5
 estimands:</p>
 <ul>
 <li><p>the restricted mean survival time under drug 1
@@ -791,16 +771,19 @@ estimands:</p>
 <li><p>the log RMTL ratio (<code>$log.rmtl.ratio</code>), which is the
 log of the ratio of <code>tau0</code> - <code>$rmst1</code> divided by
 <code>tau0</code> - <code>$rmst0</code></p></li>
-<li><p>the log HR (<code>$log.hazard.ratio</code>).</p></li>
+<li><p>the log HR (<code>$log.hazard.ratio</code>)</p></li>
+<li><p>the log population-level cumulative hazard ratio at
+<code>tau0</code> (<code>$log.cumulative.hazard.ratio</code>).</p></li>
 </ul>
 <p>The log HR comes from a Cox model adjusted for the variables in
 <code>cate.model</code>, with follow-up censored at <code>tau0</code>.
-Exponentiating it gives the adjusted HR: 29.89. This differs from the
-unadjusted HR above. In these simulated data, age differs substantially
-between treatment groups, and the groups have limited overlap in age;
-consequently, the adjusted comparison relies heavily on the model. The
-Cox HR is not the doubly robust RMTL estimate and should be interpreted
-separately.</p>
+Exponentiating it gives the adjusted HR: 29.89. Because follow-up is
+censored at <code>tau0</code>, this may differ from the adjusted Cox HR
+above, which uses all available follow-up. In these simulated data, age
+differs substantially between treatment groups, and the groups have
+limited overlap in age; consequently, the adjusted comparison relies
+heavily on the model. The Cox HR is not the doubly robust RMTL estimate
+and should be interpreted separately.</p>
 <p>For example, the log RMTL ratio of 0.07 and the 95% confidence
 interval of (0, 0.14) are displayed in the output. The estimated ratio
 and its interval can be obtained by exponentiating these log-scale
@@ -820,12 +803,12 @@ variable.</p>
 <span><span class="co">#&gt; [1] "Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.\n"</span></span></code></pre></div>
 <p>Using <code>plot(output_atefit)</code>, a histograms is generated of
 the point estimates across the <code>n.boot</code> bootstrap iterations
-for 4 estimands (<code>rmst1</code>, <code>rmst0</code>,
-<code>log.rmtl.ratio</code>, <code>log.hazard.ratio</code>). A red
-vertical line is added to each histogram with the mean of the bootstrap
-estimates.</p>
+for 5 estimands (<code>rmst1</code>, <code>rmst0</code>,
+<code>log.rmtl.ratio</code>, <code>log.hazard.ratio</code>,
+<code>log.cumulative.hazard.ratio</code>). A red vertical line marks the
+estimate from the original sample.</p>
 <p><img src="atefit_bootstrap.png"><!-- --></p>
-<p>Histograms of bootstrap estimators for 4 estimands after 500
+<p>Histograms of bootstrap estimators for 5 estimands after 500
 bootstrap</p>
 </div>
 </div>
@@ -1197,37 +1180,37 @@ example.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:10:25 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:50:01 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:10:37 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:50:13 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:10:48 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:50:24 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:11:00 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:50:36 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:11:12 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:50:47 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 58.52 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 58.08 secs</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspect-validation-results">Inspect validation results<a class="anchor" aria-label="anchor" href="#inspect-validation-results"></a>

@@ -322,41 +322,63 @@ estimates.</p>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1, high subgroup 0.01:</span></span>
+<span><span class="co">#&gt; treatment effect unavailable (treatment 0: 0, treatment 1: 10); returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, ABC validation iteration 1, high subgroup 0.01:</span></span>
+<span><span class="co">#&gt; treatment effect unavailable (treatment 0: 0, treatment 1: 10); returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:05:26 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:45:02 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 2: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:05:29 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:45:05 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
+<span><span class="co">#&gt; Warning: score.poisson, validation iteration 3: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 3: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:05:33 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:45:08 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
+<span><span class="co">#&gt; Warning: score.poisson, validation iteration 4: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.negBin, validation iteration 4: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:05:37 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:45:12 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
+<span><span class="co">#&gt; Warning: score.poisson, validation iteration 5: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 5: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
+<span><span class="co">#&gt; Warning: score.negBin, validation iteration 5: ABC unavailable because a</span></span>
+<span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:05:41 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:45:16 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 19.54 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 18.63 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2          cv3          cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.01 0.5746485        NA 6.858623e+04 1.901224e+06        NA</span></span>
+<span><span class="co">#&gt; prop0.01        NA        NA 6.858623e+04 1.901224e+06        NA</span></span>
 <span><span class="co">#&gt; prop0.3  0.6944399 0.6252387 6.324404e-01 5.625166e-01 0.5828618</span></span>
 <span><span class="co">#&gt; prop0.75 1.1424118 0.8042944 9.012645e-01 7.984435e-01 0.8428192</span></span>
 <span><span class="co">#&gt; prop1    1.0812603 1.0978549 1.053193e+00 1.072635e+00 1.0689638</span></span></code></pre></div>
@@ -635,37 +657,37 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:06:53 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:46:29 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:06:56 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:46:32 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:06:59 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:46:36 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:07:03 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:46:39 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:07:06 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:46:42 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 15.53 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 16.23 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>

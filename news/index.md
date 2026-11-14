@@ -4,6 +4,16 @@
 
 ### Major changes
 
+- Added a population-level cumulative hazard ratio at `tau0` to survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  output. It uses the same outcome, propensity-score and censoring
+  models as the RMST analysis, with bootstrap inference. The new
+  `log.cumulative.hazard.ratio` is distinct from the existing
+  conditional Cox `log.hazard.ratio` and is included in printing,
+  plotting, [`coef()`](https://rdrr.io/r/stats/coef.html) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html). Inference is
+  unavailable if the estimate or any bootstrap replicate is undefined.
+
 - Replaced the `gbm` dependency with `gbm3` for boosting models across
   count, survival, and internal continuous-outcome methods. Existing
   tuning argument names and the learning rate of 0.1 are preserved,
@@ -30,6 +40,16 @@
   floating-point differences between backends are possible.
 
 ### Minor changes and bug fixes
+
+- Use GBM3 cross-validation for single-predictor count boosting fits and
+  boosting initial predictions, removing the legacy out-of-bag
+  workaround and fixing a cross-fitting error when selecting the number
+  of trees.
+
+- Return `NA` with an informative warning for count-outcome responder
+  subgroups missing one or both treatment arms, instead of failing the
+  analysis. ABC is `NA` when a required validation estimate is
+  unavailable.
 
 - Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead
   of treating observations beyond the horizon as events. This affects

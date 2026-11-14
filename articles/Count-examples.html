@@ -866,7 +866,7 @@ parallel settings; one thread is also the fallback when neither
 <span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 3.953855 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 3.886415 secs</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -1122,37 +1122,37 @@ the default values of the remaining arguments.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:07:49 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:47:26 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:07:52 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:47:29 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:07:56 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:47:33 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:08:01 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:47:37 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 16:08:06 2026 </span></span>
+<span><span class="co">#&gt;    Sat Nov 14 16:47:42 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 21.75 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 21.71 secs</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspect-validation-results">Inspect validation results<a class="anchor" aria-label="anchor" href="#inspect-validation-results"></a>
@@ -1287,9 +1287,13 @@ the 33% highest estimated CATE scores.</p>
 <h3 id="inspect-errors-and-warnings">Inspect errors and warnings<a class="anchor" aria-label="anchor" href="#inspect-errors-and-warnings"></a>
 </h3>
 <p>Subgroup estimates can be missing or unstable, for example when a
-subgroup has few patients or observed events. Check warnings after
-running <code><a href="../reference/catecv.html">catecv()</a></code> and review affected estimates with
-caution:</p>
+subgroup has few patients or observed events. Tied scores can also leave
+a subgroup empty or change its size from the requested proportion. If a
+subgroup has no patients in one or both treatment arms, its estimate is
+<code>NA</code> and a warning identifies the method, iteration, subgroup
+and treatment counts. ABC is <code>NA</code> if a required estimate is
+unavailable. Check warnings after running <code><a href="../reference/catecv.html">catecv()</a></code> and
+review affected estimates with caution:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/warnings.html" class="external-link">warnings</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Unlike the survival output, the count output does not store a

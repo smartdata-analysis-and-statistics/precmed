@@ -220,9 +220,14 @@ output2 <- atefit(response = "survival",
 output2
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03420455 0.003115612 0.137195 0.04026192
-#> log.hazard.ratio 3.3974272 0.28220581 2.844314005 3.950540 0.00000000
+#>                               estimate         SE     CI.lower CI.upper
+#> log.rmtl.ratio              0.07015530 0.03420455  0.003115612 0.137195
+#> log.hazard.ratio            3.39742723 0.28220581  2.844314005 3.950540
+#> log.cumulative.hazard.ratio 0.02697948 0.11278450 -0.194074071 0.248033
+#>                                 pvalue
+#> log.rmtl.ratio              0.04026192
+#> log.hazard.ratio            0.00000000
+#> log.cumulative.hazard.ratio 0.81094068
 #> 
 #> Estimated RMST:
 #> 

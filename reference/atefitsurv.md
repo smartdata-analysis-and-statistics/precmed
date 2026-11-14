@@ -158,8 +158,14 @@ Return an object of class `atefit` with 6 elements:
   error, lower and upper limits of 95% confidence interval, and the
   p-value.
 
-- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio` and
-  `log.hazard.ratio` in each bootstrap sample.
+- `log.cumulative.hazard.ratio`: The log ratio of marginal cumulative
+  hazards at `tau0`, estimated from AIPW treatment-specific survival
+  probabilities, with bootstrap inference. Undefined estimates or
+  bootstrap replicates yield unavailable inference.
+
+- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio`,
+  `log.hazard.ratio`, and `log.cumulative.hazard.ratio` in each
+  bootstrap sample.
 
 - `warning`: A warning message produced if the treatment variable was
   not coded as 0/1. The key to map the original coding of the variable
@@ -205,9 +211,14 @@ output <- atefitsurv(data = survivalExample,
 output
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower  CI.upper     pvalue
-#> log.rmtl.ratio   0.0701553 0.03206484 0.007309376 0.1330012 0.02867542
-#> log.hazard.ratio 3.3974272 0.29245335 2.824229195 3.9706253 0.00000000
+#>                               estimate         SE     CI.lower  CI.upper
+#> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.1330012
+#> log.hazard.ratio            3.39742723 0.29245335  2.824229195 3.9706253
+#> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.2302107
+#>                                 pvalue
+#> log.rmtl.ratio              0.02867542
+#> log.hazard.ratio            0.00000000
+#> log.cumulative.hazard.ratio 0.79471688
 #> 
 #> Estimated RMST:
 #> 

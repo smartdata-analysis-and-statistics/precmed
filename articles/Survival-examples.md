@@ -21,18 +21,18 @@ library(ggplot2)
 
 ## Example data
 
-To show the functionalities of the `precmed` package for survival
-outcomes we first need data. For our examples we use simulated data that
-is located in the `survivalExample` data set. The data set
-`survivalExample` was simulated based on real-world claims data in
-multiple sclerosis and has 4,000 observations and 9 variables.
+For these survival examples, we use the simulated dataset
+`survivalExample`, based on real-world claims data in multiple
+sclerosis. It contains 4,000 observations and 9 variables: six baseline
+characteristics, one treatment variable, and two survival outcome
+variables. The table below summarizes the baseline characteristics by
+treatment group.
 
 [TABLE]
 
 ------------------------------------------------------------------------
 
-Most variables are baseline patient characteristics like age, gender,
-and previous treatment.
+The treatment and survival outcome variables have distinct roles:
 
 - We will use `y` as the survival outcome, which is the number of days
   until the first relapse or censoring, whichever comes first.
@@ -120,14 +120,128 @@ abline(h = exp(coef(output_cox)[1]), lty = 3, col = "steelblue")
 The dotted line is the constant HR from the Cox model. The smooth curve
 suggests how the treatment association may vary over time; it is a
 diagnostic rather than a precise estimate at every time point. The
-treatment test p-value is 8.9^{-5}; later follow-up may be less
-informative when fewer patients remain at risk.
+treatment test gives p \< 0.001, suggesting that the treatment HR varies
+over time. Later follow-up is less informative when fewer patients
+remain at risk, as reflected in the wider uncertainty bands.
 
 ### Covariate-adjusted treatment comparison
 
 Next, we adjust for age, sex, previous medical cost and previous
-relapses. We first choose an illustrative horizon: the smaller 95th
-percentile of observed follow-up in the two treatment groups.
+relapses using a Cox model:
+
+``` r
+
+output_cox_adjusted <- coxph(
+  Surv(y, d) ~ trt + age + female + previous_cost + previous_number_relapses,
+  data = survivalExample
+)
+summary(output_cox_adjusted)
+#> Call:
+#> coxph(formula = Surv(y, d) ~ trt + age + female + previous_cost + 
+#>     previous_number_relapses, data = survivalExample)
+#> 
+#>   n= 4000, number of events= 648 
+#> 
+#>                              coef exp(coef) se(coef)       z Pr(>|z|)    
+#> trtdrug1                  3.28163  26.61900  0.17858  18.377  < 2e-16 ***
+#> age                      -0.11015   0.89570  0.00740 -14.885  < 2e-16 ***
+#> female                   -0.03142   0.96907  0.09175  -0.342  0.73204    
+#> previous_cost             0.07103   1.07361  0.02235   3.178  0.00148 ** 
+#> previous_number_relapses -0.95943   0.38311  0.08335 -11.511  < 2e-16 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#>                          exp(coef) exp(-coef) lower .95 upper .95
+#> trtdrug1                   26.6190    0.03757   18.7580   37.7743
+#> age                         0.8957    1.11645    0.8828    0.9088
+#> female                      0.9691    1.03191    0.8096    1.1600
+#> previous_cost               1.0736    0.93144    1.0276    1.1217
+#> previous_number_relapses    0.3831    2.61021    0.3254    0.4511
+#> 
+#> Concordance= 0.759  (se = 0.014 )
+#> Likelihood ratio test= 550.9  on 5 df,   p=<2e-16
+#> Wald test            = 453.8  on 5 df,   p=<2e-16
+#> Score (logrank) test = 498.3  on 5 df,   p=<2e-16
+```
+
+The adjusted HR is 26.62, compared with 3.04 in the unadjusted model.
+Age differs substantially between groups and has limited overlap, so the
+adjusted comparison relies heavily on the model. An adjusted HR is
+conditional on the included covariates and is not automatically a causal
+average treatment effect.
+
+``` r
+
+ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
+print(ph_adjusted)
+#>                             chisq df       p
+#> trt                       1.74752  1  0.1862
+#> age                       0.00364  1  0.9519
+#> female                    0.78487  1  0.3757
+#> previous_cost             7.56093  1  0.0060
+#> previous_number_relapses  9.19476  1  0.0024
+#> GLOBAL                   37.69160  5 4.4e-07
+plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
+     xlab = "Days since treatment initiation",
+     ylab = "Adjusted hazard ratio: drug1 vs drug0")
+abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
+```
+
+![](Survival-examples_files/figure-html/ph_adjusted-1.png)
+
+The adjusted treatment test gives p = 0.186 and the global test gives p
+\< 0.001. A large treatment p-value does not prove proportional hazards,
+and the global test also assesses the other covariates. The two plots
+describe the unadjusted and covariate-adjusted models, respectively.
+
+### Population-level treatment comparison over a fixed horizon
+
+The unadjusted Cox model compares treatment groups without accounting
+for differences in their characteristics. The adjusted Cox model
+accounts for the selected covariates, but its HR is conditional on those
+covariates and summarizes the treatment association using a single HR.
+The diagnostics suggest that this association may vary over time, and
+estimates become less informative later in follow-up. Neither comparison
+directly describes the average time patients remain relapse-free under
+each treatment.
+
+We now use
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+to estimate population-level outcomes over a specified follow-up
+horizon. For restricted mean survival time (RMST) and restricted mean
+time lost (RMTL), it combines outcome and propensity score models with
+an adjustment for censoring to estimate population-level outcomes under
+each treatment. These measures summarize time over the chosen period
+without requiring a constant treatment HR. Under appropriate
+assumptions, the population-level comparison can be interpreted as a
+causal treatment effect.
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+also estimates a population-level cumulative hazard ratio at the horizon
+and reports a separate covariate-adjusted Cox HR. It uses bootstrap
+resampling to estimate uncertainty for all reported measures.
+
+RMST is the average event-free time up to a chosen horizon, `tau0`; RMTL
+is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with
+time lost under drug 0 over that horizon; for relapse, a ratio below 1
+favors drug 1. Its interpretation depends on the horizon. Chapter 20
+discusses RMTL for ratio-based treatment effects (Jiang et al. 2026).
+
+The cumulative hazard ratio compares the cumulative hazards,
+$`-\log(S(tau0))`$, under the two treatments.
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+estimates the treatment-specific survival probabilities using outcome,
+propensity score and censoring models. The calculation reuses the
+treatment-specific Cox outcome fits, propensity scores and censoring
+model used for RMST. This ratio is distinct from an instantaneous HR. If
+either estimated survival probability is outside the interval (0, 1),
+the ratio is undefined; bootstrap inference is also unavailable if any
+replicate is undefined. The separate covariate-adjusted Cox HR censors
+follow-up at `tau0` and does not use the propensity-score or censoring
+models.
+
+For this example, we choose an illustrative horizon of roughly 500 days:
+the smaller 95th percentile of observed follow-up in the two treatment
+groups.
 
 ``` r
 
@@ -138,109 +252,21 @@ tau0
 ```
 
 The horizon is approximately 522.7 days. It defines the period over
-which we will compare restricted mean outcomes. This choice uses
-observed times, including censoring, and does not guarantee sufficient
-follow-up; inspect numbers at risk and censoring near the horizon in
-both groups and choose a clinically meaningful horizon with adequate
-support.
+which we will compare restricted mean outcomes. This choice is not
+derived from the proportional-hazards diagnostics and does not establish
+that the HR is constant before the horizon. It uses observed times,
+including censoring, and does not guarantee sufficient follow-up;
+inspect numbers at risk and censoring near the horizon in both groups
+and choose a clinically meaningful horizon with adequate support.
 
-For comparison with the adjusted HR later returned by
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
-we censor follow-up at `tau0` and fit the same covariate-adjusted Cox
-model:
-
-``` r
-
-cox_data <- survivalExample
-cox_data$time_tau <- pmin(cox_data$y, tau0)
-cox_data$event_tau <- cox_data$d * (cox_data$y <= tau0)
-output_cox_adjusted <- coxph(
-  Surv(time_tau, event_tau) ~ trt + age + female + previous_cost + previous_number_relapses,
-  data = cox_data
-)
-summary(output_cox_adjusted)
-#> Call:
-#> coxph(formula = Surv(time_tau, event_tau) ~ trt + age + female + 
-#>     previous_cost + previous_number_relapses, data = cox_data)
-#> 
-#>   n= 4000, number of events= 617 
-#> 
-#>                               coef exp(coef)  se(coef)       z Pr(>|z|)    
-#> trtdrug1                  3.397427 29.887108  0.182864  18.579  < 2e-16 ***
-#> age                      -0.113755  0.892477  0.007606 -14.957  < 2e-16 ***
-#> female                   -0.006535  0.993486  0.094564  -0.069 0.944902    
-#> previous_cost             0.078669  1.081846  0.022126   3.556 0.000377 ***
-#> previous_number_relapses -1.008998  0.364584  0.087938 -11.474  < 2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#>                          exp(coef) exp(-coef) lower .95 upper .95
-#> trtdrug1                   29.8871    0.03346   20.8848   42.7698
-#> age                         0.8925    1.12048    0.8793    0.9059
-#> female                      0.9935    1.00656    0.8254    1.1958
-#> previous_cost               1.0818    0.92435    1.0359    1.1298
-#> previous_number_relapses    0.3646    2.74285    0.3069    0.4332
-#> 
-#> Concordance= 0.76  (se = 0.014 )
-#> Likelihood ratio test= 571.5  on 5 df,   p=<2e-16
-#> Wald test            = 466.1  on 5 df,   p=<2e-16
-#> Score (logrank) test = 516.5  on 5 df,   p=<2e-16
-```
-
-The adjusted HR is 29.89, compared with 3.04 in the unadjusted model.
-These models differ in both covariate adjustment and follow-up horizon.
-Age differs substantially between groups and has limited overlap, so the
-adjusted comparison relies heavily on the model. An adjusted HR is
-conditional on the included covariates and is not automatically a causal
-average treatment effect.
-
-``` r
-
-ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
-print(ph_adjusted)
-#>                            chisq df      p
-#> trt                       0.0167  1 0.8972
-#> age                       0.6207  1 0.4308
-#> female                    0.0747  1 0.7846
-#> previous_cost             7.4645  1 0.0063
-#> previous_number_relapses  3.1394  1 0.0764
-#> GLOBAL                   15.3651  5 0.0089
-plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
-     xlab = "Days since treatment initiation",
-     ylab = "Adjusted hazard ratio: drug1 vs drug0")
-abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
-```
-
-![](Survival-examples_files/figure-html/ph_adjusted-1.png)
-
-The adjusted treatment test p-value is 0.9 and the global test p-value
-is 0.0089. A large treatment p-value does not prove proportional
-hazards, and the global test also assesses the other covariates. The two
-plots use different models and follow-up periods, so differences between
-them cannot be attributed solely to adjustment.
-
-### Estimate the average treatment effect with `atefit()`
-
-An alternative summary is the restricted mean survival time (RMST), the
-average event-free time up to `tau0`. Restricted mean time lost (RMTL)
-is `tau0 - RMST`. The RMTL ratio compares time lost under drug 1 with
-time lost under drug 0 over that horizon; for relapse, a ratio below 1
-favors drug 1. Unlike a single Cox HR, this measure does not require the
-treatment HR to be constant over time. Results depend on the chosen
-horizon. Chapter 20 discusses RMTL for ratio-based treatment effects
-(Jiang et al. 2026).
-
-The
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-function estimates the population-level RMTL ratio and also reports the
-adjusted Cox HR. The RMTL estimator is doubly robust with respect to the
-propensity score (PS) and outcome models: under the required
-assumptions, either model may be correctly specified. It also depends on
-inverse probability of censoring weights (IPCW) and a correctly
-specified censoring model. The function provides standard errors,
-confidence intervals and p-values based on bootstrap. If an out-of-range
-RMST estimate is replaced by an outcome-model estimate, that fallback
-does not retain the doubly robust guarantee.
+The RMTL estimator is doubly robust with respect to the propensity score
+(PS) and outcome models: under the required assumptions, either model
+may be correctly specified. It also depends on inverse probability of
+censoring weights (IPCW) and a correctly specified censoring model. The
+function provides standard errors, confidence intervals and p-values
+based on bootstrap. If an out-of-range RMST estimate is replaced by an
+outcome-model estimate, that fallback does not retain the doubly robust
+guarantee.
 
 IPCW adjusts for censoring by weighting patients according to their
 estimated probability of remaining uncensored. Causal interpretation
@@ -289,8 +315,8 @@ are:
   If the data are from a RCT, it suffices to specify `ps.model` = trt
   ~ 1. The PS model is used in the doubly robust RMTL estimation.
 
-- `tau0`: The horizon for RMST and RMTL. We reuse the value calculated
-  above.
+We also specify the optional argument `tau0`, the horizon for RMST and
+RMTL, using the value calculated above.
 
 Now estimate the ATE using an outcome model with age, sex, previous cost
 and previous relapses, and a PS model with `age` and
@@ -313,15 +339,20 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 output_atefit
 #> Average treatment effect:
 #> 
-#>                   estimate         SE    CI.lower  CI.upper    pvalue
-#> log.rmtl.ratio   0.0701553 0.03415434 0.003214028 0.1370966 0.0399692
-#> log.hazard.ratio 3.3974272 0.27890929 2.850775065 3.9440794 0.0000000
+#>                               estimate         SE     CI.lower  CI.upper
+#> log.rmtl.ratio              0.07015530 0.03490277  0.001747139 0.1385635
+#> log.hazard.ratio            3.39742723 0.27725516  2.854017097 3.9408374
+#> log.cumulative.hazard.ratio 0.02697948 0.11277419 -0.194053869 0.2480128
+#>                                 pvalue
+#> log.rmtl.ratio              0.04442894
+#> log.hazard.ratio            0.00000000
+#> log.cumulative.hazard.ratio 0.81092373
 #> 
 #> Estimated RMST:
 #> 
 #>       estimate       SE CI.lower CI.upper pvalue
-#> rmst1 172.8609 6.559210 160.0051 185.7167      0
-#> rmst0 196.5603 8.793107 179.3261 213.7944      0
+#> rmst1 172.8609 6.895660 159.3457 186.3761      0
+#> rmst0 196.5603 8.847615 179.2192 213.9013      0
 #> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -329,7 +360,7 @@ The output of
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 shows the point estimate, standard error (“SE”), lower (“CI.lower”) and
 upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
-(“pvalue”) for 4 estimands:
+(“pvalue”) for 5 estimands:
 
 - the restricted mean survival time under drug 1 (`$rmst1`)
 
@@ -338,15 +369,20 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 - the log RMTL ratio (`$log.rmtl.ratio`), which is the log of the ratio
   of `tau0` - `$rmst1` divided by `tau0` - `$rmst0`
 
-- the log HR (`$log.hazard.ratio`).
+- the log HR (`$log.hazard.ratio`)
+
+- the log population-level cumulative hazard ratio at `tau0`
+  (`$log.cumulative.hazard.ratio`).
 
 The log HR comes from a Cox model adjusted for the variables in
 `cate.model`, with follow-up censored at `tau0`. Exponentiating it gives
-the adjusted HR: 29.89. This differs from the unadjusted HR above. In
-these simulated data, age differs substantially between treatment
-groups, and the groups have limited overlap in age; consequently, the
-adjusted comparison relies heavily on the model. The Cox HR is not the
-doubly robust RMTL estimate and should be interpreted separately.
+the adjusted HR: 29.89. Because follow-up is censored at `tau0`, this
+may differ from the adjusted Cox HR above, which uses all available
+follow-up. In these simulated data, age differs substantially between
+treatment groups, and the groups have limited overlap in age;
+consequently, the adjusted comparison relies heavily on the model. The
+Cox HR is not the doubly robust RMTL estimate and should be interpreted
+separately.
 
 For example, the log RMTL ratio of 0.07 and the 95% confidence interval
 of (0, 0.14) are displayed in the output. The estimated ratio and its
@@ -371,14 +407,14 @@ output_atefit$warning
 ```
 
 Using `plot(output_atefit)`, a histograms is generated of the point
-estimates across the `n.boot` bootstrap iterations for 4 estimands
-(`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.hazard.ratio`). A red vertical
-line is added to each histogram with the mean of the bootstrap
-estimates.
+estimates across the `n.boot` bootstrap iterations for 5 estimands
+(`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.hazard.ratio`,
+`log.cumulative.hazard.ratio`). A red vertical line marks the estimate
+from the original sample.
 
 ![](atefit_bootstrap.png)
 
-Histograms of bootstrap estimators for 4 estimands after 500 bootstrap
+Histograms of bootstrap estimators for 5 estimands after 500 bootstrap
 
 ## Estimate CATE scores
 
@@ -782,37 +818,37 @@ output_catecv <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:10:25 2026 
+#>    Sat Nov 14 16:50:01 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:10:37 2026 
+#>    Sat Nov 14 16:50:13 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:10:48 2026 
+#>    Sat Nov 14 16:50:24 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:11:00 2026 
+#>    Sat Nov 14 16:50:36 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 16:11:12 2026 
+#>    Sat Nov 14 16:50:47 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 58.52 secs
+#> Total runtime : 58.08 secs
 ```
 
 ### Inspect validation results
