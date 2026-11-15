@@ -149,7 +149,7 @@
   [`arg.checks()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.md)
 
 - [`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
-  : Summarize recorded survival diagnostics
+  : Summarize recorded fitting diagnostics
 
 - [`drcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/drcount.md)
   : Doubly robust estimator of the average treatment effect for count
@@ -252,6 +252,9 @@
   : Calculate the log CATE score given the baseline covariates and
   follow-up time for specified scoring method methods for survival
   outcomes
+
+- [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md)
+  : Simulate an illustrative count-outcome dataset
 
 - [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
   : Simulate an illustrative survival dataset

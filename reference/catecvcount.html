@@ -30,6 +30,7 @@ negative binomial (see score.method)."><meta property="og:image" content="https:
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
@@ -40,6 +41,8 @@ negative binomial (see score.method)."><meta property="og:image" content="https:
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
       </ul></div>
 
@@ -335,9 +338,11 @@ interaction selection rule are unchanged. Kept separate from boosting's
  if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
 <li><p><code>ate.contrastReg</code>: A list of results similar to <code>ate.poisson</code> output
  if <code>score.method</code> includes <code>'contrastReg'</code>.
- This method has an additional element in the list of results:</p><ul><li><p><code>converge.contrastReg.cv</code>: A vector of logical value of length <code>cv.n</code>.
-    The ith element indicates whether the algorithm converged in the ith cross-validation
-    iteration.</p></li>
+ This method has additional convergence information:</p><ul><li><p><code>converge.contrastReg.cv</code>: A vector of logical value of length <code>cv.n</code>.
+    The ith element is true if at least one cross-fitting repetition converged
+    in the ith cross-validation iteration.</p></li>
+<li><p><code>converge.repetitions.cv</code>: A list of logical vectors recording
+    convergence of each cross-fitting repetition in each CV iteration.</p></li>
 </ul></li>
 <li><p><code>ate.negBin</code>: A list of results similar to <code>ate.poisson</code> output
  if <code>score.method</code> includes <code>'negBin'</code>.</p></li>
@@ -451,7 +456,7 @@ and <code><a href="catefitcount.html">catefitcount()</a></code> function.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 6.31 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 9.35 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="catecvcount-1.png" alt="" width="700" height="433"></span>

@@ -33,6 +33,7 @@ intxsurv(
   tune = c(0.5, 2),
   contrast.control = list(),
   ps.control = list(),
+  rf.control = list(),
   ...
 )
 ```
@@ -128,10 +129,17 @@ intxsurv(
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `3`.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - n.trees.rf:
 
-  A positive integer specifying the maximum number of trees in random
-  forest. Used if `score.method = 'ranfomForest'` or if
+  A positive integer specifying the number of trees in random forest.
+  Used if `score.method = 'randomForest'` or if
   `initial.predictor.method = 'randomForest'` with
   `score.method = 'twoReg'` or `'contrastReg'`. Default is `1000`.
 

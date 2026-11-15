@@ -33,6 +33,14 @@ We consider a simulated dataset that is based on real-world claims data
 from patients with multiple sclerosis. The dataset `countExample`
 includes 4,000 patients with information on the following 9 variables.
 
+Alternatively, `simulate_count(n = 4000, seed = 1)` generates a fully
+synthetic dataset with the same analysis variables. Its treatment
+assignment, rate ratio, treatment interactions, follow-up and count
+dispersion can be varied; see
+[`?simulate_count`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md).
+The simulator uses illustrative assumptions and does not reconstruct the
+claims data or the packaged example.
+
 [TABLE]
 
 ------------------------------------------------------------------------
@@ -49,63 +57,116 @@ and previous treatment.
 - We will use `trt` as the treatment variable, which has 2 drugs (drug0
   and drug1).
 
-To avoid multicollinearity issues, the continuous variable `age` was
-centered at 48 years old and the medical costs in the year prior to
-treatment initiation `previous_cost` was centered at 13,824 USD and
-scaled with standard deviation 20,172 USD.
-
-The first six records of the final dataset `countExample` are shown
-below:
-
-| age | female | previous_treatment | previous_cost | previous_number_symptoms | previous_number_relapses | trt | y | years |
-|---:|---:|:---|---:|:---|---:|:---|---:|---:|
-| -21.21875 | 0 | drugA | 0.4507466 | 1 | 0 | drug1 | 0 | 0.2847365 |
-| -2.21875 | 1 | drugA | -0.1943336 | 1 | 0 | drug0 | 0 | 0.6105407 |
-| -10.21875 | 1 | drugA | -0.5336635 | 1 | 1 | drug0 | 0 | 2.6529774 |
-| 6.78125 | 0 | drugA | -0.3370594 | 1 | 1 | drug1 | 0 | 0.0383299 |
-| 4.78125 | 1 | drugC | -0.2710085 | 1 | 0 | drug1 | 1 | 2.2696783 |
-| -11.21875 | 0 | drugC | 0.1602817 | 1 | 0 | drug0 | 0 | 0.3668720 |
+For convenience, `age` is centered at 48 years and `previous_cost` is
+centered at 13,824 USD and divided by 20,172 USD.
 
 ## Estimate the average treatment effect
 
-First, one might be interested in the effect of the drug (trt) on the
-number of relapses during follow-up (y). Lets test this using simple
-regression.
+### Unadjusted treatment comparison
+
+We first compare relapse rates between treatment groups using a Poisson
+model with treatment as the only predictor. The log follow-up time is
+included as an offset to account for differences in exposure. This
+unadjusted association does not account for differences in patient
+characteristics.
 
 ``` r
 
-output_lm <- lm(y ~ trt, countExample)
-output_lm
+output_poisson <- glm(y ~ trt + offset(log(years)),
+                      data = countExample, family = poisson())
+summary(output_poisson)
 #> 
 #> Call:
-#> lm(formula = y ~ trt, data = countExample)
+#> glm(formula = y ~ trt + offset(log(years)), family = poisson(), 
+#>     data = countExample)
 #> 
 #> Coefficients:
-#> (Intercept)     trtdrug1  
-#>     0.32665      0.02045
+#>             Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept) -1.32370    0.05538 -23.900   <2e-16 ***
+#> trtdrug1     0.07293    0.06346   1.149     0.25    
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for poisson family taken to be 1)
+#> 
+#>     Null deviance: 3294.4  on 3999  degrees of freedom
+#> Residual deviance: 3293.1  on 3998  degrees of freedom
+#> AIC: 5350.4
+#> 
+#> Number of Fisher Scoring iterations: 6
 ```
 
-We see from the simple linear model that drug 1 scores 0.02 points
-higher compared to drug 0. This indicates that drug 0 is superior to
-drug 1 because lower outcomes are preferred (number of relapses).
+The estimated rate ratio for drug 1 versus drug 0 is 1.08. A ratio below
+1 corresponds to a lower relapse rate under drug 1. This association
+does not by itself establish a causal treatment effect.
 
-Now we want to estimate the Average Treatment Effect (ATE) and correct
-for several covariates like age and previous treatment because they
-might influence the relation between treatment and outcome. The
+### Covariate-adjusted treatment comparison
+
+Treatment assignment may differ according to baseline characteristics.
+To account for measured differences, we fit a Poisson model that adjusts
+for age, sex, previous treatment, previous medical cost and previous
+relapses, while retaining the follow-up offset.
+
+``` r
+
+output_poisson_adjusted <- glm(
+  y ~ trt + age + female + previous_treatment + previous_cost +
+    previous_number_relapses + offset(log(years)),
+  data = countExample, family = poisson()
+)
+summary(output_poisson_adjusted)
+#> 
+#> Call:
+#> glm(formula = y ~ trt + age + female + previous_treatment + previous_cost + 
+#>     previous_number_relapses + offset(log(years)), family = poisson(), 
+#>     data = countExample)
+#> 
+#> Coefficients:
+#>                           Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)              -2.119915   0.093376 -22.703  < 2e-16 ***
+#> trtdrug1                  0.074697   0.063503   1.176   0.2395    
+#> age                      -0.015082   0.002723  -5.540 3.03e-08 ***
+#> female                    0.483290   0.072830   6.636 3.23e-11 ***
+#> previous_treatmentdrugB   0.828678   0.078981  10.492  < 2e-16 ***
+#> previous_treatmentdrugC   0.404501   0.060730   6.661 2.73e-11 ***
+#> previous_cost            -0.070031   0.031698  -2.209   0.0272 *  
+#> previous_number_relapses  0.189551   0.035005   5.415 6.13e-08 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> (Dispersion parameter for poisson family taken to be 1)
+#> 
+#>     Null deviance: 3294.4  on 3999  degrees of freedom
+#> Residual deviance: 3071.2  on 3992  degrees of freedom
+#> AIC: 5140.5
+#> 
+#> Number of Fisher Scoring iterations: 6
+```
+
+The adjusted rate ratio is 1.08, compared with 1.08 in the unadjusted
+model. The adjusted ratio is conditional on the included covariates and
+does not necessarily represent a causal average treatment effect. A
+causal interpretation requires, among other assumptions, adequate
+treatment overlap and no unmeasured confounding.
+
+### Population-level treatment comparison using `atefit()`
+
+We now use
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-function allows estimating the ATE in terms of rate ratio. The rate
-ratio estimator is doubly robust, meaning that the estimator is
-consistent if the propensity score (PS) model (argument `ps.model`) or
-the outcome model (argument `cate.model`) or both are correctly
-specified. The function also provides standard error, confidence
-intervals, and p-values based on bootstrap.
+to estimate a population-level rate ratio, combining outcome and
+propensity score models. The rate ratio estimator is doubly robust,
+meaning that the estimator is consistent if the propensity score (PS)
+model (argument `ps.model`) or the outcome model (argument `cate.model`)
+or both are correctly specified, under the required assumptions. The
+function also provides standard errors, confidence intervals and
+p-values based on bootstrap.
 
 In this example, the rate ratio compares the relapse rate under drug 1
 with that under drug 0; a rate ratio below 1 favors drug 1. A causal
 interpretation requires appropriate assumptions, including no unmeasured
 confounding, adequate overlap in treatment assignment, and well-defined
-treatments. Chapter 17 discusses identification of conditional treatment
-effects in randomized and non-randomized data (Hoogland et al. 2026).
+treatments. Chapter 5 introduces marginal and conditional treatment
+effects (Nguyen et al. 2026).
 
 The mandatory arguments for
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -291,7 +352,6 @@ and the `gbm.parallel` option is unset.
 
 ``` r
 
-t0 <- Sys.time()
 output_catefit <- catefit(
   response = "count",
   data = countExample,
@@ -307,9 +367,6 @@ output_catefit <- catefit(
   n.cores = 1
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-t1 <- Sys.time()
-t1 - t0
-#> Time difference of 3.529245 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -329,7 +386,7 @@ results in
 length(output_catefit$score.contrastReg)
 #> [1] 4000
 head(output_catefit$score.contrastReg)
-#> [1]  0.1497829  0.2624196  0.5864289 -0.8024851 -0.1907681 -0.4049082
+#> [1]  0.1223985  0.2463684  0.5284533 -0.8525778 -0.1547064 -0.3700220
 ```
 
 2.  `coefficients` contains the estimated coefficients of the CATE score
@@ -348,13 +405,13 @@ head(output_catefit$score.contrastReg)
 
 output_catefit$coefficients
 #>                              poisson      twoReg contrastReg SE_contrastReg
-#> (Intercept)              -0.58185218 -0.57230335 -0.59733948     0.37239529
-#> age                      -0.01117701 -0.04006858 -0.03579484     0.01382861
-#> female                    0.58829733  0.73791026  0.77499335     0.36588639
-#> previous_treatmentdrugB   0.73724361  0.64116126  0.74877593     0.35907273
-#> previous_treatmentdrugC   0.15545985 -0.25808471 -0.20473293     0.26470389
-#> previous_cost            -0.13035642 -0.08457179 -0.02750876     0.15712507
-#> previous_number_relapses -0.05339112  0.06117043  0.02831604     0.16882933
+#> (Intercept)              -0.58185218 -0.56778393 -0.60435660     0.36100821
+#> age                      -0.01117701 -0.04025351 -0.03586527     0.01320552
+#> female                    0.58829733  0.73513308  0.75637775     0.35381160
+#> previous_treatmentdrugB   0.73724361  0.63387929  0.78891625     0.32100476
+#> previous_treatmentdrugC   0.15545985 -0.26859734 -0.15584596     0.24006620
+#> previous_cost            -0.13035642 -0.08233598 -0.07600948     0.12046915
+#> previous_number_relapses -0.05339112  0.06949513 -0.03062952     0.13592481
 #>                               negBin
 #> (Intercept)              -0.59232437
 #> age                      -0.01410487
@@ -387,13 +444,13 @@ each covariate.
     subgroups identified by CATE scores of contrast regression. For
     example, the estimated ATE for the subgroup of subjects constructed
     based on the 50% (“prop0.5”) lowest CATE scores estimated from
-    contrast regression is 0.62.
+    contrast regression is 0.58.
 
 ``` r
 
 output_catefit$ate.contrastReg
 #>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
-#> 0.6191191 0.6630810 0.7910504 0.8432274 0.9372587 1.0640579
+#> 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579
 ```
 
 ### Visualize the distribution of CATE scores
@@ -519,7 +576,7 @@ The mandatory arguments are: `response`, `data`, `score.method`,
 
 We also specified the following non-mandatory arguments to fit with the
 data and problem at hand: `initial.predictor.method`, `higher.y`,
-`cv.n`, `seed`, `plot.gbmperf` and `verbose`.
+`cv.n`, `seed` and `plot.gbmperf`.
 
 - `initial.predictor.method` specifies how predictions of the outcome
   are estimated in two regressions and contrast regression. Flexible
@@ -549,16 +606,6 @@ data and problem at hand: `initial.predictor.method`, `higher.y`,
 - We avoid generating the boosting performance plots by specifying
   `plot.gbmperf` = FALSE.
 
-- When `verbose` = 1, progress messages are printed in the R console but
-  errors and warnings are not printed. The current CV iteration is
-  printed, followed by the steps of the CV procedure (splitting the
-  data, training the models, validating the models) and warnings or
-  errors that have occurred during the steps (none in this example). A
-  timestamp and a progress bar are also displayed upon completion of a
-  CV iteration. If `contrastReg` was selected as one of the methods in
-  `score.method`, an additional line of output message will indicate
-  whether the algorithm has converged.
-
 There are many other non-mandatory arguments that
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 can accept. Please see the [Customizing CATE models and
@@ -583,47 +630,9 @@ output_catecv <- catecv(
   higher.y = FALSE,
   cv.n = 5, 
   seed = 999,
-  plot.gbmperf = FALSE,
-  verbose = 1
+  plot.gbmperf = FALSE
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>   |                                                                              |                                                                      |   0%
-#> cv = 1 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   convergence TRUE 
-#>    Sun Nov 15 11:57:55 2026 
-#>   |                                                                              |==============                                                        |  20%
-#> cv = 2 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   convergence TRUE 
-#>    Sun Nov 15 11:57:57 2026 
-#>   |                                                                              |============================                                          |  40%
-#> cv = 3 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   convergence TRUE 
-#>    Sun Nov 15 11:58:01 2026 
-#>   |                                                                              |==========================================                            |  60%
-#> cv = 4 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   convergence TRUE 
-#>    Sun Nov 15 11:58:05 2026 
-#>   |                                                                              |========================================================              |  80%
-#> cv = 5 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#>   convergence TRUE 
-#>    Sun Nov 15 11:58:08 2026 
-#>   |                                                                              |======================================================================| 100%
-#> Total runtime : 18.17 secs
 ```
 
 ### Inspect validation results
@@ -660,19 +669,19 @@ both `higher.y` and outcome type.
 
 output_catecv$ate.contrastReg$ate.est.train.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 0.5896053 0.6428854 0.5744973 0.6406698 0.5924975
-#> prop0.6 0.6744447 0.7114461 0.6589297 0.6930484 0.7186517
-#> prop0.7 0.7383527 0.8360698 0.7806273 0.7779180 0.7539283
-#> prop0.8 0.8034239 0.9092085 0.8208183 0.8263584 0.8117300
-#> prop0.9 0.9041969 1.0257463 0.9595834 0.9049020 0.9452626
+#> prop0.5 0.6125203 0.6352505 0.5639550 0.6292319 0.5745308
+#> prop0.6 0.6354691 0.6965326 0.6101321 0.6748155 0.6940573
+#> prop0.7 0.7451821 0.8142459 0.7558228 0.7635837 0.7714710
+#> prop0.8 0.7826935 0.8677195 0.8190230 0.8538577 0.7662717
+#> prop0.9 0.8857736 0.9977592 0.9484942 0.9689973 0.9385940
 #> prop1   1.0599740 1.0520675 1.0577453 1.0641114 1.0677619
 output_catecv$ate.contrastReg$ate.est.valid.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 0.7448829 0.6271739 0.8552290 0.5565145 0.5514821
-#> prop0.6 0.7325445 0.7194496 0.8308576 0.5906053 0.6909427
-#> prop0.7 0.9166009 0.7932235 0.8468713 0.8076085 0.7944857
-#> prop0.8 1.1280003 0.8535919 0.9563156 0.9041068 0.8696296
-#> prop0.9 1.1300157 0.8374393 0.9452552 0.9264986 0.9791587
+#> prop0.5 0.7311677 0.6043823 0.7529942 0.5478392 0.6293874
+#> prop0.6 0.8000372 0.7004678 0.7960390 0.5956396 0.6547416
+#> prop0.7 0.9369608 0.7707901 0.8355227 0.8042829 0.7552522
+#> prop0.8 1.0871104 0.8248842 0.8341719 0.9117819 0.8535701
+#> prop0.9 1.0802617 0.8014013 0.9334663 0.9079556 0.9866164
 #> prop1   1.0812603 1.0978549 1.0531927 1.0726353 1.0689638
 ```
 
@@ -687,7 +696,7 @@ user-specified proportions used to build the subgroups.
 
 For example, in the training set and in the first CV iterations (first
 column labeled “cv1”), the subgroup defined with the 50% lowest CATE
-scores (first row labeled “prop0.5”) has an estimated RR of 0.59. In
+scores (first row labeled “prop0.5”) has an estimated RR of 0.613. In
 contrast, the subgroup defined with all patients (last row labeled
 “prop1”) has an estimated RR of 1.06.
 
@@ -706,11 +715,11 @@ survival outcomes. The direction of CATE scores depends on both
 
 output_catecv$ate.contrastReg$ate.est.train.low.cv
 #>              cv1      cv2      cv3      cv4      cv5
-#> prop0.5 1.619590 1.556901 1.657101 1.542445 1.623386
-#> prop0.4 1.710009 1.575580 1.727388 1.608509 1.594635
-#> prop0.3 1.850595 1.542156 1.629855 1.648721 1.737306
-#> prop0.2 1.919854 1.573453 1.961972 1.853781 2.122016
-#> prop0.1 2.077797 1.254235 1.522567 2.118723 2.074404
+#> prop0.5 1.620139 1.602498 1.697586 1.567210 1.711755
+#> prop0.4 1.877926 1.629831 1.879557 1.629753 1.636678
+#> prop0.3 1.890165 1.614336 1.757029 1.689462 1.720674
+#> prop0.2 2.344703 1.867807 2.032254 1.843133 2.430757
+#> prop0.1 2.259441 1.423523 1.875834 1.680824 2.318978
 ```
 
 The outputs are also matrices with columns corresponding to the CV
@@ -723,8 +732,8 @@ responders defined as patients with the 60% lowest (highest if
 `higher.y` = TRUE) estimated CATE scores is the subgroup low responders
 defined as patients with the 40% highest (lowest if `higher.y` = TRUE)
 estimated CATE scores, labeled as “prop0.4”. In the training set and in
-the first CV iterations, the estimated RR is 0.674 in the 60% high
-responders to drug 1 and 1.71 in the 40% low responders.
+the first CV iterations, the estimated RR is 0.635 in the 60% high
+responders to drug 1 and 1.878 in the 40% low responders.
 
 #### Mutually exclusive subgroups
 
@@ -735,15 +744,15 @@ validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
 ``` r
 
 output_catecv$ate.contrastReg$ate.est.train.group.cv
-#>                cv1      cv2       cv3       cv4      cv5
-#> prop0.33 1.8635694 1.497846 1.7138028 1.6908566 1.649720
-#> prop0.67 1.0699029 1.489476 1.0511935 1.1809557 1.111132
-#> prop1    0.4831034 0.470482 0.4764857 0.4816721 0.535003
+#>                cv1       cv2       cv3       cv4       cv5
+#> prop0.33 1.8256926 1.6013361 1.8965411 1.6739862 1.6308308
+#> prop0.67 1.0603708 1.2529668 0.9926959 1.1134701 1.0786287
+#> prop1    0.4956232 0.4939226 0.4729564 0.5167835 0.5607068
 output_catecv$ate.contrastReg$ate.est.valid.group.cv
 #>                cv1       cv2       cv3       cv4       cv5
-#> prop0.33 1.4220392 2.0022062 1.3647971 1.5853124 1.9901237
-#> prop0.67 0.7328152 0.7720613 1.1046447 0.9853931 0.9878052
-#> prop1    0.8122051 0.6583514 0.6605675 0.5232875 0.5790997
+#> prop0.33 1.2906594 1.9702555 1.4029576 1.4667778 2.1290327
+#> prop0.67 1.3056454 0.8357763 0.9766351 0.9076750 0.9125326
+#> prop1    0.5953497 0.6296901 0.6691813 0.6195591 0.5786599
 ```
 
 The output is a matrix with columns corresponding to the CV iterations
@@ -755,30 +764,187 @@ defines 3 subgroups of patients with the 33% lowest, 33% middle and 33%
 highest estimated CATE scores when `higher.y` = FALSE (as in this
 example), or with the 33% highest, 33% middle and 33% lowest estimated
 CATE scores when `higher.y` = TRUE. Taking the first column as an
-example, the first CV iteration calculated 1.864 as the RR for the
-subgroup with the 33% lowest estimated CATE scores, 1.07 as the RR for
-subgroup with the 33% middle estimated CATE scores, and 0.483 as the RR
+example, the first CV iteration calculated 1.826 as the RR for the
+subgroup with the 33% lowest estimated CATE scores, 1.06 as the RR for
+subgroup with the 33% middle estimated CATE scores, and 0.496 as the RR
 for subgroup with the 33% highest estimated CATE scores.
 
 ### Inspect errors and warnings
 
 Subgroup estimates can be missing or unstable, for example when a
 subgroup has few patients or observed events. Tied scores can also leave
-a subgroup empty or change its size from the requested proportion. If a
-subgroup has no patients in one or both treatment arms, its estimate is
-`NA` and a warning identifies the method, iteration, subgroup and
-treatment counts. ABC is `NA` if a required estimate is unavailable.
-Check warnings after running
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-and review affected estimates with caution:
+a subgroup empty or change its size from the requested proportion. Use
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+to inspect recorded subgroup errors, warnings, unavailable ABC values
+and contrast-regression convergence across methods, splits and
+iterations. An empty table means no such messages were recorded; it does
+not establish that the models fit well.
 
 ``` r
 
-warnings()
+diagnostics(output_catecv)
+#> [1] method    split     iteration group     subgroup  type      measure  
+#> [8] message  
+#> <0 rows> (or 0-length row.names)
 ```
 
-Unlike the survival output, the count output does not store a
-subgroup-specific `errors/warnings` list.
+The support table records the number of patients (`n0`, `n1`) and total
+observed relapses (`events0`, `events1`) in each treatment arm for each
+reported subgroup. For example, inspect the validation-set support for
+contrast regression with:
+
+``` r
+
+subset(output_catecv$subgroup.support,
+       split == "validation" & method == "contrastReg")
+#>          method      split iteration group                            subgroup
+#> 57  contrastReg validation         1  high                                   1
+#> 58  contrastReg validation         1  high                                 0.5
+#> 59  contrastReg validation         1   low                                 0.5
+#> 60  contrastReg validation         1  high                                 0.6
+#> 61  contrastReg validation         1   low                                 0.4
+#> 62  contrastReg validation         1  high                                 0.7
+#> 63  contrastReg validation         1   low                                 0.3
+#> 64  contrastReg validation         1  high                                 0.8
+#> 65  contrastReg validation         1   low                                 0.2
+#> 66  contrastReg validation         1  high                                 0.9
+#> 67  contrastReg validation         1   low                                 0.1
+#> 68  contrastReg validation         1 group                 0-0.333333333333333
+#> 69  contrastReg validation         1 group 0.333333333333333-0.666666666666667
+#> 70  contrastReg validation         1 group                 0.666666666666667-1
+#> 141 contrastReg validation         2  high                                   1
+#> 142 contrastReg validation         2  high                                 0.5
+#> 143 contrastReg validation         2   low                                 0.5
+#> 144 contrastReg validation         2  high                                 0.6
+#> 145 contrastReg validation         2   low                                 0.4
+#> 146 contrastReg validation         2  high                                 0.7
+#> 147 contrastReg validation         2   low                                 0.3
+#> 148 contrastReg validation         2  high                                 0.8
+#> 149 contrastReg validation         2   low                                 0.2
+#> 150 contrastReg validation         2  high                                 0.9
+#> 151 contrastReg validation         2   low                                 0.1
+#> 152 contrastReg validation         2 group                 0-0.333333333333333
+#> 153 contrastReg validation         2 group 0.333333333333333-0.666666666666667
+#> 154 contrastReg validation         2 group                 0.666666666666667-1
+#> 225 contrastReg validation         3  high                                   1
+#> 226 contrastReg validation         3  high                                 0.5
+#> 227 contrastReg validation         3   low                                 0.5
+#> 228 contrastReg validation         3  high                                 0.6
+#> 229 contrastReg validation         3   low                                 0.4
+#> 230 contrastReg validation         3  high                                 0.7
+#> 231 contrastReg validation         3   low                                 0.3
+#> 232 contrastReg validation         3  high                                 0.8
+#> 233 contrastReg validation         3   low                                 0.2
+#> 234 contrastReg validation         3  high                                 0.9
+#> 235 contrastReg validation         3   low                                 0.1
+#> 236 contrastReg validation         3 group                 0-0.333333333333333
+#> 237 contrastReg validation         3 group 0.333333333333333-0.666666666666667
+#> 238 contrastReg validation         3 group                 0.666666666666667-1
+#> 309 contrastReg validation         4  high                                   1
+#> 310 contrastReg validation         4  high                                 0.5
+#> 311 contrastReg validation         4   low                                 0.5
+#> 312 contrastReg validation         4  high                                 0.6
+#> 313 contrastReg validation         4   low                                 0.4
+#> 314 contrastReg validation         4  high                                 0.7
+#> 315 contrastReg validation         4   low                                 0.3
+#> 316 contrastReg validation         4  high                                 0.8
+#> 317 contrastReg validation         4   low                                 0.2
+#> 318 contrastReg validation         4  high                                 0.9
+#> 319 contrastReg validation         4   low                                 0.1
+#> 320 contrastReg validation         4 group                 0-0.333333333333333
+#> 321 contrastReg validation         4 group 0.333333333333333-0.666666666666667
+#> 322 contrastReg validation         4 group                 0.666666666666667-1
+#> 393 contrastReg validation         5  high                                   1
+#> 394 contrastReg validation         5  high                                 0.5
+#> 395 contrastReg validation         5   low                                 0.5
+#> 396 contrastReg validation         5  high                                 0.6
+#> 397 contrastReg validation         5   low                                 0.4
+#> 398 contrastReg validation         5  high                                 0.7
+#> 399 contrastReg validation         5   low                                 0.3
+#> 400 contrastReg validation         5  high                                 0.8
+#> 401 contrastReg validation         5   low                                 0.2
+#> 402 contrastReg validation         5  high                                 0.9
+#> 403 contrastReg validation         5   low                                 0.1
+#> 404 contrastReg validation         5 group                 0-0.333333333333333
+#> 405 contrastReg validation         5 group 0.333333333333333-0.666666666666667
+#> 406 contrastReg validation         5 group                 0.666666666666667-1
+#>      n0  n1 events0 events1
+#> 57  250 750      78     229
+#> 58  128 372      35      83
+#> 59  122 378      43     146
+#> 60  149 451      40     115
+#> 61  101 299      38     114
+#> 62  179 521      44     137
+#> 63   71 229      34      92
+#> 64  195 605      52     174
+#> 65   55 145      26      55
+#> 66  223 677      65     195
+#> 67   27  73      13      34
+#> 68   87 247      37     102
+#> 69   75 259      13      87
+#> 70   89 245      28      40
+#> 141 250 750      82     259
+#> 142 122 378      37      92
+#> 143 128 372      45     167
+#> 144 146 454      41     135
+#> 145 104 296      41     124
+#> 146 176 524      51     163
+#> 147  74 226      31      96
+#> 148 199 601      63     192
+#> 149  51 149      19      67
+#> 150 222 678      78     218
+#> 151  28  72       4      41
+#> 152  87 247      33     102
+#> 153  81 253      23      98
+#> 154  82 252      26      59
+#> 225 250 750      89     255
+#> 226 125 375      46      98
+#> 227 125 375      43     157
+#> 228 144 456      50     114
+#> 229 106 294      39     141
+#> 230 166 534      62     153
+#> 231  84 216      27     102
+#> 232 198 602      75     177
+#> 233  52 148      14      78
+#> 234 225 675      83     214
+#> 235  25  75       6      41
+#> 236  92 242      29     116
+#> 237  74 260      27      75
+#> 238  84 250      33      64
+#> 309 250 750      81     276
+#> 310 125 375      42      85
+#> 311 125 375      39     191
+#> 312 149 451      48     116
+#> 313 101 299      33     160
+#> 314 172 528      50     153
+#> 315  78 222      31     123
+#> 316 200 600      57     177
+#> 317  50 150      24      99
+#> 318 219 681      72     225
+#> 319  31  69       9      51
+#> 320  83 251      33     139
+#> 321  88 246      21      89
+#> 322  79 255      27      48
+#> 393 250 750      84     281
+#> 394 131 369      50      83
+#> 395 119 381      34     198
+#> 396 153 447      56     118
+#> 397  97 303      28     163
+#> 398 173 527      60     156
+#> 399  77 223      24     125
+#> 400 196 604      69     187
+#> 401  54 146      15      94
+#> 402 221 679      72     241
+#> 403  29  71      12      40
+#> 404  84 250      24     134
+#> 405  86 248      28      90
+#> 406  80 254      32      58
+```
+
+The contrast-regression convergence vector indicates whether at least
+one cross-fitting repetition converged in each CV iteration. The
+individual repetition results are available in
+`output_catecv$ate.contrastReg$converge.repetitions.cv`.
 
 ## Compare scoring methods using the ABC statistic
 
@@ -807,7 +973,7 @@ output_abc <- abc(output_catecv)
 output_abc
 #>                    cv1       cv2        cv3        cv4       cv5
 #> poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204
-#> contrastReg 0.07311255 0.1602017 0.06894946 0.14832787 0.1310745
+#> contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554
 #> negBin      0.14517127 0.2203584 0.08899030 0.09382214 0.1395976
 ```
 
@@ -824,7 +990,7 @@ across iterations:
 average_abc <- apply(output_abc, 1, mean)
 average_abc
 #>     poisson contrastReg      negBin 
-#>   0.1314988   0.1163332   0.1375879
+#>   0.1314988   0.1241822   0.1375879
 ```
 
 In this example, negative binomial also offers the best overall
@@ -893,20 +1059,9 @@ plot(output_catecv,
 
 ![](Count-examples_files/figure-html/example_plot_lineplot1.1-1.png)
 
-The user can choose to plot the validation curves of only one CV
-iteration instead of the average of all CV iterations. In the following
-example, we plot the validation curves of the second CV iteration by
-specifying `cv.i` = 2 and in grayscale by specifying `grayscale` = TRUE.
-
-``` r
-
-plot(output_catecv, 
-     cv.i = 2, 
-     grayscale = TRUE, 
-     ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
-```
-
-![](Count-examples_files/figure-html/example_plot_lineplot2-1.png)
+To plot validation curves for a single CV iteration instead of the
+average, specify `cv.i` (for example, `cv.i = 2` for the second
+iteration). Set `grayscale = TRUE` to display the curves in grayscale.
 
 Same as
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md),
@@ -986,6 +1141,13 @@ Individualized Treatment Rule Results.” Chap. 20 in *Comparative
 Effectiveness and Personalized Medicine Research Using Real-World Data*,
 edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.”
+Chap. 5 in *Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-5>.
 
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
 and Thomas P. A. Debray. 2026. “Validation of Prediction Models for

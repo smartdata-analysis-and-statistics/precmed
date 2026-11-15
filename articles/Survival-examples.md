@@ -11,6 +11,10 @@ treatment comparison, we model restricted mean time lost, compare CATE
 scoring methods through internal validation, and interpret treatment
 effects in responder subgroups.
 
+For background on marginal and conditional treatment effects, see
+Chapter 5 (Nguyen et al. 2026). Chapter 17 introduces personalized
+treatment-effect prediction (Hoogland et al. 2026).
+
 ## Load required packages
 
 ``` r
@@ -1221,6 +1225,13 @@ Individualized Treatment Rule Results.” Chap. 20 in *Comparative
 Effectiveness and Personalized Medicine Research Using Real-World Data*,
 edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.”
+Chap. 5 in *Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-5>.
 
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
 and Thomas P. A. Debray. 2026. “Validation of Prediction Models for

@@ -297,12 +297,15 @@ Returns a list containing the following components saved as a
   `score.method` includes `'twoReg'`.
 
 - `ate.contrastReg`: A list of results similar to `ate.poisson` output
-  if `score.method` includes `'contrastReg'`. This method has an
-  additional element in the list of results:
+  if `score.method` includes `'contrastReg'`. This method has additional
+  convergence information:
 
   - `converge.contrastReg.cv`: A vector of logical value of length
-    `cv.n`. The ith element indicates whether the algorithm converged in
-    the ith cross-validation iteration.
+    `cv.n`. The ith element is true if at least one cross-fitting
+    repetition converged in the ith cross-validation iteration.
+
+  - `converge.repetitions.cv`: A list of logical vectors recording
+    convergence of each cross-fitting repetition in each CV iteration.
 
 - `ate.negBin`: A list of results similar to `ate.poisson` output if
   `score.method` includes `'negBin'`.
@@ -452,7 +455,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 6.31 secs 
+#> Total runtime : 9.35 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

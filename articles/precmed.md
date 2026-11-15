@@ -21,9 +21,9 @@ randomized data from a clinical trial ([Zhao et al.
 non-randomized study ([Yadlowsky et al.
 2021](#ref-yadlowsky2020estimation)).
 
-For an introduction to CATE prediction, model development, and the
-assumptions needed to identify treatment effects, see Chapter 17,
-“Introduction to methods for personalizing medicine” ([Hoogland et al.
+For background on marginal and conditional treatment effects, see
+Chapter 5 ([Nguyen et al. 2026](#ref-nguyen2026causaleffects)). Chapter
+17 introduces CATE prediction and model development ([Hoogland et al.
 2026](#ref-hoogland2026introduction)).
 
 ## Install precmed
@@ -171,6 +171,13 @@ Individualized Treatment Rule Results.” Chap. 20 in *Comparative
 Effectiveness and Personalized Medicine Research Using Real-World Data*,
 edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.”
+Chap. 5 in *Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-5>.
 
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
 and Thomas P. A. Debray. 2026. “Validation of Prediction Models for

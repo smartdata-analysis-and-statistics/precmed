@@ -33,6 +33,7 @@ catefitmean(
   seed = NULL,
   verbose = 0,
   ps.control = list(),
+  rf.control = list(),
   ...
 )
 ```
@@ -129,6 +130,13 @@ catefitmean(
   boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `2`.
+
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
 
 - n.trees.rf:
 

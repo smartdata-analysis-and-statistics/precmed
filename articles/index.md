@@ -10,6 +10,8 @@
   resources](https://smartdata-analysis-and-statistics.github.io/precmed/articles/learning-resources.md):
 - [Getting started with
   precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md):
+- [Quick
+  start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.md):
 - [Estimating and validating treatment effects for survival
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md):
 - [Methods for estimating and validating treatment

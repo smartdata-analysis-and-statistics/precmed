@@ -41,6 +41,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
@@ -53,6 +54,8 @@
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -93,6 +96,7 @@ same measured baseline characteristics; it does not identify an
 individual patient’s unobservable treatment effect. Chapter 17 of <span class="citation">Debray et al. (2026)</span> introduces the principles
 of treatment effect prediction, model development in randomized and
 non-randomized data, and the assumptions needed to identify CATEs <span class="citation">(Hoogland et al. 2026)</span>.</p>
+<p>Chapter 5 introduces marginal and conditional causal effects <span class="citation">(Nguyen et al. 2026)</span>.</p>
 <p>The primary methodological reference for the two-regression and
 contrast-regression estimators is <span class="citation">Yadlowsky et
 al. (2021)</span>. For practical guidance on interpreting and evaluating
@@ -160,7 +164,7 @@ contrast regression.</p>
 <li><p>Estimate the conditional mean outcome given baseline covariates
 and log-transformed exposure time as the offset separately in each
 treatment group (i.e.,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log</mtext><mo stretchy="false" form="prefix">(</mo><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>Y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>β</mi><mi>r</mi></msub><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\text{log}(\mathbb{E}[Y^{(r)}|\boldsymbol{x},t])=\beta_r \boldsymbol{\tilde x}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log</mtext><mo stretchy="false" form="prefix">(</mo><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>Y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="false" form="postfix">]</mo><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>β</mi><mi>r</mi></msub><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\text{log}(\mathbb{E}[Y^{(r)}|\boldsymbol{x},t])=\log(t)+\beta_r \boldsymbol{\tilde x}</annotation></semantics></math>
 for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>
 where
@@ -183,6 +187,9 @@ with negative binomial regression in step 1.</p>
 <div class="section level3">
 <h3 id="boosting">Boosting<a class="anchor" aria-label="anchor" href="#boosting"></a>
 </h3>
+<p>Gradient boosting builds an additive prediction model using
+sequentially fitted learners <span class="citation">(Friedman
+2001)</span>.</p>
 <ol style="list-style-type: decimal">
 <li>
 <p>Estimate the conditional mean outcome given baseline covariates
@@ -211,140 +218,62 @@ with a maximum number of trees specificed with the argument
 <div class="section level3">
 <h3 id="two-regressions">Two regressions<a class="anchor" aria-label="anchor" href="#two-regressions"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li><p>Randomly separate the data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
-into
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
-(<code>Kfold</code>) non-overlapping parts of approximately equal sizes,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>D</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">D_1, \dots, D_K</annotation></semantics></math>.</p></li>
-<li>
-<p>For each fold
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,K</annotation></semantics></math>,
-and separately by treatment group
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
-<p>2.1 Estimate the conditional mean outcome given baseline covariates
-and log-transformed exposure time as the offset with the Poisson-based
-gradient boosting regression method
-(<code>initial.predictor.method = "boosting"</code>) based on
-observations without the kth fold,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
-and denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x},t)</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential outcome.
-Other methods can be used to generate an initial prediction (see
-<code>initial.predictor.method</code> argument).</p>
-<p>2.2 Estimate the PS based on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
-Denote the estimated PS as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat \pi_{-k}(\boldsymbol{x})</annotation></semantics></math>
-and estimate the weights
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>r</mi><mfrac><mi>R</mi><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>R</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat W(r)=r\frac{R}{\hat \pi_{-k}(\boldsymbol{x})}+(1-r)\frac{(1-R)}{1-\hat \pi_{-k}(\boldsymbol{x})}</annotation></semantics></math>
-with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>
-denoting the treatment received.</p>
-<p>2.3 Solve the following weighted estimating equation by fitting a
-Poisson regression with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
-as the response,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log</mtext><mo stretchy="false" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{log}(\hat Y^{(r)}(\boldsymbol{x},1))</annotation></semantics></math>
+<p>The procedure adapts the ratio-based estimator of <span class="citation">Yadlowsky et al. (2021)</span> to count outcomes. Split
+the observations into treatment-stratified folds
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mi>k</mi></msub><annotation encoding="application/x-tex">D_k</annotation></semantics></math>.
+For each fold, fit the initial outcome and propensity models on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>
+and predict the held-out observations in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mi>k</mi></msub><annotation encoding="application/x-tex">D_k</annotation></semantics></math>.
+Pool these out-of-fold predictions, denoting each patient’s arm-specific
+predicted rate by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">m_{ri}</annotation></semantics></math>
+and propensity for the observed arm by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{ri}</annotation></semantics></math>.</p>
+<p>For each arm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,
+fit a weighted Poisson regression of the observed rate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Y</mi><mi>i</mi></msub><mi>/</mi><msub><mi>T</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">Y_i/T_i</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>m</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(m_{ri})</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-as the covariates,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log</mtext><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{log}(T)</annotation></semantics></math>
-as the offset, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat W(r)</annotation></semantics></math>
-as weight:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>r</mi><mi>k</mi></mrow></msub><mo>,</mo><msub><mi>𝛄</mi><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub></mrow></munder><mover><mi>W</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>Y</mi><mo>−</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mi>𝛄</mi><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>×</mo><mi>T</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">
- S(\alpha_{rk}, \boldsymbol{\gamma_{rk}}) = \sum_{i \in D_{-k}} \hat W(r)
- \begin{pmatrix}
- \text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right) \\
- \boldsymbol{\tilde x}
- \end{pmatrix}
- \left(Y - \text{exp}\left(\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right) + \boldsymbol{\gamma_{rk}^T \boldsymbol{\tilde x}} \right) \times T \right) = 0
- </annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
-denotes individual observations. Denote the roots by
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mo>,</mo><msub><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\hat \alpha_{rk}, \boldsymbol{\hat\gamma_{rk}})</annotation></semantics></math>.</p>
-</li>
-<li><p>Solve the following doubly robust estimating equation by fitting
-a Poisson regression with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)</annotation></semantics></math>
-as the response,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
-as the covariates, and no offset or weight:</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛃</mi><mi>𝐫</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub></mrow></munder><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><mrow><msubsup><mi>𝛃</mi><mi>𝐫</mi><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{-k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0</annotation></semantics></math>
-Denote the estimator as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>.</p>
-<ol start="4" style="list-style-type: decimal">
-<li><p>Repeat steps 1-3 with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\tilde x_i</annotation></semantics></math>,
+with weight
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mi>/</mi><msub><mi>p</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">I(R_i=r)/p_{ri}</annotation></semantics></math>.
+Predict the resulting mean
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">q_{ri}</annotation></semantics></math>
+for every observation, and fit a second unweighted Poisson regression of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">q_{ri}</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\tilde x_i</annotation></semantics></math>.
+Denote the resulting coefficients by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mi>r</mi></msub><annotation encoding="application/x-tex">\hat\beta_r</annotation></semantics></math>.
+The score is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>t</mi><mi>w</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>−</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>.</mi></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{tworeg}(\boldsymbol{x})=(\hat\beta_1-\hat\beta_0)^T\tilde x.</annotation></semantics></math></p>
+<p>Repeat the procedure
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-bootstrap samples and denote the estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐛</mi></mrow></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_{rb}}</annotation></semantics></math>
-in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-sample. The final estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>
-is the mean of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐛</mi></mrow></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_{rb}}</annotation></semantics></math>.</p></li>
-<li><p>The CATE score with two regressions is</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>t</mi><mi>w</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mn>𝟏</mn></msub><mo>−</mo><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mn>𝟎</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\hat{CATE}_{tworeg}(\boldsymbol{x})=(\boldsymbol{\hat \beta_1} - \boldsymbol{\hat \beta_0})^T\boldsymbol{\tilde x}</annotation></semantics></math></p>
+times with new random fold assignments and average the coefficient
+differences. These are repeated cross-fitting splits, not bootstrap
+samples.</p>
 </div>
 <div class="section level3">
 <h3 id="contrast-regression">Contrast regression<a class="anchor" aria-label="anchor" href="#contrast-regression"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li><p>Randomly separate the data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
-into
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
-(<code>Kfold</code>) non-overlapping parts of approximately equal sizes,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>D</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">D_1, \dots, D_K</annotation></semantics></math>.</p></li>
-<li>
-<p>For each fold
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,K</annotation></semantics></math>,
-and separately by treatment group
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
-<p>2.1 Estimate the conditional mean outcome given baseline covariates
-and log-transformed exposure time as the offset with the Poisson-based
-gradient boosting regression method
-(<code>initial.predictor.method = "boosting"</code>) based on
-observations without the kth fold,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
-and denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo>,</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x},t)</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential outcome.
-Other methods can be used to generate an initial prediction (see
-<code>initial.predictor.method</code> argument).</p>
-<p>2.2 Estimate the PS based on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
-Denote the estimated PS as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat \pi_{-k}(\boldsymbol{x})</annotation></semantics></math>.</p>
-</li>
-<li><p>Solve the following doubly robust estimating equation by
-Newton-Raphson method or using a L2-norm score method if the former
-fails to converge:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛅</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub></mrow></munder><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo minsize="300%" maxsize="300%" stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>R</mi><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mi>Y</mi><mi>T</mi></mfrac><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">}</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mi>+</mi><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>R</mi><mo stretchy="false" form="postfix">)</mo><mrow><mo stretchy="true" form="prefix">{</mo><mfrac><mi>Y</mi><mi>T</mi></mfrac><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">}</mo></mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo minsize="300%" maxsize="300%" stretchy="true" form="postfix">]</mo><mo>=</mo><mn>0</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-S(\boldsymbol{\delta})&amp;=\sum_{k=1}^K \sum_{i \in D_{-k}} \boldsymbol{\tilde x}\Bigg[\frac{R\left\{\frac{Y}{T}-\frac{1}{2}\left(\hat Y_{-k}^{(0)}(\boldsymbol{ x})\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x}) + \hat Y_{-k}^{(1)}(\boldsymbol{x})\right)\right\}(1-\hat\pi_{-k}(\boldsymbol{x}))}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\\
-&amp;+\frac{(1-R)\left\{\frac{Y}{T}-\frac{1}{2}\left(\hat Y_{-k}^{(0)}(\boldsymbol{ x}) + \hat Y_{-k}^{(1)}(\boldsymbol{x})\text{exp}(-\boldsymbol{\delta^T}\boldsymbol{\tilde x})\right)\right\}\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\Bigg]=0
-\end{aligned}</annotation></semantics></math> Denote the estimator as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\boldsymbol{\hat\delta}</annotation></semantics></math>.</p></li>
-<li><p>Repeat steps 1-3 with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-bootstrap samples and denote the estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐛</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \delta_b}</annotation></semantics></math>
-in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-sample. The final estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\boldsymbol{\hat \delta}</annotation></semantics></math>
-is the mean of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐛</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \delta_b}</annotation></semantics></math>.</p></li>
-<li><p>The CATE score with contrast regression is</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>c</mi><mi>o</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>s</mi><mi>t</mi><mi>r</mi><mi>e</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><msup><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow></mrow><annotation encoding="application/x-tex">\hat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}</annotation></semantics></math></p>
+<p>The contrast estimator uses the same held-out predictions and
+repeated fold assignments <span class="citation">(Yadlowsky et al.
+2021)</span>. Write
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>η</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>δ</mi><mi>T</mi></msup><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\eta_i=\exp(\delta^T\tilde x_i)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\pi_i</annotation></semantics></math>
+for the out-of-fold propensity for treatment 1, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mrow><mn>0</mn><mi>i</mi></mrow></msub><mo>,</mo><msub><mi>m</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">m_{0i},m_{1i}</annotation></semantics></math>
+for the out-of-fold rate predictions. The fitted score solves</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><mo>∑</mo><mi>i</mi></munder><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mfrac><mrow><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mi>/</mi><msub><mi>T</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>m</mi><mrow><mn>0</mn><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>m</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mn>2</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>Y</mi><mi>i</mi></msub><mi>/</mi><msub><mi>T</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>m</mi><mrow><mn>0</mn><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>m</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mn>2</mn><mo stretchy="false" form="postfix">}</mo><msub><mi>π</mi><mi>i</mi></msub></mrow><mrow><msub><mi>η</mi><mi>i</mi></msub><msub><mi>π</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>i</mi></msub></mrow></mfrac><mo>=</mo><mn>0</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">\sum_i \tilde x_i\frac{R_i( Y_i/T_i-(\eta_i m_{0i}+m_{1i})/2)(1-\pi_i)-(1-R_i)\{\eta_iY_i/T_i-(\eta_i m_{0i}+m_{1i})/2\}\pi_i}{\eta_i\pi_i+1-\pi_i}=0.</annotation></semantics></math></p>
+<p>The final score is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>δ</mi><mo accent="true">̂</mo></mover><mi>T</mi></msup><mover><mi>x</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\hat\delta^T\tilde x</annotation></semantics></math>.
+The coefficients are averaged across converged repetitions; if none
+converged, the coefficients from all repetitions are averaged. The
+equation is solved by Newton–Raphson, with numerical minimization as a
+fallback.</p>
 </div>
 <div class="section level3">
 <h3 id="validation-curves-and-the-abc-statistics">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics"></a>
@@ -435,7 +364,9 @@ adaptations of the doubly robust two-regression and contrast-regression
 approaches <span class="citation">(Yadlowsky et al. 2021)</span>.
 Chapter 20 of the book also discusses restricted mean time lost as an
 outcome for ratio-based treatment effects <span class="citation">(Jiang
-et al. 2026)</span>.</p>
+et al. 2026)</span>. For restricted mean event time regression using
+inverse probability of censoring weighting (IPCW), see <span class="citation">Tian et al. (2014)</span>; the procedures below adapt
+these ideas to the RMTL treatment-effect setting.</p>
 <p>Assume that the following data are recorded for each of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 observations:</p>
@@ -506,192 +437,112 @@ the prediction as
 <div class="section level3">
 <h3 id="boosting-1">Boosting<a class="anchor" aria-label="anchor" href="#boosting-1"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li>
-<p>Estimate the conditional mean RMTL given baseline covariates
-separately in each treatment group (i.e.,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>Y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[Y^{(r)}|\boldsymbol{x}]</annotation></semantics></math>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>)
-with Poisson-based gradient boosting regression method weighted with
-IPCW. Denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y^{(r)}(\boldsymbol{x})</annotation></semantics></math>.</p>
-<ul>
-<li>The number of trees is specificed with the argument
-<code>n.trees.boosting</code>. Default is 200.</li>
-<li>The depth of trees is specified with the argument
-<code>tree.depth</code>. Default is 2.</li>
-</ul>
-</li>
-<li><p>The CATE score with boosting is the plug-in estimator</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>b</mi><mi>o</mi><mi>o</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>n</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\boldsymbol{x})}{\hat Y^{(0)}(\boldsymbol{x})}\right)</annotation></semantics></math></p>
+<p>Within each treatment arm, the implementation fits IPCW-weighted
+Gaussian gradient boosting to the restricted survival time divided by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>,
+followed by a weighted binomial GAM calibration of the predictions and
+covariates. It converts the resulting predicted restricted mean survival
+time to RMTL and takes the log ratio. Gradient boosting is described by
+<span class="citation">Friedman (2001)</span>. <code>tree.depth</code>
+controls the boosting trees; <code>n.trees.boosting</code> is the
+maximum number of trees considered for cross-validation.</p>
 </div>
 <div class="section level3">
 <h3 id="random-forest">Random forest<a class="anchor" aria-label="anchor" href="#random-forest"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li>
-<p>Estimate the conditional mean RMTL given baseline covariates
-separately in each treatment group (i.e.,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝔼</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>Y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[Y^{(r)}|\boldsymbol{x}]</annotation></semantics></math>
-for
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>)
-with survival random forest. Denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y^{(r)}(\boldsymbol{x})</annotation></semantics></math>.</p>
-<ul>
-<li>The number of trees in boosting is selected via CV with a maximum
-number of trees specificed with the argument <code>n.trees.rf</code>.
-Default is 1,000.</li>
-<li>The base learners are regression trees with depth specified with the
-argument <code>tree.depth</code>. Default is 2.</li>
-</ul>
-</li>
-<li><p>The CATE score with boosting is the plug-in estimator</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>b</mi><mi>o</mi><mi>o</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>n</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\boldsymbol{x})}{\hat Y^{(0)}(\boldsymbol{x})}\right)</annotation></semantics></math></p>
+<p>Random survival forests extend random forests to right-censored data
+<span class="citation">(Ishwaran et al. 2008)</span>. A forest is fitted
+separately in each treatment arm. The predicted survival curve is
+integrated to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+to estimate RMST; subtracting that integral from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>
+gives predicted RMTL
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>L</mi><mo accent="true">̂</mo></mover><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat L_r(\boldsymbol{x})</annotation></semantics></math>.
+The score is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>a</mi><mi>n</mi><mi>d</mi><mi>o</mi><mi>m</mi><mi>F</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>s</mi><mi>t</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msub><mover><mi>L</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msub><mover><mi>L</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{randomForest}(\boldsymbol{x})=\log\left(\frac{\hat L_1(\boldsymbol{x})}{\hat L_0(\boldsymbol{x})}\right).</annotation></semantics></math></p>
+<p><code>n.trees.rf</code> specifies the number of trees (default
+1,000); it is not selected by cross-validation. Optional forest settings
+can be supplied through <code>rf.control</code>, for example
+<code>list(mtry = 3, nodesize = 15)</code>. <code>tree.depth</code>
+applies to boosting; use <code>rf.control$nodedepth</code> to set a
+forest depth limit.</p>
 </div>
 <div class="section level3">
 <h3 id="two-regressions-1">Two regressions<a class="anchor" aria-label="anchor" href="#two-regressions-1"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li><p>Randomly separate the data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
-into
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
-(<code>Kfold</code>) non-overlapping parts of approximately equal sizes,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>D</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">D_1, \dots, D_K</annotation></semantics></math>.</p></li>
-<li>
-<p>For each fold
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,K</annotation></semantics></math>,
-and separately by treatment arm
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
-<p>2.1 Estimate the conditional mean RMTL given baseline covariates with
-the Poisson-based gradient boosting regression method
-(<code>initial.predictor.method = "boosting"</code>) based on
-observations without the kth fold,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
-and denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x})</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential outcome.
-Other methods can be used to generate an initial prediction (see
-<code>initial.predictor.method</code> argument).</p>
-<p>2.2 Estimate the propensity score model based on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
-Denote the estimated PS as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat \pi_{-k}(\boldsymbol{x})</annotation></semantics></math>
-and estimate the weights
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>W</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>r</mi><mfrac><mi>R</mi><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>R</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat W_{-k}(r)=r\frac{R}{\hat \pi_{-k}(\boldsymbol{x})}+(1-r)\frac{(1-R)}{1-\hat \pi_{-k}(\boldsymbol{x})}</annotation></semantics></math>
-with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>
-denoting the treatment received.</p>
-<p>2.3 Estimate the IPCW:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>L</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>δ</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>≥</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msub><mover><mi>K</mi><mo accent="true">̂</mo></mover><msup><mi>C</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup></msub><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat L(r,y) = \frac{\delta+(1-\delta)I(y^{(r)}\geq\tau)}{\hat K_{C^{(r)}}(T \wedge \tau|x)}</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>K</mi><mo accent="true">̂</mo></mover><msup><mi>C</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup></msub><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat K_{C^{(r)}}(T \wedge \tau|x)</annotation></semantics></math>
-is a consistent estimator of the survival function of the censoring time
-given the covariate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>,
-for example, using a Cox model and the Breslow estimator for the
-cumulative baseline hazard function
-(<code>ipcw.method = "breslow"</code>).</p>
-<p>2.4 Solve the following weighted estimating equation by fitting a
-Poisson regression with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\tau - (T\wedge\tau)</annotation></semantics></math>
-as the response,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">log</mtext><mo stretchy="false" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\text{log}(\hat Y_{-k}^{(r)}(\boldsymbol{x}))</annotation></semantics></math>
+<p>This procedure adapts the ratio-based two-regression approach of
+<span class="citation">Yadlowsky et al. (2021)</span> to survival
+outcomes, using IPCW for censoring <span class="citation">(Tian et al.
+2014)</span>. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>U</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>,</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">U_i=\min(Y_i,\tau)</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
-as the covariates, and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>K</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo><mo>×</mo><msub><mover><mi>W</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat K(r,y)\times\hat W_{-k}(r)</annotation></semantics></math>
-as weight:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>r</mi><mi>k</mi></mrow></msub><mo>,</mo><msub><mi>𝛄</mi><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub></mrow></munder><mover><mi>K</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>W</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo>−</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>α</mi><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msubsup><mi>𝛄</mi><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S(\alpha_{rk}, \boldsymbol{\gamma_{rk}})=\sum_{i \in D_{-k}} \hat K(r,y) \hat W_{-k}(r) \left((\tau- T\wedge\tau) - \text{exp}\left(\alpha_{rk}\text{log}
- \left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\gamma_{rk}^T}\boldsymbol{\tilde x}\right)\right)=0</annotation></semantics></math></p>
-</li>
-<li><p>Solve the following doubly robust estimating equation by fitting
-a Poisson regression with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)</annotation></semantics></math>
-as the response,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\boldsymbol{x}</annotation></semantics></math>
-as the covariates, and no offset or weight:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>𝛃</mi><mi>𝐫</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mi>k</mi></msub></mrow></munder><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">exp</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mrow><mi>r</mi><mi>k</mi></mrow></msub><mtext mathvariant="normal">log</mtext><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><msubsup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐤</mi></mrow><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><mrow><msubsup><mi>𝛃</mi><mi>𝐫</mi><mi>𝐓</mi></msubsup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0</annotation></semantics></math>
-Denote the estimator as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>.</p></li>
-<li><p>Repeat steps 1-3 with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>D</mi><mi>i</mi><mo>*</mo></msubsup><mo>=</mo><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>≥</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mi>i</mi></msub><mo>&lt;</mo><mi>τ</mi><mo>,</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D_i^*=I(Y_i\geq\tau)+I(Y_i&lt;\tau,\delta_i=1)</annotation></semantics></math>.
+The censoring model is fitted on the full data used for the fit. The
+weight is</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mfrac><msubsup><mi>D</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>G</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>U</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mtext mathvariant="monospace">𝚜𝚞𝚛𝚟.𝚖𝚒𝚗</mtext><mo stretchy="false" form="postfix">}</mo></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">w_i=\frac{D_i^*}{\max\{\hat G(U_i\mid X_i),\texttt{surv.min}\}},</annotation></semantics></math></p>
+<p>normalized to have mean one, where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>G</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat G</annotation></semantics></math>
+estimates censoring survival using <code>ipcw.model</code>. The default
+model includes the outcome-model covariates and treatment; a supplied
+<code>ipcw.model</code> determines its covariates.</p>
+<p>Split the data into treatment-stratified folds. Fit arm-specific
+initial survival outcome models and a propensity model on each fold’s
+complement and predict its held-out observations. The initial model may
+use random survival forests, weighted Gaussian boosting followed by GAM
+calibration, or weighted logistic regression. Pool the out-of-fold
+predictions, cap predicted restricted survival time at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.99</mn><mi>τ</mi></mrow><annotation encoding="application/x-tex">0.99\tau</annotation></semantics></math>,
+and convert it to predicted RMTL
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">m_{ri}</annotation></semantics></math>.</p>
+<p>For each arm
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,
+fit a Poisson regression of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>τ</mi><mo>−</mo><msub><mi>U</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\tau-U_i</annotation></semantics></math>
+on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msub><mi>m</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\log(m_{ri})</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\tilde x_i</annotation></semantics></math>,
+weighted by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mi>i</mi></msub><mo>=</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo><mi>/</mi><msub><mi>p</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">w_i I(R_i=r)/p_{ri}</annotation></semantics></math>,
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">p_{ri}</annotation></semantics></math>
+is the out-of-fold propensity for that arm. Predict the fitted means for
+all observations and regress them on
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\tilde x_i</annotation></semantics></math>
+with an unweighted Poisson regression. Denoting the resulting
+coefficients by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mi>r</mi></msub><annotation encoding="application/x-tex">\hat\beta_r</annotation></semantics></math>,
+the score is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>−</mo><msub><mover><mi>β</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup><mover><mi>x</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">(\hat\beta_1-\hat\beta_0)^T\tilde x</annotation></semantics></math>.</p>
+<p>The process is repeated for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-bootstrap samples (<code>B</code>) and denote the estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐛</mi></mrow></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_{rb}}</annotation></semantics></math>
-in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-sample. The final estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mi>𝐫</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_r}</annotation></semantics></math>
-is the mean of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>𝐫</mi><mi>𝐛</mi></mrow></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \beta_{rb}}</annotation></semantics></math>.</p></li>
-<li><p>The CATE score with two regression is</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>t</mi><mi>w</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mn>𝟏</mn></msub><mo>−</mo><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mn>𝟎</mn></msub><msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{tworeg}(\boldsymbol{x})=(\boldsymbol{\hat \beta_1} - \boldsymbol{\hat \beta_0})^T\boldsymbol{\tilde x}</annotation></semantics></math></p>
+random fold assignments and the coefficient differences are averaged.
+These are repeated cross-fitting splits, not bootstrap samples.</p>
 </div>
 <div class="section level3">
 <h3 id="contrast-regression-1">Contrast regression<a class="anchor" aria-label="anchor" href="#contrast-regression-1"></a>
 </h3>
-<ol style="list-style-type: decimal">
-<li><p>Randomly separate the data
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
-into
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
-(<code>Kfold</code>) non-overlapping parts of approximately equal sizes,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mn>1</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>D</mi><mi>K</mi></msub></mrow><annotation encoding="application/x-tex">D_1, \dots, D_K</annotation></semantics></math>.</p></li>
-<li>
-<p>For each fold
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn><mo>,</mo><mi>…</mi><mo>,</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">k=1,\dots,K</annotation></semantics></math>,
-and separately by treatment arm
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mo stretchy="false" form="prefix">{</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">r \in \{0,1\}</annotation></semantics></math>:</p>
-<p>2.1 Estimate the conditional mean RMTL given baseline covariates with
-the Poisson-based gradient boosting regression method
-(<code>initial.predictor.method = "boosting"</code>) based on
-observations without the kth fold,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>,
-and denote the prediction as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat Y_{-k}^{(r)}(\boldsymbol{x})</annotation></semantics></math>.
-This is the initial nonparametric prediction of the potential outcome.
-Other methods can be used to generate an initial prediction (see
-<code>initial.predictor.method</code> argument).</p>
-<p>2.2 Estimate the propensity score model based on
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mi>−</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">D_{-k}</annotation></semantics></math>.
-Denote the estimated PS as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat \pi_{-k}(\boldsymbol{x})</annotation></semantics></math>.</p>
-<p>2.3 Estimate the IPCW:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>L</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>δ</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>δ</mi><mo stretchy="false" form="postfix">)</mo><mi>I</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>y</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>≥</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msub><mover><mi>K</mi><mo accent="true">̂</mo></mover><msup><mi>C</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup></msub><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\hat L(r,y) = \frac{\delta+(1-\delta)I(y^{(r)}\geq\tau)}{\hat K_{C^{(r)}}(T \wedge \tau|x)}</annotation></semantics></math></p>
-<p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>K</mi><mo accent="true">̂</mo></mover><msup><mi>C</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup></msub><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat K_{C^{(r)}}(T \wedge \tau|x)</annotation></semantics></math>
-is a consistent estimator of the survival function of the censoring time
-given the covariate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>,
-for example, using a Cox model and the Breslow estimator for the
-cumulative baseline hazard function
-(<code>ipcw.method = "breslow"</code>).</p>
-</li>
-<li><p>Solve the following doubly robust estimating equation by
-Newton-Raphson method or using a L2-norm score method if the former
-fails to converge:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛅</mi><mo stretchy="false" form="postfix">)</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><munder><mo>∑</mo><mrow><mi>i</mi><mo>∈</mo><msub><mi>D</mi><mi>k</mi></msub></mrow></munder><mover><mi>L</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>,</mo><mi>y</mi><mo stretchy="false" form="postfix">)</mo><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo minsize="300%" maxsize="300%" stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>R</mi><mrow><mo stretchy="true" form="prefix">{</mo><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo>−</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">}</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mi>−</mi><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>R</mi><mo stretchy="false" form="postfix">)</mo><mrow><mo stretchy="true" form="prefix">{</mo><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo>−</mo><mi>T</mi><mo>∧</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo><mo>−</mo><msubsup><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow><mrow><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">}</mo></mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mtext mathvariant="normal">exp</mtext><mo stretchy="false" form="prefix">(</mo><msup><mi>𝛅</mi><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover><mo stretchy="false" form="postfix">)</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mn>1</mn><mo>−</mo><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mrow><mi>−</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo minsize="300%" maxsize="300%" stretchy="true" form="postfix">]</mo><mo>=</mo><mn>0</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-S(\boldsymbol{\delta})&amp;=\sum_{k=1}^K \sum_{i \in D_{k}} \hat L(r,y) \boldsymbol{\tilde x}\Bigg[\frac{R\left\{(\tau - T\wedge\tau)-\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat Y_{-k}^{(0)}(\boldsymbol{x})\right\}(1-\hat\pi_{-k}(\boldsymbol{x}))}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\\
-&amp;-\frac{(1-R)\left\{(\tau - T\wedge\tau)-\hat Y_{-k}^{(0)}(\boldsymbol{ x}) \right\}\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\Bigg]=0
-\end{aligned}</annotation></semantics></math> Denote the estimator as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\boldsymbol{\hat\delta}</annotation></semantics></math>.</p></li>
-<li><p>Repeat steps 1-3 with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-bootstrap samples (<code>B</code>) and denote the estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐛</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \delta_b}</annotation></semantics></math>
-in the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
-sample. The final estimator
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\boldsymbol{\hat \delta}</annotation></semantics></math>
-is the mean of the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐛</mi></msub><annotation encoding="application/x-tex">\boldsymbol{\hat \delta_b}</annotation></semantics></math>.</p></li>
-<li><p>The CATE score with contrast regression is</p></li>
-</ol>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mrow><mi>C</mi><mi>A</mi><mi>T</mi><mi>E</mi></mrow><mo accent="true">̂</mo></mover><mrow><mi>c</mi><mi>o</mi><mi>n</mi><mi>t</mi><mi>r</mi><mi>a</mi><mi>s</mi><mi>t</mi><mi>r</mi><mi>e</mi><mi>g</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><msup><mover><mi>𝛅</mi><mo accent="true">̂</mo></mover><mi>𝐓</mi></msup><mover><mi>𝐱</mi><mo accent="true">̃</mo></mover></mrow></mrow><annotation encoding="application/x-tex">\widehat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}</annotation></semantics></math></p>
+<p>Use the same IPCW and out-of-fold predictions as above. The
+contrast-regression approach adapts <span class="citation">Yadlowsky et
+al. (2021)</span> to censored survival outcomes. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo>−</mo><msub><mi>U</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mi>τ</mi></mrow><annotation encoding="application/x-tex">z_i=(\tau-U_i)/\tau</annotation></semantics></math>,
+let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>m</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">m_{ri}</annotation></semantics></math>
+denote the predicted RMTL divided by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>τ</mi><annotation encoding="application/x-tex">\tau</annotation></semantics></math>,
+and write
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>η</mi><mi>i</mi></msub><mo>=</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><msup><mi>δ</mi><mi>T</mi></msup><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\eta_i=\exp(\delta^T\tilde x_i)</annotation></semantics></math>.
+With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\pi_i</annotation></semantics></math>
+the out-of-fold propensity for treatment 1, the implementation
+solves</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>w</mi><mi>i</mi></msub><msub><mover><mi>x</mi><mo accent="true">̃</mo></mover><mi>i</mi></msub><mfrac><mrow><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">{</mo><msub><mi>z</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>m</mi><mrow><mn>0</mn><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>m</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mn>2</mn><mo stretchy="false" form="postfix">}</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>R</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>z</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>η</mi><mi>i</mi></msub><msub><mi>m</mi><mrow><mn>0</mn><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>m</mi><mrow><mn>1</mn><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mi>/</mi><mn>2</mn><mo stretchy="false" form="postfix">}</mo><msub><mi>π</mi><mi>i</mi></msub></mrow><mrow><msub><mi>η</mi><mi>i</mi></msub><msub><mi>π</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mi>i</mi></msub></mrow></mfrac><mo>=</mo><mn>0</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">\sum_i w_i\tilde x_i\frac{R_i\{z_i-(\eta_i m_{0i}+m_{1i})/2\}(1-\pi_i)-(1-R_i)\{\eta_i z_i-(\eta_i m_{0i}+m_{1i})/2\}\pi_i}{\eta_i\pi_i+1-\pi_i}=0.</annotation></semantics></math></p>
+<p>The final score is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>δ</mi><mo accent="true">̂</mo></mover><mi>T</mi></msup><mover><mi>x</mi><mo accent="true">̃</mo></mover></mrow><annotation encoding="application/x-tex">\hat\delta^T\tilde x</annotation></semantics></math>.
+The coefficients are averaged across converged repetitions; if none
+converged, the coefficients from all repetitions are averaged.
+Newton–Raphson is used with numerical minimization as a fallback.</p>
 </div>
 <div class="section level3">
 <h3 id="validation-curves-and-the-abc-statistics-1">Validation curves and the ABC statistics<a class="anchor" aria-label="anchor" href="#validation-curves-and-the-abc-statistics-1"></a>
@@ -783,6 +634,11 @@ Debray, Thomas P. A., Tri-Long Nguyen, and Robert W. Platt, eds. 2026.
 <em>Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data</em>. 1st ed. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809" class="external-link">https://doi.org/10.1201/9781003300809</a>.
 </div>
+<div id="ref-friedman2001greedy" class="csl-entry">
+Friedman, Jerome H. 2001. <span>“Greedy Function Approximation: A
+Gradient Boosting Machine.”</span> <em>The Annals of Statistics</em> 29
+(5): 1189–232. <a href="https://doi.org/10.1214/aos/1013203451" class="external-link">https://doi.org/10.1214/aos/1013203451</a>.
+</div>
 <div id="ref-hoogland2026introduction" class="csl-entry">
 Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long
 Nguyen. 2026. <span>“Introduction to Methods for Personalizing
@@ -790,6 +646,11 @@ Medicine.”</span> Chap. 17 in <em>Comparative Effectiveness and
 Personalized Medicine Research Using Real-World Data</em>, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
 Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">https://doi.org/10.1201/9781003300809-17</a>.
+</div>
+<div id="ref-ishwaran2008random" class="csl-entry">
+Ishwaran, Hemant, Udaya B. Kogalur, Eugene H. Blackstone, and Michael S.
+Lauer. 2008. <span>“Random Survival Forests.”</span> <em>The Annals of
+Applied Statistics</em> 2 (3): 841–60. <a href="https://doi.org/10.1214/08-AOAS169" class="external-link">https://doi.org/10.1214/08-AOAS169</a>.
 </div>
 <div id="ref-jiang2026visualization" class="csl-entry">
 Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen,
@@ -799,6 +660,14 @@ of Individualized Treatment Rule Results.”</span> Chap. 20 in
 Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen,
 and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-20" class="external-link">https://doi.org/10.1201/9781003300809-20</a>.
 </div>
+<div id="ref-nguyen2026causaleffects" class="csl-entry">
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. <span>“Understanding and Defining Causal
+Effects.”</span> Chap. 5 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-5" class="external-link">https://doi.org/10.1201/9781003300809-5</a>.
+</div>
 <div id="ref-thao2026validation" class="csl-entry">
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
 and Thomas P. A. Debray. 2026. <span>“Validation of Prediction Models
@@ -806,6 +675,11 @@ for Patient Outcomes and Individualized Treatment Effect.”</span> Chap.
 19 in <em>Comparative Effectiveness and Personalized Medicine Research
 Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long
 Nguyen, and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-19" class="external-link">https://doi.org/10.1201/9781003300809-19</a>.
+</div>
+<div id="ref-tian2014predicting" class="csl-entry">
+Tian, Lu, Lihui Zhao, and Lee-Jen Wei. 2014. <span>“Predicting the
+Restricted Mean Event Time with the Subject’s Baseline Covariates in
+Survival Analysis.”</span> <em>Biostatistics</em> 15 (2): 222–33. <a href="https://doi.org/10.1093/biostatistics/kxt050" class="external-link">https://doi.org/10.1093/biostatistics/kxt050</a>.
 </div>
 <div id="ref-yadlowsky2020estimation" class="csl-entry">
 Yadlowsky, Steve, Fabio Pellegrini, Federica Lionetto, Stefan Braune,

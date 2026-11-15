@@ -11,6 +11,9 @@ Using Real-World Data*](https://doi.org/10.1201/9781003300809) ([Debray
 et al. 2026](#ref-debray2026comparative)). The following chapters are
 particularly relevant to **precmed**:
 
+- [Chapter 5](https://doi.org/10.1201/9781003300809-5): marginal and
+  conditional treatment effects, including the ATE ([Nguyen et al.
+  2026](#ref-nguyen2026causaleffects)).
 - [Chapter 17](https://doi.org/10.1201/9781003300809-17): principles of
   CATE prediction and model development in randomized and non-randomized
   data ([Hoogland et al. 2026](#ref-hoogland2026introduction)).
@@ -58,6 +61,13 @@ Individualized Treatment Rule Results.” Chap. 20 in *Comparative
 Effectiveness and Personalized Medicine Research Using Real-World Data*,
 edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.”
+Chap. 5 in *Comparative Effectiveness and Personalized Medicine Research
+Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen,
+and Robert W. Platt. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-5>.
 
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,
 and Thomas P. A. Debray. 2026. “Validation of Prediction Models for

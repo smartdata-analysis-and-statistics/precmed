@@ -22,6 +22,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
@@ -32,6 +33,8 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
       </ul></div>
 
@@ -139,12 +142,12 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 11.04 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 17.22 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2       cv3       cv4        cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.2185333 0.1009797 0.1808103 0.2481409 0.05477379</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1        cv2       cv3        cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1143179 0.06027394 0.1144298 0.08318717 0.1011692</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -163,8 +166,8 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1889643 0.1979584 0.1526227 0.1924833 0.1580444</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1883137 0.1989778 0.1514164 0.1935848 0.1560357</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1629757 0.1714649 0.1560678 0.1907529 0.1608417</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1574183 0.1606966 0.1507745 0.1870858 0.1591810</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

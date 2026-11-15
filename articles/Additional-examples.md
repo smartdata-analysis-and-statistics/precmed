@@ -167,16 +167,16 @@ output_catecv2 <- catecv(response = "count",
 
 print(output_catecv2$ate.contrastReg$ate.est.train.high.cv) 
 #>                cv1       cv2       cv3       cv4       cv5
-#> prop0.5  0.5896053 0.6428854 0.5744973 0.6406698 0.5924975
-#> prop0.55 0.6123025 0.6913102 0.5994781 0.6506526 0.6531537
-#> prop0.6  0.6744447 0.7114461 0.6589297 0.6930484 0.7186517
-#> prop0.65 0.6958967 0.7769476 0.7306405 0.7265152 0.7519433
-#> prop0.7  0.7383527 0.8360698 0.7806273 0.7779180 0.7539283
-#> prop0.75 0.7769239 0.8320732 0.8020475 0.8271006 0.7999920
-#> prop0.8  0.8034239 0.9092085 0.8208183 0.8263584 0.8117300
-#> prop0.85 0.8585330 0.9649914 0.8771507 0.8949641 0.8512447
-#> prop0.9  0.9041969 1.0257463 0.9595834 0.9049020 0.9452626
-#> prop0.95 0.9607169 1.0002418 0.9968210 0.9784077 0.9816699
+#> prop0.5  0.6125203 0.6352505 0.5639550 0.6292319 0.5745308
+#> prop0.55 0.6123425 0.6810730 0.6086757 0.6481483 0.6176396
+#> prop0.6  0.6354691 0.6965326 0.6101321 0.6748155 0.6940573
+#> prop0.65 0.6940466 0.7800556 0.6835564 0.7121965 0.7623751
+#> prop0.7  0.7451821 0.8142459 0.7558228 0.7635837 0.7714710
+#> prop0.75 0.7658276 0.8315130 0.7983923 0.8055230 0.7422471
+#> prop0.8  0.7826935 0.8677195 0.8190230 0.8538577 0.7662717
+#> prop0.85 0.8121735 0.9498889 0.8424164 0.8661071 0.8614440
+#> prop0.9  0.8857736 0.9977592 0.9484942 0.9689973 0.9385940
+#> prop0.95 0.9939960 1.0176507 0.9943742 0.9803130 1.0340514
 #> prop1    1.0599740 1.0520675 1.0577453 1.0641114 1.0677619
 # Dimension is now 11 rows (nested binary subgroups) by 5 columns (CV iterations)
 ```
@@ -206,11 +206,11 @@ section.
 ``` r
 
 print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
-#>                cv1       cv2       cv3       cv4       cv5
-#> prop0.25 1.8720359 1.7135347 1.8803024 1.6290449 1.8095445
-#> prop0.5  1.2812141 1.3353842 1.4042263 1.4192956 1.3873281
-#> prop0.75 0.8821662 1.0769622 0.8219097 1.0732422 0.8013989
-#> prop1    0.4352059 0.3641272 0.4109202 0.4230607 0.4559544
+#>                cv1       cv2       cv3      cv4       cv5
+#> prop0.25 2.0498142 1.7154503 1.8164594 1.778980 2.1789660
+#> prop0.5  1.1585604 1.4411747 1.5079571 1.278110 1.1951267
+#> prop0.75 0.8061818 1.0462414 0.8048728 1.153159 0.7642478
+#> prop1    0.4665909 0.4106455 0.4141645 0.383163 0.4616615
 # Dimension is now 4 rows (multi-category mutually exclusive subgroups) by 5 columns (CV iterations)
 
 boxplot(output_catecv2)
@@ -266,16 +266,14 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sun Nov 15 11:55:49 2026 
+#>    Sun Nov 15 16:05:04 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#> Warning: score.contrastReg, validation iteration 2: ABC unavailable because a
-#> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sun Nov 15 11:55:51 2026 
+#>    Sun Nov 15 16:05:08 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -286,7 +284,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sun Nov 15 11:55:54 2026 
+#>    Sun Nov 15 16:05:13 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -297,7 +295,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sun Nov 15 11:55:57 2026 
+#>    Sun Nov 15 16:05:18 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -310,15 +308,15 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sun Nov 15 11:56:00 2026 
+#>    Sun Nov 15 16:05:23 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 14.9 secs
+#> Total runtime : 25.38 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
-#>                cv1       cv2          cv3          cv4       cv5
-#> prop0.01        NA        NA 6.858623e+04 1.901224e+06        NA
-#> prop0.3  0.6944399 0.6252387 6.324404e-01 5.625166e-01 0.5828618
-#> prop0.75 1.1424118 0.8042944 9.012645e-01 7.984435e-01 0.8428192
-#> prop1    1.0812603 1.0978549 1.053193e+00 1.072635e+00 1.0689638
+#>                cv1        cv2       cv3          cv4       cv5
+#> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
+#> prop0.3  0.5247199 0.61813014 0.6248190 6.234047e-01 0.5989032
+#> prop0.75 1.0038876 0.76649623 0.8423006 8.611282e-01 0.8301160
+#> prop1    1.0812603 1.09785493 1.0531927 1.072635e+00 1.0689638
 ```
 
 ``` r
@@ -429,14 +427,16 @@ catecv(response = "survival",
        verbose = 0)
 ```
 
-Note that for `boosting` and `randomForest` methods that are tree-based,
-parameters such as tree depth and number of trees can be specified with
-arguments `tree.depth`, `n.trees.rf`, and `n.trees.boosting`.
+For boosting, `tree.depth` and `n.trees.boosting` control tree depth and
+the maximum number of trees. For random forests, `n.trees.rf` sets the
+number of trees, and `rf.control` can set forest options, for example
+`rf.control = list(mtry = 3, nodesize = 15)`. These options also apply
+when random forest is the initial predictor.
 
 Generally speaking, the “logistic” initial predictor method is the
 fastest and “boosting” is the slowest among the 3 methods, while
-“randomForest” is somewhere in between with longer computational time as
-the number of trees and tree depth increase.
+“randomForest” is often somewhere in between; computation time depends
+on the data and forest settings.
 
 ### Subgroup proportion
 
@@ -606,37 +606,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sun Nov 15 11:57:05 2026 
+#>    Sun Nov 15 16:06:54 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sun Nov 15 11:57:08 2026 
+#>    Sun Nov 15 16:06:58 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sun Nov 15 11:57:10 2026 
+#>    Sun Nov 15 16:07:03 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sun Nov 15 11:57:13 2026 
+#>    Sun Nov 15 16:07:07 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sun Nov 15 11:57:16 2026 
+#>    Sun Nov 15 16:07:11 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 14.22 secs
+#> Total runtime : 20.54 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA

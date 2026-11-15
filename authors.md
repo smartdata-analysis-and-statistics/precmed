@@ -27,12 +27,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/DESCRIPTION)
 
-Tian L, Jiang X, Simoneau G, Debray T (2026). *precmed: Precision
-Medicine*. R package version 1.1.0.9000,
+Tian L, Jiang X, Simoneau G, Debray T (2026). *precmed: Estimation and
+Validation of Heterogeneous Treatment Effects*. R package version
+1.1.0.9000,
 <https://github.com/smartdata-analysis-and-statistics/precmed>.
 
     @Manual{,
-      title = {precmed: Precision Medicine},
+      title = {precmed: Estimation and Validation of Heterogeneous Treatment Effects},
       author = {Lu Tian and Xiaotong Jiang and Gabrielle Simoneau and Thomas Debray},
       year = {2026},
       note = {R package version 1.1.0.9000},

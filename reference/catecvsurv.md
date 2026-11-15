@@ -46,7 +46,8 @@ catecvsurv(
   verbose = 0,
   rmst.control = list(),
   contrast.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  rf.control = list()
 )
 ```
 
@@ -200,10 +201,17 @@ catecvsurv(
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - n.trees.rf:
 
-  A positive integer specifying the maximum number of trees in random
-  forest. Used if `score.method = 'ranfomForest'` or if
+  A positive integer specifying the number of trees in random forest.
+  Used if `score.method = 'randomForest'` or if
   `initial.predictor.method = 'randomForest'` with
   `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
   survival outcomes. Default is `1000`.
@@ -542,33 +550,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sun Nov 15 11:52:59 2026 
+#>    Sun Nov 15 16:01:18 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sun Nov 15 11:53:03 2026 
+#>    Sun Nov 15 16:01:23 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sun Nov 15 11:53:06 2026 
+#>    Sun Nov 15 16:01:27 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sun Nov 15 11:53:09 2026 
+#>    Sun Nov 15 16:01:32 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sun Nov 15 11:53:13 2026 
+#>    Sun Nov 15 16:01:37 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.66 secs 
+#> Total runtime : 23.21 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

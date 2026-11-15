@@ -8,6 +8,7 @@
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/index.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/learning-resources.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/authors.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/index.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/news/index.html</loc></url>
@@ -69,6 +70,7 @@
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scorecount.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoremean.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoresurv.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/survCatch.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/survivalExample.html</loc></url>

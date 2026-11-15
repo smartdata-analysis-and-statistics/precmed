@@ -42,6 +42,7 @@ catecvmean(
   seed = NULL,
   verbose = 0,
   ps.control = list(),
+  rf.control = list(),
   ...
 )
 ```
@@ -179,10 +180,17 @@ catecvmean(
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `2`.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - n.trees.rf:
 
-  A positive integer specifying the maximum number of trees in random
-  forest. Used if `score.method = 'ranfomForest'` or if
+  A positive integer specifying the number of trees in random forest.
+  Used if `score.method = 'randomForest'` or if
   `initial.predictor.method = 'randomForest'` with
   `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
   survival outcomes. Default is `1000`.

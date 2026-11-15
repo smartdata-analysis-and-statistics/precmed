@@ -22,6 +22,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
@@ -32,6 +33,8 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
       </ul></div>
 
@@ -143,12 +146,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 13.41 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 10.6 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1       cv2        cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.05075604 0.1257254 0.09639645 0.1047147 0.1699769</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2        cv3        cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1728522 0.0977611 0.06436482 0.04714318 0.1915639</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -162,13 +165,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                  cv.n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No value supplied for tau0. Default sets tau0 to the maximum survival time.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1451623 0.1831530 0.1764178 0.2012851 0.2015632</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1374874 0.1780103 0.1689797 0.1931232 0.1989472</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1745854 0.1972287 0.1925117 0.1592986 0.1597752</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1667871 0.1948498 0.1896487 0.1524810 0.1565294</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

@@ -41,6 +41,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../index.html" aria-label="Home"><span class="fa fa-home fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
@@ -53,6 +54,8 @@
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
+<li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -71,7 +74,6 @@
       <img src="../logo.png" class="logo" alt=""><h1>Estimating and validating treatment effects for count outcomes</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 15, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Count-examples.Rmd</code></div>
@@ -107,6 +109,12 @@ and responder diagnostics, including examples using <code>precmed</code>
 data from patients with multiple sclerosis. The dataset
 <code>countExample</code> includes 4,000 patients with information on
 the following 9 variables.</p>
+<p>Alternatively, <code>simulate_count(n = 4000, seed = 1)</code>
+generates a fully synthetic dataset with the same analysis variables.
+Its treatment assignment, rate ratio, treatment interactions, follow-up
+and count dispersion can be varied; see <code><a href="../reference/simulate_count.html">?simulate_count</a></code>.
+The simulator uses illustrative assumptions and does not reconstruct the
+claims data or the packaged example.</p>
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -559,141 +567,112 @@ number of years during follow-up.</p></li>
 <li><p>We will use <code>trt</code> as the treatment variable, which has
 2 drugs (drug0 and drug1).</p></li>
 </ul>
-<p>To avoid multicollinearity issues, the continuous variable
-<code>age</code> was centered at 48 years old and the medical costs in
-the year prior to treatment initiation <code>previous_cost</code> was
-centered at 13,824 USD and scaled with standard deviation 20,172
-USD.</p>
-<p>The first six records of the final dataset <code>countExample</code>
-are shown below:</p>
-<table class="table">
-<colgroup>
-<col width="8%">
-<col width="5%">
-<col width="15%">
-<col width="11%">
-<col width="21%">
-<col width="21%">
-<col width="5%">
-<col width="2%">
-<col width="8%">
-</colgroup>
-<thead><tr class="header">
-<th align="right">age</th>
-<th align="right">female</th>
-<th align="left">previous_treatment</th>
-<th align="right">previous_cost</th>
-<th align="left">previous_number_symptoms</th>
-<th align="right">previous_number_relapses</th>
-<th align="left">trt</th>
-<th align="right">y</th>
-<th align="right">years</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">-21.21875</td>
-<td align="right">0</td>
-<td align="left">drugA</td>
-<td align="right">0.4507466</td>
-<td align="left">1</td>
-<td align="right">0</td>
-<td align="left">drug1</td>
-<td align="right">0</td>
-<td align="right">0.2847365</td>
-</tr>
-<tr class="even">
-<td align="right">-2.21875</td>
-<td align="right">1</td>
-<td align="left">drugA</td>
-<td align="right">-0.1943336</td>
-<td align="left">1</td>
-<td align="right">0</td>
-<td align="left">drug0</td>
-<td align="right">0</td>
-<td align="right">0.6105407</td>
-</tr>
-<tr class="odd">
-<td align="right">-10.21875</td>
-<td align="right">1</td>
-<td align="left">drugA</td>
-<td align="right">-0.5336635</td>
-<td align="left">1</td>
-<td align="right">1</td>
-<td align="left">drug0</td>
-<td align="right">0</td>
-<td align="right">2.6529774</td>
-</tr>
-<tr class="even">
-<td align="right">6.78125</td>
-<td align="right">0</td>
-<td align="left">drugA</td>
-<td align="right">-0.3370594</td>
-<td align="left">1</td>
-<td align="right">1</td>
-<td align="left">drug1</td>
-<td align="right">0</td>
-<td align="right">0.0383299</td>
-</tr>
-<tr class="odd">
-<td align="right">4.78125</td>
-<td align="right">1</td>
-<td align="left">drugC</td>
-<td align="right">-0.2710085</td>
-<td align="left">1</td>
-<td align="right">0</td>
-<td align="left">drug1</td>
-<td align="right">1</td>
-<td align="right">2.2696783</td>
-</tr>
-<tr class="even">
-<td align="right">-11.21875</td>
-<td align="right">0</td>
-<td align="left">drugC</td>
-<td align="right">0.1602817</td>
-<td align="left">1</td>
-<td align="right">0</td>
-<td align="left">drug0</td>
-<td align="right">0</td>
-<td align="right">0.3668720</td>
-</tr>
-</tbody>
-</table>
+<p>For convenience, <code>age</code> is centered at 48 years and
+<code>previous_cost</code> is centered at 13,824 USD and divided by
+20,172 USD.</p>
 </div>
 <div class="section level2">
 <h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
 </h2>
-<p>First, one might be interested in the effect of the drug (trt) on the
-number of relapses during follow-up (y). Lets test this using simple
-regression.</p>
+<div class="section level3">
+<h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
+</h3>
+<p>We first compare relapse rates between treatment groups using a
+Poisson model with treatment as the only predictor. The log follow-up
+time is included as an offset to account for differences in exposure.
+This unadjusted association does not account for differences in patient
+characteristics.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">trt</span>, <span class="va">countExample</span><span class="op">)</span></span>
-<span><span class="va">output_lm</span></span>
+<code class="sourceCode R"><span><span class="va">output_poisson</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">trt</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                      data <span class="op">=</span> <span class="va">countExample</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">output_poisson</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; lm(formula = y ~ trt, data = countExample)</span></span>
+<span><span class="co">#&gt; glm(formula = y ~ trt + offset(log(years)), family = poisson(), </span></span>
+<span><span class="co">#&gt;     data = countExample)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt; (Intercept)     trtdrug1  </span></span>
-<span><span class="co">#&gt;     0.32665      0.02045</span></span></code></pre></div>
-<p>We see from the simple linear model that drug 1 scores 0.02 points
-higher compared to drug 0. This indicates that drug 0 is superior to
-drug 1 because lower outcomes are preferred (number of relapses).</p>
-<p>Now we want to estimate the Average Treatment Effect (ATE) and
-correct for several covariates like age and previous treatment because
-they might influence the relation between treatment and outcome. The
-<code><a href="../reference/atefit.html">atefit()</a></code> function allows estimating the ATE in terms of
-rate ratio. The rate ratio estimator is doubly robust, meaning that the
-estimator is consistent if the propensity score (PS) model (argument
-<code>ps.model</code>) or the outcome model (argument
-<code>cate.model</code>) or both are correctly specified. The function
-also provides standard error, confidence intervals, and p-values based
-on bootstrap.</p>
+<span><span class="co">#&gt;             Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept) -1.32370    0.05538 -23.900   &lt;2e-16 ***</span></span>
+<span><span class="co">#&gt; trtdrug1     0.07293    0.06346   1.149     0.25    </span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (Dispersion parameter for poisson family taken to be 1)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     Null deviance: 3294.4  on 3999  degrees of freedom</span></span>
+<span><span class="co">#&gt; Residual deviance: 3293.1  on 3998  degrees of freedom</span></span>
+<span><span class="co">#&gt; AIC: 5350.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Number of Fisher Scoring iterations: 6</span></span></code></pre></div>
+<p>The estimated rate ratio for drug 1 versus drug 0 is 1.08. A ratio
+below 1 corresponds to a lower relapse rate under drug 1. This
+association does not by itself establish a causal treatment effect.</p>
+</div>
+<div class="section level3">
+<h3 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
+</h3>
+<p>Treatment assignment may differ according to baseline
+characteristics. To account for measured differences, we fit a Poisson
+model that adjusts for age, sex, previous treatment, previous medical
+cost and previous relapses, while retaining the follow-up offset.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_poisson_adjusted</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span></span>
+<span>  <span class="va">y</span> <span class="op">~</span> <span class="va">trt</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span></span>
+<span>    <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">countExample</span>, family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">poisson</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">output_poisson_adjusted</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; glm(formula = y ~ trt + age + female + previous_treatment + previous_cost + </span></span>
+<span><span class="co">#&gt;     previous_number_relapses + offset(log(years)), family = poisson(), </span></span>
+<span><span class="co">#&gt;     data = countExample)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;                           Estimate Std. Error z value Pr(&gt;|z|)    </span></span>
+<span><span class="co">#&gt; (Intercept)              -2.119915   0.093376 -22.703  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; trtdrug1                  0.074697   0.063503   1.176   0.2395    </span></span>
+<span><span class="co">#&gt; age                      -0.015082   0.002723  -5.540 3.03e-08 ***</span></span>
+<span><span class="co">#&gt; female                    0.483290   0.072830   6.636 3.23e-11 ***</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugB   0.828678   0.078981  10.492  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugC   0.404501   0.060730   6.661 2.73e-11 ***</span></span>
+<span><span class="co">#&gt; previous_cost            -0.070031   0.031698  -2.209   0.0272 *  </span></span>
+<span><span class="co">#&gt; previous_number_relapses  0.189551   0.035005   5.415 6.13e-08 ***</span></span>
+<span><span class="co">#&gt; ---</span></span>
+<span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; (Dispersion parameter for poisson family taken to be 1)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     Null deviance: 3294.4  on 3999  degrees of freedom</span></span>
+<span><span class="co">#&gt; Residual deviance: 3071.2  on 3992  degrees of freedom</span></span>
+<span><span class="co">#&gt; AIC: 5140.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Number of Fisher Scoring iterations: 6</span></span></code></pre></div>
+<p>The adjusted rate ratio is 1.08, compared with 1.08 in the unadjusted
+model. The adjusted ratio is conditional on the included covariates and
+does not necessarily represent a causal average treatment effect. A
+causal interpretation requires, among other assumptions, adequate
+treatment overlap and no unmeasured confounding.</p>
+</div>
+<div class="section level3">
+<h3 id="population-level-treatment-comparison-using-atefit">Population-level treatment comparison using
+<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-using-atefit"></a>
+</h3>
+<p>We now use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate a population-level rate
+ratio, combining outcome and propensity score models. The rate ratio
+estimator is doubly robust, meaning that the estimator is consistent if
+the propensity score (PS) model (argument <code>ps.model</code>) or the
+outcome model (argument <code>cate.model</code>) or both are correctly
+specified, under the required assumptions. The function also provides
+standard errors, confidence intervals and p-values based on
+bootstrap.</p>
 <p>In this example, the rate ratio compares the relapse rate under drug
 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal
 interpretation requires appropriate assumptions, including no unmeasured
 confounding, adequate overlap in treatment assignment, and well-defined
-treatments. Chapter 17 discusses identification of conditional treatment
-effects in randomized and non-randomized data <span class="citation">(Hoogland et al. 2026)</span>.</p>
+treatments. Chapter 5 introduces marginal and conditional treatment
+effects <span class="citation">(Nguyen et al. 2026)</span>.</p>
 <p>The mandatory arguments for <code><a href="../reference/atefit.html">atefit()</a></code> are:</p>
 <ul>
 <li><p><code>response</code>: “count” in this example because we use
@@ -735,7 +714,7 @@ methods need not use it to construct their scores.</li>
 <p>Let’s calculate the ATE for the effect of treatment on y and build an
 outcome model that contains all variables and a PS model with
 <code>age</code> and <code>previous_treatment</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
@@ -749,7 +728,7 @@ outcome model that contains all variables and a PS model with
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>When <code>verbose</code> = 1, the function outputs a progress bar in
 the console.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_atefit</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -775,7 +754,7 @@ the rate ratio and its interval. The default confidence level is 95%;
 specify <code>level</code>, for example <code>level = 0.90</code>, to
 request a different level. Intervals use the bootstrap standard error
 already stored in the fitted object:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rate.ratio</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rate.ratio</span></span>
 <span><span class="co">#&gt; log.rate.ratio </span></span>
@@ -796,6 +775,7 @@ with the mean of the bootstrap estimates.</p>
 <p><img src="atefit_bootstrap_count.png"><!-- --></p>
 <p>Histograms of bootstrap log rate ratio estimators after 500 bootstrap
 iterations.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="estimate-cate-scores">Estimate CATE scores<a class="anchor" aria-label="anchor" href="#estimate-cate-scores"></a>
@@ -849,9 +829,8 @@ thread. <code>precmed</code> translates this argument to the GBM3
 parallel settings; one thread is also the fallback when neither
 <code>n.cores</code> nor <code>par.details</code> is supplied and the
 <code>gbm.parallel</code> option is unset.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">t0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
 <span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
@@ -865,10 +844,7 @@ parallel settings; one thread is also the fallback when neither
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  n.cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 3.529245 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -882,11 +858,11 @@ this output is 4,000 for our toy example. Below we show the CATE scores
 estimated with contrast regression for the first 6 subjects in the
 data.</li>
 </ol>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1]  0.1497829  0.2624196  0.5864289 -0.8024851 -0.1907681 -0.4049082</span></span></code></pre></div>
+<span><span class="co">#&gt; [1]  0.1223985  0.2463684  0.5284533 -0.8525778 -0.1547064 -0.3700220</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>
 <code>coefficients</code> contains the estimated coefficients of the
@@ -901,16 +877,16 @@ errors of the estimated coefficients. Boosting does not estimate
 coefficients (it directly predicts the score) so there is no coefficient
 result for this method.</li>
 </ol>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span><span class="co">#&gt;                              poisson      twoReg contrastReg SE_contrastReg</span></span>
-<span><span class="co">#&gt; (Intercept)              -0.58185218 -0.57230335 -0.59733948     0.37239529</span></span>
-<span><span class="co">#&gt; age                      -0.01117701 -0.04006858 -0.03579484     0.01382861</span></span>
-<span><span class="co">#&gt; female                    0.58829733  0.73791026  0.77499335     0.36588639</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugB   0.73724361  0.64116126  0.74877593     0.35907273</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugC   0.15545985 -0.25808471 -0.20473293     0.26470389</span></span>
-<span><span class="co">#&gt; previous_cost            -0.13035642 -0.08457179 -0.02750876     0.15712507</span></span>
-<span><span class="co">#&gt; previous_number_relapses -0.05339112  0.06117043  0.02831604     0.16882933</span></span>
+<span><span class="co">#&gt; (Intercept)              -0.58185218 -0.56778393 -0.60435660     0.36100821</span></span>
+<span><span class="co">#&gt; age                      -0.01117701 -0.04025351 -0.03586527     0.01320552</span></span>
+<span><span class="co">#&gt; female                    0.58829733  0.73513308  0.75637775     0.35381160</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugB   0.73724361  0.63387929  0.78891625     0.32100476</span></span>
+<span><span class="co">#&gt; previous_treatmentdrugC   0.15545985 -0.26859734 -0.15584596     0.24006620</span></span>
+<span><span class="co">#&gt; previous_cost            -0.13035642 -0.08233598 -0.07600948     0.12046915</span></span>
+<span><span class="co">#&gt; previous_number_relapses -0.05339112  0.06949513 -0.03062952     0.13592481</span></span>
 <span><span class="co">#&gt;                               negBin</span></span>
 <span><span class="co">#&gt; (Intercept)              -0.59232437</span></span>
 <span><span class="co">#&gt; age                      -0.01410487</span></span>
@@ -941,12 +917,12 @@ specified scoring method. In this example, we show the estimated ATEs of
 subgroups identified by CATE scores of contrast regression. For example,
 the estimated ATE for the subgroup of subjects constructed based on the
 50% (“prop0.5”) lowest CATE scores estimated from contrast regression is
-0.62.</li>
+0.58.</li>
 </ol>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
-<span><span class="co">#&gt; 0.6191191 0.6630810 0.7910504 0.8432274 0.9372587 1.0640579</span></span></code></pre></div>
+<span><span class="co">#&gt; 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="visualize-the-distribution-of-cate-scores">Visualize the distribution of CATE scores<a class="anchor" aria-label="anchor" href="#visualize-the-distribution-of-cate-scores"></a>
 </h3>
@@ -961,7 +937,7 @@ functions. For example, it is possible to plot the densities of all CATE
 scores with <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot()</a></code>. There are some subjects with
 extremely low CATE scores but most of the samples fall between -1 and 1
 with triple modes at around -0.5, 0, and 0.8.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Boosting"</span>, <span class="st">"Naive Poisson"</span>, <span class="st">"Two regressions"</span>, <span class="st">"Contrast regression"</span>,</span>
@@ -1058,8 +1034,8 @@ we selected <code>poisson</code>, <code>contrastReg</code> and
 <code>negBin</code> to limit run time.</p>
 <p>We also specified the following non-mandatory arguments to fit with
 the data and problem at hand: <code>initial.predictor.method</code>,
-<code>higher.y</code>, <code>cv.n</code>, <code>seed</code>,
-<code>plot.gbmperf</code> and <code>verbose</code>.</p>
+<code>higher.y</code>, <code>cv.n</code>, <code>seed</code> and
+<code>plot.gbmperf</code>.</p>
 <ul>
 <li><p><code>initial.predictor.method</code> specifies how predictions
 of the outcome are estimated in two regressions and contrast regression.
@@ -1084,16 +1060,6 @@ longer computational times.</p></li>
 results.</p></li>
 <li><p>We avoid generating the boosting performance plots by specifying
 <code>plot.gbmperf</code> = FALSE.</p></li>
-<li><p>When <code>verbose</code> = 1, progress messages are printed in
-the R console but errors and warnings are not printed. The current CV
-iteration is printed, followed by the steps of the CV procedure
-(splitting the data, training the models, validating the models) and
-warnings or errors that have occurred during the steps (none in this
-example). A timestamp and a progress bar are also displayed upon
-completion of a CV iteration. If <code>contrastReg</code> was selected
-as one of the methods in <code>score.method</code>, an additional line
-of output message will indicate whether the algorithm has
-converged.</p></li>
 </ul>
 <p>There are many other non-mandatory arguments that
 <code><a href="../reference/catecv.html">catecv()</a></code> can accept. Please see the <a href="Additional-examples.html">Customizing CATE models and
@@ -1102,7 +1068,7 @@ description</a> section for details. If you run into errors or warnings
 with your data, it might be helpful to go over the descriptions to see
 if you need to alter the default values. In this toy example, we keep
 the default values of the remaining arguments.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
@@ -1114,47 +1080,9 @@ the default values of the remaining arguments.</p>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>, </span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
+<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt;   |                                                                              |                                                                      |   0%</span></span>
-<span><span class="co">#&gt; cv = 1 </span></span>
-<span><span class="co">#&gt;   splitting the data..</span></span>
-<span><span class="co">#&gt;   training..</span></span>
-<span><span class="co">#&gt;   validating..</span></span>
-<span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sun Nov 15 11:57:55 2026 </span></span>
-<span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
-<span><span class="co">#&gt; cv = 2 </span></span>
-<span><span class="co">#&gt;   splitting the data..</span></span>
-<span><span class="co">#&gt;   training..</span></span>
-<span><span class="co">#&gt;   validating..</span></span>
-<span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sun Nov 15 11:57:57 2026 </span></span>
-<span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
-<span><span class="co">#&gt; cv = 3 </span></span>
-<span><span class="co">#&gt;   splitting the data..</span></span>
-<span><span class="co">#&gt;   training..</span></span>
-<span><span class="co">#&gt;   validating..</span></span>
-<span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sun Nov 15 11:58:01 2026 </span></span>
-<span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
-<span><span class="co">#&gt; cv = 4 </span></span>
-<span><span class="co">#&gt;   splitting the data..</span></span>
-<span><span class="co">#&gt;   training..</span></span>
-<span><span class="co">#&gt;   validating..</span></span>
-<span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sun Nov 15 11:58:05 2026 </span></span>
-<span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
-<span><span class="co">#&gt; cv = 5 </span></span>
-<span><span class="co">#&gt;   splitting the data..</span></span>
-<span><span class="co">#&gt;   training..</span></span>
-<span><span class="co">#&gt;   validating..</span></span>
-<span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sun Nov 15 11:58:08 2026 </span></span>
-<span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 18.17 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspect-validation-results">Inspect validation results<a class="anchor" aria-label="anchor" href="#inspect-validation-results"></a>
@@ -1183,22 +1111,22 @@ correspond to high responders to drug1. When <code>higher.y</code> =
 FALSE, lower CATE scores correspond to high responders to drug1. Note
 that this is different for survival outcomes. The direction of CATE
 scores depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5 0.5896053 0.6428854 0.5744973 0.6406698 0.5924975</span></span>
-<span><span class="co">#&gt; prop0.6 0.6744447 0.7114461 0.6589297 0.6930484 0.7186517</span></span>
-<span><span class="co">#&gt; prop0.7 0.7383527 0.8360698 0.7806273 0.7779180 0.7539283</span></span>
-<span><span class="co">#&gt; prop0.8 0.8034239 0.9092085 0.8208183 0.8263584 0.8117300</span></span>
-<span><span class="co">#&gt; prop0.9 0.9041969 1.0257463 0.9595834 0.9049020 0.9452626</span></span>
+<span><span class="co">#&gt; prop0.5 0.6125203 0.6352505 0.5639550 0.6292319 0.5745308</span></span>
+<span><span class="co">#&gt; prop0.6 0.6354691 0.6965326 0.6101321 0.6748155 0.6940573</span></span>
+<span><span class="co">#&gt; prop0.7 0.7451821 0.8142459 0.7558228 0.7635837 0.7714710</span></span>
+<span><span class="co">#&gt; prop0.8 0.7826935 0.8677195 0.8190230 0.8538577 0.7662717</span></span>
+<span><span class="co">#&gt; prop0.9 0.8857736 0.9977592 0.9484942 0.9689973 0.9385940</span></span>
 <span><span class="co">#&gt; prop1   1.0599740 1.0520675 1.0577453 1.0641114 1.0677619</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.5 0.7448829 0.6271739 0.8552290 0.5565145 0.5514821</span></span>
-<span><span class="co">#&gt; prop0.6 0.7325445 0.7194496 0.8308576 0.5906053 0.6909427</span></span>
-<span><span class="co">#&gt; prop0.7 0.9166009 0.7932235 0.8468713 0.8076085 0.7944857</span></span>
-<span><span class="co">#&gt; prop0.8 1.1280003 0.8535919 0.9563156 0.9041068 0.8696296</span></span>
-<span><span class="co">#&gt; prop0.9 1.1300157 0.8374393 0.9452552 0.9264986 0.9791587</span></span>
+<span><span class="co">#&gt; prop0.5 0.7311677 0.6043823 0.7529942 0.5478392 0.6293874</span></span>
+<span><span class="co">#&gt; prop0.6 0.8000372 0.7004678 0.7960390 0.5956396 0.6547416</span></span>
+<span><span class="co">#&gt; prop0.7 0.9369608 0.7707901 0.8355227 0.8042829 0.7552522</span></span>
+<span><span class="co">#&gt; prop0.8 1.0871104 0.8248842 0.8341719 0.9117819 0.8535701</span></span>
+<span><span class="co">#&gt; prop0.9 1.0802617 0.8014013 0.9334663 0.9079556 0.9866164</span></span>
 <span><span class="co">#&gt; prop1   1.0812603 1.0978549 1.0531927 1.0726353 1.0689638</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations, labeled from 1 to <code>cv.n</code>, and rows corresponding
@@ -1211,7 +1139,7 @@ regression. The rows in the output are labeled to reflect the
 user-specified proportions used to build the subgroups.</p>
 <p>For example, in the training set and in the first CV iterations
 (first column labeled “cv1”), the subgroup defined with the 50% lowest
-CATE scores (first row labeled “prop0.5”) has an estimated RR of 0.59.
+CATE scores (first row labeled “prop0.5”) has an estimated RR of 0.613.
 In contrast, the subgroup defined with all patients (last row labeled
 “prop1”) has an estimated RR of 1.06.
 <!-- This suggests that the CATE score estimated with contrast regression identifies high responders to drug 1 vs drug 0 because patients with the 50\% lowest estimated CATE score have a better (lower) RR compared to all patients. However, the same relationship between estimated RRs is not observed in the training set. This will be further visualized with valiation curves in the next section. 
@@ -1229,14 +1157,14 @@ correspond to low responders to drug1. When <code>higher.y</code> =
 FALSE, higher CATE scores correspond to low responders to drug1. Again,
 this is different for survival outcomes. The direction of CATE scores
 depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
-<span><span class="co">#&gt; prop0.5 1.619590 1.556901 1.657101 1.542445 1.623386</span></span>
-<span><span class="co">#&gt; prop0.4 1.710009 1.575580 1.727388 1.608509 1.594635</span></span>
-<span><span class="co">#&gt; prop0.3 1.850595 1.542156 1.629855 1.648721 1.737306</span></span>
-<span><span class="co">#&gt; prop0.2 1.919854 1.573453 1.961972 1.853781 2.122016</span></span>
-<span><span class="co">#&gt; prop0.1 2.077797 1.254235 1.522567 2.118723 2.074404</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.5 1.620139 1.602498 1.697586 1.567210 1.711755</span></span>
+<span><span class="co">#&gt; prop0.4 1.877926 1.629831 1.879557 1.629753 1.636678</span></span>
+<span><span class="co">#&gt; prop0.3 1.890165 1.614336 1.757029 1.689462 1.720674</span></span>
+<span><span class="co">#&gt; prop0.2 2.344703 1.867807 2.032254 1.843133 2.430757</span></span>
+<span><span class="co">#&gt; prop0.1 2.259441 1.423523 1.875834 1.680824 2.318978</span></span></code></pre></div>
 <p>The outputs are also matrices with columns corresponding to the CV
 iterations and rows corresponding to nested subgroups.</p>
 <p>The output for the low responders brings additional information to
@@ -1247,7 +1175,7 @@ responders defined as patients with the 60% lowest (highest if
 responders defined as patients with the 40% highest (lowest if
 <code>higher.y</code> = TRUE) estimated CATE scores, labeled as
 “prop0.4”. In the training set and in the first CV iterations, the
-estimated RR is 0.674 in the 60% high responders to drug 1 and 1.71 in
+estimated RR is 0.635 in the 60% high responders to drug 1 and 1.878 in
 the 40% low responders.</p>
 </div>
 <div class="section level4">
@@ -1258,17 +1186,17 @@ subgroups of patients in the training
 (<code>$ate.est.train.group.cv</code>) and validation
 (<code>$ate.est.valid.group.cv</code>) sets across all CV
 iterations.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
-<span><span class="co">#&gt;                cv1      cv2       cv3       cv4      cv5</span></span>
-<span><span class="co">#&gt; prop0.33 1.8635694 1.497846 1.7138028 1.6908566 1.649720</span></span>
-<span><span class="co">#&gt; prop0.67 1.0699029 1.489476 1.0511935 1.1809557 1.111132</span></span>
-<span><span class="co">#&gt; prop1    0.4831034 0.470482 0.4764857 0.4816721 0.535003</span></span>
+<span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
+<span><span class="co">#&gt; prop0.33 1.8256926 1.6013361 1.8965411 1.6739862 1.6308308</span></span>
+<span><span class="co">#&gt; prop0.67 1.0603708 1.2529668 0.9926959 1.1134701 1.0786287</span></span>
+<span><span class="co">#&gt; prop1    0.4956232 0.4939226 0.4729564 0.5167835 0.5607068</span></span>
 <span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.group.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
-<span><span class="co">#&gt; prop0.33 1.4220392 2.0022062 1.3647971 1.5853124 1.9901237</span></span>
-<span><span class="co">#&gt; prop0.67 0.7328152 0.7720613 1.1046447 0.9853931 0.9878052</span></span>
-<span><span class="co">#&gt; prop1    0.8122051 0.6583514 0.6605675 0.5232875 0.5790997</span></span></code></pre></div>
+<span><span class="co">#&gt; prop0.33 1.2906594 1.9702555 1.4029576 1.4667778 2.1290327</span></span>
+<span><span class="co">#&gt; prop0.67 1.3056454 0.8357763 0.9766351 0.9076750 0.9125326</span></span>
+<span><span class="co">#&gt; prop1    0.5953497 0.6296901 0.6691813 0.6195591 0.5786599</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the mutually exclusive subgroups.
 The previous 2 outputs only focus on binary subgroups (high or low
@@ -1279,9 +1207,9 @@ patients with the 33% lowest, 33% middle and 33% highest estimated CATE
 scores when <code>higher.y</code> = FALSE (as in this example), or with
 the 33% highest, 33% middle and 33% lowest estimated CATE scores when
 <code>higher.y</code> = TRUE. Taking the first column as an example, the
-first CV iteration calculated 1.864 as the RR for the subgroup with the
-33% lowest estimated CATE scores, 1.07 as the RR for subgroup with the
-33% middle estimated CATE scores, and 0.483 as the RR for subgroup with
+first CV iteration calculated 1.826 as the RR for the subgroup with the
+33% lowest estimated CATE scores, 1.06 as the RR for subgroup with the
+33% middle estimated CATE scores, and 0.496 as the RR for subgroup with
 the 33% highest estimated CATE scores.</p>
 </div>
 </div>
@@ -1290,16 +1218,171 @@ the 33% highest estimated CATE scores.</p>
 </h3>
 <p>Subgroup estimates can be missing or unstable, for example when a
 subgroup has few patients or observed events. Tied scores can also leave
-a subgroup empty or change its size from the requested proportion. If a
-subgroup has no patients in one or both treatment arms, its estimate is
-<code>NA</code> and a warning identifies the method, iteration, subgroup
-and treatment counts. ABC is <code>NA</code> if a required estimate is
-unavailable. Check warnings after running <code><a href="../reference/catecv.html">catecv()</a></code> and
-review affected estimates with caution:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/warnings.html" class="external-link">warnings</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>Unlike the survival output, the count output does not store a
-subgroup-specific <code>errors/warnings</code> list.</p>
+a subgroup empty or change its size from the requested proportion. Use
+<code><a href="../reference/diagnostics.html">diagnostics()</a></code> to inspect recorded subgroup errors,
+warnings, unavailable ABC values and contrast-regression convergence
+across methods, splits and iterations. An empty table means no such
+messages were recorded; it does not establish that the models fit
+well.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] method    split     iteration group     subgroup  type      measure  </span></span>
+<span><span class="co">#&gt; [8] message  </span></span>
+<span><span class="co">#&gt; &lt;0 rows&gt; (or 0-length row.names)</span></span></code></pre></div>
+<p>The support table records the number of patients (<code>n0</code>,
+<code>n1</code>) and total observed relapses (<code>events0</code>,
+<code>events1</code>) in each treatment arm for each reported subgroup.
+For example, inspect the validation-set support for contrast regression
+with:</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">$</span><span class="va">subgroup.support</span>,</span>
+<span>       <span class="va">split</span> <span class="op">==</span> <span class="st">"validation"</span> <span class="op">&amp;</span> <span class="va">method</span> <span class="op">==</span> <span class="st">"contrastReg"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          method      split iteration group                            subgroup</span></span>
+<span><span class="co">#&gt; 57  contrastReg validation         1  high                                   1</span></span>
+<span><span class="co">#&gt; 58  contrastReg validation         1  high                                 0.5</span></span>
+<span><span class="co">#&gt; 59  contrastReg validation         1   low                                 0.5</span></span>
+<span><span class="co">#&gt; 60  contrastReg validation         1  high                                 0.6</span></span>
+<span><span class="co">#&gt; 61  contrastReg validation         1   low                                 0.4</span></span>
+<span><span class="co">#&gt; 62  contrastReg validation         1  high                                 0.7</span></span>
+<span><span class="co">#&gt; 63  contrastReg validation         1   low                                 0.3</span></span>
+<span><span class="co">#&gt; 64  contrastReg validation         1  high                                 0.8</span></span>
+<span><span class="co">#&gt; 65  contrastReg validation         1   low                                 0.2</span></span>
+<span><span class="co">#&gt; 66  contrastReg validation         1  high                                 0.9</span></span>
+<span><span class="co">#&gt; 67  contrastReg validation         1   low                                 0.1</span></span>
+<span><span class="co">#&gt; 68  contrastReg validation         1 group                 0-0.333333333333333</span></span>
+<span><span class="co">#&gt; 69  contrastReg validation         1 group 0.333333333333333-0.666666666666667</span></span>
+<span><span class="co">#&gt; 70  contrastReg validation         1 group                 0.666666666666667-1</span></span>
+<span><span class="co">#&gt; 141 contrastReg validation         2  high                                   1</span></span>
+<span><span class="co">#&gt; 142 contrastReg validation         2  high                                 0.5</span></span>
+<span><span class="co">#&gt; 143 contrastReg validation         2   low                                 0.5</span></span>
+<span><span class="co">#&gt; 144 contrastReg validation         2  high                                 0.6</span></span>
+<span><span class="co">#&gt; 145 contrastReg validation         2   low                                 0.4</span></span>
+<span><span class="co">#&gt; 146 contrastReg validation         2  high                                 0.7</span></span>
+<span><span class="co">#&gt; 147 contrastReg validation         2   low                                 0.3</span></span>
+<span><span class="co">#&gt; 148 contrastReg validation         2  high                                 0.8</span></span>
+<span><span class="co">#&gt; 149 contrastReg validation         2   low                                 0.2</span></span>
+<span><span class="co">#&gt; 150 contrastReg validation         2  high                                 0.9</span></span>
+<span><span class="co">#&gt; 151 contrastReg validation         2   low                                 0.1</span></span>
+<span><span class="co">#&gt; 152 contrastReg validation         2 group                 0-0.333333333333333</span></span>
+<span><span class="co">#&gt; 153 contrastReg validation         2 group 0.333333333333333-0.666666666666667</span></span>
+<span><span class="co">#&gt; 154 contrastReg validation         2 group                 0.666666666666667-1</span></span>
+<span><span class="co">#&gt; 225 contrastReg validation         3  high                                   1</span></span>
+<span><span class="co">#&gt; 226 contrastReg validation         3  high                                 0.5</span></span>
+<span><span class="co">#&gt; 227 contrastReg validation         3   low                                 0.5</span></span>
+<span><span class="co">#&gt; 228 contrastReg validation         3  high                                 0.6</span></span>
+<span><span class="co">#&gt; 229 contrastReg validation         3   low                                 0.4</span></span>
+<span><span class="co">#&gt; 230 contrastReg validation         3  high                                 0.7</span></span>
+<span><span class="co">#&gt; 231 contrastReg validation         3   low                                 0.3</span></span>
+<span><span class="co">#&gt; 232 contrastReg validation         3  high                                 0.8</span></span>
+<span><span class="co">#&gt; 233 contrastReg validation         3   low                                 0.2</span></span>
+<span><span class="co">#&gt; 234 contrastReg validation         3  high                                 0.9</span></span>
+<span><span class="co">#&gt; 235 contrastReg validation         3   low                                 0.1</span></span>
+<span><span class="co">#&gt; 236 contrastReg validation         3 group                 0-0.333333333333333</span></span>
+<span><span class="co">#&gt; 237 contrastReg validation         3 group 0.333333333333333-0.666666666666667</span></span>
+<span><span class="co">#&gt; 238 contrastReg validation         3 group                 0.666666666666667-1</span></span>
+<span><span class="co">#&gt; 309 contrastReg validation         4  high                                   1</span></span>
+<span><span class="co">#&gt; 310 contrastReg validation         4  high                                 0.5</span></span>
+<span><span class="co">#&gt; 311 contrastReg validation         4   low                                 0.5</span></span>
+<span><span class="co">#&gt; 312 contrastReg validation         4  high                                 0.6</span></span>
+<span><span class="co">#&gt; 313 contrastReg validation         4   low                                 0.4</span></span>
+<span><span class="co">#&gt; 314 contrastReg validation         4  high                                 0.7</span></span>
+<span><span class="co">#&gt; 315 contrastReg validation         4   low                                 0.3</span></span>
+<span><span class="co">#&gt; 316 contrastReg validation         4  high                                 0.8</span></span>
+<span><span class="co">#&gt; 317 contrastReg validation         4   low                                 0.2</span></span>
+<span><span class="co">#&gt; 318 contrastReg validation         4  high                                 0.9</span></span>
+<span><span class="co">#&gt; 319 contrastReg validation         4   low                                 0.1</span></span>
+<span><span class="co">#&gt; 320 contrastReg validation         4 group                 0-0.333333333333333</span></span>
+<span><span class="co">#&gt; 321 contrastReg validation         4 group 0.333333333333333-0.666666666666667</span></span>
+<span><span class="co">#&gt; 322 contrastReg validation         4 group                 0.666666666666667-1</span></span>
+<span><span class="co">#&gt; 393 contrastReg validation         5  high                                   1</span></span>
+<span><span class="co">#&gt; 394 contrastReg validation         5  high                                 0.5</span></span>
+<span><span class="co">#&gt; 395 contrastReg validation         5   low                                 0.5</span></span>
+<span><span class="co">#&gt; 396 contrastReg validation         5  high                                 0.6</span></span>
+<span><span class="co">#&gt; 397 contrastReg validation         5   low                                 0.4</span></span>
+<span><span class="co">#&gt; 398 contrastReg validation         5  high                                 0.7</span></span>
+<span><span class="co">#&gt; 399 contrastReg validation         5   low                                 0.3</span></span>
+<span><span class="co">#&gt; 400 contrastReg validation         5  high                                 0.8</span></span>
+<span><span class="co">#&gt; 401 contrastReg validation         5   low                                 0.2</span></span>
+<span><span class="co">#&gt; 402 contrastReg validation         5  high                                 0.9</span></span>
+<span><span class="co">#&gt; 403 contrastReg validation         5   low                                 0.1</span></span>
+<span><span class="co">#&gt; 404 contrastReg validation         5 group                 0-0.333333333333333</span></span>
+<span><span class="co">#&gt; 405 contrastReg validation         5 group 0.333333333333333-0.666666666666667</span></span>
+<span><span class="co">#&gt; 406 contrastReg validation         5 group                 0.666666666666667-1</span></span>
+<span><span class="co">#&gt;      n0  n1 events0 events1</span></span>
+<span><span class="co">#&gt; 57  250 750      78     229</span></span>
+<span><span class="co">#&gt; 58  128 372      35      83</span></span>
+<span><span class="co">#&gt; 59  122 378      43     146</span></span>
+<span><span class="co">#&gt; 60  149 451      40     115</span></span>
+<span><span class="co">#&gt; 61  101 299      38     114</span></span>
+<span><span class="co">#&gt; 62  179 521      44     137</span></span>
+<span><span class="co">#&gt; 63   71 229      34      92</span></span>
+<span><span class="co">#&gt; 64  195 605      52     174</span></span>
+<span><span class="co">#&gt; 65   55 145      26      55</span></span>
+<span><span class="co">#&gt; 66  223 677      65     195</span></span>
+<span><span class="co">#&gt; 67   27  73      13      34</span></span>
+<span><span class="co">#&gt; 68   87 247      37     102</span></span>
+<span><span class="co">#&gt; 69   75 259      13      87</span></span>
+<span><span class="co">#&gt; 70   89 245      28      40</span></span>
+<span><span class="co">#&gt; 141 250 750      82     259</span></span>
+<span><span class="co">#&gt; 142 122 378      37      92</span></span>
+<span><span class="co">#&gt; 143 128 372      45     167</span></span>
+<span><span class="co">#&gt; 144 146 454      41     135</span></span>
+<span><span class="co">#&gt; 145 104 296      41     124</span></span>
+<span><span class="co">#&gt; 146 176 524      51     163</span></span>
+<span><span class="co">#&gt; 147  74 226      31      96</span></span>
+<span><span class="co">#&gt; 148 199 601      63     192</span></span>
+<span><span class="co">#&gt; 149  51 149      19      67</span></span>
+<span><span class="co">#&gt; 150 222 678      78     218</span></span>
+<span><span class="co">#&gt; 151  28  72       4      41</span></span>
+<span><span class="co">#&gt; 152  87 247      33     102</span></span>
+<span><span class="co">#&gt; 153  81 253      23      98</span></span>
+<span><span class="co">#&gt; 154  82 252      26      59</span></span>
+<span><span class="co">#&gt; 225 250 750      89     255</span></span>
+<span><span class="co">#&gt; 226 125 375      46      98</span></span>
+<span><span class="co">#&gt; 227 125 375      43     157</span></span>
+<span><span class="co">#&gt; 228 144 456      50     114</span></span>
+<span><span class="co">#&gt; 229 106 294      39     141</span></span>
+<span><span class="co">#&gt; 230 166 534      62     153</span></span>
+<span><span class="co">#&gt; 231  84 216      27     102</span></span>
+<span><span class="co">#&gt; 232 198 602      75     177</span></span>
+<span><span class="co">#&gt; 233  52 148      14      78</span></span>
+<span><span class="co">#&gt; 234 225 675      83     214</span></span>
+<span><span class="co">#&gt; 235  25  75       6      41</span></span>
+<span><span class="co">#&gt; 236  92 242      29     116</span></span>
+<span><span class="co">#&gt; 237  74 260      27      75</span></span>
+<span><span class="co">#&gt; 238  84 250      33      64</span></span>
+<span><span class="co">#&gt; 309 250 750      81     276</span></span>
+<span><span class="co">#&gt; 310 125 375      42      85</span></span>
+<span><span class="co">#&gt; 311 125 375      39     191</span></span>
+<span><span class="co">#&gt; 312 149 451      48     116</span></span>
+<span><span class="co">#&gt; 313 101 299      33     160</span></span>
+<span><span class="co">#&gt; 314 172 528      50     153</span></span>
+<span><span class="co">#&gt; 315  78 222      31     123</span></span>
+<span><span class="co">#&gt; 316 200 600      57     177</span></span>
+<span><span class="co">#&gt; 317  50 150      24      99</span></span>
+<span><span class="co">#&gt; 318 219 681      72     225</span></span>
+<span><span class="co">#&gt; 319  31  69       9      51</span></span>
+<span><span class="co">#&gt; 320  83 251      33     139</span></span>
+<span><span class="co">#&gt; 321  88 246      21      89</span></span>
+<span><span class="co">#&gt; 322  79 255      27      48</span></span>
+<span><span class="co">#&gt; 393 250 750      84     281</span></span>
+<span><span class="co">#&gt; 394 131 369      50      83</span></span>
+<span><span class="co">#&gt; 395 119 381      34     198</span></span>
+<span><span class="co">#&gt; 396 153 447      56     118</span></span>
+<span><span class="co">#&gt; 397  97 303      28     163</span></span>
+<span><span class="co">#&gt; 398 173 527      60     156</span></span>
+<span><span class="co">#&gt; 399  77 223      24     125</span></span>
+<span><span class="co">#&gt; 400 196 604      69     187</span></span>
+<span><span class="co">#&gt; 401  54 146      15      94</span></span>
+<span><span class="co">#&gt; 402 221 679      72     241</span></span>
+<span><span class="co">#&gt; 403  29  71      12      40</span></span>
+<span><span class="co">#&gt; 404  84 250      24     134</span></span>
+<span><span class="co">#&gt; 405  86 248      28      90</span></span>
+<span><span class="co">#&gt; 406  80 254      32      58</span></span></code></pre></div>
+<p>The contrast-regression convergence vector indicates whether at least
+one cross-fitting repetition converged in each CV iteration. The
+individual repetition results are available in
+<code>output_catecv$ate.contrastReg$converge.repetitions.cv</code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -1318,12 +1401,12 @@ greater separation in the expected direction for this example. Chapter
 statistics</a> section for a detailed illustration of the relationship
 between <code>higher.y</code>, <code>abc</code>, and the validation
 curves.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="va">output_abc</span></span>
 <span><span class="co">#&gt;                    cv1       cv2        cv3        cv4       cv5</span></span>
 <span><span class="co">#&gt; poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204</span></span>
-<span><span class="co">#&gt; contrastReg 0.07311255 0.1602017 0.06894946 0.14832787 0.1310745</span></span>
+<span><span class="co">#&gt; contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554</span></span>
 <span><span class="co">#&gt; negBin      0.14517127 0.2203584 0.08899030 0.09382214 0.1395976</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
@@ -1332,11 +1415,11 @@ binomial (“negBin”) has an ABC of 0.145, which is the highest in this CV
 iteration, meaning that negative binomial offers the best performance in
 the first CV iteration. The user can combine the ABC for each method
 across iterations:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="va">average_abc</span></span>
 <span><span class="co">#&gt;     poisson contrastReg      negBin </span></span>
-<span><span class="co">#&gt;   0.1314988   0.1163332   0.1375879</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.1314988   0.1241822   0.1375879</span></span></code></pre></div>
 <p>In this example, negative binomial also offers the best overall
 performance because it has the highest average ABC, followed closely by
 Poisson.</p>
@@ -1371,7 +1454,7 @@ heterogeneity is present. The method that has the steepest slope in the
 validation results would be selected because it captures the most
 treatment effect heterogeneity while generalizing well to unseen
 data.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="700"></p>
 <p>For this toy example, the methods are performing well in the training
@@ -1387,22 +1470,15 @@ description</a> section.</p>
 <p>The plot’s legend includes the ABC statistics in the validation set.
 The user can choose to mute the ABC annotations by specifying
 <code>show.abc</code> = FALSE.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, </span>
 <span>     show.abc <span class="op">=</span> <span class="cn">FALSE</span>, </span>
 <span>     ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/example_plot_lineplot1.1-1.png" class="r-plt" alt="" width="700"></p>
-<p>The user can choose to plot the validation curves of only one CV
-iteration instead of the average of all CV iterations. In the following
-example, we plot the validation curves of the second CV iteration by
-specifying <code>cv.i</code> = 2 and in grayscale by specifying
-<code>grayscale</code> = TRUE.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, </span>
-<span>     cv.i <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>     grayscale <span class="op">=</span> <span class="cn">TRUE</span>, </span>
-<span>     ylab <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Count-examples_files/figure-html/example_plot_lineplot2-1.png" class="r-plt" alt="" width="700"></p>
+<p>To plot validation curves for a single CV iteration instead of the
+average, specify <code>cv.i</code> (for example, <code>cv.i = 2</code>
+for the second iteration). Set <code>grayscale = TRUE</code> to display
+the curves in grayscale.</p>
 <p>Same as <code><a href="../reference/abc.html">abc()</a></code>, the user can also choose to use the
 median (instead of mean [default]) of the ATEs across CV iterations by
 specifying the argument <code>combine</code> = “median” in
@@ -1428,7 +1504,7 @@ with the 33% lowest (0-33%), middle 33% (33-66%), and highest 33%
 (66-100%) estimated CATE scores. The box plot shows the distribution of
 the ATEs over all <code>cv.n</code> CV iterations, instead of a summary
 statistics like mean or median in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>,</span>
 <span>        ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/example_plot_boxplot-1.png" class="r-plt" alt="" width="700"></p>
@@ -1474,6 +1550,14 @@ of Individualized Treatment Rule Results.”</span> Chap. 20 in
 <em>Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen,
 and Robert W. Platt. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-20" class="external-link">https://doi.org/10.1201/9781003300809-20</a>.
+</div>
+<div id="ref-nguyen2026causaleffects" class="csl-entry">
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. <span>“Understanding and Defining Causal
+Effects.”</span> Chap. 5 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-5" class="external-link">https://doi.org/10.1201/9781003300809-5</a>.
 </div>
 <div id="ref-thao2026validation" class="csl-entry">
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland,

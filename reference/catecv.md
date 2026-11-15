@@ -47,7 +47,8 @@ catecv(
   verbose = 0,
   contrast.control = list(),
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  rf.control = list()
 )
 ```
 
@@ -240,10 +241,17 @@ catecv(
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - n.trees.rf:
 
-  A positive integer specifying the maximum number of trees in random
-  forest. Used if `score.method = 'ranfomForest'` or if
+  A positive integer specifying the number of trees in random forest.
+  Used if `score.method = 'randomForest'` or if
   `initial.predictor.method = 'randomForest'` with
   `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
   survival outcomes. Default is `1000`.
@@ -412,7 +420,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 6.29 secs 
+#> Total runtime : 9.43 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
