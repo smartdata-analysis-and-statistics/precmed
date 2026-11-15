@@ -5,8 +5,8 @@
 #' Treatment is assigned using a logistic propensity model; the numbers in
 #' each treatment group arise from those probabilities and vary by sample.
 #' Event times follow a Weibull proportional hazards model with treatment
-#' interactions with age and previous relapses. Censoring is independent of covariates and
-#' event times. Default coefficients are chosen to illustrate confounding and
+#' interactions with age and previous relapses. By default, censoring is
+#' independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 #' heterogeneous treatment effects; they are not clinical estimates and do not
 #' establish the relative performance of methods on other data.
 #'
@@ -34,6 +34,14 @@
 #'   the log HR is \code{log(conditional_hr) + treatment_age *
 #'   (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses},
 #'   where \code{age_in_years} is the uncentered age.
+#' @param censor_weights Named coefficients for an exponential censoring
+#'   model with log hazard per day. Recognized names are \code{intercept},
+#'   \code{age}, \code{female}, \code{previous_cost},
+#'   \code{previous_number_relapses}, \code{drugB}, \code{drugC}, and
+#'   \code{treatment}. Named subsets override the defaults. Age is measured in
+#'   decades from 48 years; cost uses the scaling described above; drugA and
+#'   drug0 are the reference groups. The default intercept is
+#'   \code{log(1/450)} and all other coefficients are zero.
 #'
 #' @return A data frame with \code{n} rows and nine columns:
 #'   centered \code{age}, \code{female}, \code{previous_treatment}, scaled
@@ -42,8 +50,10 @@
 #'   event indicator \code{d}. The age and cost columns retain centering and
 #'   scaling attributes. Times are in days; 1 indicates relapse and 0 censoring.
 #' @details Event times use a Weibull baseline with shape 1.15 and scale 650
-#'   days. Censoring times are exponential with mean 450 days and administrative
-#'   censoring at 900 days. Extreme propensity coefficients can produce poor
+#'   days. By default, random censoring times are exponential with mean 450 days;
+#'   administrative censoring occurs at 900 days. Censoring and event times are generated independently
+#'   conditional on covariates and treatment, including when censoring depends
+#'   on those variables. Extreme propensity coefficients can produce poor
 #'   treatment overlap or a sample with no patients in one treatment group.
 #' @examples
 #' toy <- simulate_survival(n = 200, seed = 1)
@@ -51,13 +61,19 @@
 #' toy_unequal <- simulate_survival(n = 200, seed = 1,
 #'   ps_weights = c(intercept = -1), conditional_hr = 0.8)
 #' table(toy_unequal$trt)
+#' toy_censor <- simulate_survival(n = 200, seed = 1,
+#'   censor_weights = c(treatment = log(2), age = 0.3))
+#' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
 simulate_survival <- function(
     n = 4000L, seed = 20261114L,
     ps_weights = c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.20),
     lp_weights = c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.10,
                    previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
-    conditional_hr = 0.9) {
+    conditional_hr = 0.9,
+    censor_weights = c(intercept = log(1 / 450), age = 0, female = 0,
+                       previous_cost = 0, previous_number_relapses = 0,
+                       drugB = 0, drugC = 0, treatment = 0)) {
   if (!is.numeric(n) || length(n) != 1L || !is.finite(n) || n < 1 ||
       n != floor(n) || n > .Machine$integer.max)
     stop("n must be a positive integer.")
@@ -73,6 +89,9 @@ simulate_survival <- function(
   lp_weights <- merge_weights(lp_weights,
     c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.10,
       previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16), "lp_weights")
+  censor_weights <- merge_weights(censor_weights,
+    c(intercept = log(1 / 450), age = 0, female = 0, previous_cost = 0,
+      previous_number_relapses = 0, drugB = 0, drugC = 0, treatment = 0), "censor_weights")
   if (!is.numeric(conditional_hr) || length(conditional_hr) != 1L ||
       !is.finite(conditional_hr) || conditional_hr <= 0)
     stop("conditional_hr must be a finite positive number.")
@@ -102,7 +121,17 @@ simulate_survival <- function(
   event_time <- 650 * (-log(stats::runif(nrow(dat))) / exp(lp))^(1 / 1.15)
   if (any(!is.finite(event_time)) || any(event_time <= 0))
     stop("Outcome coefficients produced invalid event times; use less extreme values.")
-  censor_time <- pmin(stats::rexp(nrow(dat), rate = 1 / 450), 900)
+  censor_lp <- censor_weights[["intercept"]] - log(1 / 450) +
+    censor_weights[["age"]] * age / 10 + censor_weights[["female"]] * dat$female +
+    censor_weights[["previous_cost"]] * cost +
+    censor_weights[["previous_number_relapses"]] * dat$relapses +
+    censor_weights[["drugB"]] * (dat$prev == "drugB") +
+    censor_weights[["drugC"]] * (dat$prev == "drugC") +
+    censor_weights[["treatment"]] * dat$treatment
+  censor_rate <- (1 / 450) * exp(censor_lp)
+  if (any(!is.finite(censor_rate)) || any(censor_rate <= 0))
+    stop("Censoring coefficients produced invalid rates; use less extreme values.")
+  censor_time <- pmin(stats::rexp(nrow(dat), rate = censor_rate), 900)
   out <- data.frame(age = age, female = dat$female,
                     previous_treatment = factor(dat$prev, levels = c("drugA", "drugB", "drugC")),
                     previous_cost = cost,

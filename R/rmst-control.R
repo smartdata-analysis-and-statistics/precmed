@@ -1,4 +1,5 @@
 # Keep RMST integration options separate from model-fitting arguments.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 resolve_rmst_control <- function(rmst.control) {
   if (!is.list(rmst.control) || (length(rmst.control) &&
       (is.null(names(rmst.control)) || anyNA(names(rmst.control)) ||

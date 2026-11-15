@@ -47,3 +47,6 @@ exp(confint(fit))
 exp(confint(fit, level = 0.90))
 }
 }
+\author{
+Thomas Debray \email{tdebray@fromdatatowisdom.com}
+}

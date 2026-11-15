@@ -159,6 +159,8 @@ atefit <- function(response,
 #'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
 #' The red vertical reference line represents the final estimate.
+#' For survival fits, RMST facets use the original treatment labels when available;
+#' older objects use treatment 0 and treatment 1.
 #' @author Thomas Debray
 #'
 #' @importFrom dplyr %>% add_row mutate
@@ -182,6 +184,15 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
            title = title)
   } else if (x$response == "survival") {
 
+    treatment.labels <- x$treatment.labels
+    if (is.null(treatment.labels) || length(treatment.labels) != 2L ||
+        anyNA(treatment.labels) || any(!nzchar(treatment.labels)))
+      treatment.labels <- c("treatment 0", "treatment 1")
+    facet.labels <- c(rmst1 = paste0("RMST (", treatment.labels[2], ")"),
+                      rmst0 = paste0("RMST (", treatment.labels[1], ")"),
+                      log.rmtl.ratio = "Log RMTL ratio",
+                      log.cumulative.hazard.ratio = "Log cumulative hazard ratio",
+                      log.hazard.ratio = "Log hazard ratio")
     est.df <- data.frame(key = character(), value = numeric())
     est.df <- est.df %>% add_row(key = "rmst1", value = x$rmst1$estimate)
     est.df <- est.df %>% add_row(key = "rmst0", value = x$rmst0$estimate)
@@ -196,7 +207,7 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
       gather(key = "key", value = "value") %>% na.omit() %>%
       mutate(key = factor(.data$key, levels = est.df$key)) %>%
       ggplot(aes(x = .data$value)) + geom_histogram(bins = bins, alpha = alpha) +
-      facet_wrap(. ~ .data$key, scales = "free") +
+      facet_wrap(. ~ .data$key, scales = "free", labeller = ggplot2::as_labeller(facet.labels)) +
       geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "red") +
       theme +
       labs(x = "Bootstrap values", y = "Frequency", title = title)
@@ -239,6 +250,6 @@ print.atefit <- function(x, ...) {
 
   if (!is.null(x$warning)) {
     cat("\n")
-    warning(x$warning)
+    message(x$warning)
   }
 }

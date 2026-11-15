@@ -2,6 +2,7 @@
 NULL
 
 # Validate shared numerical controls before either backend is called.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 validate_contrast_controls <- function(error.maxNR, max.iterNR, tune, optim.control) {
   if (!is.numeric(error.maxNR) || length(error.maxNR) != 1L ||
       !is.finite(error.maxNR) || error.maxNR <= 0) {
@@ -27,6 +28,7 @@ validate_contrast_controls <- function(error.maxNR, max.iterNR, tune, optim.cont
 }
 
 # Contrast-regression controls are separated from GBM's ... arguments.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 resolve_contrast_control <- function(contrast.control, error.maxNR, max.iterNR, tune) {
   defaults <- list(solver = "C", error.maxNR = error.maxNR,
                    max.iterNR = max.iterNR, tune = tune, optim.control = list())

@@ -1,4 +1,5 @@
 # PS interaction screening options are distinct from fitting method and GBM ... .
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 resolve_ps_control <- function(ps.control) {
   if (!is.list(ps.control) || (length(ps.control) &&
       (is.null(names(ps.control)) || anyNA(names(ps.control)) ||
@@ -11,6 +12,7 @@ resolve_ps_control <- function(ps.control) {
 
 # Materialize only selected interactions. Both paths preserve pair ordering,
 # sample variances, strict SMD > .1, and the original variance stabilizer.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 ps_interactions <- function(x, trt, xnew = NULL, solver = c("C", "R")) {
   solver <- match.arg(solver)
   x <- as.matrix(x)

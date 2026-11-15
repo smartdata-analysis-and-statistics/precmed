@@ -290,7 +290,7 @@ print.catefit <- function(x, ...) {
 
   if (!is.null(x$warning)) {
     cat("\n")
-    warning(x$warning)
+    message(x$warning)
   }
 }
 

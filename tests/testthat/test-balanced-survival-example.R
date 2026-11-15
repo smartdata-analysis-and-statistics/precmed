@@ -67,3 +67,20 @@ test_that("survival simulator rejects invalid inputs and allows extreme allocati
     ps_weights = c(intercept = 1, age = 0, drugB = 0, drugC = 0))
   expect_gt(sum(higher$trt == "drug1"), sum(lower$trt == "drug1"))
 })
+test_that("censoring model preserves defaults and responds to coefficients", {
+  base <- simulate_survival(n = 2000, seed = 42)
+  explicit <- simulate_survival(n = 2000, seed = 42,
+    censor_weights = c(intercept = log(1 / 450), treatment = 0))
+  expect_identical(base, explicit)
+  more <- simulate_survival(n = 2000, seed = 42,
+    censor_weights = c(intercept = log(2 / 450)))
+  expect_true(all(more$y <= base$y))
+  expect_gt(sum(more$d == 0), sum(base$d == 0))
+  treated <- simulate_survival(n = 2000, seed = 42,
+    censor_weights = c(treatment = log(2)))
+  expect_identical(treated$y[base$trt == "drug0"], base$y[base$trt == "drug0"])
+  expect_gt(sum(treated$d[base$trt == "drug1"] == 0),
+            sum(base$d[base$trt == "drug1"] == 0))
+  expect_error(simulate_survival(censor_weights = c(unknown = 1)), "censor_weights")
+  expect_error(simulate_survival(censor_weights = c(intercept = 1000)), "invalid rates")
+})

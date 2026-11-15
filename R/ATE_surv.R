@@ -46,7 +46,7 @@
 #' @param verbose An integer value indicating whether intermediate progress messages should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #'
-#' @return Return an object of class \code{atefit} with 6 elements:
+#' @return Return an object of class \code{atefit} including:
 #' \itemize{
 #'   \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
 #'   lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=1}.
@@ -64,9 +64,8 @@
 #'   Undefined estimates or bootstrap replicates yield unavailable inference.
 #'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
 #'   \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
-#'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
-#'   The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
-#'   the interpretation of the remaining of the output.
+#'   \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1, in that order.
+#'   \item{\code{warning}: } The informational treatment recoding message, if applicable.
 #' }
 #'
 #' @details This helper function estimates the average treatment effect (ATE) for survival data between two
@@ -234,6 +233,7 @@ atefitsurv <- function(data,
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
   out$warning <- preproc$warning
+  out$treatment.labels <- preproc$treatment.labels
 
   class(out) <- "atefit"
 
@@ -346,6 +346,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 
 # AIPW survival probabilities at the horizon, using the existing censoring model.
 # Undefined probabilities are returned as NA rather than clipped into range.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 aipw_log_cumulative_hr <- function(y, d, trt, q0, q1, ps, censor_survival, tau0) {
   alive <- as.numeric(y > tau0 | (y == tau0 & d == 0))
   observed <- alive / censor_survival
@@ -355,6 +356,7 @@ aipw_log_cumulative_hr <- function(y, d, trt, q0, q1, ps, censor_survival, tau0)
   log(-log(s1)) - log(-log(s0))
 }
 
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
   if (!is.na(estimate) && (estimate < 0 || estimate > tau0)) {
     w <- simpleWarning(paste0("Doubly robust RMST for treatment ", arm,

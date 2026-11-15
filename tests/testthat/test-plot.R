@@ -84,3 +84,21 @@ test_that("hazard plots default to cumulative ratios and retain explicit Cox plo
   expect_error(plot(fit, measure = "chr", show.abc = FALSE), "refit")
   expect_s3_class(plot(fit, measure = "conditional_hazard_ratio", show.abc = FALSE), "ggplot")
 })
+test_that("ATE survival plot labels treatment panels and supports old fits", {
+  fit <- structure(list(response = "survival", n.boot = 2,
+    treatment.labels = c("control", "new drug"),
+    rmst0 = data.frame(estimate = 3), rmst1 = data.frame(estimate = 4),
+    log.rmtl.ratio = data.frame(estimate = 0.1),
+    log.cumulative.hazard.ratio = data.frame(estimate = 0.2),
+    trt.boot = data.frame(rmst1 = c(3, 4), rmst0 = c(2, 3),
+                          log.rmtl.ratio = c(0.1, 0.2),
+                          log.cumulative.hazard.ratio = c(0.2, 0.3))), class = "atefit")
+  labels <- plot(fit)$facet$params$labeller
+  keys <- data.frame(key = c("rmst1", "rmst0", "log.rmtl.ratio", "log.cumulative.hazard.ratio"))
+  expect_equal(unname(unlist(labels(keys))), c("RMST (new drug)", "RMST (control)",
+    "Log RMTL ratio", "Log cumulative hazard ratio"))
+  fit$treatment.labels <- NULL
+  expect_equal(unname(unlist(plot(fit)$facet$params$labeller(keys)))[1:2],
+               c("RMST (treatment 1)", "RMST (treatment 0)"))
+  expect_s3_class(ggplot2::ggplot_build(plot(fit)), "ggplot_built")
+})

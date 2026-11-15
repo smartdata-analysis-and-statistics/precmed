@@ -289,6 +289,7 @@ drmean <- function(y, trt, x.cate, x.ps,
 
 # Matrix-only equivalent of drmean(..., ps.method = "glm", interactions = TRUE).
 # outcome.design includes the intercept and is constructed once per split search.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 drmean.matrix <- function(y, trt, outcome.design, x.ps, families,
                           minPS = 0.01, maxPS = 0.99) {
   withCallingHandlers({

@@ -293,6 +293,7 @@ drcount <- function(y, trt, x.cate, x.ps, time,
 # Matrix-only equivalent of drcount(..., ps.method = "glm", interactions = TRUE).
 # Used by balanced splitting to avoid rebuilding model frames on each attempt.
 # outcome.design already includes the intercept; x.ps is the PS design matrix.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
                            minPS = 0.01, maxPS = 0.99) {
   withCallingHandlers({
@@ -454,6 +455,7 @@ estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, high
   return(exp(ate.est))
 }
 
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 count_subgroup_log_effect <- function(selected, y, x.cate, x.ps, time, trt,
                                       ps.method, minPS, maxPS, ps.control, label) {
   counts <- c(sum(trt[selected] == 0), sum(trt[selected] == 1))

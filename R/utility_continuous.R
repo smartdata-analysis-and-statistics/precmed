@@ -248,7 +248,8 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
   } else if (!all(unique(trt) %in% c(0, 1))) {
     cat <- sort(unique(trt))
     trt <- ifelse(trt == cat[1], 0, 1)
-    warn.dr <- warning(paste0("Variable trt was recoded to 0/1 with ", cat[1], "->0 and ", cat[2], "->1.\n"))
+    warn.dr <- paste0("Variable trt was recoded to 0/1 with ", cat[1], "->0 and ", cat[2], "->1.")
+    message(warn.dr)
   } else if (is.factor(trt) == TRUE) {
     trt <- as.numeric(trt == 1)
   }

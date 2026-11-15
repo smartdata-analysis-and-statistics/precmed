@@ -1,5 +1,6 @@
 # Translate the existing GBM arguments to GBM3's current API. Keep the
 # historical learning rate and use all observations/features for training.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 fit_boosting <- function(formula, data, distribution, weights = NULL,
                          n.trees = 100, interaction.depth = 1,
                          n.minobsinnode = 10, shrinkage = 0.1,
@@ -41,6 +42,7 @@ fit_boosting <- function(formula, data, distribution, weights = NULL,
     fold_id = fold.id, par_details = par.details))
 }
 
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 best_boosting_iteration <- function(object, method, plot.it = TRUE) {
   performance <- gbm3::gbmt_performance(object, method = method)
   if (plot.it) plot(performance)

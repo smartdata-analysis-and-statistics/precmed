@@ -40,6 +40,16 @@
 
 ## Minor changes and bug fixes
 
+* Label survival `atefit()` bootstrap plot panels with the original treatment
+  names when available, and use readable names for the treatment effects.
+
+* Report automatic treatment recoding as an informational message rather than
+  a warning, while retaining the mapping in existing result objects.
+
+* Added `diagnostics()` to summarize recorded survival `atefit()` treatment
+  recoding information and subgroup errors and warnings from `catefit()` and
+  `catecv()` results in a data frame.
+
 * Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead of
   treating observations beyond the horizon as events. This affects
   subgroup and cross-validation hazard ratio estimates; RMST and RMTL

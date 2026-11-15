@@ -10,7 +10,9 @@ simulate_survival(
   ps_weights = c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.2),
   lp_weights = c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.1,
     previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
-  conditional_hr = 0.9
+  conditional_hr = 0.9,
+  censor_weights = c(intercept = log(1/450), age = 0, female = 0, previous_cost = 0,
+    previous_number_relapses = 0, drugB = 0, drugC = 0, treatment = 0)
 )
 }
 \arguments{
@@ -42,6 +44,15 @@ drug1 versus drug0 at age 48 with zero previous relapses. For other values,
 the log HR is \code{log(conditional_hr) + treatment_age *
 (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses},
 where \code{age_in_years} is the uncentered age.}
+
+\item{censor_weights}{Named coefficients for an exponential censoring
+model with log hazard per day. Recognized names are \code{intercept},
+\code{age}, \code{female}, \code{previous_cost},
+\code{previous_number_relapses}, \code{drugB}, \code{drugC}, and
+\code{treatment}. Named subsets override the defaults. Age is measured in
+decades from 48 years; cost uses the scaling described above; drugA and
+drug0 are the reference groups. The default intercept is
+\code{log(1/450)} and all other coefficients are zero.}
 }
 \value{
 A data frame with \code{n} rows and nine columns:
@@ -57,15 +68,17 @@ methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
-interactions with age and previous relapses. Censoring is independent of covariates and
-event times. Default coefficients are chosen to illustrate confounding and
+interactions with age and previous relapses. By default, censoring is
+independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
 establish the relative performance of methods on other data.
 }
 \details{
 Event times use a Weibull baseline with shape 1.15 and scale 650
-  days. Censoring times are exponential with mean 450 days and administrative
-  censoring at 900 days. Extreme propensity coefficients can produce poor
+  days. By default, random censoring times are exponential with mean 450 days;
+  administrative censoring occurs at 900 days. Censoring and event times are generated independently
+  conditional on covariates and treatment, including when censoring depends
+  on those variables. Extreme propensity coefficients can produce poor
   treatment overlap or a sample with no patients in one treatment group.
 }
 \examples{
@@ -74,4 +87,9 @@ table(toy$trt)
 toy_unequal <- simulate_survival(n = 200, seed = 1,
   ps_weights = c(intercept = -1), conditional_hr = 0.8)
 table(toy_unequal$trt)
+toy_censor <- simulate_survival(n = 200, seed = 1,
+  censor_weights = c(treatment = log(2), age = 0.3))
+}
+\author{
+Thomas Debray \email{tdebray@fromdatatowisdom.com}
 }

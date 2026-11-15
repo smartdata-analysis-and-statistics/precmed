@@ -92,7 +92,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 }
 \value{
-Return an object of class \code{atefit} with 6 elements:
+Return an object of class \code{atefit} including:
 \itemize{
   \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
   lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=1}.
@@ -110,9 +110,8 @@ Return an object of class \code{atefit} with 6 elements:
   Undefined estimates or bootstrap replicates yield unavailable inference.
   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
   \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
-  \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1.
-  The key to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate
-  the interpretation of the remaining of the output.
+  \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1, in that order.
+  \item{\code{warning}: } The informational treatment recoding message, if applicable.
 }
 }
 \description{

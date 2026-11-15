@@ -22,9 +22,11 @@
 #' exp(confint(fit))
 #' exp(confint(fit, level = 0.90))
 #' }
+#' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @name atefit-extract
 NULL
 
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 atefit_effect_terms <- function(object) {
   switch(object$response,
          count = "log.rate.ratio",

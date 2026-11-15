@@ -5,7 +5,7 @@ test_that("survival horizon preserves events and removes the conditional HR from
   # Exercise both an event and a censoring observation exactly at the horizon.
   dat$y[1:2] <- tau
   dat$d[1:2] <- c(1, 0)
-  expect_warning(fit <- atefitsurv(
+  expect_message(fit <- atefitsurv(
     data = dat,
     cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
     ps.model = trt ~ age + previous_treatment,
@@ -14,6 +14,7 @@ test_that("survival horizon preserves events and removes the conditional HR from
   expect_null(fit$log.hazard.ratio)
   expect_false("log.hazard.ratio" %in% colnames(fit$trt.boot))
   expect_true("log.cumulative.hazard.ratio" %in% colnames(fit$trt.boot))
+  expect_equal(fit$treatment.labels, as.character(sort(unique(dat$trt))))
   expect_equal(survival_event_at_horizon(c(tau, tau, tau + 1), c(1, 0, 1), tau),
                c(1, 0, 0))
 })

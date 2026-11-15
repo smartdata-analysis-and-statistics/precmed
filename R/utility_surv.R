@@ -241,12 +241,15 @@ data.preproc.surv <- function(fun, cate.model, ps.model, ipcw.model = NULL, tau0
 
   ## Check treatment binary numeric and coded as 0/1
   cat <- warn.dr <- NULL
+  treatment.labels <- c("0", "1")
   if (as.numeric(length(unique(trt))) > 2) {
     stop("trt must be binary.")
   } else if (!all(unique(trt) %in% c(0, 1))) {
     cat <- cat <- sort(unique(trt))
+    treatment.labels <- as.character(cat)
     trt <- ifelse(trt == cat[1], 0, 1)
-    warn.dr <- warning(paste0("Variable trt was recoded to 0/1 with ", cat[1], "->0 and ", cat[2], "->1.\n"))
+    warn.dr <- paste0("Variable trt was recoded to 0/1 with ", cat[1], "->0 and ", cat[2], "->1.")
+    message(warn.dr)
   } else if (is.factor(trt) == TRUE) {
     trt <- as.numeric(trt == 1)
   }
@@ -326,6 +329,7 @@ data.preproc.surv <- function(fun, cate.model, ps.model, ipcw.model = NULL, tau0
 
   # fun == drinf
   out.data$warning <- warn.dr
+  out.data$treatment.labels <- treatment.labels
   return(out.data)
 }
 
@@ -444,9 +448,11 @@ balancesurv.split <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, train.
 }
 
 # Event status for survival models with administrative censoring at tau0.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 survival_event_at_horizon <- function(y, d, tau0) d * (y <= tau0)
 
 # Integrate right-continuous forest survival curves through the requested horizon.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 integrate_forest_survival <- function(time, survival, tau0) {
   survival <- as.matrix(survival)
   stopifnot(ncol(survival) == length(time), length(tau0) == 1L,
