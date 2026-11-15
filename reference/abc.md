@@ -77,7 +77,7 @@ cv_count <- catecv(response = "count",
                                 offset(log(years)),
                    ps.model = trt ~ age + previous_treatment,
                    higher.y = FALSE, cv.n = 5, verbose = 1)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
@@ -104,12 +104,12 @@ cv_count <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 8.73 secs 
+#> Total runtime : 12.95 secs 
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_count)
-#>                cv1       cv2        cv3        cv4       cv5
-#> poisson 0.08239488 0.1174353 0.03781265 0.05895449 0.1515999
+#>               cv1        cv2     cv3       cv4       cv5
+#> poisson 0.1283477 0.05823479 0.22264 0.0963013 0.1933624
 
 # Survival outcome
 library(survival)
@@ -122,15 +122,14 @@ cv_surv <- catecv(response = "survival",
                   higher.y = FALSE,
                   cv.n = 5)
 #> Warning: No value supplied for tau0. Default sets tau0 to the maximum survival time.
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
 
 # ABC of the validation curves for each method and each CV iteration
 abc(cv_surv)
 #>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1764991 0.1834498 0.1793951 0.1814366 0.2032079
-#> randomForest 0.1726036 0.1771241 0.1794585 0.1746046 0.2014012
+#> poisson      0.1964080 0.1845313 0.1519473 0.1732581 0.1811395
+#> randomForest 0.1837699 0.1783284 0.1493221 0.1687519 0.1718282
 
 # }
 ```

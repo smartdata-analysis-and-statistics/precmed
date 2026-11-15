@@ -184,7 +184,7 @@ output <- atefit(response = "count",
                  ps.model = trt ~ age + previous_treatment,
                  n.boot = 50,
                  seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> 
 output
 #> Average treatment effect:
@@ -198,7 +198,7 @@ output
 #> rate1 0.2860635
 #> rate0 0.2685660
 #> 
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 plot(output)
 
 
@@ -215,7 +215,7 @@ output2 <- atefit(response = "survival",
                         ps.model = trt ~ age + previous_treatment,
                   tau0 = tau0,
                   seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> 
 output2
 #> Average treatment effect:
@@ -233,7 +233,7 @@ output2
 #> rmst1 172.8609 6.774625 159.5829 186.1389      0
 #> rmst0 196.5603 8.904742 179.1073 214.0132      0
 #> 
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 plot(output2)
 
 

@@ -341,7 +341,7 @@ fit_1 <- catefit(response = "count",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = TRUE,
                  seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 coef(fit_1)
 #>                              poisson
@@ -368,7 +368,7 @@ fit_2 <- catefit(response = "survival",
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 
 #>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" 

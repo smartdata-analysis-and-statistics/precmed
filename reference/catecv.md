@@ -385,7 +385,7 @@ cate_1 <- catecv(response = "count",
                               offset(log(years)),
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = FALSE, cv.n = 5, seed = 999, verbose = 1)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
@@ -412,7 +412,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 4.86 secs 
+#> Total runtime : 8.1 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
@@ -440,7 +440,7 @@ cate_2 <- catecv(response = "survival",
                  surv.min = 0.025,
                  cv.n = 5,
                  seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 plot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"

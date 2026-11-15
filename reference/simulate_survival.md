@@ -6,10 +6,11 @@ independently of patient records. Treatment is assigned using a logistic
 propensity model; the numbers in each treatment group arise from those
 probabilities and vary by sample. Event times follow a Weibull
 proportional hazards model with treatment interactions with age and
-previous relapses. Censoring is independent of covariates and event
-times. Default coefficients are chosen to illustrate confounding and
-heterogeneous treatment effects; they are not clinical estimates and do
-not establish the relative performance of methods on other data.
+previous relapses. By default, censoring is independent of covariates,
+treatment, and event times. Default coefficients are chosen to
+illustrate confounding and heterogeneous treatment effects; they are not
+clinical estimates and do not establish the relative performance of
+methods on other data.
 
 ## Usage
 
@@ -20,7 +21,9 @@ simulate_survival(
   ps_weights = c(intercept = 0.11, age = 1.15, drugB = 0.25, drugC = -0.2),
   lp_weights = c(intercept = 0, age = 0.45, female = 0.12, previous_cost = 0.1,
     previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
-  conditional_hr = 0.9
+  conditional_hr = 0.9,
+  censor_weights = c(intercept = log(1/450), age = 0, female = 0, previous_cost = 0,
+    previous_number_relapses = 0, drugB = 0, drugC = 0, treatment = 0)
 )
 ```
 
@@ -63,6 +66,16 @@ simulate_survival(
   `log(conditional_hr) + treatment_age * (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses`,
   where `age_in_years` is the uncentered age.
 
+- censor_weights:
+
+  Named coefficients for an exponential censoring model with log hazard
+  per day. Recognized names are `intercept`, `age`, `female`,
+  `previous_cost`, `previous_number_relapses`, `drugB`, `drugC`, and
+  `treatment`. Named subsets override the defaults. Age is measured in
+  decades from 48 years; cost uses the scaling described above; drugA
+  and drug0 are the reference groups. The default intercept is
+  `log(1/450)` and all other coefficients are zero.
+
 ## Value
 
 A data frame with `n` rows and nine columns: centered `age`, `female`,
@@ -75,9 +88,16 @@ and 0 censoring.
 ## Details
 
 Event times use a Weibull baseline with shape 1.15 and scale 650 days.
-Censoring times are exponential with mean 450 days and administrative
-censoring at 900 days. Extreme propensity coefficients can produce poor
-treatment overlap or a sample with no patients in one treatment group.
+By default, random censoring times are exponential with mean 450 days;
+administrative censoring occurs at 900 days. Censoring and event times
+are generated independently conditional on covariates and treatment,
+including when censoring depends on those variables. Extreme propensity
+coefficients can produce poor treatment overlap or a sample with no
+patients in one treatment group.
+
+## Author
+
+Thomas Debray <tdebray@fromdatatowisdom.com>
 
 ## Examples
 
@@ -93,4 +113,6 @@ table(toy_unequal$trt)
 #> 
 #> drug0 drug1 
 #>   145    55 
+toy_censor <- simulate_survival(n = 200, seed = 1,
+  censor_weights = c(treatment = log(2), age = 0.3))
 ```

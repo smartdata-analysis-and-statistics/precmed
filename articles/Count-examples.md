@@ -138,11 +138,13 @@ are:
   with error if `trt` takes more than 2 distinct values or will
   automatically transform `trt` into a numeric variable. In this
   example, `trt` (a factor variable taking values “drug0” and “drug1”)
-  was transformed and a warning message was left to the user (see output
+  was transformed and an informational message is shown (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
   If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. Note that the PS model is only used in the estimation of the 2
-  doubly robust methods (two and contrast regressions).
+  ~ 1. The PS model is used to estimate overall and subgroup average
+  treatment effects. It is also used to fit the doubly robust
+  two-regression and contrast-regression CATE scores; other scoring
+  methods need not use it to construct their scores.
 
 Let’s calculate the ATE for the effect of treatment on y and build an
 outcome model that contains all variables and a PS model with `age` and
@@ -160,7 +162,7 @@ output_atefit <- atefit(
   seed = 999,
   verbose = 0
 )
-#> Warning in data.preproc(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 When `verbose` = 1, the function outputs a progress bar in the console.
@@ -178,7 +180,7 @@ output_atefit
 #>        estimate
 #> rate1 0.2860635
 #> rate0 0.2685660
-#> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 The output of
@@ -304,10 +306,10 @@ output_catefit <- catefit(
   seed = 999,
   n.cores = 1
 )
-#> Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 2.843992 secs
+#> Time difference of 4.827449 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -584,44 +586,44 @@ output_catecv <- catecv(
   plot.gbmperf = FALSE,
   verbose = 1
 )
-#> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 20:26:10 2026 
+#>    Sun Nov 15 11:30:54 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 20:26:12 2026 
+#>    Sun Nov 15 11:30:58 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 20:26:15 2026 
+#>    Sun Nov 15 11:31:03 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 20:26:18 2026 
+#>    Sun Nov 15 11:31:08 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sat Nov 14 20:26:21 2026 
+#>    Sun Nov 15 11:31:13 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 14.31 secs
+#> Total runtime : 25.24 secs
 ```
 
 ### Inspect validation results

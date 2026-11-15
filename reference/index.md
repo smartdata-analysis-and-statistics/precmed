@@ -148,6 +148,9 @@
   after
   [`arg.checks()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.md)
 
+- [`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+  : Summarize recorded survival diagnostics
+
 - [`drcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/drcount.md)
   : Doubly robust estimator of the average treatment effect for count
   data

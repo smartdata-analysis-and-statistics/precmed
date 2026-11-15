@@ -18,6 +18,7 @@ effects in responder subgroups.
 library(precmed)
 library(dplyr)
 library(ggplot2)
+library(survival)
 ```
 
 ## Example data
@@ -59,21 +60,25 @@ The treatment and survival outcome variables have distinct roles:
   and drug1).
 
 For convenience, `age` is centered at 48 years and `previous_cost` is
-centered at 14,362 USD and divided by 24,266 USD. These transformations
-change the scale of the coefficients, not the information in the
-covariates.
+centered at 14,362 USD and divided by 24,266 USD.
 
-The first six records of the final dataset `survival_data` are shown
-below:
+The Kaplan–Meier curves below show the observed relapse-free survival
+experience in each treatment group. Marks on the curves indicate
+censored observations. These are unadjusted group comparisons;
+differences between the curves may reflect baseline differences as well
+as treatment effects.
 
-| age | female | previous_treatment | previous_cost | previous_number_symptoms | previous_number_relapses | trt | y | d |
-|---:|---:|:---|---:|:---|---:|:---|---:|---:|
-| 1.5442845 | 0 | drugB | -0.4066093 | \>=2 | 0 | drug1 | 25.33528 | 1 |
-| -19.9326491 | 0 | drugA | 0.0441700 | 0 | 1 | drug1 | 465.87114 | 0 |
-| 10.8604816 | 1 | drugA | -0.0560578 | 1 | 0 | drug0 | 294.74863 | 0 |
-| -0.5209435 | 1 | drugA | 0.0169210 | 0 | 0 | drug1 | 900.00000 | 0 |
-| -3.8028845 | 1 | drugA | 0.4815126 | 1 | 1 | drug0 | 20.03475 | 0 |
-| -8.7688543 | 1 | drugB | 0.3129080 | 1 | 2 | drug0 | 272.70155 | 0 |
+``` r
+
+km_fit <- survfit(Surv(y, d) ~ trt, data = survival_data)
+plot(km_fit, col = c("steelblue", "darkorange3"), lty = 1:2, lwd = 2,
+     mark.time = TRUE, xlab = "Days since treatment initiation",
+     ylab = "Relapse-free survival probability", ylim = c(0, 1))
+legend("bottomleft", legend = c("drug0", "drug1"),
+       col = c("steelblue", "darkorange3"), lty = 1:2, lwd = 2, bty = "n")
+```
+
+![](Survival-examples_files/figure-html/km_by_treatment-1.png)
 
 ## Estimate the average treatment effect
 
@@ -86,7 +91,6 @@ characteristics.
 
 ``` r
 
-library(survival)
 output_cox <- coxph(Surv(y, d) ~ trt, data = survival_data)
 summary(output_cox)
 #> Call:
@@ -141,8 +145,10 @@ wider uncertainty bands.
 
 ### Covariate-adjusted treatment comparison
 
-Next, we adjust for age, sex, previous medical cost and previous
-relapses using a Cox model:
+In this synthetic dataset, treatment assignment depends on baseline
+characteristics rather than being randomized. To account for measured
+baseline differences, we first consider a Cox model that adjusts for
+age, sex, previous medical cost and previous relapses.
 
 ``` r
 
@@ -180,37 +186,19 @@ summary(output_cox_adjusted)
 ```
 
 The adjusted HR is 0.74, compared with 0.97 in the unadjusted model. The
-treatment groups have substantial overlap in age in this synthetic
-example; model adjustment and appropriate assumptions still matter. An
-adjusted HR is conditional on the included covariates and is not
-automatically a causal average treatment effect.
-
-``` r
-
-ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
-print(ph_adjusted)
-#>                            chisq df    p
-#> trt                      1.33621  1 0.25
-#> age                      0.35186  1 0.55
-#> female                   0.00942  1 0.92
-#> previous_cost            0.25772  1 0.61
-#> previous_number_relapses 0.00558  1 0.94
-#> GLOBAL                   3.63924  5 0.60
-plot(ph_adjusted, var = "trt", hr = TRUE, resid = FALSE,
-     xlab = "Days since treatment initiation",
-     ylab = "Adjusted hazard ratio: drug1 vs drug0")
-abline(h = exp(coef(output_cox_adjusted)["trtdrug1"]), lty = 3, col = "steelblue")
-```
-
-![](Survival-examples_files/figure-html/ph_adjusted-1.png)
+adjusted HR is conditional on the included covariates and does not
+necessarily represent a causal average treatment effect. Adjustment
+cannot remove confounding from unmeasured variables, and a causal
+interpretation also requires appropriate model specification, treatment
+overlap and assumptions about censoring.
 
 For the adjusted model, the proportional-hazards test for the treatment
 term gives p = 0.248. This test assesses whether the treatment HR
-changes over time; it is not a test of whether the treatment effect is
-zero. A large p-value does not establish that the HR is constant. The
-global proportional-hazards test gives p = 0.602 and assesses the model
-covariates jointly, so evidence of non-proportional hazards may arise
-from covariates other than treatment.
+changes over time; it does not test whether the treatment effect is
+zero. The global proportional-hazards test gives p = 0.602 and assesses
+the model covariates jointly, so evidence of non-proportional hazards
+may arise from covariates other than treatment. A large p-value does not
+establish that the proportional-hazards assumption holds.
 
 ### Population-level treatment comparison over a fixed horizon
 
@@ -329,7 +317,7 @@ are:
   will stop with error if `trt` takes more than 2 distinct values or
   will automatically transform `trt` into a numeric variable. In this
   example, `trt` (a factor variable taking values “drug0” and “drug1”)
-  was transformed and a warning message was left to the user (see output
+  was transformed and an informational message is shown (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
   If the data are from a RCT, it suffices to specify `ps.model` = trt
   ~ 1. The PS model is used in the doubly robust RMTL estimation.
@@ -349,7 +337,7 @@ output_atefit <- atefit(response = "survival",
                         ps.model = trt ~ age + previous_treatment,
                         tau0 = tau0,
                         seed = 999)
-#> Warning in data.preproc.surv(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 When `verbose` = 1, the function outputs a progress bar in the console.
@@ -371,7 +359,7 @@ output_atefit
 #>       estimate        SE CI.lower CI.upper pvalue
 #> rmst1 467.9432 10.432618 447.4956 488.3908      0
 #> rmst0 425.5458  9.302363 407.3135 443.7781      0
-#> Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 The output of
@@ -415,20 +403,27 @@ ratio above 1 indicates more time lost before `tau0` under drug 1; the
 interval describes uncertainty in that comparison. The RMST estimates
 provide the corresponding event-free times up to `tau0`.
 
-The output of
+The RMTL and cumulative hazard ratios compare the treatment coded as 1
+with the treatment coded as 0; their log ratios are reported in the
+output. Here, `trt` is a factor, so
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-is expressed in terms of treatment 0 vs 1, where the RMTL and cumulative
-hazard ratios are expressed as the ratio of the treatment coded as 1
-over the treatment coded as 0. If the treatment variable is not coded as
-0/1 in the data set, the function returns a warning
-`output_atefit$warning` which indicates what key was used to recode the
-treatment variable into a 0/1 variable.
+recodes `drug0` to 0 and `drug1` to 1. The ratios therefore compare drug
+1 with drug 0. The recoding is reported as an informational message and
+can be inspected with
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md):
 
 ``` r
 
-output_atefit$warning
-#> [1] "Variable trt was recoded to 0/1 with drug0->0 and drug1->1.\n"
+diagnostics(output_atefit)
+#>   method split iteration group subgroup type measure
+#> 1   <NA>  <NA>        NA  <NA>     <NA> info    <NA>
+#>                                                       message
+#> 1 Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
+
+For other treatment labels, check the mapping before interpreting the
+ratio. Alternatively, code the treatment as 0 and 1 explicitly to choose
+the reference group.
 
 Using `plot(output_atefit)`, a histograms is generated of the point
 estimates across the `n.boot` bootstrap iterations for 4 estimands
@@ -513,11 +508,13 @@ are:
   with error if `trt` takes more than 2 distinct values or will
   automatically transform `trt` into a numeric variable. In this
   example, `trt` (a factor variable taking values “drug0” and “drug1”)
-  was transformed and a warning message was left to the user (see output
+  was transformed and an informational message is shown (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
   If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. Note that the PS model is only used in the estimation of the 2
-  doubly robust methods (two and contrast regressions).
+  ~ 1. The PS model is used to estimate overall and subgroup average
+  treatment effects. It is also used to fit the doubly robust
+  two-regression and contrast-regression CATE scores; other scoring
+  methods need not use it to construct their scores.
 
 We also specified the following non-mandatory arguments to fit with the
 data and problem at hand: `initial.predictor.method`, `tau0`,
@@ -573,7 +570,7 @@ output_catefit <- catefit(response = "survival",
                           higher.y = TRUE,
                           seed = 999,
                           plot.gbmperf = FALSE)
-#> Warning in data.preproc.surv(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -834,7 +831,12 @@ default values. In this toy example, we keep the default values of the
 remaining arguments.
 
 We reuse the `tau0` calculated above so that validation estimates RMTL
-over the same horizon as the average treatment effect example.
+over the same horizon as the average treatment effect example. With the
+default 75% training split, the validation set contains about 1,000
+patients. The smallest nonempty nested low-responder group contains 20%
+of that set (about 200 patients), while the mutually exclusive groups
+each contain at least 30%. Actual treatment and event counts within each
+group may be smaller and should be checked.
 
 ``` r
 
@@ -849,13 +851,13 @@ output_catecv <- catecv(response = "survival",
                         tau0 = tau0,
                         higher.y = TRUE,
                         surv.min = 0.025,
-                        prop.cutoff = seq(0.6, 1, length = 5),
-                        prop.multi = c(0, 0.5, 0.6, 1),
+                        prop.cutoff = c(0.6, 0.7, 0.8, 1),
+                        prop.multi = c(0, 0.4, 0.7, 1),
                         cv.n = 5,
                         seed = 999,
                         plot.gbmperf = FALSE,
                         verbose = 0)
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 ### Inspect validation results
@@ -896,22 +898,20 @@ output_catecv$ate.randomForest$ate.est.train.high.cv
 #> prop0.6 0.4951334 0.4969934 0.5151479 0.4454503 0.5098675
 #> prop0.7 0.5650587 0.5658140 0.5932439 0.5542147 0.5670414
 #> prop0.8 0.6350284 0.6523356 0.6566739 0.6596998 0.6266324
-#> prop0.9 0.7244618 0.7306332 0.7341755 0.7429478 0.7287041
 #> prop1   0.8618214 0.8763156 0.8851667 0.8773175 0.8693505
 output_catecv$ate.randomForest$ate.est.valid.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
 #> prop0.6 0.8350406 0.8945916 0.7231150 0.8262132 0.8851521
 #> prop0.7 0.8656700 0.9046940 0.8007250 0.8038333 0.8946092
 #> prop0.8 0.8945529 0.8458138 0.7972482 0.8204835 0.8626967
-#> prop0.9 0.9062666 0.8430675 0.8332984 0.8355789 0.8782795
 #> prop1   0.9473602 0.8947570 0.8907424 0.8731632 0.9015339
 ```
 
 The output is a matrix with columns corresponding to the CV iterations,
 labeled from 1 to `cv.n`, and rows corresponding to nested subgroups.
 The nested subgroups of patients are defined by the argument
-`prop.cutoff`. Here, we use `seq(0.6, 1, length = 5)` which defines
-nested subgroups with the 60%, 70%, 80%, 90% and 100% lowest (highest if
+`prop.cutoff`. Here, we use `c(0.6, 0.7, 0.8, 1)` which defines nested
+subgroups with the 60%, 70%, 80% and 100% lowest (highest if
 `higher.y = FALSE`) CATE scores estimated by random forest. The rows in
 the output are labeled to reflect the user-specified proportions used to
 build the subgroups.
@@ -940,7 +940,6 @@ output_catecv$ate.randomForest$ate.est.train.low.cv
 #> prop0.4 2.057115 2.159150 1.999794 2.266325 2.100201
 #> prop0.3 2.705007 2.720842 2.353439 2.917494 2.686156
 #> prop0.2 3.682680 3.160212 3.048414 3.506051 3.923344
-#> prop0.1 7.417539 5.739000 7.007782 8.274179 5.738395
 ```
 
 The outputs are also matrices with columns corresponding to the CV
@@ -967,53 +966,52 @@ validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
 
 output_catecv$ate.randomForest$ate.est.train.group.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 1.8052834 1.7416591 1.6387404 1.8250094 1.7116141
-#> prop0.6 0.8147914 0.8111590 0.8399463 0.8272714 0.7914137
-#> prop1   0.3096542 0.3470304 0.3596674 0.2849770 0.3553154
+#> prop0.4 2.0571154 2.1591497 1.9997945 2.2663254 2.1002008
+#> prop0.7 0.8220639 0.7449121 0.8374856 0.7544819 0.8238335
+#> prop1   0.2412136 0.2807517 0.2715028 0.2141048 0.2653259
 output_catecv$ate.randomForest$ate.est.valid.group.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 0.9334227 1.0050618 1.2091543 0.9415795 0.9468304
-#> prop0.6 0.9803391 1.3087144 0.6523681 0.6920507 1.1355205
-#> prop1   1.0424313 0.9003513 0.6066036 0.7876344 0.8759833
+#> prop0.4 1.1604063 1.0091299 1.3216451 0.9236189 0.9479675
+#> prop0.7 0.6888083 0.8412021 0.8276704 0.8138356 0.8903427
+#> prop1   1.0328881 1.0252757 0.6056148 0.8403807 0.9456674
 ```
 
-The output is a matrix with columns corresponding to the CV iterations
-and rows corresponding to the mutually exclusive subgroups. The previous
-2 outputs only focus on binary subgroups (high or low responders). Here,
-the mutually exclusive subgroups can be more than 2 and are defined by
-the argument `prop.multi`. We use `c(0, 0.5, 0.6, 1)` which defines 3
-subgroups of patients with the 50% lowest, 10% middle and 40% highest
-estimated CATE scores when `higher.y` = TRUE (as in this example), or
-with the 40% highest, 10% middle and 50% lowest estimated CATE scores
-when `higher.y` = FALSE. Taking the first column as an example, the
-first CV iteration calculated 1.805 as the RMTL ratio for the subgroup
-with the 50% lowest estimated CATE scores, 0.815 as the RMTL ratio for
-the subgroup with the middle 10% estimated CATE scores, and 0.31 as the
-RMTL ratio for the subgroup with the 40% highest estimated CATE scores.
+The output is a matrix with columns corresponding to CV iterations and
+rows corresponding to mutually exclusive subgroups. With
+`prop.multi = c(0, 0.4, 0.7, 1)` and `higher.y = TRUE`, the groups
+contain patients with the 40% lowest, middle 30%, and 30% highest
+estimated CATE scores. In the first training split, their estimated RMTL
+ratios are 2.057, 0.822, and 0.241, respectively.
 
 ### Inspect errors and warnings
 
 Subgroup estimates can be missing or unstable, for example when a
-subgroup has few patients or observed events. The
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-output records errors and warnings for each method, subgroup and
-iteration. The following code checks the first iteration for
-low-responder subgroups using the random forest method:
+subgroup has few patients or observed events. Use
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+to collect the recorded errors and warnings across methods, splits,
+subgroups and iterations in a table. An empty table means no subgroup
+messages were recorded:
 
 ``` r
 
-output_catecv$`errors/warnings`$randomForest$est.train.low.cv$cv1
-#> NULL
-output_catecv$`errors/warnings`$randomForest$est.valid.low.cv$cv1
-#> $warnings
-#> $warnings$`prop 0.1`
-#> [1] "Cumulative hazard ratio is undefined because an estimated survival probability is outside (0, 1)."
+diagnostics(output_catecv)
+#>        method      split iteration group subgroup    type
+#> 1 contrastReg validation         1 group   prop 1 warning
+#>                   measure
+#> 1 cumulative hazard ratio
+#>                                                                                             message
+#> 1 Cumulative hazard ratio is undefined because an estimated survival probability is outside (0, 1).
 ```
 
-For mutually exclusive subgroups, inspect
-`` output_catecv$`errors/warnings`$randomForest$est.train.group.cv ``.
-Review any convergence warnings and interpret affected estimates with
-caution.
+The original nested list is still available as
+`` output_catecv$`errors/warnings` ``. Review recorded warnings and
+interpret affected estimates with caution. The cumulative hazard ratio
+can be undefined if an estimated treatment-specific survival probability
+lies outside (0, 1). Its augmented estimator adds a weighted correction
+to outcome-model predictions; this correction is not constrained to keep
+the estimate between zero and one. Small subgroups, limited follow-up,
+or extreme weights can make such estimates unstable, even when the
+subgroup contains patients.
 
 ## Compare scoring methods using the ABC statistic
 
@@ -1149,13 +1147,13 @@ visualized as box plots, with 1 box plot for each scoring method. Only
 validation results are visualized here. The x-axis is determined by
 `prop.multi` and the y-axis is the estimated ATEs in each subgroup. We
 specify the `ylab` argument accordingly. The subgroups correspond to
-each row of the `ate.est.valid.group.cv` result in `output_catecv`, so
-in this example the subgroups are patient with the 50% lowest (0-50%),
-middle 10% (50-60%), and highest 40% (60-100%) estimated CATE scores.
-Notice that the groups do not have to be equally spaced in terms of
-percentiles. The box plot shows the distribution of the ATEs over all
-`cv.n` CV iterations, instead of a summary statistics like mean or
-median in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+each row of the `ate.est.valid.group.cv` result in `output_catecv`: the
+40% lowest (0-40%), middle 30% (40-70%), and highest 30% (70-100%)
+estimated CATE scores. Notice that the groups do not have to be equally
+spaced in terms of percentiles. The box plot shows the distribution of
+the ATEs over all `cv.n` CV iterations, instead of a summary statistics
+like mean or median in
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 

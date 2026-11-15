@@ -186,7 +186,7 @@ eval_1 <- catecv(response = "count",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = FALSE,
                  cv.n = 5)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 # default setting
 plot(eval_1)
@@ -228,7 +228,7 @@ eval_2 <- catecv(response = "survival",
                  tau0 = tau0,
                  cv.n = 5,
                  seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 
 # default setting, plot RMTL ratios in both training and validation sets

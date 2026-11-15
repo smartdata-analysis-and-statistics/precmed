@@ -50,7 +50,7 @@
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul>
@@ -71,7 +71,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Customizing CATE models and validation</h1>
             <h3 data-toc-skip class="subtitle">Vignette 3 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 14, 2026</h4>
+            <h4 data-toc-skip class="date">November 15, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Additional-examples.Rmd" class="external-link"><code>vignettes/Additional-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Additional-examples.Rmd</code></div>
@@ -242,7 +242,7 @@ reflected in the results.</p></li>
 <span>                         seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>                         plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                         verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
@@ -314,7 +314,7 @@ estimates.</p>
 <span>                         seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>                         plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                         verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="co">#&gt; Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model =</span></span>
 <span><span class="co">#&gt; ps.model, : The first element of prop.cutoff cannot be 0 and has been removed.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%</span></span>
@@ -329,7 +329,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:24:33 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:28:05 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -338,7 +338,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 2: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:24:35 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:28:08 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -349,7 +349,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 3: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:24:37 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:28:12 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -360,7 +360,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 4: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:24:40 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:28:16 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -373,9 +373,9 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 5: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:24:43 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:28:21 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 13.11 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 21.87 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2          cv3          cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.01        NA        NA 6.858623e+04 1.901224e+06        NA</span></span>
@@ -570,7 +570,7 @@ reflected in the results.</p>
 <span>                seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>                plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
@@ -647,7 +647,7 @@ estimates.</p>
 <span>                         seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>                         plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>                         verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model</span></span>
 <span><span class="co">#&gt; = ps.model, : The first element of prop.cutoff cannot be 0 and has been</span></span>
 <span><span class="co">#&gt; removed.</span></span>
@@ -657,37 +657,37 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:25:31 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:29:46 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:25:33 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:29:50 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:25:35 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:29:54 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:25:37 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:29:58 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:25:39 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:30:02 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 10.76 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 19.31 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>
@@ -790,7 +790,7 @@ show how setting different values of the truncation time.</p>
 <span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model</span></span>
 <span><span class="co">#&gt; = ps.model, : No value supplied for tau0. Default sets tau0 to the maximum</span></span>
 <span><span class="co">#&gt; survival time.</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Additional-examples_files/figure-html/time-1.png" class="r-plt" alt="" width="700"></p>
 </div>

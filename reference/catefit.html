@@ -33,7 +33,7 @@ linear regression (continuous only), and generalized additive model (continuous 
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -359,7 +359,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                 ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>                 seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_1</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              poisson</span>
@@ -386,7 +386,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                 initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
 <span class="r-in"><span>                 ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>, higher.y <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">999</span>, n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
 <span class="r-plt img"><img src="catefit-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="catefit-2.png" alt="" width="700" height="433"></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" </span>

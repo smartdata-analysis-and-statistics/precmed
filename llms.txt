@@ -338,6 +338,9 @@ Study.” *Journal of the American Statistical Association* 108 (502):
   after
   [`arg.checks()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.md)
 
+- [`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+  : Summarize recorded survival diagnostics
+
 - [`drcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/drcount.md)
   : Doubly robust estimator of the average treatment effect for count
   data
@@ -472,6 +475,8 @@ Study.” *Journal of the American Statistical Association* 108 (502):
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md):
 - [Estimating and validating treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md):
+- [Learning
+  resources](https://smartdata-analysis-and-statistics.github.io/precmed/articles/learning-resources.md):
 - [Getting started with
   precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md):
 - [Estimating and validating treatment effects for survival

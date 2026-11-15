@@ -414,7 +414,7 @@ fit <- catefitsurv(data = survivalExample,
                    ipcw.model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,
                    seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 coef(fit)
 #> NULL

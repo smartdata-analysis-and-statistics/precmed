@@ -4,12 +4,6 @@
 
 ### Major changes
 
-- Updated the default
-  [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
-  coefficients to illustrate confounding and heterogeneous treatment
-  effects. Simulated results for a given seed will differ from earlier
-  development versions.
-
 - Added the population-level `log.cumulative.hazard.ratio` at `tau0` to
   survival
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
@@ -17,8 +11,9 @@
   any bootstrap replicate is undefined. This replaces the conditional
   Cox `log.hazard.ratio` in
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-  output, a breaking change. Subgroup and validation HR outputs are
-  unchanged.
+  output, a breaking change. Subgroup and validation conditional HR
+  outputs remain available as `hr.*`; their values can change because of
+  the horizon correction described below.
 
 - Added subgroup cumulative hazard ratios to survival
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -27,14 +22,18 @@
   as `chr.*` outputs; `hr.*` outputs remain conditional Cox hazard
   ratios. Survival plots and box plots now accept `measure = "rmtl"`
   (default), `"cumulative_hr"`, or `"conditional_hr"`; validation curves
-  can display multiple measures. `plot.hr` and `hazard.type` are
-  deprecated. Older saved objects must be refitted for cumulative hazard
-  plots.
+  can display multiple measures. The previously supported `plot.hr`
+  argument is deprecated; `plot.hr = TRUE` now selects the cumulative
+  hazard ratio by default rather than the conditional Cox HR. Use
+  `measure = "conditional_hr"` to plot the latter. Older saved objects
+  must be refitted for cumulative hazard plots.
 
 - Added
   [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
-  to generate reproducible synthetic survival data. The survival
-  vignette now uses it; `survivalExample` remains available.
+  to generate reproducible synthetic survival data illustrating
+  confounding and heterogeneous treatment effects. Treatment, outcome,
+  and censoring coefficients can be specified. The survival vignette now
+  uses it; `survivalExample` remains available.
 
 - Added C backends, enabled by default, for count and survival contrast
   regression, Cox restricted mean survival integration, and LASSO
@@ -57,10 +56,36 @@
 
 ### Minor changes and bug fixes
 
+- Label survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  bootstrap plot panels with the original treatment names when
+  available, and use readable names for the treatment effects.
+
+- Report automatic treatment recoding as an informational message rather
+  than a warning, while retaining the mapping in existing result
+  objects.
+
+- Added
+  [`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+  to summarize recorded survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  treatment recoding information and subgroup errors and warnings from
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  and
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  results in a data frame.
+
+- Added [`coef()`](https://rdrr.io/r/stats/coef.html) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html) methods for
+  extracting supported treatment effects and confidence intervals from
+  count and survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  results.
+
 - Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead
   of treating observations beyond the horizon as events. This affects
-  subgroup and cross-validation hazard ratio estimates; RMST and RMTL
-  calculations are unchanged.
+  subgroup and cross-validation hazard ratio estimates; this correction
+  does not change the RMST and RMTL calculations.
 
 - Fixed survival random forest event coding at `tau0` and integrated
   predicted survival curves through the full horizon when computing

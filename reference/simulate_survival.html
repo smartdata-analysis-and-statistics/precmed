@@ -4,16 +4,16 @@ methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
-interactions with age and previous relapses. Censoring is independent of covariates and
-event times. Default coefficients are chosen to illustrate confounding and
+interactions with age and previous relapses. By default, censoring is
+independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
 establish the relative performance of methods on other data."><meta property="og:description" content="Generate fully synthetic data for demonstrating survival treatment-effect
 methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
-interactions with age and previous relapses. Censoring is independent of covariates and
-event times. Default coefficients are chosen to illustrate confounding and
+interactions with age and previous relapses. By default, censoring is
+independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
 establish the relative performance of methods on other data."><meta property="og:image" content="https://smartdata-analysis-and-statistics.github.io/precmed/logo.png"><script id="thinkific-product-embed" src="https://assets.thinkific.com/js/embeds/product-cards-client.min.js"></script></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -43,7 +43,7 @@ establish the relative performance of methods on other data."><meta property="og
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -65,8 +65,8 @@ methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull proportional hazards model with treatment
-interactions with age and previous relapses. Censoring is independent of covariates and
-event times. Default coefficients are chosen to illustrate confounding and
+interactions with age and previous relapses. By default, censoring is
+independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
 establish the relative performance of methods on other data.</p>
     </div>
@@ -79,7 +79,9 @@ establish the relative performance of methods on other data.</p>
 <span>  ps_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0.11</span>, age <span class="op">=</span> <span class="fl">1.15</span>, drugB <span class="op">=</span> <span class="fl">0.25</span>, drugC <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span><span class="op">)</span>,</span>
 <span>  lp_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fl">0</span>, age <span class="op">=</span> <span class="fl">0.45</span>, female <span class="op">=</span> <span class="fl">0.12</span>, previous_cost <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>    previous_number_relapses <span class="op">=</span> <span class="fl">0.16</span>, treatment_age <span class="op">=</span> <span class="op">-</span><span class="fl">0.28</span>, treatment_relapses <span class="op">=</span> <span class="op">-</span><span class="fl">0.16</span><span class="op">)</span>,</span>
-<span>  conditional_hr <span class="op">=</span> <span class="fl">0.9</span></span>
+<span>  conditional_hr <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  censor_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">450</span><span class="op">)</span>, age <span class="op">=</span> <span class="fl">0</span>, female <span class="op">=</span> <span class="fl">0</span>, previous_cost <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>    previous_number_relapses <span class="op">=</span> <span class="fl">0</span>, drugB <span class="op">=</span> <span class="fl">0</span>, drugC <span class="op">=</span> <span class="fl">0</span>, treatment <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,6 +127,17 @@ the log HR is <code>log(conditional_hr) + treatment_age *
 (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses</code>,
 where <code>age_in_years</code> is the uncentered age.</p></dd>
 
+
+<dt id="arg-censor-weights">censor_weights<a class="anchor" aria-label="anchor" href="#arg-censor-weights"></a></dt>
+<dd><p>Named coefficients for an exponential censoring
+model with log hazard per day. Recognized names are <code>intercept</code>,
+<code>age</code>, <code>female</code>, <code>previous_cost</code>,
+<code>previous_number_relapses</code>, <code>drugB</code>, <code>drugC</code>, and
+<code>treatment</code>. Named subsets override the defaults. Age is measured in
+decades from 48 years; cost uses the scaling described above; drugA and
+drug0 are the reference groups. The default intercept is
+<code>log(1/450)</code> and all other coefficients are zero.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -138,9 +151,15 @@ where <code>age_in_years</code> is the uncentered age.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Event times use a Weibull baseline with shape 1.15 and scale 650
-  days. Censoring times are exponential with mean 450 days and administrative
-  censoring at 900 days. Extreme propensity coefficients can produce poor
+  days. By default, random censoring times are exponential with mean 450 days;
+  administrative censoring occurs at 900 days. Censoring and event times are generated independently
+  conditional on covariates and treatment, including when censoring depends
+  on those variables. Extreme propensity coefficients can produce poor
   treatment overlap or a sample with no patients in one treatment group.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
+    <p>Thomas Debray <a href="mailto:tdebray@fromdatatowisdom.com">tdebray@fromdatatowisdom.com</a></p>
     </div>
 
     <div class="section level2">
@@ -156,6 +175,8 @@ where <code>age_in_years</code> is the uncentered age.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> drug0 drug1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   145    55 </span>
+<span class="r-in"><span><span class="va">toy_censor</span> <span class="op">&lt;-</span> <span class="fu">simulate_survival</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>  censor_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, age <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

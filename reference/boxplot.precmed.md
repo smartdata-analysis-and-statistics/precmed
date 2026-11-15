@@ -134,7 +134,7 @@ eval_1 <- catecv(response = "count",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = FALSE,
                  cv.n = 5)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 boxplot(eval_1, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 
@@ -155,7 +155,7 @@ eval_2 <- catecv(response = "survival",
                  higher.y = TRUE,
                  cv.n = 5,
                  seed = 999)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 boxplot(eval_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Warning: Removed 10 rows containing non-finite outside the scale range

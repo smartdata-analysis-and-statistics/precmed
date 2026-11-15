@@ -160,7 +160,7 @@ output_catecv2 <- catecv(response = "count",
                          seed = 999,
                          plot.gbmperf = FALSE,
                          verbose = 0)
-#> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 ``` r
@@ -251,7 +251,7 @@ output_catecv3 <- catecv(response = "count",
                          seed = 999,
                          plot.gbmperf = FALSE,
                          verbose = 1)
-#> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model =
 #> ps.model, : The first element of prop.cutoff cannot be 0 and has been removed.
 #>   |                                                                              |                                                                      |   0%
@@ -266,7 +266,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 20:24:33 2026 
+#>    Sun Nov 15 11:28:05 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
@@ -275,7 +275,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 2: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 20:24:35 2026 
+#>    Sun Nov 15 11:28:08 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -286,7 +286,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 20:24:37 2026 
+#>    Sun Nov 15 11:28:12 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -297,7 +297,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 20:24:40 2026 
+#>    Sun Nov 15 11:28:16 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -310,9 +310,9 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Sat Nov 14 20:24:43 2026 
+#>    Sun Nov 15 11:28:21 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 13.11 secs
+#> Total runtime : 21.87 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2          cv3          cv4       cv5
 #> prop0.01        NA        NA 6.858623e+04 1.901224e+06        NA
@@ -500,7 +500,7 @@ output_catecv2 <- catecv(response = "survival",
                 seed = 999,
                 plot.gbmperf = FALSE,
                 verbose = 0)
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 ``` r
@@ -596,7 +596,7 @@ output_catecv3 <- catecv(response = "survival",
                          seed = 999,
                          plot.gbmperf = FALSE,
                          verbose = 1)
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
 #> = ps.model, : The first element of prop.cutoff cannot be 0 and has been
 #> removed.
@@ -606,37 +606,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 20:25:31 2026 
+#>    Sun Nov 15 11:29:46 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 20:25:33 2026 
+#>    Sun Nov 15 11:29:50 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 20:25:35 2026 
+#>    Sun Nov 15 11:29:54 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 20:25:37 2026 
+#>    Sun Nov 15 11:29:58 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Sat Nov 14 20:25:39 2026 
+#>    Sun Nov 15 11:30:02 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 10.76 secs
+#> Total runtime : 19.31 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -748,7 +748,7 @@ output_catecv5 <- catecv(response = "survival",
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
 #> = ps.model, : No value supplied for tau0. Default sets tau0 to the maximum
 #> survival time.
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 plot(output_catecv5)
 ```
 

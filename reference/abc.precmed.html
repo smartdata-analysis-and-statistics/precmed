@@ -29,7 +29,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -116,7 +116,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                                <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                   ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                   higher.y <span class="op">=</span> <span class="cn">FALSE</span>, cv.n <span class="op">=</span> <span class="fl">5</span>, verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
@@ -143,12 +143,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 5.45 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 7.22 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1      cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1336687 0.129385 0.1087391 0.1241502 0.2422689</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                cv1       cv2        cv3       cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.06318685 0.2204612 0.04070852 0.1131277 0.0558532</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
@@ -161,14 +161,14 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                  cv.n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No value supplied for tau0. Default sets tau0 to the maximum survival time.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="abc.html">abc</a></span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1744519 0.1801821 0.1617462 0.1882339 0.1657854</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1703244 0.1814604 0.1641023 0.1844664 0.1565232</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1655055 0.1996535 0.1548843 0.1592874 0.1819872</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1656789 0.1875285 0.1414181 0.1572051 0.1775081</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

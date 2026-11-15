@@ -51,6 +51,10 @@ bootstrap standard errors stored in the fitted object. Changing `level`
 does not repeat the bootstrap. Treatment-specific event rates and
 restricted mean survival times are not included.
 
+## Author
+
+Thomas Debray <tdebray@fromdatatowisdom.com>
+
 ## Examples
 
 ``` r

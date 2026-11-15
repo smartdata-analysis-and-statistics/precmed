@@ -45,7 +45,8 @@ bootstrap samples
 
 Create a histogram displaying the distribution of the bootstrap
 estimates. The red vertical reference line represents the final
-estimate.
+estimate. For survival fits, RMST facets use the original treatment
+labels when available; older objects use treatment 0 and treatment 1.
 
 ## Author
 

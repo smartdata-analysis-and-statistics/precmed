@@ -6,6 +6,8 @@
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md):
 - [Estimating and validating treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md):
+- [Learning
+  resources](https://smartdata-analysis-and-statistics.github.io/precmed/articles/learning-resources.md):
 - [Getting started with
   precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md):
 - [Estimating and validating treatment effects for survival

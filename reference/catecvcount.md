@@ -425,7 +425,7 @@ catecv <- catecvcount(data = countExample,
                       seed = 999,
                       plot.gbmperf = FALSE,
                       verbose = 1)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
@@ -452,7 +452,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 4.76 secs 
+#> Total runtime : 8.22 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 #> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"

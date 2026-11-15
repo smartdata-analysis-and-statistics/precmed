@@ -50,7 +50,7 @@
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul>
@@ -71,7 +71,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Estimating and validating treatment effects for count outcomes</h1>
             <h3 data-toc-skip class="subtitle">Vignette 1 of 4</h3>
             
-            <h4 data-toc-skip class="date">November 14, 2026</h4>
+            <h4 data-toc-skip class="date">November 15, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
       <div class="d-none name"><code>Count-examples.Rmd</code></div>
@@ -723,12 +723,14 @@ control or comparator. If it is not the case, the function will stop
 with error if <code>trt</code> takes more than 2 distinct values or will
 automatically transform <code>trt</code> into a numeric variable. In
 this example, <code>trt</code> (a factor variable taking values “drug0”
-and “drug1”) was transformed and a warning message was left to the user
-(see output below):
+and “drug1”) was transformed and an informational message is shown (see
+output below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
-= trt ~ 1. Note that the PS model is only used in the estimation of the
-2 doubly robust methods (two and contrast regressions).</li>
+= trt ~ 1. The PS model is used to estimate overall and subgroup average
+treatment effects. It is also used to fit the doubly robust
+two-regression and contrast-regression CATE scores; other scoring
+methods need not use it to construct their scores.</li>
 </ul>
 <p>Let’s calculate the ATE for the effect of treatment on y and build an
 outcome model that contains all variables and a PS model with
@@ -744,7 +746,7 @@ outcome model that contains all variables and a PS model with
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "drinf", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>When <code>verbose</code> = 1, the function outputs a progress bar in
 the console.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -759,7 +761,7 @@ the console.</p>
 <span><span class="co">#&gt;        estimate</span></span>
 <span><span class="co">#&gt; rate1 0.2860635</span></span>
 <span><span class="co">#&gt; rate0 0.2685660</span></span>
-<span><span class="co">#&gt; Warning in print.atefit(x): Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
 of the 95% confidence interval, and the p-value (“pvalue”) for the log
@@ -863,10 +865,10 @@ parallel settings; one thread is also the fallback when neither
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  n.cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "catefit", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="va">t1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">t1</span> <span class="op">-</span> <span class="va">t0</span></span>
-<span><span class="co">#&gt; Time difference of 2.843992 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Time difference of 4.827449 secs</span></span></code></pre></div>
 <p>Each method specified in <code>score.method</code> has the following
 sets of results in <code><a href="../reference/catefit.html">catefit()</a></code>:</p>
 <ol style="list-style-type: decimal">
@@ -1115,44 +1117,44 @@ the default values of the remaining arguments.</p>
 <span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model = ps.model, : Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%</span></span>
 <span><span class="co">#&gt; cv = 1 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:26:10 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:30:54 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:26:12 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:30:58 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:26:15 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:31:03 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:26:18 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:31:08 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Sat Nov 14 20:26:21 2026 </span></span>
+<span><span class="co">#&gt;    Sun Nov 15 11:31:13 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 14.31 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Total runtime : 25.24 secs</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="inspect-validation-results">Inspect validation results<a class="anchor" aria-label="anchor" href="#inspect-validation-results"></a>

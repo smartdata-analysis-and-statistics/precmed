@@ -37,7 +37,7 @@ negative binomial (see score.method)."><meta property="og:image" content="https:
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
   </ul></li>
-<li class="nav-item"><a class="nav-link" href="../index.html#learning-resources">Learning resources</a></li>
+<li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -424,7 +424,7 @@ and <code><a href="catefitcount.html">catefitcount()</a></code> function.</p></d
 <span class="r-in"><span>                      seed <span class="op">=</span> <span class="fl">999</span>,</span></span>
 <span class="r-in"><span>                      plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                      verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
@@ -451,7 +451,7 @@ and <code><a href="catefitcount.html">catefitcount()</a></code> function.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 4.76 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 8.22 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")):</span> could not find function "scale_x_continuous"</span>

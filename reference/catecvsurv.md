@@ -536,39 +536,39 @@ catecv <- catecvsurv(data = survivalExample,
                      tau0 = tau0,
                      higher.y = TRUE,
                      cv.n = 5, seed = 999, verbose = 1)
-#> Warning: Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 20:22:29 2026 
+#>    Sun Nov 15 11:24:22 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 20:22:31 2026 
+#>    Sun Nov 15 11:24:26 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 20:22:34 2026 
+#>    Sun Nov 15 11:24:31 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 20:22:37 2026 
+#>    Sun Nov 15 11:24:35 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Sat Nov 14 20:22:39 2026 
+#>    Sun Nov 15 11:24:40 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 12.52 secs 
+#> Total runtime : 22.16 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
