@@ -412,10 +412,10 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 8.1 secs 
+#> Total runtime : 6.29 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
+
 boxplot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
 abc(cate_1)
@@ -443,7 +443,7 @@ cate_2 <- catecv(response = "survival",
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 
 plot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#> Error in scale_x_continuous(labels = function(x) paste0(format(100 * x,     trim = TRUE, scientific = FALSE), "%")): could not find function "scale_x_continuous"
+
 boxplot(cate_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 #> Warning: Removed 10 rows containing non-finite outside the scale range
 #> (`stat_boxplot()`).

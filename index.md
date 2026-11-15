@@ -84,13 +84,18 @@ For more info:
 
 ## Recommended workflow
 
-We recommend the following workflow to develop a model for estimating
-the CATE in order to identify treatment effect heterogeneity:
+We recommend the following workflow to estimate the overall ATE and
+develop a model for estimating the CATE to identify treatment effect
+heterogeneity:
 
-1.  Compare up to five modelling approaches (e.g., Poisson regression,
+1.  Use
+    [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+    to estimate the overall ATE between two treatment groups and its
+    uncertainty using bootstrap resampling.
+2.  Compare up to five modelling approaches (e.g., Poisson regression,
     boosting) for estimating the CATE using cross-validation through
     [catecv](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.html).
-2.  Select the best modelling approach using 3 metrics:
+3.  Select the best modelling approach using 3 metrics:
     - Compare the steepness of the validation curves in the validation
       samples across methods using
       [`plot()`](https://rdrr.io/r/graphics/plot.default.html). Two
@@ -109,14 +114,9 @@ the CATE in order to identify treatment effect heterogeneity:
     - Compare the distribution of the estimated ATE across different
       levels of the CATE score percentiles using
       [`boxplot()`](https://rdrr.io/r/graphics/boxplot.html).
-3.  Apply the best modelling approach in the original data or in a new
+4.  Apply the best modelling approach in the original data or in a new
     external dataset using
     [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
-4.  Optional. Use
-    [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-    to estimate ATE between 2 treatment groups with a doubly robust
-    estimator and estimate the variability of the ATE with a bootstrap
-    approach.
 
 In the vignettes, we will adopt a different workflow to gradually expose
 the user from simple to more complex methods.

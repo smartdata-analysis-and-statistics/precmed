@@ -309,7 +309,7 @@ output_catefit <- catefit(
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 t1 <- Sys.time()
 t1 - t0
-#> Time difference of 4.827449 secs
+#> Time difference of 3.529245 secs
 ```
 
 Each method specified in `score.method` has the following sets of
@@ -593,37 +593,37 @@ output_catecv <- catecv(
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sun Nov 15 11:30:54 2026 
+#>    Sun Nov 15 11:57:55 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sun Nov 15 11:30:58 2026 
+#>    Sun Nov 15 11:57:57 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sun Nov 15 11:31:03 2026 
+#>    Sun Nov 15 11:58:01 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sun Nov 15 11:31:08 2026 
+#>    Sun Nov 15 11:58:05 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Sun Nov 15 11:31:13 2026 
+#>    Sun Nov 15 11:58:08 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 25.24 secs
+#> Total runtime : 18.17 secs
 ```
 
 ### Inspect validation results

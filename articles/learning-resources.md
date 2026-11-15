@@ -24,16 +24,14 @@ particularly relevant to **precmed**:
 
 ## Free courses
 
-Two free courses complement the book and introduce **precmed**, its
-practical use, and the underlying statistical methods.
-
-- [An Introduction to Precision
-  Medicine](https://sdas.thinkific.com/courses/precmedintro) covers the
-  foundations through recorded webinars, exercises, and readings.
-- The [companion course to the
-  book](https://sdas.thinkific.com/courses/rwd-book) provides background
-  materials, example R code, and curated references to support practical
-  analyses.
+These free courses can help you build the knowledge and practical skills
+needed to study personalized treatment decisions. [An Introduction to
+Precision Medicine](https://sdas.thinkific.com/courses/precmedintro)
+introduces the foundations through recorded webinars, exercises, and
+readings. The [companion course to the
+book](https://sdas.thinkific.com/courses/rwd-book) provides background
+materials, example R code, and curated references to support practical
+analyses with **precmed** and related methods.
 
 ## Methodological references
 
