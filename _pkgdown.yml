@@ -30,7 +30,7 @@ navbar:
       href: articles/Theoretical-details.html
     href: articles/index.html
   - text: Learning resources
-    href: index.html#learning-resources
+    href: articles/learning-resources.html
   - text: Functions
     href: reference/index.html
   - text: News
