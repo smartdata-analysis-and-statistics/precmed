@@ -35,5 +35,35 @@ test_that("diagnostics handles whole-sample fits and empty results", {
   x[["errors/warnings"]]$contrastReg$est.high$warnings <- NULL
   expect_equal(nrow(diagnostics(x)), 0)
   expect_type(diagnostics(x)$iteration, "integer")
-  expect_error(diagnostics(structure(list(response = "count"), class = "precmed")), "survival")
+  expect_error(diagnostics(structure(list(response = "continuous"), class = "precmed")), "count or survival")
+})
+
+test_that("count subgroup diagnostics record support and preserve warnings", {
+  d <- precmed:::count_diagnostic_collector()
+  callback <- d$callback("poisson", "validation", 1L, c(2, 0, 1), c(0, 0, 1))
+  expect_warning(value <- precmed:::count_subgroup_log_effect(
+    c(TRUE, TRUE, FALSE), c(2, 0, 1), cbind(x = 1:3), cbind(1, 1:3),
+    rep(0, 3), c(0, 0, 1), "glm", .01, .99, list(), "test", callback, "high", "0.5"),
+    "treatment effect unavailable")
+  expect_true(is.na(value))
+  expect_equal(d$support$n0, 2L)
+  expect_equal(d$support$n1, 0L)
+  expect_equal(d$support$events0, 2)
+  x <- structure(list(response = "count", diagnostic.messages = d$messages), class = "precmed")
+  expect_equal(diagnostics(x)$subgroup, "0.5")
+  expect_equal(diagnostics(x)$type, "warning")
+})
+
+test_that("count CV records convergence and support without verbose output", {
+  data(countExample)
+  fit <- catecvcount(data = countExample[1:500, ],
+    cate.model = y ~ age + previous_treatment + offset(log(years)),
+    ps.model = trt ~ age + previous_treatment,
+    score.method = "contrastReg", initial.predictor.method = "poisson",
+    B = 1, Kfold = 2, cv.n = 1, abc = FALSE, verbose = 0, seed = 45)
+  expect_length(fit$ate.contrastReg$converge.contrastReg.cv, 1)
+  expect_length(fit$ate.contrastReg$converge.repetitions.cv[[1]], 1)
+  expect_true(nrow(fit$subgroup.support) > 0)
+  expect_true(all(c("training", "validation") %in% fit$subgroup.support$split))
+  expect_s3_class(diagnostics(fit), "data.frame")
 })

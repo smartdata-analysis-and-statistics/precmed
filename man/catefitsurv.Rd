@@ -34,6 +34,7 @@ catefitsurv(
   rmst.control = list(),
   contrast.control = list(),
   ps.control = list(),
+  rf.control = list(),
   ...
 )
 }
@@ -107,8 +108,10 @@ It must be a positive value and should be chosen close to 0. Default is \code{0.
 if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 \code{'contrastReg'}. Default is 2.}
 
-\item{n.trees.rf}{A positive integer specifying the maximum number of trees in random forest.
-Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
+\item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
+Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 Default is \code{1000}.}
 

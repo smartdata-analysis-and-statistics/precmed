@@ -1,15 +1,16 @@
-#' Summarize recorded survival diagnostics
+#' Summarize recorded fitting diagnostics
 #'
-#' Collect the treatment-recoding information stored by survival \code{atefit()},
-#' or the subgroup errors and warnings stored by survival \code{catefit()} or
+#' Collect treatment-recoding information from \code{atefit()}, or recorded
+#' subgroup errors and warnings from count or survival \code{catefit()} and
 #' \code{catecv()}, into a data frame. Each row represents one recorded message.
-#' The original subgroup list remains available as \code{object[["errors/warnings"]]}.
+#' Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 #'
-#' @param object A survival \code{atefit}, \code{catefit}, or \code{catecv} result.
+#' @param object A count or survival \code{atefit}, \code{catefit}, or \code{catecv} result.
 #' @return A data frame with columns \code{method}, \code{split},
 #'   \code{iteration}, \code{group}, \code{subgroup}, \code{type},
-#'   \code{measure}, and \code{message}. For mutually exclusive groups,
-#'   \code{subgroup} is the upper percentile label recorded by the estimator.
+#'   \code{measure}, and \code{message}. For count mutually exclusive groups,
+#'   \code{subgroup} gives the lower and upper boundaries; survival uses the
+#'   upper percentile label recorded by the estimator.
 #'   Method, split, iteration, group, subgroup, and measure are \code{NA} for
 #'   \code{atefit}; split and iteration are \code{NA} for \code{catefit}.
 #'   Otherwise, measure is \code{NA}
@@ -17,8 +18,9 @@
 #'   with the same columns when there are no recorded messages.
 #' @details This reports only diagnostics stored in the result, not every
 #'   warning emitted during fitting. In particular, \code{atefit()} stores the
-#'   treatment-recoding information, but not all bootstrap warnings. Count and
-#'   continuous results are not supported by this helper.
+#'   treatment-recoding information, but not all bootstrap warnings. Count
+#'   fits record subgroup messages and support in \code{object$subgroup.support}.
+#'   Continuous results are not supported by this helper.
 #' @examples
 #' \dontrun{
 #' diagnostics(output_atefit)
@@ -29,9 +31,8 @@
 #' @export
 diagnostics <- function(object) {
   if (!inherits(object, c("atefit", "precmed", "catefit")) ||
-      !identical(object$response, "survival") ||
-      (!inherits(object, "atefit") && is.null(object[["errors/warnings"]])))
-    stop("object must be a survival atefit, catefit, or catecv result.")
+      !object$response %in% c("survival", "count"))
+    stop("object must be a count or survival atefit, catefit, or catecv result.")
 
   out <- data.frame(method = character(), split = character(), iteration = integer(),
                     group = character(), subgroup = character(), type = character(),
@@ -44,6 +45,12 @@ diagnostics <- function(object) {
     }
     return(out)
   }
+  if (identical(object$response, "count")) {
+    if (!is.null(object$diagnostic.messages)) return(object$diagnostic.messages)
+    return(out)
+  }
+  if (is.null(object[["errors/warnings"]]))
+    stop("object must be a count or survival atefit, catefit, or catecv result with recorded diagnostics.")
   add_messages <- function(entry, method, split, iteration, group) {
     for (type in c("errors", "warnings")) {
       entries <- entry[[type]]
@@ -79,4 +86,26 @@ diagnostics <- function(object) {
     }
   }
   out
+}
+
+count_diagnostic_collector <- function() {
+  e <- new.env(parent = emptyenv())
+  e$messages <- data.frame(method = character(), split = character(), iteration = integer(),
+    group = character(), subgroup = character(), type = character(), measure = character(),
+    message = character(), stringsAsFactors = FALSE)
+  e$support <- data.frame(method = character(), split = character(), iteration = integer(),
+    group = character(), subgroup = character(), n0 = integer(), n1 = integer(),
+    events0 = numeric(), events1 = numeric(), stringsAsFactors = FALSE)
+  e$callback <- function(method, split, iteration, y, trt, include.support = TRUE) {
+    force(method); force(split); force(iteration); force(y); force(trt); force(include.support)
+    function(type, group, subgroup, selected, message) {
+      if (type == "support") {
+        if (include.support) e$support[nrow(e$support) + 1L, ] <- list(method, split, iteration, group, subgroup,
+          sum(selected & trt == 0), sum(selected & trt == 1),
+          sum(y[selected & trt == 0]), sum(y[selected & trt == 1]))
+      } else e$messages[nrow(e$messages) + 1L, ] <- list(method, split, iteration,
+        group, subgroup, type, "rate ratio", message)
+    }
+  }
+  e
 }

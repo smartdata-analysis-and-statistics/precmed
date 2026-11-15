@@ -1,7 +1,6 @@
 ---
 title: "Estimating and validating treatment effects for count outcomes"
 subtitle: "Vignette 1 of 4"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
 bibliography: references.bib
 output: 
   html_document:
@@ -102,27 +101,44 @@ Most variables are baseline patient characteristics like age, gender, and previo
 
 * We will use `trt` as the treatment variable, which has 2 drugs (drug0 and drug1). 
 
-To avoid multicollinearity issues, the continuous variable `age` was centered at 48 years old and the medical costs in the year prior to treatment initiation `previous_cost` was centered at 13,824 USD and scaled with standard deviation 20,172 USD.
+For convenience, `age` is centered at 48 years and `previous_cost` is centered at 13,824 USD and divided by 20,172 USD.
 
-The first six records of the final dataset `countExample` are shown below:
-
-```{r, echo = F, eval = T}
-data(countExample) #get clean dataset
-knitr::kable(head(countExample), row.names = FALSE)
+```{r, include = FALSE}
+data(countExample) # Restore the centered data for analysis.
 ```
 
 ## Estimate the average treatment effect 
 
-First, one might be interested in the effect of the drug (trt) on the number of relapses during follow-up (y). Lets test this using simple regression. 
+### Unadjusted treatment comparison
+
+We first compare relapse rates between treatment groups using a Poisson model with treatment as the only predictor. The log follow-up time is included as an offset to account for differences in exposure. This unadjusted association does not account for differences in patient characteristics.
 
 ```{r, eval = T, echo = T}
-output_lm <- lm(y ~ trt, countExample)
-output_lm
+output_poisson <- glm(y ~ trt + offset(log(years)),
+                      data = countExample, family = poisson())
+summary(output_poisson)
 ```
 
-We see from the simple linear model that drug 1 scores `r round(output_lm$coefficients[2], 2)` points higher compared to drug 0. This indicates that drug 0 is superior to drug 1 because lower outcomes are preferred (number of relapses). 
+The estimated rate ratio for drug 1 versus drug 0 is `r round(exp(coef(output_poisson)[2]), 2)`. A ratio below 1 corresponds to a lower relapse rate under drug 1. This association does not by itself establish a causal treatment effect.
 
-Now we want to estimate the Average Treatment Effect (ATE) and correct for several covariates like age and previous treatment because they might influence the relation between treatment and outcome. The `atefit()` function allows estimating the ATE in terms of rate ratio. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the propensity score (PS) model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified. The function also provides standard error, confidence intervals, and p-values based on bootstrap.
+### Covariate-adjusted treatment comparison
+
+Treatment assignment may differ according to baseline characteristics. To account for measured differences, we fit a Poisson model that adjusts for age, sex, previous treatment, previous medical cost and previous relapses, while retaining the follow-up offset.
+
+```{r adjusted_poisson, eval = T, echo = T}
+output_poisson_adjusted <- glm(
+  y ~ trt + age + female + previous_treatment + previous_cost +
+    previous_number_relapses + offset(log(years)),
+  data = countExample, family = poisson()
+)
+summary(output_poisson_adjusted)
+```
+
+The adjusted rate ratio is `r round(exp(coef(output_poisson_adjusted)["trtdrug1"]), 2)`, compared with `r round(exp(coef(output_poisson)[2]), 2)` in the unadjusted model. The adjusted ratio is conditional on the included covariates and does not necessarily represent a causal average treatment effect. A causal interpretation requires, among other assumptions, adequate treatment overlap and no unmeasured confounding.
+
+### Population-level treatment comparison using `atefit()`
+
+We now use `atefit()` to estimate a population-level rate ratio, combining outcome and propensity score models. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the propensity score (PS) model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified, under the required assumptions. The function also provides standard errors, confidence intervals and p-values based on bootstrap.
 
 In this example, the rate ratio compares the relapse rate under drug 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal interpretation requires appropriate assumptions, including no unmeasured confounding, adequate overlap in treatment assignment, and well-defined treatments. Chapter 17 discusses identification of conditional treatment effects in randomized and non-randomized data [@hoogland2026introduction].
 
@@ -202,7 +218,6 @@ The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, a
 If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. We set `n.cores = 1` to run boosting with one thread. `precmed` translates this argument to the GBM3 parallel settings; one thread is also the fallback when neither `n.cores` nor `par.details` is supplied and the `gbm.parallel` option is unset.
 
 ```{r example_catefit, eval = T, echo = T, cache = doc.cache}
-t0 <- Sys.time()
 output_catefit <- catefit(
   response = "count",
   data = countExample,
@@ -217,8 +232,6 @@ output_catefit <- catefit(
   seed = 999,
   n.cores = 1
 )
-t1 <- Sys.time()
-t1 - t0
 ```
 
 Each method specified in `score.method` has the following sets of results in `catefit()`: 
@@ -317,7 +330,7 @@ The `catecv()` function provides the same estimation as the `catefit()` but via 
 Now we can use the `catecv()` function to run internal validation to compare the different scoring methods. The mandatory arguments are similar to `atefit()` and `catefit()`: 
 The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. For this toy example we selected `poisson`, `contrastReg` and `negBin` to limit run time. 
 
-We also specified the following non-mandatory arguments to fit with the data and problem at hand: `initial.predictor.method`, `higher.y`,  `cv.n`, `seed`, `plot.gbmperf` and `verbose`.
+We also specified the following non-mandatory arguments to fit with the data and problem at hand: `initial.predictor.method`, `higher.y`, `cv.n`, `seed` and `plot.gbmperf`.
 
 * `initial.predictor.method` specifies how predictions of the outcome are estimated in two regressions and contrast regression. Flexible models can be used such as GBM ("boosting") or generalized additive models ("gam"). Both methods are computationally intensive so we choose "poisson" to obtain predictions from a Poisson regression, which reduces the computational time at the expense of stricter parametric assumptions and less flexibility.
 
@@ -328,8 +341,6 @@ We also specified the following non-mandatory arguments to fit with the data and
 * We set a random seed `seed` = 999 to reproduce the results.
 
 * We avoid generating the boosting performance plots by specifying `plot.gbmperf` = FALSE.
-
-* When `verbose` = 1, progress messages are printed in the R console but errors and warnings are not printed. The current CV iteration is printed, followed by the steps of the CV procedure (splitting the data, training the models, validating the models) and warnings or errors that have occurred during the steps (none in this example). A timestamp and a progress bar are also displayed upon completion of a CV iteration. If `contrastReg` was selected as one of the methods in `score.method`, an additional line of output message will indicate whether the algorithm has converged.
 
 There are many other non-mandatory arguments that `catecv()` can accept. Please see the [Customizing CATE models and validation](Additional-examples.html) vignette for more examples and the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.html) section for details. If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
 
@@ -345,8 +356,7 @@ output_catecv <- catecv(
   higher.y = FALSE,
   cv.n = 5, 
   seed = 999,
-  plot.gbmperf = FALSE,
-  verbose = 1
+  plot.gbmperf = FALSE
 )
 ```
 
@@ -397,13 +407,20 @@ The output is a matrix with columns corresponding to the CV iterations and rows 
 
 ### Inspect errors and warnings
 
-Subgroup estimates can be missing or unstable, for example when a subgroup has few patients or observed events. Tied scores can also leave a subgroup empty or change its size from the requested proportion. If a subgroup has no patients in one or both treatment arms, its estimate is `NA` and a warning identifies the method, iteration, subgroup and treatment counts. ABC is `NA` if a required estimate is unavailable. Check warnings after running `catecv()` and review affected estimates with caution:
+Subgroup estimates can be missing or unstable, for example when a subgroup has few patients or observed events. Tied scores can also leave a subgroup empty or change its size from the requested proportion. Use `diagnostics()` to inspect recorded subgroup errors, warnings, unavailable ABC values and contrast-regression convergence across methods, splits and iterations. An empty table means no such messages were recorded; it does not establish that the models fit well.
 
 ```{r errwarn, eval = T, echo = T}
-warnings()
+diagnostics(output_catecv)
 ```
 
-Unlike the survival output, the count output does not store a subgroup-specific `errors/warnings` list.
+The support table records the number of patients (`n0`, `n1`) and total observed relapses (`events0`, `events1`) in each treatment arm for each reported subgroup. For example, inspect the validation-set support for contrast regression with:
+
+```{r count_support, eval = T, echo = T}
+subset(output_catecv$subgroup.support,
+       split == "validation" & method == "contrastReg")
+```
+
+The contrast-regression convergence vector indicates whether at least one cross-fitting repetition converged in each CV iteration. The individual repetition results are available in `output_catecv$ate.contrastReg$converge.repetitions.cv`.
 
 ## Compare scoring methods using the ABC statistic
 
@@ -448,14 +465,7 @@ plot(output_catecv,
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
 ```
 
-The user can choose to plot the validation curves of only one CV iteration instead of the average of all CV iterations. In the following example, we plot the validation curves of the second CV iteration by specifying `cv.i` = 2 and in grayscale by specifying `grayscale` = TRUE.
-
-```{r example_plot_lineplot2, eval = T, echo = T}
-plot(output_catecv, 
-     cv.i = 2, 
-     grayscale = TRUE, 
-     ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
-```
+To plot validation curves for a single CV iteration instead of the average, specify `cv.i` (for example, `cv.i = 2` for the second iteration). Set `grayscale = TRUE` to display the curves in grayscale.
 
 Same as `abc()`, the user can also choose to use the median (instead of mean [default]) of the ATEs across CV iterations by specifying the argument `combine` = "median" in `plot()`. 
 

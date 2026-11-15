@@ -2,18 +2,18 @@
 % Please edit documentation in R/diagnostics.R
 \name{diagnostics}
 \alias{diagnostics}
-\title{Summarize recorded survival diagnostics}
+\title{Summarize recorded fitting diagnostics}
 \usage{
 diagnostics(object)
 }
 \arguments{
-\item{object}{A survival \code{atefit}, \code{catefit}, or \code{catecv} result.}
+\item{object}{A count or survival \code{atefit}, \code{catefit}, or \code{catecv} result.}
 }
 \value{
 A data frame with columns \code{method}, \code{split},
   \code{iteration}, \code{group}, \code{subgroup}, \code{type},
-  \code{measure}, and \code{message}. For mutually exclusive groups,
-  \code{subgroup} is the upper percentile label recorded by the estimator.
+  \code{measure}, and \code{message}. Count mutually exclusive groups use
+  lower and upper boundaries; survival uses the upper percentile label.
   Method, split, iteration, group, subgroup, and measure are \code{NA} for
   \code{atefit}; split and iteration are \code{NA} for \code{catefit}.
   Otherwise, measure is \code{NA}
@@ -21,16 +21,17 @@ A data frame with columns \code{method}, \code{split},
   with the same columns when there are no recorded messages.
 }
 \description{
-Collect the treatment-recoding information stored by survival \code{atefit()},
-or the subgroup errors and warnings stored by survival \code{catefit()} or
+Collect treatment-recoding information from \code{atefit()}, or recorded
+subgroup errors and warnings from count or survival \code{catefit()} and
 \code{catecv()}, into a data frame. Each row represents one recorded message.
-The original subgroup list remains available as \code{object[["errors/warnings"]]}.
+Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 }
 \details{
 This reports only diagnostics stored in the result, not every
   warning emitted during fitting. In particular, \code{atefit()} stores the
-  treatment-recoding information, but not all bootstrap warnings. Count and
-  continuous results are not supported by this helper.
+  treatment-recoding information, but not all bootstrap warnings. Count fits
+  record subgroup support in \code{object$subgroup.support}. Continuous results
+  are not supported by this helper.
 }
 \examples{
 \dontrun{

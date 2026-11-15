@@ -29,6 +29,7 @@ catefitmean(
   seed = NULL,
   verbose = 0,
   ps.control = list(),
+  rf.control = list(),
   ...
 )
 }
@@ -92,6 +93,8 @@ in \code{init.model}.}
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 \code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
+
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees. Used only if
 \code{score.method = 'randomForest'}. Default is \code{1000}.}

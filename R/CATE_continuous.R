@@ -50,6 +50,9 @@
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
 #' @param n.trees.rf A positive integer specifying the number of trees. Used only if
 #' \code{score.method = 'randomForest'}. Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -200,8 +203,9 @@ catefitmean <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        ps.control = list(), ...) {
+                        ps.control = list(), rf.control = list(), ...) {
   resolve_ps_control(ps.control)
+  resolve_rf_control(rf.control)
 
 
   stop("This functionality is not implemented yet")
@@ -245,7 +249,7 @@ catefitmean <- function(data,
                   xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
-                  error.maxNR = error.maxNR, tune = tune, ..., ps.control = ps.control)
+                  error.maxNR = error.maxNR, tune = tune, ..., ps.control = ps.control, rf.control = rf.control)
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -480,6 +484,9 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
 #' @param n.trees.rf A positive integer specifying the number of trees. Used only if
 #' \code{score.method = 'randomForest'}. Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -520,7 +527,8 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
                      ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                      initial.predictor.method = "boosting",
                      xvar.smooth.init, xvar.smooth.score,
-                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ps.control = list(), ...) {
+                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ps.control = list(), rf.control = list(), ...) {
+  rf.control <- resolve_rf_control(rf.control)
   ps.args <- resolve_ps_control(ps.control)
 
 
@@ -769,8 +777,8 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
     data1.rf <- datatot[trt == 1, ]
     data0.rf <- datatot[trt == 0, ]
 
-    fit1.rf <- meanCatch(randomForestSRC::rfsrc(y ~ ., data = data1.rf, ntree = n.trees.rf))
-    fit0.rf <- meanCatch(randomForestSRC::rfsrc(y ~ ., data = data0.rf, ntree = n.trees.rf))
+    fit1.rf <- meanCatch(fit_rf(y ~ ., data = data1.rf, n.trees.rf = n.trees.rf, rf.control = rf.control))
+    fit0.rf <- meanCatch(fit_rf(y ~ ., data = data0.rf, n.trees.rf = n.trees.rf, rf.control = rf.control))
 
     result$result.randomForest <- list(fit1.rf = fit1.rf$fit, fit0.rf = fit0.rf$fit)
 

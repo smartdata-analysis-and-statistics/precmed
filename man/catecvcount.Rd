@@ -215,11 +215,13 @@ Returns a list containing the following components saved as a \code{"precmed"} o
  if \code{score.method} includes \code{'twoReg'}.
  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.poisson} output
  if \code{score.method} includes \code{'contrastReg'}.
- This method has an additional element in the list of results:
+ This method has additional convergence information:
  \itemize{
     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
-    The ith element indicates whether the algorithm converged in the ith cross-validation
-    iteration.
+    The ith element is true if at least one cross-fitting repetition converged
+    in the ith cross-validation iteration.
+    \item{\code{converge.repetitions.cv}: }A list of logical vectors recording
+    convergence of each cross-fitting repetition in each CV iteration.
  }
  \item{\code{ate.negBin}: }A list of results similar to \code{ate.poisson} output
  if \code{score.method} includes \code{'negBin'}.

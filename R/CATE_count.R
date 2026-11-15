@@ -276,6 +276,7 @@ catefitcount <- function(data,
                           x.cate = x.cate, time = time,
                           score.method = score.method)
 
+  count.diagnostics <- count_diagnostic_collector()
   for (name in names(fit.score)) {
     score <- fit.score[[name]]
     result[[name]] <- score
@@ -284,7 +285,8 @@ catefitcount <- function(data,
                                       time = time, trt = trt,
                                       score = score, higher.y = higher.y,
                                       prop = prop, onlyhigh = TRUE,
-                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control)
+                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
+                                      diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), NA_character_, NA_integer_, y, trt))
     result[[str_replace(name, "score", "ate")]] <- ate
     names(result[[str_replace(name, "score", "ate")]]) <- paste0("prop", round(prop, 2))
   }
@@ -318,6 +320,15 @@ catefitcount <- function(data,
     fit$result.boosting
   if ("contrastReg" %in% score.method) result$fit$result.contrastReg$sigma.contrastReg <-
     fit$result.contrastReg$sigma.contrastReg
+  if ("contrastReg" %in% score.method) {
+    result$fit$result.contrastReg$converge.repetitions <- fit$result.contrastReg$converge.repetitions
+    if (any(!fit$result.contrastReg$converge.repetitions))
+      count.diagnostics$callback("contrastReg", NA_character_, NA_integer_, y, trt)(
+        "warning", NA_character_, NA_character_, NULL,
+        paste0("Contrast regression did not converge in ", sum(!fit$result.contrastReg$converge.repetitions), " of ", B, " cross-fitting repetitions."))
+  }
+  result$diagnostic.messages <- count.diagnostics$messages
+  result$subgroup.support <- count.diagnostics$support
 
   if (verbose >= 1) {
     t.end <- Sys.time()
@@ -654,11 +665,15 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
         } else if (initial.predictor.method == "poisson") {
 
+          # The offset is needed for fitting counts, but downstream estimators
+          # require predicted rates, so predict at one unit of exposure.
+          datatot_valid_rate <- datatot_valid
+          datatot_valid_rate$time <- 0
           fit1.pois <- glm(y ~ . - time + offset(time), data = data1, family = "poisson")
-          f1.predictcv[index == k] <- predict(object = fit1.pois, newdata = datatot_valid, type = "response")
+          f1.predictcv[index == k] <- predict(object = fit1.pois, newdata = datatot_valid_rate, type = "response")
 
           fit0.pois <- glm(y ~ . - time + offset(time), data = data0, family = "poisson")
-          f0.predictcv[index == k] <- predict(object = fit0.pois, newdata = datatot_valid, type = "response")
+          f0.predictcv[index == k] <- predict(object = fit0.pois, newdata = datatot_valid_rate, type = "response")
 
         } else if (initial.predictor.method == "gam") {
 
@@ -749,7 +764,8 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
     names(delta.contrastReg) <- colnames(sigma.contrastReg) <- rownames(sigma.contrastReg) <- c("(Intercept)", colnames(x.cate))
     result$result.contrastReg <- list(delta.contrastReg = delta.contrastReg,
                                       sigma.contrastReg = sigma.contrastReg,
-                                      converge.contrastReg = converge.contrastReg)
+                                      converge.contrastReg = converge.contrastReg,
+                                      converge.repetitions = as.logical(converge))
   }
 
 

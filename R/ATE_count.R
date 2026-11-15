@@ -379,7 +379,7 @@ drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
 #'         vector of size equal to the length of prop; returned only when \code{onlyhigh} == TRUE
 estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher.y,
                                        prop, onlyhigh,
-                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count") {
+                                       ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count", diagnostic = NULL) {
 
   if (!higher.y) score <- -score
   cut <- quantile(score, 1 - prop)
@@ -389,11 +389,11 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
   for (b in 1:n.subgroup) {
       idsub1 <- (score >= cut[b])
       ate.est.high[b] <- count_subgroup_log_effect(idsub1, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
-                                                   paste0(context, ", high subgroup ", prop[b]))
+                                                   paste0(context, ", high subgroup ", prop[b]), diagnostic, "high", as.character(prop[b]))
       if (onlyhigh == FALSE) {
         idsub0 <- (score < cut[b])
         ate.est.low[b] <- count_subgroup_log_effect(idsub0, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
-                                                     paste0(context, ", low subgroup ", 1 - prop[b]))
+                                                     paste0(context, ", low subgroup ", 1 - prop[b]), diagnostic, "low", as.character(1 - prop[b]))
       }
   }
   if (onlyhigh) {
@@ -441,7 +441,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' @param context Label used to identify the analysis in subgroup warnings.
 #' @return estimated ATEs of all categories in the one multilevel subgroup; vector of size equal to the length of categories in the multilevel subgroup
 estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, higher.y, prop,
-                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count"){
+                                         ps.method = "glm", minPS = 0.01, maxPS = 0.99, ps.control = list(), context = "Count", diagnostic = NULL){
 
   if (higher.y == FALSE) score <- -score
   cut <- quantile(score, prop)
@@ -450,22 +450,36 @@ estcount.multilevel.subgroup <- function(y, x.cate, x.ps, time, trt, score, high
   for (b in seq(n.subgroup)) {
     idsub <- (score >= cut[b] & score <= cut[b + 1])
     ate.est[b] <- count_subgroup_log_effect(idsub, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
-                                             paste0(context, ", group ", prop[b], "-", prop[b + 1]))
+                                             paste0(context, ", group ", prop[b], "-", prop[b + 1]), diagnostic, "group", paste0(prop[b], "-", prop[b + 1]))
   }
   return(exp(ate.est))
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 count_subgroup_log_effect <- function(selected, y, x.cate, x.ps, time, trt,
-                                      ps.method, minPS, maxPS, ps.control, label) {
+                                      ps.method, minPS, maxPS, ps.control, label,
+                                      diagnostic = NULL, group = NA_character_, subgroup = NA_character_) {
   counts <- c(sum(trt[selected] == 0), sum(trt[selected] == 1))
+  if (!is.null(diagnostic)) diagnostic("support", group, subgroup, selected, NULL)
   if (any(counts == 0)) {
-    warning(label, ": treatment effect unavailable (treatment 0: ", counts[1],
-            ", treatment 1: ", counts[2], "); returning NA.", call. = FALSE)
+    msg <- paste0(label, ": treatment effect unavailable (treatment 0: ", counts[1],
+                  ", treatment 1: ", counts[2], "); returning NA.")
+    if (!is.null(diagnostic)) diagnostic("warning", group, subgroup, selected, msg)
+    warning(msg, call. = FALSE)
     return(NA_real_)
   }
-  drcount(y = y[selected], x.cate = x.cate[selected, , drop = FALSE],
+  value <- tryCatch(withCallingHandlers(drcount(y = y[selected], x.cate = x.cate[selected, , drop = FALSE],
           x.ps = x.ps[selected, , drop = FALSE], time = time[selected],
           trt = trt[selected], ps.method = ps.method, minPS = minPS,
-          maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$log.rate.ratio
+          maxPS = maxPS, interactions = FALSE, ps.control = ps.control)$log.rate.ratio,
+    warning = function(w) if (!is.null(diagnostic)) diagnostic("warning", group, subgroup, selected, conditionMessage(w))),
+    error = function(e) {
+      if (is.null(diagnostic)) stop(e)
+      diagnostic("error", group, subgroup, selected, conditionMessage(e))
+      warning(label, ": subgroup estimation failed: ", conditionMessage(e), call. = FALSE)
+      NA_real_
+    })
+  if (!is.finite(value) && !is.null(diagnostic))
+    diagnostic("warning", group, subgroup, selected, paste0(label, ": estimated rate ratio is not finite."))
+  value
 }

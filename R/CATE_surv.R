@@ -57,8 +57,11 @@
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 #' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 #' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -259,10 +262,11 @@ catefitsurv <- function(data,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        rmst.control = list(), contrast.control = list(), ps.control = list(), ...) {
+                        rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), ...) {
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
+  resolve_rf_control(rf.control)
 
 
   resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
@@ -333,7 +337,7 @@ catefitsurv <- function(data,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
                   error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                  contrast.control = contrast.control, ..., ps.control = ps.control)
+                  contrast.control = contrast.control, ..., ps.control = ps.control, rf.control = rf.control)
 
   if (initial.predictor.method == "boosting" & fit$best.iter == n.trees.boosting) {
     warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
@@ -647,8 +651,11 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{3}.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or
 #' if \code{initial.predictor.method = 'randomForest'} with
 #' \code{score.method = 'twoReg'} or \code{'contrastReg'}. Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -705,7 +712,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
                      tree.depth = 3, n.trees.rf = 1000, n.trees.boosting = 150,
                      B = 3, Kfold = 5, plot.gbmperf = TRUE,
                      error.maxNR = 1e-3, max.iterNR = 100,
-                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), ...) {
+                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), rf.control = list(), ...) {
+  rf.control <- resolve_rf_control(rf.control)
   ps.args <- resolve_ps_control(ps.control)
 
 
@@ -767,13 +775,13 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
           x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1rf <- datatot_train[trt_train == 1,]
-          fit1 <- rfsrc(Surv(y, d) ~ ., data = data1rf, ntree = n.trees.rf)
+          fit1 <- fit_rf(Surv(y, d) ~ ., data = data1rf, n.trees.rf = n.trees.rf, rf.control = rf.control)
           surv1.prd <- predict(object = fit1, newdata = datatot_valid)$survival
           time1 <- fit1$time
           f1.predictcv[index == k] <- integrate_forest_survival(time1, surv1.prd, tau0) / tau0
 
           data0rf <- datatot_train[trt_train == 0,]
-          fit0 <- rfsrc(Surv(y, d) ~ ., data = data0rf, ntree = n.trees.rf)
+          fit0 <- fit_rf(Surv(y, d) ~ ., data = data0rf, n.trees.rf = n.trees.rf, rf.control = rf.control)
           surv0.prd <- predict(object = fit0, newdata = datatot_valid)$survival
           time0 <- fit0$time
           f0.predictcv[index == k] <- integrate_forest_survival(time0, surv0.prd, tau0) / tau0
@@ -899,8 +907,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
     data1rf <- datatotrf[trt == 1, ]
     data0rf <- datatotrf[trt == 0, ]
 
-    fit1.rf <- rfsrc(Surv(y, d) ~ ., data = data1rf, ntree = n.trees.rf)
-    fit0.rf <- rfsrc(Surv(y, d) ~ ., data = data0rf, ntree = n.trees.rf)
+    fit1.rf <- fit_rf(Surv(y, d) ~ ., data = data1rf, n.trees.rf = n.trees.rf, rf.control = rf.control)
+    fit0.rf <- fit_rf(Surv(y, d) ~ ., data = data0rf, n.trees.rf = n.trees.rf, rf.control = rf.control)
     result$result.randomForest <- list(fit1.rf = fit1.rf, fit0.rf = fit0.rf)
   }
 

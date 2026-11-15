@@ -94,8 +94,11 @@
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 #' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 #' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -254,8 +257,10 @@ catecv <- function(response,
                    seed = NULL,
                    plot.gbmperf = TRUE,
                    verbose = 0,
-                   contrast.control = list(), rmst.control = list(), ps.control = list()) {
+                   contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
   resolve_ps_control(ps.control)
+  resolve_rf_control(rf.control)
+  if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
 
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
@@ -266,6 +271,7 @@ catecv <- function(response,
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  if (response == "count") .args$rf.control <- NULL
   if (response != "survival") .args$rmst.control <- NULL
   if (response == "continuous") .args$contrast.control <- NULL
 
@@ -363,8 +369,11 @@ catecv <- function(response,
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 #' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 #' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -638,10 +647,11 @@ catecvsurv <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        plot.gbmperf = TRUE,
-                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list()) {
+                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list()) {
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
+  resolve_rf_control(rf.control)
 
 
   resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
@@ -820,7 +830,7 @@ catecvsurv <- function(data,
                     tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                     B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    contrast.control = contrast.control, ps.control = ps.control)
+                    contrast.control = contrast.control, ps.control = ps.control, rf.control = rf.control)
 
 
     if ("contrastReg" %in% score.method) {
@@ -1228,11 +1238,13 @@ catecvsurv <- function(data,
 #'  if \code{score.method} includes \code{'twoReg'}.
 #'  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.poisson} output
 #'  if \code{score.method} includes \code{'contrastReg'}.
-#'  This method has an additional element in the list of results:
+#'  This method has additional convergence information:
 #'  \itemize{
 #'     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
-#'     The ith element indicates whether the algorithm converged in the ith cross-validation
-#'     iteration.
+#'     The ith element is true if at least one cross-fitting repetition converged
+#'     in the ith cross-validation iteration.
+#'     \item{\code{converge.repetitions.cv}: }A list of logical vectors recording
+#'     convergence of each cross-fitting repetition in each CV iteration.
 #'  }
 #'  \item{\code{ate.negBin}: }A list of results similar to \code{ate.poisson} output
 #'  if \code{score.method} includes \code{'negBin'}.
@@ -1456,7 +1468,11 @@ catecvcount <- function(data,
   names(result$props) <- c("prop.onlyhigh", "prop.bi", "prop.multi")
   result$overall.ate.train <- result$overall.ate.valid <- rep(NA, cv.n)
 
-  if ("contrastReg" %in% score.method) converge.contrastReg.cv <- rep(NA, cv.n)
+  count.diagnostics <- count_diagnostic_collector()
+  if ("contrastReg" %in% score.method) {
+    converge.contrastReg.cv <- rep(NA, cv.n)
+    converge.repetitions.cv <- vector("list", cv.n)
+  }
 
   # Set progress bar
   if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
@@ -1513,8 +1529,14 @@ catecvcount <- function(data,
                      error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
                      contrast.control = contrast.control, ..., ps.control = ps.control)
 
-    if ("contrastReg" %in% score.method) converge.contrastReg.cv[cv.i] <-
-      fit$result.contrastReg$converge.contrastReg
+    if ("contrastReg" %in% score.method) {
+      converge.contrastReg.cv[cv.i] <- fit$result.contrastReg$converge.contrastReg
+      converge.repetitions.cv[[cv.i]] <- fit$result.contrastReg$converge.repetitions
+      failed <- sum(!fit$result.contrastReg$converge.repetitions)
+      if (failed > 0) count.diagnostics$callback("contrastReg", "training", cv.i, y.train, trt.train)(
+        "warning", NA_character_, NA_character_, NULL,
+        paste0("Contrast regression did not converge in ", failed, " of ", B, " cross-fitting repetitions."))
+    }
 
     if (verbose == 2) {
       if (fit$best.iter == n.trees.boosting) {
@@ -1558,6 +1580,9 @@ catecvcount <- function(data,
 
     for (name in names(fit.score.train)) {
       score.train <- fit.score.train[[name]]
+      if (prop.onlyhigh[n.subgroup.onlyhigh] == 1)
+        count.diagnostics$callback(sub("^score\\.", "", name), "training", cv.i, y.train, trt.train)(
+          "support", "high", "1", rep(TRUE, length(y.train)), NULL)
       ate.train.cv.i <-
         estcount.bilevel.subgroups(y = y.train,
                                    x.cate = x.cate.train, x.ps = x.ps.train,
@@ -1565,7 +1590,8 @@ catecvcount <- function(data,
                                    score = score.train, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE, ps.method = ps.method,
                                    minPS = minPS, maxPS = maxPS, ps.control = ps.control,
-                                   context = paste0(name, ", training iteration ", cv.i))
+                                   context = paste0(name, ", training iteration ", cv.i),
+                                   diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), "training", cv.i, y.train, trt.train))
       result[[str_replace(name, "score", "ate")]]$ate.est.train.high.cv[, cv.i] <-
         c(ate.train.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.train.low.cv[, cv.i] <-
@@ -1577,7 +1603,8 @@ catecvcount <- function(data,
                                      score = score.train, higher.y = higher.y,
                                      prop = prop.multi, ps.method = ps.method,
                                      minPS = minPS, maxPS = maxPS, ps.control = ps.control,
-                                     context = paste0(name, ", training iteration ", cv.i))
+                                     context = paste0(name, ", training iteration ", cv.i),
+                                     diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), "training", cv.i, y.train, trt.train))
     }
 
     ####### Construct the score in validation set ----------------------------------------------
@@ -1598,6 +1625,9 @@ catecvcount <- function(data,
 
     for (name in names(fit.score.valid)) {
       score.valid <- fit.score.valid[[name]]
+      if (prop.onlyhigh[n.subgroup.onlyhigh] == 1)
+        count.diagnostics$callback(sub("^score\\.", "", name), "validation", cv.i, y.valid, trt.valid)(
+          "support", "high", "1", rep(TRUE, length(y.valid)), NULL)
       ate.valid.cv.i <-
         estcount.bilevel.subgroups(y = y.valid,
                                    x.cate = x.cate.valid, x.ps = x.ps.valid,
@@ -1605,7 +1635,8 @@ catecvcount <- function(data,
                                    score = score.valid, higher.y = higher.y,
                                    prop = prop.bi, onlyhigh = FALSE,
                                    ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
-                                   context = paste0(name, ", validation iteration ", cv.i))
+                                   context = paste0(name, ", validation iteration ", cv.i),
+                                   diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), "validation", cv.i, y.valid, trt.valid))
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.high.cv[, cv.i] <-
         c(ate.valid.cv.i$ate.est.high, est.prop1)
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.low.cv[, cv.i] <-
@@ -1617,7 +1648,8 @@ catecvcount <- function(data,
                                      score = score.valid, higher.y = higher.y,
                                      prop = prop.multi,
                                      ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
-                                     context = paste0(name, ", validation iteration ", cv.i))
+                                     context = paste0(name, ", validation iteration ", cv.i),
+                                     diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), "validation", cv.i, y.valid, trt.valid))
 
       if (abc == TRUE) {
         temp.abc <- log(estcount.bilevel.subgroups(y = y.valid,
@@ -1626,7 +1658,8 @@ catecvcount <- function(data,
                                                    score = score.valid, higher.y = higher.y,
                                                    prop = prop.abc, onlyhigh = TRUE,
                                                    ps.method = ps.method, minPS = minPS, maxPS = maxPS, ps.control = ps.control,
-                                                   context = paste0(name, ", ABC validation iteration ", cv.i)))
+                                                   context = paste0(name, ", ABC validation iteration ", cv.i),
+                                                   diagnostic = count.diagnostics$callback(sub("^score\\.", "", name), "validation", cv.i, y.valid, trt.valid, FALSE)))
 
         if (higher.y == TRUE) {
           # if higher scores are better, ABC requires subtracting the ATE from validation curve
@@ -1641,6 +1674,8 @@ catecvcount <- function(data,
         } else {
           warning(name, ", validation iteration ", cv.i,
                   ": ABC unavailable because a required estimate is not finite; returning NA.", call. = FALSE)
+          count.diagnostics$callback(sub("^score\\.", "", name), "validation", cv.i, y.valid, trt.valid)(
+            "warning", "ABC", NA_character_, NULL, "ABC unavailable because a required estimate is not finite.")
           result[[str_replace(name, "score", "ate")]]$abc.valid[cv.i] <- NA_real_
         }
       }
@@ -1662,13 +1697,18 @@ catecvcount <- function(data,
     }
 
     if ("contrastReg" %in% score.method) {
-      result$ate.contrastReg <- append(result$ate.contrastReg,
-                                       list(converge.contrastReg.cv = converge.contrastReg.cv))
       if (any(is.na(converge.contrastReg.cv))) {
         warning("Contrast regression algorithm did not converge in at least one cross-validation iteration.")
       }
     }
   }
+
+  if ("contrastReg" %in% score.method) {
+    result$ate.contrastReg$converge.contrastReg.cv <- converge.contrastReg.cv
+    result$ate.contrastReg$converge.repetitions.cv <- converge.repetitions.cv
+  }
+  result$diagnostic.messages <- count.diagnostics$messages
+  result$subgroup.support <- count.diagnostics$support
 
   if (verbose >= 1) {
     close(pb)
@@ -1765,8 +1805,11 @@ catecvcount <- function(data,
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 #' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 #' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -1951,9 +1994,9 @@ catecvmean <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        verbose = 0,
-                       ps.control = list(), ...) {
+                       ps.control = list(), rf.control = list(), ...) {
   resolve_ps_control(ps.control)
-
+  resolve_rf_control(rf.control)
 
   stop("This functionality is not implemented yet")
 
@@ -2121,7 +2164,7 @@ catecvmean <- function(data,
                     xvar.smooth.init = xvar.smooth.init, xvar.smooth.score = xvar.smooth.score,
                     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                     tree.depth = tree.depth,  n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
-                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf, ..., ps.control = ps.control)
+                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf, ..., ps.control = ps.control, rf.control = rf.control)
 
     #    if ("contrastReg" %in% score.method) converge.contrastReg.cv[cv.i] <-
     #      fit$result.contrastReg$converge.contrastReg

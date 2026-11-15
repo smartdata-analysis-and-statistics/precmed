@@ -58,7 +58,7 @@ The package offers 5 methods to estimate the CATE score: Poisson regression, neg
 
 ### Poisson
 
-1. Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset separately in each treatment group (i.e., $\text{log}(\mathbb{E}[Y^{(r)}|\boldsymbol{x},t])=\beta_r \boldsymbol{\tilde x}$ for $r \in \{0,1\}$ where $\boldsymbol{\tilde x}$ is the $x$ with an intercept) with Poisson regression. Denote the prediction for one time unit as $\hat Y^{(r)}(\boldsymbol{x},1)=\text{exp}(\hat \beta_r \boldsymbol{\tilde x})$.
+1. Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset separately in each treatment group (i.e., $\text{log}(\mathbb{E}[Y^{(r)}|\boldsymbol{x},t])=\log(t)+\beta_r \boldsymbol{\tilde x}$ for $r \in \{0,1\}$ where $\boldsymbol{\tilde x}$ is the $x$ with an intercept) with Poisson regression. Denote the prediction for one time unit as $\hat Y^{(r)}(\boldsymbol{x},1)=\text{exp}(\hat \beta_r \boldsymbol{\tilde x})$.
 
 2. The CATE score with Poisson is the plug-in estimator
 
@@ -69,6 +69,8 @@ $$\hat{CATE}_{Poisson}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\bolds
 Follow the same step as in Poisson but replace Poisson regression with negative binomial regression in step 1. 
 
 ### Boosting
+
+Gradient boosting builds an additive prediction model using sequentially fitted learners [@friedman2001greedy].
 
 1. Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset separately in each treatment group (i.e., $\mathbb{E}[Y^{(r)}|\boldsymbol{x},t]$ for $r \in \{0,1\}$) with Poisson-based gradient boosting regression method. Denote the prediction for one time unit as $\hat Y^{(r)}(\boldsymbol{x},1)$.
 
@@ -81,60 +83,21 @@ $$\hat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\bold
 
 ### Two regressions
 
-1. Randomly separate the data $D$ into $K$ (`Kfold`) non-overlapping parts of approximately equal sizes, $D_1, \dots, D_K$.
-2. For each fold $k=1,\dots,K$, and separately by treatment group $r \in \{0,1\}$:
+The procedure adapts the ratio-based estimator of @yadlowsky2020estimation to count outcomes. Split the observations into treatment-stratified folds $D_k$. For each fold, fit the initial outcome and propensity models on $D_{-k}$ and predict the held-out observations in $D_k$. Pool these out-of-fold predictions, denoting each patient's arm-specific predicted rate by $m_{ri}$ and propensity for the observed arm by $p_{ri}$.
 
-    2.1 Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset with the
-    Poisson-based gradient boosting regression method (`initial.predictor.method = "boosting"`) based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome. Other methods can be used to generate an initial prediction (see `initial.predictor.method` argument).
-    
-    2.2 Estimate the PS based on $D_{-k}$. Denote the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$ and estimate the weights $\hat W(r)=r\frac{R}{\hat \pi_{-k}(\boldsymbol{x})}+(1-r)\frac{(1-R)}{1-\hat \pi_{-k}(\boldsymbol{x})}$ with $R$ denoting the treatment received.
-    
-    2.3 Solve the following weighted estimating equation by fitting a Poisson regression with $Y$ as the response, $\text{log}(\hat Y^{(r)}(\boldsymbol{x},1))$ and $x$ as the covariates, $\text{log}(T)$ as the offset, and $\hat W(r)$ as weight:
-    
-    $$
-    S(\alpha_{rk}, \boldsymbol{\gamma_{rk}}) = \sum_{i \in D_{-k}} \hat W(r)
-    \begin{pmatrix}
-    \text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right) \\
-    \boldsymbol{\tilde x}
-    \end{pmatrix}
-    \left(Y - \text{exp}\left(\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right) + \boldsymbol{\gamma_{rk}^T \boldsymbol{\tilde x}} \right) \times T \right) = 0
-    $$
-    
-    where $i$ denotes individual observations. Denote the roots by $(\hat \alpha_{rk}, \boldsymbol{\hat\gamma_{rk}})$.
-    
-3. Solve the following doubly robust estimating equation by fitting a Poisson regression with $\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)$ as the response, $\boldsymbol{x}$ as the covariates, and no offset or weight:
-    
-$$S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{-k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y^{(r)}(\boldsymbol{x},1)\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0$$
-Denote the estimator as $\boldsymbol{\hat \beta_r}$. 
+For each arm $r$, fit a weighted Poisson regression of the observed rate $Y_i/T_i$ on $\log(m_{ri})$ and $\tilde x_i$, with weight $I(R_i=r)/p_{ri}$. Predict the resulting mean $q_{ri}$ for every observation, and fit a second unweighted Poisson regression of $q_{ri}$ on $\tilde x_i$. Denote the resulting coefficients by $\hat\beta_r$. The score is
 
-4. Repeat steps 1-3 with $B$ bootstrap samples and denote the estimator $\boldsymbol{\hat \beta_{rb}}$ in the $b$ sample. The final estimator $\boldsymbol{\hat \beta_r}$ is the mean of the $\boldsymbol{\hat \beta_{rb}}$.
+$$\widehat{CATE}_{tworeg}(\boldsymbol{x})=(\hat\beta_1-\hat\beta_0)^T\tilde x.$$
 
-5. The CATE score with two regressions is  
-
-$$\hat{CATE}_{tworeg}(\boldsymbol{x})=(\boldsymbol{\hat \beta_1} - \boldsymbol{\hat \beta_0})^T\boldsymbol{\tilde x}$$
+Repeat the procedure $B$ times with new random fold assignments and average the coefficient differences. These are repeated cross-fitting splits, not bootstrap samples.
 
 ### Contrast regression
 
-1. Randomly separate the data $D$ into $K$ (`Kfold`) non-overlapping parts of approximately equal sizes, $D_1, \dots, D_K$.
-2. For each fold $k=1,\dots,K$, and separately by treatment group $r \in \{0,1\}$:
+The contrast estimator uses the same held-out predictions and repeated fold assignments [@yadlowsky2020estimation]. Write $\eta_i=\exp(\delta^T\tilde x_i)$, $\pi_i$ for the out-of-fold propensity for treatment 1, and $m_{0i},m_{1i}$ for the out-of-fold rate predictions. The fitted score solves
 
-    2.1 Estimate the conditional mean outcome given baseline covariates and log-transformed exposure time as the offset with the
-    Poisson-based gradient boosting regression method  (`initial.predictor.method = "boosting"`) based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x},t)$. This is the initial nonparametric prediction of the potential outcome. Other methods can be used to generate an initial prediction (see `initial.predictor.method` argument).
-    
-    2.2 Estimate the PS based on $D_{-k}$. Denote the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$.
-    
-3. Solve the following doubly robust estimating equation by Newton-Raphson method or using a L2-norm score method if the former fails to converge:
-$$\begin{aligned}
-S(\boldsymbol{\delta})&=\sum_{k=1}^K \sum_{i \in D_{-k}} \boldsymbol{\tilde x}\Bigg[\frac{R\left\{\frac{Y}{T}-\frac{1}{2}\left(\hat Y_{-k}^{(0)}(\boldsymbol{ x})\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x}) + \hat Y_{-k}^{(1)}(\boldsymbol{x})\right)\right\}(1-\hat\pi_{-k}(\boldsymbol{x}))}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\\
-&+\frac{(1-R)\left\{\frac{Y}{T}-\frac{1}{2}\left(\hat Y_{-k}^{(0)}(\boldsymbol{ x}) + \hat Y_{-k}^{(1)}(\boldsymbol{x})\text{exp}(-\boldsymbol{\delta^T}\boldsymbol{\tilde x})\right)\right\}\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\Bigg]=0
-\end{aligned}$$
-Denote the estimator as $\boldsymbol{\hat\delta}$.
+$$\sum_i \tilde x_i\frac{R_i( Y_i/T_i-(\eta_i m_{0i}+m_{1i})/2)(1-\pi_i)-(1-R_i)\{\eta_iY_i/T_i-(\eta_i m_{0i}+m_{1i})/2\}\pi_i}{\eta_i\pi_i+1-\pi_i}=0.$$
 
-4. Repeat steps 1-3 with $B$ bootstrap samples and denote the estimator $\boldsymbol{\hat \delta_b}$ in the $b$ sample. The final estimator $\boldsymbol{\hat \delta}$ is the mean of the $\boldsymbol{\hat \delta_b}$.
-
-5. The CATE score with contrast regression is  
-
-$$\hat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}$$
+The final score is $\hat\delta^T\tilde x$. The coefficients are averaged across converged repetitions; if none converged, the coefficients from all repetitions are averaged. The equation is solved by Newton--Raphson, with numerical minimization as a fallback.
 
 
 ### Validation curves and the ABC statistics 
@@ -172,7 +135,7 @@ ABC calculation examples in relation with `higher.y` argument in `catecv()` and 
 
 ## Estimation and validation for survival outcomes
 
-For survival outcomes, the CATE score is expressed as a log-ratio of restricted mean time lost conditional on baseline covariates. It can be estimated with random forest, boosting, Poisson regression, or adaptations of the doubly robust two-regression and contrast-regression approaches [@yadlowsky2020estimation]. Chapter 20 of the book also discusses restricted mean time lost as an outcome for ratio-based treatment effects [@jiang2026visualization].
+For survival outcomes, the CATE score is expressed as a log-ratio of restricted mean time lost conditional on baseline covariates. It can be estimated with random forest, boosting, Poisson regression, or adaptations of the doubly robust two-regression and contrast-regression approaches [@yadlowsky2020estimation]. Chapter 20 of the book also discusses restricted mean time lost as an outcome for ratio-based treatment effects [@jiang2026visualization]. For restricted mean event time regression using inverse probability of censoring weighting (IPCW), see @tian2014predicting; the procedures below adapt these ideas to the RMTL treatment-effect setting.
 
 Assume that the following data are recorded for each of $n$ observations:
 
@@ -206,112 +169,37 @@ $$\widehat{CATE}_{Poisson}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\b
 
 ### Boosting
 
-1.  Estimate the conditional mean RMTL given baseline covariates separately in each treatment group (i.e.,
-$\mathbb{E}[Y^{(r)}|\boldsymbol{x}]$ for $r \in \{0,1\}$) with Poisson-based gradient boosting regression method weighted with IPCW. Denote the prediction as $\hat Y^{(r)}(\boldsymbol{x})$.
-
-    -   The number of trees is specificed with the argument
-        `n.trees.boosting`. Default is 200.
-    -   The depth of trees is specified with the argument `tree.depth`.
-        Default is 2.
-
-2.  The CATE score with boosting is the plug-in estimator
-
-$$\widehat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\boldsymbol{x})}{\hat Y^{(0)}(\boldsymbol{x})}\right)$$
+Within each treatment arm, the implementation fits IPCW-weighted Gaussian gradient boosting to the restricted survival time divided by $\tau$, followed by a weighted binomial GAM calibration of the predictions and covariates. It converts the resulting predicted restricted mean survival time to RMTL and takes the log ratio. Gradient boosting is described by @friedman2001greedy. `tree.depth` controls the boosting trees; `n.trees.boosting` is the maximum number of trees considered for cross-validation.
 
 ### Random forest
 
-1.  Estimate the conditional mean RMTL given baseline covariates separately in each treatment group (i.e.,
-    $\mathbb{E}[Y^{(r)}|\boldsymbol{x}]$ for $r \in \{0,1\}$) with survival random forest. Denote the prediction as
-    $\hat Y^{(r)}(\boldsymbol{x})$.
+Random survival forests extend random forests to right-censored data [@ishwaran2008random]. A forest is fitted separately in each treatment arm. The predicted survival curve is integrated to $\tau$ to estimate RMST; subtracting that integral from $\tau$ gives predicted RMTL $\hat L_r(\boldsymbol{x})$. The score is
 
-    -   The number of trees in boosting is selected via CV with a maximum number of trees specificed with the argument
-        `n.trees.rf`. Default is 1,000.
-    -   The base learners are regression trees with depth specified with the argument `tree.depth`. Default is 2.
+$$\widehat{CATE}_{randomForest}(\boldsymbol{x})=\log\left(\frac{\hat L_1(\boldsymbol{x})}{\hat L_0(\boldsymbol{x})}\right).$$
 
-2.  The CATE score with boosting is the plug-in estimator
-
-$$\widehat{CATE}_{boosting}(\boldsymbol{x})=\text{log}\left(\frac{\hat Y^{(1)}(\boldsymbol{x})}{\hat Y^{(0)}(\boldsymbol{x})}\right)$$
+`n.trees.rf` specifies the number of trees (default 1,000); it is not selected by cross-validation. Optional forest settings can be supplied through `rf.control`, for example `list(mtry = 3, nodesize = 15)`. `tree.depth` applies to boosting; use `rf.control$nodedepth` to set a forest depth limit.
 
 ### Two regressions
 
-1.  Randomly separate the data $D$ into $K$ (`Kfold`) non-overlapping parts of approximately equal sizes, $D_1, \dots, D_K$.
+This procedure adapts the ratio-based two-regression approach of @yadlowsky2020estimation to survival outcomes, using IPCW for censoring [@tian2014predicting]. Let $U_i=\min(Y_i,\tau)$ and $D_i^*=I(Y_i\geq\tau)+I(Y_i<\tau,\delta_i=1)$. The censoring model is fitted on the full data used for the fit. The weight is
 
-2.  For each fold $k=1,\dots,K$, and separately by treatment arm $r \in \{0,1\}$:
+$$w_i=\frac{D_i^*}{\max\{\hat G(U_i\mid X_i),\texttt{surv.min}\}},$$
 
-    2.1 Estimate the conditional mean RMTL given baseline covariates with the Poisson-based gradient boosting regression method (`initial.predictor.method = "boosting"`) based on observations without the kth fold, $D_{-k}$, and denote the prediction as $\hat Y_{-k}^{(r)}(\boldsymbol{x})$. This is the initial nonparametric prediction of the potential outcome. Other methods can be used to generate an initial prediction (see `initial.predictor.method` argument).
+normalized to have mean one, where $\hat G$ estimates censoring survival using `ipcw.model`. The default model includes the outcome-model covariates and treatment; a supplied `ipcw.model` determines its covariates.
 
-    2.2 Estimate the propensity score model based on $D_{-k}$. Denote the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$ and estimate the weights $\hat W_{-k}(r)=r\frac{R}{\hat \pi_{-k}(\boldsymbol{x})}+(1-r)\frac{(1-R)}{1-\hat \pi_{-k}(\boldsymbol{x})}$
-    with $R$ denoting the treatment received.
+Split the data into treatment-stratified folds. Fit arm-specific initial survival outcome models and a propensity model on each fold's complement and predict its held-out observations. The initial model may use random survival forests, weighted Gaussian boosting followed by GAM calibration, or weighted logistic regression. Pool the out-of-fold predictions, cap predicted restricted survival time at $0.99\tau$, and convert it to predicted RMTL $m_{ri}$.
 
-    2.3 Estimate the IPCW:
+For each arm $r$, fit a Poisson regression of $\tau-U_i$ on $\log(m_{ri})$ and $\tilde x_i$, weighted by $w_i I(R_i=r)/p_{ri}$, where $p_{ri}$ is the out-of-fold propensity for that arm. Predict the fitted means for all observations and regress them on $\tilde x_i$ with an unweighted Poisson regression. Denoting the resulting coefficients by $\hat\beta_r$, the score is $(\hat\beta_1-\hat\beta_0)^T\tilde x$.
 
-    $$\hat L(r,y) = \frac{\delta+(1-\delta)I(y^{(r)}\geq\tau)}{\hat K_{C^{(r)}}(T \wedge \tau|x)}$$
-
-    where $\hat K_{C^{(r)}}(T \wedge \tau|x)$ is a consistent estimator of the survival function of the censoring time given the covariate $x$, for example, using a Cox model and the Breslow estimator for the cumulative baseline hazard function (`ipcw.method = "breslow"`).
-
-    2.4 Solve the following weighted estimating equation by fitting a Poisson regression with $\tau - (T\wedge\tau)$ as the response, $\text{log}(\hat Y_{-k}^{(r)}(\boldsymbol{x}))$ and $x$ as the covariates, and $\hat K(r,y)\times\hat W_{-k}(r)$ as weight:
-
-    $$S(\alpha_{rk}, \boldsymbol{\gamma_{rk}})=\sum_{i \in D_{-k}} \hat K(r,y) \hat W_{-k}(r) \left((\tau- T\wedge\tau) - \text{exp}\left(\alpha_{rk}\text{log}
-     \left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\gamma_{rk}^T}\boldsymbol{\tilde x}\right)\right)=0$$
-
-3.  Solve the following doubly robust estimating equation by fitting a
-    Poisson regression with
-    $\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)$
-    as the response, $\boldsymbol{x}$ as the covariates, and no offset
-    or weight:
-    $$S(\boldsymbol{\beta_r})=\sum_{k=1}^K \sum_{i \in D_{k}}\boldsymbol{\tilde x}\left(\text{exp}\left(\hat\alpha_{rk}\text{log}\left(\hat Y_{-k}^{(r)}(\boldsymbol{x})\right)+\boldsymbol{\hat\gamma_{rk}^T\boldsymbol{\tilde x}}\right)-\text{exp}(\boldsymbol{\beta_r^T\tilde x})\right)=0$$
-    Denote the estimator as $\boldsymbol{\hat \beta_r}$.
-
-4.  Repeat steps 1-3 with $B$ bootstrap samples (`B`) and denote the estimator $\boldsymbol{\hat \beta_{rb}}$ in the $b$ sample. The final estimator $\boldsymbol{\hat \beta_r}$ is the mean of the  $\boldsymbol{\hat \beta_{rb}}$.
-
-5.  The CATE score with two regression is
-
-$$\widehat{CATE}_{tworeg}(\boldsymbol{x})=(\boldsymbol{\hat \beta_1} - \boldsymbol{\hat \beta_0})^T\boldsymbol{\tilde x}$$
+The process is repeated for $B$ random fold assignments and the coefficient differences are averaged. These are repeated cross-fitting splits, not bootstrap samples.
 
 ### Contrast regression
 
-1.  Randomly separate the data $D$ into $K$ (`Kfold`) non-overlapping
-    parts of approximately equal sizes, $D_1, \dots, D_K$.
+Use the same IPCW and out-of-fold predictions as above. The contrast-regression approach adapts @yadlowsky2020estimation to censored survival outcomes. Let $z_i=(\tau-U_i)/\tau$, let $m_{ri}$ denote the predicted RMTL divided by $\tau$, and write $\eta_i=\exp(\delta^T\tilde x_i)$. With $\pi_i$ the out-of-fold propensity for treatment 1, the implementation solves
 
-2.  For each fold $k=1,\dots,K$, and separately by treatment arm
-    $r \in \{0,1\}$:
+$$\sum_i w_i\tilde x_i\frac{R_i\{z_i-(\eta_i m_{0i}+m_{1i})/2\}(1-\pi_i)-(1-R_i)\{\eta_i z_i-(\eta_i m_{0i}+m_{1i})/2\}\pi_i}{\eta_i\pi_i+1-\pi_i}=0.$$
 
-    2.1 Estimate the conditional mean RMTL given baseline covariates
-    with the Poisson-based gradient boosting regression method
-    (`initial.predictor.method = "boosting"`) based on observations
-    without the kth fold, $D_{-k}$, and denote the prediction as
-    $\hat Y_{-k}^{(r)}(\boldsymbol{x})$. This is the initial
-    nonparametric prediction of the potential outcome. Other methods can
-    be used to generate an initial prediction (see
-    `initial.predictor.method` argument).
-
-    2.2 Estimate the propensity score model based on $D_{-k}$. Denote
-    the estimated PS as $\hat \pi_{-k}(\boldsymbol{x})$.
-
-    2.3 Estimate the IPCW:
-
-    $$\hat L(r,y) = \frac{\delta+(1-\delta)I(y^{(r)}\geq\tau)}{\hat K_{C^{(r)}}(T \wedge \tau|x)}$$
-
-    where $\hat K_{C^{(r)}}(T \wedge \tau|x)$ is a consistent estimator
-    of the survival function of the censoring time given the covariate
-    $x$, for example, using a Cox model and the Breslow estimator for
-    the cumulative baseline hazard function (`ipcw.method = "breslow"`).
-
-3.  Solve the following doubly robust estimating equation by
-    Newton-Raphson method or using a L2-norm score method if the former
-    fails to converge: $$\begin{aligned}
-    S(\boldsymbol{\delta})&=\sum_{k=1}^K \sum_{i \in D_{k}} \hat L(r,y) \boldsymbol{\tilde x}\Bigg[\frac{R\left\{(\tau - T\wedge\tau)-\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat Y_{-k}^{(0)}(\boldsymbol{x})\right\}(1-\hat\pi_{-k}(\boldsymbol{x}))}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\\
-    &-\frac{(1-R)\left\{(\tau - T\wedge\tau)-\hat Y_{-k}^{(0)}(\boldsymbol{ x}) \right\}\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})}{\text{exp}(\boldsymbol{\delta^T}\boldsymbol{\tilde x})\hat\pi_{-k}(\boldsymbol{x})+1-\hat\pi_{-k}(\boldsymbol{x})}\Bigg]=0
-    \end{aligned}$$ Denote the estimator as $\boldsymbol{\hat\delta}$.
-
-4.  Repeat steps 1-3 with $B$ bootstrap samples (`B`) and denote the
-    estimator $\boldsymbol{\hat \delta_b}$ in the $b$ sample. The final
-    estimator $\boldsymbol{\hat \delta}$ is the mean of the
-    $\boldsymbol{\hat \delta_b}$.
-
-5.  The CATE score with contrast regression is
-
-$$\widehat{CATE}_{contrastreg}(\boldsymbol{x})=\boldsymbol{\hat \delta^T\tilde x}$$
+The final score is $\hat\delta^T\tilde x$. The coefficients are averaged across converged repetitions; if none converged, the coefficients from all repetitions are averaged. Newton--Raphson is used with numerical minimization as a fallback.
 
 ### Validation curves and the ABC statistics
 

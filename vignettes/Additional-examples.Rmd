@@ -245,9 +245,9 @@ catecv(response = "survival",
        verbose = 0)
 ```
 
-Note that for `boosting` and `randomForest` methods that are tree-based, parameters such as tree depth and number of trees can be specified with arguments `tree.depth`, `n.trees.rf`, and `n.trees.boosting`.
+For boosting, `tree.depth` and `n.trees.boosting` control tree depth and the maximum number of trees. For random forests, `n.trees.rf` sets the number of trees, and `rf.control` can set forest options, for example `rf.control = list(mtry = 3, nodesize = 15)`. These options also apply when random forest is the initial predictor.
 
-Generally speaking, the "logistic" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is somewhere in between with longer computational time as the number of trees and tree depth increase.
+Generally speaking, the "logistic" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is often somewhere in between; computation time depends on the data and forest settings.
 
 ### Subgroup proportion
 

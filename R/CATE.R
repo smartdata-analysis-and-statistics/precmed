@@ -75,8 +75,11 @@
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 #' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.rf A positive integer specifying the maximum number of trees in random forest.
-#' Used if \code{score.method = 'ranfomForest'} or if \code{initial.predictor.method = 'randomForest'}
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
+#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 #' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
@@ -209,8 +212,10 @@ catefit <- function(response,
                     plot.gbmperf = TRUE,
                     verbose = 0,
                     contrast.control = list(),
-                    rmst.control = list(), ps.control = list(), ...) {
+                    rmst.control = list(), ps.control = list(), rf.control = list(), ...) {
   resolve_ps_control(ps.control)
+  resolve_rf_control(rf.control)
+  if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
 
 
   stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
@@ -220,6 +225,7 @@ catefit <- function(response,
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  if (response == "count") .args$rf.control <- NULL
   if (response != "survival") .args$rmst.control <- NULL
   if (response == "continuous") .args$contrast.control <- NULL
   switch(response,
