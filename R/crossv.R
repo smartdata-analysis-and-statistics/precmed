@@ -2927,7 +2927,7 @@ plot.precmed <- function(x,
     ggplot(aes(x = .data$prop, y = .data$ate.cv, color = .data$score)) +
     geom_line(linewidth = 1.2) +
     facet_wrap(~ .data$set, ncol = 2) +
-    scale_x_continuous(labels = function(x) paste0(format(100 * x, trim = TRUE, scientific = FALSE), "%")) +
+    ggplot2::scale_x_continuous(labels = function(x) paste0(format(100 * x, trim = TRUE, scientific = FALSE), "%")) +
     scale_y_continuous(limits = c(lowery, uppery)) +
     labs(y = ylab, x = xlab, title = title) +
     theme +

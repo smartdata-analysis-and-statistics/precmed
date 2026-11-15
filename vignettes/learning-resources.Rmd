@@ -17,10 +17,16 @@ For a broader introduction to personalized medicine using real-world data, see [
 
 ## Free courses
 
-Two free courses complement the book and introduce **precmed**, its practical use, and the underlying statistical methods.
+These free courses can help you build the knowledge and practical skills needed to study personalized treatment decisions. [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro) introduces the foundations through recorded webinars, exercises, and readings. The [companion course to the book](https://sdas.thinkific.com/courses/rwd-book) provides background materials, example R code, and curated references to support practical analyses with **precmed** and related methods.
 
-- [An Introduction to Precision Medicine](https://sdas.thinkific.com/courses/precmedintro) covers the foundations through recorded webinars, exercises, and readings.
-- The [companion course to the book](https://sdas.thinkific.com/courses/rwd-book) provides background materials, example R code, and curated references to support practical analyses.
+<div class="learning-course-widgets">
+<div class="thinkific-product-card" data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff" data-btn-bg-color="#005a80" data-card-type="card" data-link-type="landing_page" data-product="3112887" data-embed-version="0.0.2" data-card-txt-color="#243746" data-card-bg-color="#ffffff" data-store-url="https://sdas.thinkific.com/embeds/products/show">
+<div class="iframe-container"></div>
+</div>
+<div class="thinkific-product-card" data-btn-txt="Start learning for free" data-btn-txt-color="#ffffff" data-btn-bg-color="#005a80" data-card-type="card" data-link-type="landing_page" data-product="3591896" data-embed-version="0.0.2" data-card-txt-color="#243746" data-card-bg-color="#ffffff" data-store-url="https://sdas.thinkific.com/embeds/products/show">
+<div class="iframe-container"></div>
+</div>
+</div>
 
 ## Methodological references
 

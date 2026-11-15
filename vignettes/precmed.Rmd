@@ -59,15 +59,15 @@ The **precmed** package contains functions to
 
 Chapter 19 discusses validation strategies and the assessment of discrimination, calibration, and decision accuracy [@thao2026validation]. Chapter 20 provides practical guidance on validation curves, ABC statistics, and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
 
-We recommend the following workflow to develop a model for estimating the CATE in order to identify treatment effect heterogeneity:
+We recommend the following workflow to estimate the overall ATE and develop a model for estimating the CATE to identify treatment effect heterogeneity:
 
-1. Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE using cross-validation through `catecv()`.
-2. Select the best modelling approach using 3 metrics:
+1. Use `atefit()` to estimate the overall ATE between two treatment groups and its uncertainty using bootstrap resampling.
+2. Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE using cross-validation through `catecv()`.
+3. Select the best modelling approach using 3 metrics:
     * Compare the steepness of the validation curves in the validation samples across methods using `plot()`. Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under the argument `score.method`.
     * The area between curves (ABC) using `abc()` quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
     * Compare the distribution of the estimated ATE across different levels of the CATE score percentiles using `boxplot()`. 
-3. Apply the best modelling approach in the original data or in a new external dataset using `catefit()`. 
-4.	Optional. Use `atefit()` to estimate ATE between 2 treatment groups with a doubly robust estimator and estimate the variability of the ATE with a bootstrap approach.
+4. Apply the best modelling approach in the original data or in a new external dataset using `catefit()`.
 
 In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.
 
