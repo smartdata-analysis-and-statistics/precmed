@@ -5,7 +5,7 @@ differ across patients, and to assess a prediction model using
 cross-validation. It uses the included simulated multiple sclerosis data
 and a count outcome: the number of relapses during follow-up.
 
-## Is precmed right for my study?
+## Is precmed suitable for me?
 
 | Question | Guidance |
 |----|----|

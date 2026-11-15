@@ -22,7 +22,8 @@ estcount.multilevel.subgroup(
   minPS = 0.01,
   maxPS = 0.99,
   ps.control = list(),
-  context = "Count"
+  context = "Count",
+  diagnostic = NULL
 )
 ```
 
@@ -102,6 +103,11 @@ estcount.multilevel.subgroup(
 - context:
 
   Label used to identify the analysis in subgroup warnings.
+
+- diagnostic:
+
+  Optional internal callback for recording subgroup support and fitting
+  diagnostics.
 
 ## Value
 
