@@ -1,6 +1,6 @@
 Package: precmed
 Type: Package
-Title: Precision Medicine
+Title: Estimation and Validation of Heterogeneous Treatment Effects
 Version: 1.1.0.9000
 Authors@R: c(person(given = "Lu", 
                     family = "Tian", 
@@ -33,9 +33,13 @@ Authors@R: c(person(given = "Lu",
             person(given = "Joana", 
                    family = "Caldas", 
                    role = "ctb"))
-Description: A doubly robust precision medicine approach to fit, cross-validate
-    and visualize prediction models for the conditional average treatment effect
-    (CATE). For time-to-event outcomes, it also estimates restricted mean
+Description: Methods for estimating average treatment effects (ATE) and
+    estimating and validating conditional average treatment effects (CATE)
+    in randomized trials and observational studies with count or time-to-event
+    outcomes. Supports the study of treatment effect heterogeneity by fitting,
+    cross-validating and visualizing CATE prediction models, and estimates
+    ATE using doubly robust methods. For time-to-event
+    outcomes, it also estimates restricted mean
     survival and marginal cumulative hazard ratios at a specified horizon.
     The cumulative hazard ratio uses augmented inverse probability of treatment
     weighting with outcome and censoring models, without discretizing event times.

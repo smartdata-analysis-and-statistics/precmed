@@ -35,6 +35,8 @@ knitr::opts_chunk$set(cache.extra = list(
 
 This vignette demonstrates how to use `precmed` to estimate average and conditional average treatment effects (ATEs and CATEs) for survival outcomes. Using fully synthetic data inspired by a multiple sclerosis treatment comparison, we model restricted mean time lost, compare CATE scoring methods through internal validation, and interpret treatment effects in responder subgroups.
 
+For background on marginal and conditional treatment effects, see Chapter 5 [@nguyen2026causaleffects]. Chapter 17 introduces personalized treatment-effect prediction [@hoogland2026introduction].
+
 ```{r, include=FALSE}
 ###################################################################
 #

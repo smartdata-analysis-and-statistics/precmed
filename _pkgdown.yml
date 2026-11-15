@@ -16,8 +16,8 @@ navbar:
   - icon: fa-home fa-lg
     aria-label: Home
     href: index.html
-#  - text: Get started
-#    href: articles/precmed.html
+  - text: Quick start
+    href: articles/quick-start.html
   - text: Vignettes
     menu:
     - text: Estimating and validating treatment effects for count outcomes
@@ -35,6 +35,10 @@ navbar:
     href: reference/index.html
   - text: News
     href: news/index.html
+  - text: Citation
+    href: authors.html#citation
+  - text: Support
+    href: https://github.com/smartdata-analysis-and-statistics/precmed/issues
   right:
   - icon: fa-github
     aria-label: Source code

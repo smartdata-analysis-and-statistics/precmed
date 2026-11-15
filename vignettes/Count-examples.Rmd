@@ -60,6 +60,8 @@ library(ggplot2)
 ## Example data
 We consider a simulated dataset that is based on real-world claims data from patients with multiple sclerosis. The dataset `countExample` includes 4,000 patients with information on the following 9 variables.
 
+Alternatively, `simulate_count(n = 4000, seed = 1)` generates a fully synthetic dataset with the same analysis variables. Its treatment assignment, rate ratio, treatment interactions, follow-up and count dispersion can be varied; see `?simulate_count`. The simulator uses illustrative assumptions and does not reconstruct the claims data or the packaged example.
+
 ```{r data, echo = F, eval = T, include = F, results = 'hide'}
 data(countExample)
 countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
@@ -140,7 +142,7 @@ The adjusted rate ratio is `r round(exp(coef(output_poisson_adjusted)["trtdrug1"
 
 We now use `atefit()` to estimate a population-level rate ratio, combining outcome and propensity score models. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the propensity score (PS) model (argument `ps.model`) or the outcome model (argument `cate.model`) or both are correctly specified, under the required assumptions. The function also provides standard errors, confidence intervals and p-values based on bootstrap.
 
-In this example, the rate ratio compares the relapse rate under drug 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal interpretation requires appropriate assumptions, including no unmeasured confounding, adequate overlap in treatment assignment, and well-defined treatments. Chapter 17 discusses identification of conditional treatment effects in randomized and non-randomized data [@hoogland2026introduction].
+In this example, the rate ratio compares the relapse rate under drug 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal interpretation requires appropriate assumptions, including no unmeasured confounding, adequate overlap in treatment assignment, and well-defined treatments. Chapter 5 introduces marginal and conditional treatment effects [@nguyen2026causaleffects].
 
 The mandatory arguments for `atefit()` are:
 

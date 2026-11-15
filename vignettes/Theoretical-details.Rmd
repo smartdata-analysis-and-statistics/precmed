@@ -32,6 +32,8 @@ This vignette explains the ratio-based CATE estimators and validation procedures
 
 A CATE describes the average treatment effect among patients with the same measured baseline characteristics; it does not identify an individual patient's unobservable treatment effect. Chapter 17 of @debray2026comparative introduces the principles of treatment effect prediction, model development in randomized and non-randomized data, and the assumptions needed to identify CATEs [@hoogland2026introduction].
 
+Chapter 5 introduces marginal and conditional causal effects [@nguyen2026causaleffects].
+
 The primary methodological reference for the two-regression and contrast-regression estimators is @yadlowsky2020estimation. For practical guidance on interpreting and evaluating the resulting scores, the book provides two complementary chapters:
 
 * **Chapter 19: Validation of prediction models for patient outcomes and individualized treatment effect** discusses validation strategies, discrimination, calibration, and decision accuracy [@thao2026validation].

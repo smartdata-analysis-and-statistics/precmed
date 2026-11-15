@@ -11,21 +11,26 @@ downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r
 
 ## Overview
 
-**precmed** was developed to help researchers with the implementation of
-precision medicine in R. A key objective of precision medicine is to
-determine the optimal treatment separately for each patient instead of
-applying a common treatment to all patients. Personalizing treatment
-decisions becomes particularly relevant when treatment response differs
-across patients, or when patients have different preferences about
-benefits and harms. This package offers statistical methods to develop
-and validate prediction models for estimating individualized treatment
-effects. These treatment effects are also known as the conditional
-average treatment effects (CATEs) and describe how different subgroups
-of patients respond to the same treatment. Presently, **precmed**
-focuses on the personalization of two competitive treatments using
-randomized data from a clinical trial (Zhao et al. 2013) or using
-real-world data (RWD) from a non-randomized study (Yadlowsky et al.
-2021).
+**precmed** is an R package for estimating average treatment effects
+(ATEs) and estimating and validating conditional average treatment
+effects (CATEs) in randomized trials and observational studies, with
+methods for count and survival outcomes. The ATE describes an effect
+across a population, while the CATE describes an average effect among
+patients with particular observed characteristics. Together, they support
+the study of treatment effect heterogeneity and precision medicine.
+
+Use **precmed** when you want to:
+
+- Estimate the ATE for two treatments using doubly robust methods.
+- Explore treatment effect heterogeneity by developing and cross-validating CATE models.
+- Visualize and compare estimated effects across patient subgroups.
+
+The methods support causal inference under appropriate assumptions; for
+observational data, these include adequate control of confounding and
+sufficient treatment overlap. The package builds on work by Zhao et al.
+(2013) and Yadlowsky et al. (2021).
+
+See [Is precmed right for my study?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-right-for-my-study) for a quick overview of supported data, outcomes and analyses.
 
 ## Learning resources
 
@@ -104,6 +109,14 @@ The latest version can be installed from GitHub as follows:
 install.packages("devtools")
 devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 ```
+
+Try the [quick start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html) for a complete count-outcome example and validation plot.
+
+## Citation and support
+
+To cite the installed version of **precmed**, run `citation("precmed")` in R, or see the [authors and citation page](https://smartdata-analysis-and-statistics.github.io/precmed/authors.html#citation). Please also cite the methodological references relevant to your analysis.
+
+For questions, bug reports, or feature requests, use [GitHub issues](https://github.com/smartdata-analysis-and-statistics/precmed/issues). For a bug report, please include your package and R versions, the error message, and a minimal reproducible example using simulated or non-sensitive data.
 
 ## Package capabilities
 
