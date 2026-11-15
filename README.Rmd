@@ -33,7 +33,7 @@ Use **precmed** when you want to:
 
 The methods support causal inference under appropriate assumptions; for observational data, these include adequate control of confounding and sufficient treatment overlap. The package builds on work by @zhao2013effectively and @yadlowsky2020estimation.
 
-See [Is precmed right for my study?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-right-for-my-study) for a quick overview of supported data, outcomes and analyses.
+See [Is precmed suitable for me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me) for a quick overview of supported data, outcomes and analyses.
 
 ## Learning resources
 

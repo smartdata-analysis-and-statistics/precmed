@@ -30,7 +30,7 @@ observational data, these include adequate control of confounding and
 sufficient treatment overlap. The package builds on work by Zhao et al.
 (2013) and Yadlowsky et al. (2021).
 
-See [Is precmed right for my study?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-right-for-my-study) for a quick overview of supported data, outcomes and analyses.
+See [Is precmed suitable for me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me) for a quick overview of supported data, outcomes and analyses.
 
 ## Learning resources
 

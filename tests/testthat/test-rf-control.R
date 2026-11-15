@@ -14,7 +14,8 @@ test_that("forest settings reach randomForestSRC and predictions work", {
   set.seed(53)
   dat <- data.frame(y = rexp(100), d = rbinom(100, 1, .8),
                     x = rnorm(100), z = rnorm(100))
-  fit <- precmed:::fit_rf(survival::Surv(y, d) ~ ., dat, 20,
+  Surv <- survival::Surv
+  fit <- precmed:::fit_rf(Surv(y, d) ~ ., dat, 20,
                           list(mtry = 1, nodesize = 7))
   expect_equal(fit$ntree, 20)
   expect_equal(fit$mtry, 1)
