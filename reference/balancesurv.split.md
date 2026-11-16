@@ -45,8 +45,8 @@ balancesurv.split(
 
 - x.ps:
 
-  Matrix of `p.ps` baseline covariates specified in the propensity score
-  model; dimension `n` by `p.ps`.
+  Matrix of `p.ps` baseline covariates specified in the treatment model;
+  dimension `n` by `p.ps`.
 
 - x.ipcw:
 
@@ -87,8 +87,8 @@ d.train - event indicator in the training set; vector of size `m` coded
 as 0/1 trt.train - treatment received in the training set; vector of
 size `m` coded as 0/1 x.cate.train - baseline covariates for the outcome
 model in the training set; matrix of dimension `m` by `p.cate`
-x.ps.train - baseline covariates (plus intercept) for the propensity
-score model in the training set; matrix of dimension `m` by `p.ps + 1`
+x.ps.train - baseline covariates (plus intercept) for the treatment
+model in the training set; matrix of dimension `m` by `p.ps + 1`
 x.ipcw.train - baseline covariates for inverse probability of censoring
 in the training set; matrix of dimension `m` by `p.ipw` yf.train -
 follow-up time in the training set; if known, vector of size `m`; if
@@ -98,9 +98,9 @@ the validation set; vector of size `n-m` coded as 0/1 trt.valid -
 treatment received in the validation set; vector of size `n-m` coded as
 0/1 x.cate.valid - baseline covariates for the outcome model in the
 validation set; matrix of dimension `n-m` by `p.cate` x.ps.valid -
-baseline covariates (plus intercept) for the propensity score model in
-the validation set; matrix of dimension `n-m` by `p.ps + 1`
-x.ipcw.valid - baseline covariates for inverse probability of censoring
-in the validation set; matrix of dimension `n-m` by `p.ipw` yf.valid -
+baseline covariates (plus intercept) for the treatment model in the
+validation set; matrix of dimension `n-m` by `p.ps + 1` x.ipcw.valid -
+baseline covariates for inverse probability of censoring in the
+validation set; matrix of dimension `n-m` by `p.ipw` yf.valid -
 follow-up time in the training set; if known, vector of size `n-m`; if
 unknown, `yf == NULL`

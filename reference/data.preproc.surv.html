@@ -25,10 +25,12 @@ Apply at the beginning of catefitcount(), catecvcount(), catefitsurv(), and cate
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -86,13 +88,13 @@ The outcome must appear on the left-hand side.</p></dd>
 
 
 <dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
-<dd><p>A formula describing the propensity score model to be fitted.
+<dd><p>A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a RCT, specify <code>ps.model</code> as an intercept-only model.</p></dd>
 
 
 <dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
-<dd><p>A formula describing inverse probability of censoring weighting(IPCW) model to be fitted.
+<dd><p>A formula describing the censoring model used for inverse probability of censoring weighting (IPCW).
 If covariates are the same as outcome model, set <code>ipcw.model = NULL</code>.
 Otherwise, the left-hand side must be empty and the right-hand side is a covariates model.</p></dd>
 
@@ -103,7 +105,7 @@ which corresponds to setting the truncation time as the maximum survival time in
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame containing the variables in the outcome, propensity score, and IPCW models;
+<dd><p>A data frame containing the variables in the outcome, treatment, and censoring models;
 a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
@@ -154,9 +156,9 @@ for count outcomes and <code>'randomForest'</code> for survival outcomes.</p></d
            - y: outcome; vector of length <code>n</code> (observations)
            - d : the event indicator; vector of length <code>n</code>; only if <code>respone = "survival"</code>
            - trt: binary treatment; vector of length <code>n</code>
-           - x.ps: matrix of <code>p.ps</code> baseline covariates specified in the propensity score model (plus intercept); dimension <code>n</code> by <code>p.ps + 1</code>
+           - x.ps: matrix of <code>p.ps</code> baseline covariates specified in the treatment model (plus intercept); dimension <code>n</code> by <code>p.ps + 1</code>
            - x.cate: matrix of <code>p.cate</code> baseline covariates specified in the outcome model; dimension <code>n</code> by <code>p.cate</code>
-           - x.ipcw: matrix of <code>p.ipw</code> baseline covarites specified in inverse probability of censoring weighting model; dimension <code>n</code> by <code>p.ipw</code>
+           - x.ipcw: matrix of <code>p.ipw</code> baseline covarites specified in censoring model; dimension <code>n</code> by <code>p.ipw</code>
            - time: offset; vector of length <code>n</code>; only if <code>response = "count"</code>
            - if <code>fun = "catefit"</code>:
                - prop: formatted <code>prop.cutoff</code>

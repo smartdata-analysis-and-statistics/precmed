@@ -1,13 +1,16 @@
-# Methods for estimating and validating treatment effects
+# Methods for developing and validating CATE scores
 
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/precmed)](https://cran.r-project.org/package=precmed)
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-This vignette explains the ratio-based CATE estimators and validation
-procedures implemented in `precmed` for count and survival outcomes. It
-covers the scoring methods, validation curves, and ABC statistics used
-in the worked examples.
+This vignette describes CATE score development and validation methods
+for count and survival outcomes. A treatment model estimates the
+propensity score, and a censoring model provides probabilities for
+inverse probability of censoring weighting (IPCW). For average treatment
+effect estimation across binary, count and survival outcomes, see
+[Methods for estimating average treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
 
 ## Background and further reading
 
@@ -34,7 +37,7 @@ provides two complementary chapters:
   validation curves, and responder diagnostics, including examples using
   `precmed` (Jiang et al. 2026).
 
-## Estimation and validation for count outcomes
+## Development of CATE scores for count outcomes
 
 For count outcomes, the CATE score is expressed as a log-rate ratio
 conditional on baseline covariates. It can be estimated with boosting,
@@ -126,7 +129,7 @@ fitted learners (Friedman 2001).
 The procedure adapts the ratio-based estimator of Yadlowsky et al.
 (2021) to count outcomes. Split the observations into
 treatment-stratified folds $`D_k`$. For each fold, fit the initial
-outcome and propensity models on $`D_{-k}`$ and predict the held-out
+outcome and treatment models on $`D_{-k}`$ and predict the held-out
 observations in $`D_k`$. Pool these out-of-fold predictions, denoting
 each patient’s arm-specific predicted rate by $`m_{ri}`$ and propensity
 for the observed arm by $`p_{ri}`$.
@@ -163,88 +166,7 @@ averaged across converged repetitions; if none converged, the
 coefficients from all repetitions are averaged. The equation is solved
 by Newton–Raphson, with numerical minimization as a fallback.
 
-### Validation curves and the ABC statistics
-
-The ABC statistic summarizes the area between the validation curve and
-the overall ATE reference line (Zhao et al. 2013; Yadlowsky et al.
-2021). Chapter 20 provides worked examples of these curves and their
-interpretation as responder diagnostics (Jiang et al. 2026). Validation
-curves and ABC assess how well a score ranks patients by treatment
-benefit. They do not, by themselves, establish calibration of the
-predicted CATEs or the clinical value of a treatment rule; Chapter 19
-discusses these complementary aspects of validation (Thao et al. 2026).
-
-For a single CV iteration, it is implemented in the training and
-validation sets separately as following:
-
-**Step 1**. Calculate the ATE in the training or validation sets.
-
-**Step 2**. Calculate the ATE in 100 nested subgroups based on the
-estimated CATE score and derive the corresponding validation curve.
-Subgroups are defined with 100 equally-spaced proportions from
-`min(prop.cutoff)` to `max(prop.cutoff)` to ensure that enough data
-points are available to build the validation curve.
-
-**Step 3**. The ABC is calculated with
-[`auc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/auc.md)
-from `utility.R` using the natural cubic spline interpolation, which
-calculates the area between the horizontal line with y-intercept at the
-ATE calculated in **step 1** over the range
-\[`min(prop.cutoff)`,`max(prop.cutoff)`\] (*y*) and the validation curve
-calculated in **step 2** (*x*).
-
-The function [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
-allows the user to combine validation curves from 2 or more CV
-iterations (i.e., `cv.n > 1`). There are 2 ways to combine the
-validation curves:
-
-1.  The option `combine`=“median” takes the median of the ATEs across
-    all CV iterations in **step 1** and the median of the ATEs in the
-    100 nested subgroups in **step 2**.
-
-2.  The option `combine`=“mean” takes the mean of the ATEs across all CV
-    iterations in **step 1** and the mean of the ATEs in the 100 nested
-    subgroups in **step 2**.
-
-In either case, the ABC calculations are carried out as in **step 3**
-with the resulting *x* and *y*.
-
-The figure below explains how the ABC is calculated with a simple
-schema. The ABC calculations are such that larger positive ABC values
-always indicate more treatment effect heterogeneity. This is implemented
-by considering separately the cases when larger or smaller outcomes are
-preferred.
-
-- If larger count outcomes are preferred (`higher.y = TRUE`, e.g.,
-  positive events like number of motor developmental milestones
-  reached), a validation curve above the ATE line and decreasing towards
-  that line is synonym with treatment effect heterogeneity (top left
-  figure). However, sections of the validation curve below the ATE line
-  indicate inability to capture treatment effect heterogeneity (bottom
-  left figure). Hence, the ABC is defined by subtracting the areas below
-  the ATE line (red) from the areas above the ATE line (green) such that
-  larger positive ABC are preferred.
-
-- If smaller count outcomes are preferred (`higher.y = FALSE`, e.g.,
-  negative events like number of relapses), a validation curve below the
-  ATE line and increasing towards that line is synonym with treatment
-  effect heterogeneity (top right figure). However, sections of the
-  validation curve above the ATE line indicate inability to capture
-  treatment effect heterogeneity (bottom right figure). Hence, the ABC
-  is defined by subtracting the areas above the ATE line (red) from the
-  areas below the ATE line (green) such that larger positive ABC are
-  preferred.
-
-![](ABCexample.png)
-
-ABC calculation examples in relation with `higher.y` argument in
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-and
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
-Validation curves are represented with a blue line and the dashed line
-is the ATE
-
-## Estimation and validation for survival outcomes
+## Development of CATE scores for survival outcomes
 
 For survival outcomes, the CATE score is expressed as a log-ratio of
 restricted mean time lost conditional on baseline covariates. It can be
@@ -347,7 +269,7 @@ outcome-model covariates and treatment; a supplied `ipcw.model`
 determines its covariates.
 
 Split the data into treatment-stratified folds. Fit arm-specific initial
-survival outcome models and a propensity model on each fold’s complement
+survival outcome models and a treatment model on each fold’s complement
 and predict its held-out observations. The initial model may use random
 survival forests, weighted Gaussian boosting followed by GAM
 calibration, or weighted logistic regression. Pool the out-of-fold
@@ -384,7 +306,97 @@ averaged across converged repetitions; if none converged, the
 coefficients from all repetitions are averaged. Newton–Raphson is used
 with numerical minimization as a fallback.
 
-### Validation curves and the ABC statistics
+## Validation of CATE scores
+
+The following validation curves and ABC statistics apply to count and
+survival CATE scores supported by
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
+They assess ranking of treatment benefit and are distinct from the
+bootstrap inference described in the [ATE methods
+vignette](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
+
+### Count outcomes
+
+The ABC statistic summarizes the area between the validation curve and
+the overall ATE reference line (Zhao et al. 2013; Yadlowsky et al.
+2021). Chapter 20 provides worked examples of these curves and their
+interpretation as responder diagnostics (Jiang et al. 2026). Validation
+curves and ABC assess how well a score ranks patients by treatment
+benefit. They do not, by themselves, establish calibration of the
+predicted CATEs or the clinical value of a treatment rule; Chapter 19
+discusses these complementary aspects of validation (Thao et al. 2026).
+
+For a single CV iteration, it is implemented in the training and
+validation sets separately as following:
+
+**Step 1**. Calculate the ATE in the training or validation sets.
+
+**Step 2**. Calculate the ATE in 100 nested subgroups based on the
+estimated CATE score and derive the corresponding validation curve.
+Subgroups are defined with 100 equally-spaced proportions from
+`min(prop.cutoff)` to `max(prop.cutoff)` to ensure that enough data
+points are available to build the validation curve.
+
+**Step 3**. The ABC is calculated with
+[`auc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/auc.md)
+from `utility.R` using the natural cubic spline interpolation, which
+calculates the area between the horizontal line with y-intercept at the
+ATE calculated in **step 1** over the range
+\[`min(prop.cutoff)`,`max(prop.cutoff)`\] (*y*) and the validation curve
+calculated in **step 2** (*x*).
+
+The function [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+allows the user to combine validation curves from 2 or more CV
+iterations (i.e., `cv.n > 1`). There are 2 ways to combine the
+validation curves:
+
+1.  The option `combine`=“median” takes the median of the ATEs across
+    all CV iterations in **step 1** and the median of the ATEs in the
+    100 nested subgroups in **step 2**.
+
+2.  The option `combine`=“mean” takes the mean of the ATEs across all CV
+    iterations in **step 1** and the mean of the ATEs in the 100 nested
+    subgroups in **step 2**.
+
+In either case, the ABC calculations are carried out as in **step 3**
+with the resulting *x* and *y*.
+
+The figure below explains how the ABC is calculated with a simple
+schema. The ABC calculations are such that larger positive ABC values
+always indicate more treatment effect heterogeneity. This is implemented
+by considering separately the cases when larger or smaller outcomes are
+preferred.
+
+- If larger count outcomes are preferred (`higher.y = TRUE`, e.g.,
+  positive events like number of motor developmental milestones
+  reached), a validation curve above the ATE line and decreasing towards
+  that line is synonym with treatment effect heterogeneity (top left
+  figure). However, sections of the validation curve below the ATE line
+  indicate inability to capture treatment effect heterogeneity (bottom
+  left figure). Hence, the ABC is defined by subtracting the areas below
+  the ATE line (red) from the areas above the ATE line (green) such that
+  larger positive ABC are preferred.
+
+- If smaller count outcomes are preferred (`higher.y = FALSE`, e.g.,
+  negative events like number of relapses), a validation curve below the
+  ATE line and increasing towards that line is synonym with treatment
+  effect heterogeneity (top right figure). However, sections of the
+  validation curve above the ATE line indicate inability to capture
+  treatment effect heterogeneity (bottom right figure). Hence, the ABC
+  is defined by subtracting the areas above the ATE line (red) from the
+  areas below the ATE line (green) such that larger positive ABC are
+  preferred.
+
+![](ABCexample.png)
+
+ABC calculation examples in relation with `higher.y` argument in
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+and
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+Validation curves are represented with a blue line and the dashed line
+is the ATE
+
+### Survival outcomes
 
 The ABC statistic summarizes the area between the validation curve and
 the overall ATE reference line (Zhao et al. 2013; Yadlowsky et al.
@@ -460,14 +472,16 @@ is the ATE.
 
 ## Other `precmed` vignettes in this series
 
-[1. Estimating and validating treatment effects for count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Estimating and validating treatment effects for survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Customizing CATE models and
-validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Estimating and validating treatment effects for count
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Estimating and validating treatment effects for survival
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Customizing CATE models and
+  validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 
 ## References
 

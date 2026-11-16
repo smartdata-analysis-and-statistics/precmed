@@ -1,9 +1,10 @@
-# Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data
+# Estimate average treatment effects for binary, count and survival outcomes
 
-Doubly robust estimator of the average treatment effect between two
-treatments, which is the rate ratio for count outcomes, the restricted
-mean time lost ratio for survival outcomes and the mean difference for
-continuous outcome. Bootstrap is used for inference.
+Doubly robust average treatment effect estimation for two treatments.
+The effect is a risk difference for binary outcomes, a rate ratio for
+count outcomes, or a restricted mean time lost ratio for survival
+outcomes. Bootstrap resampling is used for inference. Continuous
+outcomes are not yet implemented.
 
 ## Usage
 
@@ -35,7 +36,7 @@ atefit(
 - response:
 
   A string describing the type of outcome in the data. Allowed values
-  include "count" (see
+  include "binary", "count" (see
   [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
   "survival" (see
   [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
@@ -44,9 +45,9 @@ atefit(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - cate.model:
 
@@ -56,10 +57,12 @@ atefit(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. For binary
+  outcomes, logical treatment values `FALSE` and `TRUE` are mapped to 0
+  and 1, respectively. Numeric 0/1 values or two distinct treatment
+  labels are also accepted. If data are from a randomized controlled
+  trial, specify `ps.model = trt ~ 1` as an intercept-only model.
 
 - ps.method:
 
@@ -72,10 +75,10 @@ atefit(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which corresponds to
-  specifying the IPCW with the same covariates as the outcome model
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty. Only
+  applies for survival outcomes. Default is `NULL`, which uses a
+  censoring model with the same covariates as the outcome model
   `cate.model`, plus the treatment.
 
 - ipcw.method:
@@ -120,9 +123,10 @@ atefit(
 - interactions:
 
   A logical value indicating whether the outcome model should assume
-  interactions between `x` and `trt`. Applies only to count outcomes. If
-  `TRUE`, interactions will be assumed only if at least 10 patients
-  received each treatment option. Default is `TRUE`.
+  interactions between `x` and `trt`. For binary outcomes this controls
+  all treatment-covariate interactions in the logistic outcome model.
+  For count outcomes, if `TRUE`, interactions will be assumed only if at
+  least 10 patients received each treatment option. Default is `TRUE`.
 
 - n.boot:
 
@@ -139,6 +143,12 @@ atefit(
   An integer value indicating whether intermediate progress messages and
   histograms should be printed. `1` indicates messages are printed and
   `0` otherwise. Default is `0`.
+
+  Binary outcomes use `response = "binary"` and estimate a doubly robust
+  risk difference (treatment 1 minus treatment 0) with a logistic
+  outcome model. The result includes `risk.difference`, `risk0`,
+  `risk1`, and bootstrap estimates. If any bootstrap fit fails,
+  inference is unavailable.
 
 - rmst.control:
 
@@ -159,6 +169,8 @@ atefit(
 
 ## Value
 
+For binary response, see
+[`atefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md).
 For count response, see description of outputs in
 [`atefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md).
 For survival response, see description of outputs in
@@ -166,10 +178,33 @@ For survival response, see description of outputs in
 
 ## Details
 
+For binary response, see
+[`atefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md).
 For count response, see details in
 [`atefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md).
 For survival response, see details in
 [`atefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md).
+
+Failed or non-finite bootstrap estimates are recorded in
+`bootstrap.diagnostics`, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected
+measure is unavailable rather than based on a subset of replicates. See
+also
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+to inspect these records.
+
+## References
+
+Hoogland, J., IntHout, J., Belias, M., et al. (2021). A tutorial on
+individualized treatment effect prediction from randomized trials with a
+binary endpoint. *Statistics in Medicine*, 40(26), 5961–5981.
+[doi:10.1002/sim.9154](https://doi.org/10.1002/sim.9154)
+
+## Author
+
+Thomas Debray <tdebray@fromdatatowisdom.com>
+
+Xiaotong (Phoebe) Jiang <xiaotong.phoebe.jiang@gmail.com>
 
 ## Examples
 

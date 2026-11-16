@@ -1,7 +1,9 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/404.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/LICENSE.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html</loc></url>
@@ -18,6 +20,7 @@
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/arg.checks.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit-extract.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitmean.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.html</loc></url>
@@ -71,6 +74,7 @@
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scorecount.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoremean.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/scoresurv.html</loc></url>
+<url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.html</loc></url>
 <url><loc>https://smartdata-analysis-and-statistics.github.io/precmed/reference/survCatch.html</loc></url>

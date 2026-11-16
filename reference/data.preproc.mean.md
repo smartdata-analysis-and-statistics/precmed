@@ -47,15 +47,15 @@ data.preproc.mean(
 
 - ps.model:
 
-  A formula describing the propensity score model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a RCT, specify
-  `ps.model` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  RCT, specify `ps.model` as an intercept-only model.
 
 - data:
 
-  A data frame containing the variables in the outcome and propensity
-  score models; a data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome and treatment
+  models; a data frame with `n` rows (1 row per observation).
 
 - prop.cutoff:
 

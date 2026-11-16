@@ -42,7 +42,7 @@ balance.split(
 
   Matrix of `p.ps` baseline covariates (plus a leading column of 1 for
   the intercept); dimension `n` by `p.ps + 1` (covariates in the
-  propensity score model plus intercept)
+  treatment model plus intercept)
 
 - time:
 
@@ -86,14 +86,14 @@ size `m` (observations in the training set) trt.train - treatment
 received in the training set; vector of size `m` coded as 0/1
 x.cate.train - baseline covariates for the outcome model in the training
 set; matrix of dimension `m` by `p.cate` x.ps.train - baseline
-covariates (plus intercept) for the propensity score model in the
-training set; matrix of dimension `m` by `p.ps + 1` time.train -
-log-transformed person-years of follow-up in the training set; vector of
-size `m` y.valid - observed outcome in the validation set; vector of
-size `n-m` trt.valid - treatment received in the validation set; vector
-of size `n-m` coded as 0/1 x.cate.valid - baseline covariates for the
-outcome model in the validation set; matrix of dimension `n-m` by
-`p.cate` x.ps.valid - baseline covariates (plus intercept) for the
-propensity score model in the validation set; matrix of dimension `n-m`
-by `p.ps + 1` time.valid - log-transformed person-years of follow-up in
-the validation set; vector of size `n-m`
+covariates (plus intercept) for the treatment model in the training set;
+matrix of dimension `m` by `p.ps + 1` time.train - log-transformed
+person-years of follow-up in the training set; vector of size `m`
+y.valid - observed outcome in the validation set; vector of size `n-m`
+trt.valid - treatment received in the validation set; vector of size
+`n-m` coded as 0/1 x.cate.valid - baseline covariates for the outcome
+model in the validation set; matrix of dimension `n-m` by `p.cate`
+x.ps.valid - baseline covariates (plus intercept) for the treatment
+model in the validation set; matrix of dimension `n-m` by `p.ps + 1`
+time.valid - log-transformed person-years of follow-up in the validation
+set; vector of size `n-m`

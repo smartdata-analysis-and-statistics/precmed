@@ -58,7 +58,7 @@ intxmean(
 
   Matrix of `p.ps` baseline covariates (plus a leading column of 1 for
   the intercept); dimension `n` by `p.ps + 1` (covariates in the
-  propensity score model plus intercept)
+  treatment model plus intercept)
 
 - score.method:
 
@@ -114,13 +114,6 @@ intxmean(
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `2`.
 
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
-
 - n.trees.rf:
 
   A positive integer specifying the number of trees. Used only if
@@ -159,6 +152,13 @@ intxmean(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
 
 - ...:
 

@@ -32,8 +32,11 @@
   : Extract average treatment effect estimates and confidence intervals
 
 - [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-  : Doubly robust estimator of and inference for the average treatment
-  effect for count, survival and continuous data
+  : Estimate average treatment effects for binary, count and survival
+  outcomes
+
+- [`atefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md)
+  : Estimate an average treatment effect for a binary outcome
 
 - [`atefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md)
   : Doubly robust estimator of and inference for the average treatment
@@ -100,8 +103,7 @@
   score for survival outcomes
 
 - [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-  : Estimation of the conditional average treatment effect (CATE) score
-  for count, survival and continuous data
+  : Estimate conditional treatment effect scores
 
 - [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md)
   : Estimation of the conditional average treatment effect (CATE) score
@@ -255,6 +257,9 @@
   : Calculate the log CATE score given the baseline covariates and
   follow-up time for specified scoring method methods for survival
   outcomes
+
+- [`simulate_binary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.md)
+  : Simulate a binary response from relapse counts
 
 - [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md)
   : Simulate an illustrative count-outcome dataset

@@ -11,18 +11,25 @@ and a count outcome: the number of relapses during follow-up.
 |----|----|
 | What data can I use? | Individual-level data from a randomized trial or an observational study. |
 | What treatments can I compare? | Two treatments at a time. |
-| What outcomes are supported? | Count and time-to-event outcomes. |
+| What outcomes are supported? | Binary, count and time-to-event outcomes for ATE and CATE fitting in the development version. Continuous outcomes are not yet implemented. |
 | What can I estimate? | An overall average treatment effect (ATE) and conditional average treatment effects (CATEs) for patients with given observed characteristics. |
-| Can I assess model performance? | Cross-validation, subgroup curves and other diagnostics help assess treatment-effect predictions. |
+| Can I assess model performance? | [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md) cross-validation, subgroup curves and ABC are illustrated here for count outcomes and in the survival tutorial. |
 | Can I interpret the estimates causally? | Only when the relevant assumptions are justified. Observational analyses require, among other assumptions, adequate control of confounding and sufficient treatment overlap. |
 
 ## Install and load
 
-Install the released version from CRAN, then load the package:
+Install the released version from CRAN, then load the package.
+Binary-outcome fitting is currently available in the development
+version, which can be installed from GitHub:
 
 ``` r
 
 install.packages("precmed")
+```
+
+``` r
+
+devtools::install_github("smartdata-analysis-and-statistics/precmed")
 ```
 
 ``` r
@@ -44,8 +51,8 @@ Start with
 to estimate the average treatment effect across the study population.
 For count outcomes, it estimates a relapse rate ratio comparing `drug1`
 with `drug0`. The outcome model includes a log follow-up offset, and the
-propensity score model describes treatment assignment using baseline
-characteristics.
+treatment model (propensity-score model) describes treatment assignment
+using baseline characteristics.
 
 ``` r
 
@@ -78,9 +85,9 @@ and its 95% confidence interval; a rate ratio below 1 indicates a lower
 estimated relapse rate with `drug1`. The confidence interval uses the
 bootstrap standard error. The estimator is doubly robust: under the
 required causal and other regularity assumptions, it is consistent if
-either the outcome model or the propensity score model is correctly
-specified. The 50 bootstrap replicates used here keep the example short;
-use more for a substantive analysis.
+either the outcome model or the treatment model is correctly specified.
+The 50 bootstrap replicates used here keep the example short; use more
+for a substantive analysis.
 
 ``` r
 
@@ -99,7 +106,7 @@ explore treatment effect heterogeneity.
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 fits a conditional average treatment effect (CATE) scoring model and
 evaluates it with cross-validation. Here, the outcome model includes a
-log follow-up offset to model relapse rates. The propensity score model
+log follow-up offset to model relapse rates. The treatment model
 describes treatment assignment using age and previous treatment. Because
 fewer relapses are better, we set `higher.y = FALSE`.
 
@@ -138,6 +145,9 @@ population.
 
 ## Next steps
 
+- Follow the [binary outcome
+  tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+  for fixed-horizon response and held-out subgroup validation.
 - Follow the [count outcome
   tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
   to estimate the overall treatment effect, compare scoring methods, and
@@ -147,8 +157,10 @@ population.
   for time-to-event data.
 - Explore [model and validation
   options](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-  and the
-  [methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md).
+  and the methods for [average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+  and [CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md).
 
 For observational data, causal interpretation depends on assumptions
 including adequate control of confounding and sufficient treatment

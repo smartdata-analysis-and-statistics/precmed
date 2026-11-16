@@ -45,10 +45,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -72,7 +74,6 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Customizing CATE models and validation</h1>
-            <h3 data-toc-skip class="subtitle">Vignette 3 of 4</h3>
             
             <h4 data-toc-skip class="date">November 16, 2026</h4>
       
@@ -110,10 +111,10 @@ where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0</mn><mo>,</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r = 0,1</annotation></semantics></math>
 is the treatment and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-is the CV fold) are calculated. See <a href="Theoretical-details.html">Methods for estimating and validating
-treatment effects</a> section for the background of these initial
-predictors and how they are used in two and contrast regressions. Here
-is a list of all 3 options:</p>
+is the CV fold) are calculated. See <a href="Theoretical-details.html">Methods for developing and validating
+CATE scores</a> section for the background of these initial predictors
+and how they are used in two and contrast regressions. Here is a list of
+all 3 options:</p>
 <ul>
 <li>“poisson” (Poisson regression from the <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> function)
 <ul>
@@ -274,8 +275,8 @@ statistic is not affected by the change in <code>prop.cutoff</code>
 because the calculation of ABC statistics depends on the minimum and
 maximum of the <code>prop.cutoff</code> vector and is always calculated
 based on 100 evenly-spaced cutoffs created from this range. See more
-theoretical details on ABC calculation in the <a href="Theoretical-details.html">Methods for estimating and validating
-treatment effects</a> section.</p>
+theoretical details on ABC calculation in the <a href="Theoretical-details.html">Methods for developing and validating
+CATE scores</a> section.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;                cv1       cv2       cv3      cv4       cv5</span></span>
@@ -332,14 +333,14 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Mon Nov 16 10:59:03 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:28:24 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Mon Nov 16 10:59:05 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:28:27 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -350,7 +351,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 3: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Mon Nov 16 10:59:08 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:28:32 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -361,7 +362,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 4: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Mon Nov 16 10:59:12 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:28:37 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -374,9 +375,9 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 5: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Mon Nov 16 10:59:15 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:28:42 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 16.86 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 24.6 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1        cv2       cv3          cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.01        NA 0.09705963        NA 2.447035e+06        NA</span></span>
@@ -426,10 +427,10 @@ where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>=</mo><mn>0</mn><mo>,</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r = 0,1</annotation></semantics></math>
 is the treatment and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
-is the cross validation fold) are calculated. See <a href="Theoretical-details.html">Methods for estimating and validating
-treatment effects</a> section for the background of these initial
-predictors and how they are used in the two and contrast regression.
-Here is a list of all 3 options:</p>
+is the cross validation fold) are calculated. See <a href="Theoretical-details.html">Methods for developing and validating
+CATE scores</a> section for the background of these initial predictors
+and how they are used in the two and contrast regression. Here is a list
+of all 3 options:</p>
 <ul>
 <li>“logistic” (logistic regression from the <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code>
 function)
@@ -602,8 +603,8 @@ this because the calculation of ABC statistics depends on the minimum
 and maximum of the <code>prop.cutoff</code> vector and 100 evenly-spaced
 subgroup cutoffs are created from this range. The highest proportion
 cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See
-more theoretical details on ABC calculation in the <a href="Theoretical-details.html">Methods for estimating and validating
-treatment effects</a> section.</p>
+more theoretical details on ABC calculation in the <a href="Theoretical-details.html">Methods for developing and validating
+CATE scores</a> section.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">output_catecv2</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span><span class="op">)</span> </span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4      cv5</span></span>
@@ -660,37 +661,37 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Mon Nov 16 11:00:11 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:30:12 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Mon Nov 16 11:00:13 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:30:16 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Mon Nov 16 11:00:16 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:30:20 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Mon Nov 16 11:00:18 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:30:24 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Mon Nov 16 11:00:20 2026 </span></span>
+<span><span class="co">#&gt;    Mon Nov 16 12:30:28 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 11.56 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 20.29 secs</span></span>
 <span><span class="va">output_catecv3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>
@@ -724,20 +725,23 @@ increase the length as needed.</li>
 </ol>
 </div>
 <div class="section level3">
-<h3 id="ipcw-model-and-method">IPCW model and method<a class="anchor" aria-label="anchor" href="#ipcw-model-and-method"></a>
+<h3 id="censoring-model-and-method">Censoring model and method<a class="anchor" aria-label="anchor" href="#censoring-model-and-method"></a>
 </h3>
-<p>The default IPCW model uses the same covariates as the outcome model
-<code>cate.model</code> plus the treatment. The default IPCW method is a
-Cox regression with Breslow estimator of the baseline survivor function
-from <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph()</a></code> function in the <code>survival</code> package.
-Different variables or different method can be specified in the IPCW
-model. In the example below, we changed the covariates to the number of
-symptoms and number relapses in the pre-index period and specified the
-Weibull accelerated failure time (AFT) regression model using the
-location-scale parameterization. The <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg()</a></code> function in
-the <code>survival</code> package was used to fit the AFT model.</p>
+<p>The censoring model estimates the probabilities used for inverse
+probability of censoring weighting (IPCW). The default censoring model
+uses the same covariates as the outcome model <code>cate.model</code>
+plus the treatment. The default IPCW method is a Cox regression with
+Breslow estimator of the baseline survivor function from
+<code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph()</a></code> function in the <code>survival</code> package.
+Different variables or different method can be specified in the
+censoring model. In the example below, we changed the covariates to the
+number of symptoms and number relapses in the pre-index period and
+specified the Weibull accelerated failure time (AFT) regression model
+using the location-scale parameterization. The <code><a href="https://rdrr.io/pkg/survival/man/survreg.html" class="external-link">survreg()</a></code>
+function in the <code>survival</code> package was used to fit the AFT
+model.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># An example of a different IPCW model with different covariates from default</span></span>
+<code class="sourceCode R"><span><span class="co"># An example of a different censoring model with different covariates from default</span></span>
 <span><span class="va">output_catecv4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                         data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
 <span>                         score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
@@ -771,7 +775,7 @@ two time parameters.</p>
 survival time in either treatment group as <code>tau0</code>. Below we
 show how setting different values of the truncation time.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># An example of a different IPCW model with different covariates from default</span></span>
+<code class="sourceCode R"><span><span class="co"># An example of a different censoring model with different covariates from default</span></span>
 <span><span class="va">output_catecv5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                         data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
 <span>                         score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
@@ -801,11 +805,18 @@ show how setting different values of the truncation time.</p>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
-<p><a href="Count-examples.html">1. Estimating and validating treatment
-effects for count outcomes</a><br><a href="Survival-examples.html">2. Estimating and validating treatment
-effects for survival outcomes</a><br><a href="Additional-examples.html">3. Customizing CATE models and
-validation</a><br><a href="Theoretical-details.html">4. Methods for estimating and
-validating treatment effects</a></p>
+<ul>
+<li><a href="Binary-examples.html">Estimating and validating treatment
+effects for binary outcomes</a></li>
+<li><a href="Count-examples.html">Estimating and validating treatment
+effects for count outcomes</a></li>
+<li><a href="Survival-examples.html">Estimating and validating treatment
+effects for survival outcomes</a></li>
+<li><a href="ATE-theory.html">Methods for estimating average treatment
+effects</a></li>
+<li><a href="Theoretical-details.html">Methods for developing and
+validating CATE scores</a></li>
+</ul>
 </div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

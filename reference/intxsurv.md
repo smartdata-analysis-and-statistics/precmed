@@ -60,8 +60,8 @@ intxsurv(
 
 - x.ps:
 
-  Matrix of `p.ps` baseline covariates specified in the propensity score
-  model; dimension `n` by `p.ps`.
+  Matrix of `p.ps` baseline covariates specified in the treatment model;
+  dimension `n` by `p.ps`.
 
 - x.ipcw:
 
@@ -128,13 +128,6 @@ intxsurv(
   boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `3`.
-
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
 
 - n.trees.rf:
 
@@ -206,6 +199,13 @@ intxsurv(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
 
 - ...:
 

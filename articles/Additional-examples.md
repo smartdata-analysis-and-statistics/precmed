@@ -28,9 +28,9 @@ library(ggplot2)
 If you choose two regressions or contrast regression as the scoring
 method, there is an option to specify how the initial outcome regression
 estimates ($`\hat\mu_r^k`$ where $`r = 0,1`$ is the treatment and $`k`$
-is the CV fold) are calculated. See [Methods for estimating and
-validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+is the CV fold) are calculated. See [Methods for developing and
+validating CATE
+scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section for the background of these initial predictors and how they are
 used in two and contrast regressions. Here is a list of all 3 options:
 
@@ -199,8 +199,8 @@ statistic is not affected by the change in `prop.cutoff` because the
 calculation of ABC statistics depends on the minimum and maximum of the
 `prop.cutoff` vector and is always calculated based on 100 evenly-spaced
 cutoffs created from this range. See more theoretical details on ABC
-calculation in the [Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+calculation in the [Methods for developing and validating CATE
+scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section.
 
 ``` r
@@ -266,14 +266,14 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 10:59:03 2026 
+#>    Mon Nov 16 12:28:24 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Mon Nov 16 10:59:05 2026 
+#>    Mon Nov 16 12:28:27 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +284,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 10:59:08 2026 
+#>    Mon Nov 16 12:28:32 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +295,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 10:59:12 2026 
+#>    Mon Nov 16 12:28:37 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,9 +308,9 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 10:59:15 2026 
+#>    Mon Nov 16 12:28:42 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.86 secs
+#> Total runtime : 24.6 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -357,8 +357,8 @@ If you choose two and/or contrast regression as the scoring method,
 there is an option to specify how the initial outcome regression
 estimates ($`\hat\mu_r^k`$ where $`r = 0,1`$ is the treatment and $`k`$
 is the cross validation fold) are calculated. See [Methods for
-estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+developing and validating CATE
+scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section for the background of these initial predictors and how they are
 used in the two and contrast regression. Here is a list of all 3
 options:
@@ -538,9 +538,9 @@ the calculation of ABC statistics depends on the minimum and maximum of
 the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are
 created from this range. The highest proportion cutoff that is not 1 in
 the main example was 0.9 and it is now 0.95. See more theoretical
-details on ABC calculation in the [Methods for estimating and validating
-treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+details on ABC calculation in the [Methods for developing and validating
+CATE
+scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 section.
 
 ``` r
@@ -606,37 +606,37 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 11:00:11 2026 
+#>    Mon Nov 16 12:30:12 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 11:00:13 2026 
+#>    Mon Nov 16 12:30:16 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 11:00:16 2026 
+#>    Mon Nov 16 12:30:20 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 11:00:18 2026 
+#>    Mon Nov 16 12:30:24 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 11:00:20 2026 
+#>    Mon Nov 16 12:30:28 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 11.56 secs
+#> Total runtime : 20.29 secs
 output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -674,14 +674,16 @@ and `prop.multi`:
     recommended to start from a smaller length and you can increase the
     length as needed.
 
-### IPCW model and method
+### Censoring model and method
 
-The default IPCW model uses the same covariates as the outcome model
-`cate.model` plus the treatment. The default IPCW method is a Cox
-regression with Breslow estimator of the baseline survivor function from
+The censoring model estimates the probabilities used for inverse
+probability of censoring weighting (IPCW). The default censoring model
+uses the same covariates as the outcome model `cate.model` plus the
+treatment. The default IPCW method is a Cox regression with Breslow
+estimator of the baseline survivor function from
 [`coxph()`](https://rdrr.io/pkg/survival/man/coxph.html) function in the
 `survival` package. Different variables or different method can be
-specified in the IPCW model. In the example below, we changed the
+specified in the censoring model. In the example below, we changed the
 covariates to the number of symptoms and number relapses in the
 pre-index period and specified the Weibull accelerated failure time
 (AFT) regression model using the location-scale parameterization. The
@@ -690,7 +692,7 @@ the `survival` package was used to fit the AFT model.
 
 ``` r
 
-# An example of a different IPCW model with different covariates from default
+# An example of a different censoring model with different covariates from default
 output_catecv4 <- catecv(response = "survival",
                          data = survivalExample,
                          score.method = c("poisson", "contrastReg"),
@@ -726,7 +728,7 @@ setting different values of the truncation time.
 
 ``` r
 
-# An example of a different IPCW model with different covariates from default
+# An example of a different censoring model with different covariates from default
 output_catecv5 <- catecv(response = "survival",
                          data = survivalExample,
                          score.method = c("poisson", "contrastReg"),
@@ -756,14 +758,16 @@ plot(output_catecv5)
 
 ## Other `precmed` vignettes in this series
 
-[1. Estimating and validating treatment effects for count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Estimating and validating treatment effects for survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Customizing CATE models and
-validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Estimating and validating treatment effects for count
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Estimating and validating treatment effects for survival
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

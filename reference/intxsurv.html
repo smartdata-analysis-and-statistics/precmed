@@ -23,10 +23,12 @@
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -105,7 +107,7 @@
 
 
 <dt id="arg-x-ps">x.ps<a class="anchor" aria-label="anchor" href="#arg-x-ps"></a></dt>
-<dd><p>Matrix of <code>p.ps</code> baseline covariates specified in the propensity score model; dimension <code>n</code> by <code>p.ps</code>.</p></dd>
+<dd><p>Matrix of <code>p.ps</code> baseline covariates specified in the treatment model; dimension <code>n</code> by <code>p.ps</code>.</p></dd>
 
 
 <dt id="arg-x-ipcw">x.ipcw<a class="anchor" aria-label="anchor" href="#arg-x-ipcw"></a></dt>
@@ -165,10 +167,6 @@ one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'logistic'
 (usually 2-3). Used only if <code>score.method = 'boosting'</code> or
 if <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
 <code>initial.predictor.method = 'boosting'</code>. Default is <code>3</code>.</p></dd>
-
-
-<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
-<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>, <code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
 
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
@@ -236,6 +234,12 @@ Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code
 Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
+
+
+<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
+<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>,
+<code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms
+and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

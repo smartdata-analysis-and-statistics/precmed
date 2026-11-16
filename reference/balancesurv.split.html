@@ -27,10 +27,12 @@ Balanced means 1) The ratio of treated and controls is maintained in the trainin
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -93,7 +95,7 @@ Balanced means 1) The ratio of treated and controls is maintained in the trainin
 
 
 <dt id="arg-x-ps">x.ps<a class="anchor" aria-label="anchor" href="#arg-x-ps"></a></dt>
-<dd><p>Matrix of <code>p.ps</code> baseline covariates specified in the propensity score model; dimension <code>n</code> by <code>p.ps</code>.</p></dd>
+<dd><p>Matrix of <code>p.ps</code> baseline covariates specified in the treatment model; dimension <code>n</code> by <code>p.ps</code>.</p></dd>
 
 
 <dt id="arg-x-ipcw">x.ipcw<a class="anchor" aria-label="anchor" href="#arg-x-ipcw"></a></dt>
@@ -129,14 +131,14 @@ searching for a balanced training-validation split. Default is <code>5,000</code
             d.train          - event indicator in the training set; vector of size <code>m</code> coded as 0/1
             trt.train        - treatment received in the training set; vector of size <code>m</code> coded as 0/1
             x.cate.train     - baseline covariates for the outcome model in the training set; matrix of dimension <code>m</code> by <code>p.cate</code>
-            x.ps.train       - baseline covariates (plus intercept) for the propensity score model in the training set; matrix of dimension <code>m</code> by <code>p.ps + 1</code>
+            x.ps.train       - baseline covariates (plus intercept) for the treatment model in the training set; matrix of dimension <code>m</code> by <code>p.ps + 1</code>
             x.ipcw.train      - baseline covariates for inverse probability of censoring in the training set; matrix of dimension <code>m</code> by <code>p.ipw</code>
             yf.train         - follow-up time in the training set; if known, vector of size <code>m</code>; if unknown, <code>yf == NULL</code>
             y.valid          - observed survival or censoring time in the validation set; vector of size <code>n-m</code>
             d.valid          - event indicator in the validation set; vector of size <code>n-m</code> coded as 0/1
             trt.valid        - treatment received in the validation set; vector of size <code>n-m</code> coded as 0/1
             x.cate.valid     - baseline covariates for the outcome model in the validation set; matrix of dimension <code>n-m</code> by <code>p.cate</code>
-            x.ps.valid       - baseline covariates (plus intercept) for the propensity score model in the validation set; matrix of dimension <code>n-m</code> by <code>p.ps + 1</code>
+            x.ps.valid       - baseline covariates (plus intercept) for the treatment model in the validation set; matrix of dimension <code>n-m</code> by <code>p.ps + 1</code>
             x.ipcw.valid      - baseline covariates for inverse probability of censoring in the validation set; matrix of dimension <code>n-m</code> by <code>p.ipw</code>
             yf.valid         - follow-up time in the training set; if known, vector of size <code>n-m</code>; if unknown, <code>yf == NULL</code></p>
     </div>

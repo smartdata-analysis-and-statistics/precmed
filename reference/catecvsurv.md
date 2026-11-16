@@ -55,9 +55,9 @@ catecvsurv(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - score.method:
 
@@ -72,10 +72,11 @@ catecvsurv(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  randomized controlled trial, specify `ps.model = ~1` as an
+  intercept-only model.
 
 - ps.method:
 
@@ -96,11 +97,11 @@ catecvsurv(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Default
-  is `ipcw.model = NULL`, which corresponds to specifying the IPCW model
-  with the same covariates as the outcome model `cate.model` plus the
-  treatment.
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty.
+  Default is `ipcw.model = NULL`, which corresponds to specifying the
+  censoring model with the same covariates as the outcome model
+  `cate.model` plus the treatment.
 
 - ipcw.method:
 
@@ -201,13 +202,6 @@ catecvsurv(
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
 
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
-
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
@@ -301,6 +295,13 @@ catecvsurv(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 ## Value
 
 Returns a list containing the following components saved as a
@@ -361,11 +362,12 @@ Returns a list containing the following components saved as a
     `cv.n`. The ith element indicates whether the algorithm converged in
     the ith cross-validation iteration.
 
-- `chr.<method>`: Subgroup marginal cumulative hazard ratios at `tau0`,
-  in training and validation matrices for high, low and disjoint groups.
-  The corresponding overall estimates are `overall.chr.train` and
-  `overall.chr.valid`. Undefined estimates are `NA`; `hr.*` results are
-  conditional Cox HRs.
+- `chr.<method>`: A list of subgroup marginal cumulative hazard ratios
+  at `tau0`, with training and validation matrices for high, low and
+  disjoint groups. Matrix names use the prefix `chr.est.`; undefined
+  estimates are `NA`. `overall.chr.train` and `overall.chr.valid`
+  contain the corresponding overall fold estimates. Existing `hr.*`
+  results are conditional Cox HRs.
 
 - `hr.randomForest`: A list of adjusted hazard ratio if `score.method`
   includes `'randomForest'`:
@@ -550,33 +552,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 10:57:40 2026 
+#>    Mon Nov 16 12:26:21 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 10:57:43 2026 
+#>    Mon Nov 16 12:26:26 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 10:57:47 2026 
+#>    Mon Nov 16 12:26:31 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 10:57:50 2026 
+#>    Mon Nov 16 12:26:36 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 10:57:53 2026 
+#>    Mon Nov 16 12:26:40 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.03 secs 
+#> Total runtime : 23.45 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

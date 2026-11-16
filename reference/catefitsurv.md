@@ -47,9 +47,9 @@ catefitsurv(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - score.method:
 
@@ -64,10 +64,11 @@ catefitsurv(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  randomized controlled trial, specify `ps.model = ~1` as an
+  intercept-only model.
 
 - ps.method:
 
@@ -88,11 +89,11 @@ catefitsurv(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Default
-  is `ipcw.model = NULL`, which corresponds to specifying the IPCW model
-  with the same covariates as the outcome model `cate.model` plus the
-  treatment.
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty.
+  Default is `ipcw.model = NULL`, which corresponds to specifying the
+  censoring model with the same covariates as the outcome model
+  `cate.model` plus the treatment.
 
 - ipcw.method:
 
@@ -153,13 +154,6 @@ catefitsurv(
   boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
-
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
 
 - n.trees.rf:
 
@@ -254,6 +248,13 @@ catefitsurv(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - ...:
 
   Additional boosting arguments; see
@@ -286,9 +287,9 @@ components:
   subgroups based the estimated CATE scores with contrast regression.
   Only provided if `score.method` includes `'contrastReg'`.
 
-- `chr.<method>`: Subgroup marginal cumulative hazard ratios at `tau0`,
-  one for each selected scoring method and cutoff. Undefined estimates
-  are `NA`; `hr.*` results are conditional Cox HRs.
+- `chr.<method>`: A vector of subgroup marginal cumulative hazard ratios
+  at `tau0`, for each selected scoring method. Undefined estimates are
+  `NA`; existing `hr.*` results are conditional Cox HRs.
 
 - `hr.randomForest`: A vector of numerical values of length
   `prop.cutoff` containing the adjusted hazard ratio in nested subgroups

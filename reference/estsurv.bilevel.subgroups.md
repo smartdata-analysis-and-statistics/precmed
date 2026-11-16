@@ -52,8 +52,8 @@ estsurv.bilevel.subgroups(
 
 - x.ps:
 
-  Matrix of `p.ps` baseline covariates specified in the propensity score
-  model; dimension `n` by `p.ps`.
+  Matrix of `p.ps` baseline covariates specified in the treatment model;
+  dimension `n` by `p.ps`.
 
 - x.ipcw:
 

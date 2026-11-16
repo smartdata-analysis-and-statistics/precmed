@@ -19,28 +19,30 @@ diagnostics(object)
 
 - object:
 
-  A count or survival `atefit`, `catefit`, or `catecv` result.
+  A binary, count or survival `atefit`, or a count or survival `catefit`
+  or `catecv` result.
 
 ## Value
 
 A data frame with columns `method`, `split`, `iteration`, `group`,
-`subgroup`, `type`, `measure`, and `message`. Count mutually exclusive
-groups use lower and upper boundaries; survival uses the upper
-percentile label. Method, split, iteration, group, subgroup, and measure
-are `NA` for `atefit`; split and iteration are `NA` for `catefit`.
-Otherwise, measure is `NA` unless the recorded message identifies it.
-Returns a zero-row data frame with the same columns when there are no
-recorded messages.
+`subgroup`, `type`, `measure`, and `message`. For count mutually
+exclusive groups, `subgroup` gives the lower and upper boundaries;
+survival uses the upper percentile label recorded by the estimator. For
+`atefit`, bootstrap failures have split `bootstrap`, the replicate
+number in iteration, and the affected estimate in measure. Split and
+iteration are `NA` for `catefit`. Otherwise, measure is `NA` unless the
+recorded message identifies it. Returns a zero-row data frame with the
+same columns when there are no recorded messages.
 
 ## Details
 
 This reports only diagnostics stored in the result, not every warning
 emitted during fitting. In particular,
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-stores the treatment-recoding information, but not all bootstrap
-warnings. Count fits record subgroup support in
-`object$subgroup.support`. Continuous results are not supported by this
-helper.
+stores the treatment-recoding information and failed or undefined
+bootstrap estimates, but not all bootstrap warnings. Count fits record
+subgroup messages and support in `object$subgroup.support`. Continuous
+results are not supported by this helper.
 
 ## Author
 

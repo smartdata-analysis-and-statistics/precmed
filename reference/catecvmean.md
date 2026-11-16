@@ -51,8 +51,8 @@ catecvmean(
 
 - data:
 
-  A data frame containing the variables in the outcome and propensity
-  score models; a data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome and treatment
+  models; a data frame with `n` rows (1 row per observation).
 
 - score.method:
 
@@ -67,10 +67,10 @@ catecvmean(
 
 - ps.model:
 
-  A formula describing the propensity score model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a RCT, specify
-  `ps.model` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  RCT, specify `ps.model` as an intercept-only model.
 
 - ps.method:
 
@@ -180,13 +180,6 @@ catecvmean(
   `score.method = 'twoReg'` or `'contrastReg'` and
   `initial.predictor.method = 'boosting'`. Default is `2`.
 
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
-
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
@@ -254,6 +247,13 @@ catecvmean(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
 
 - ...:
 

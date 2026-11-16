@@ -21,6 +21,11 @@ randomized data from a clinical trial ([Zhao et al.
 non-randomized study ([Yadlowsky et al.
 2021](#ref-yadlowsky2020estimation)).
 
+The treatment model estimates propensity scores, and the censoring model
+provides probabilities used for inverse probability of censoring
+weighting (IPCW). The corresponding arguments are `ps.model` and
+`ipcw.model`.
+
 For background on marginal and conditional treatment effects, see
 Chapter 5 ([Nguyen et al. 2026](#ref-nguyen2026causaleffects)). Chapter
 17 introduces CATE prediction and model development ([Hoogland et al.
@@ -47,13 +52,14 @@ devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 
 The **precmed** package contains functions to
 
-- Estimate the average treatment effect (ATE) for count and survival
-  outcome data using
+- Estimate the average treatment effect (ATE) for binary, count and
+  survival outcomes using
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-- Estimate the conditional average treatment effect (CATE) using
+- Fit CATE scores for binary, count and survival outcomes using
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-- Development and Cross-validation of CATE using
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+- Develop and cross-validate CATE scores using
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
+  with count and survival examples
 - Plot the proportion of subjects with an estimated treatment effect no
   less than $`c`$ over a range of values for $`c`$([Zhao et al.
   2013](#ref-zhao2013effectively)).
@@ -71,9 +77,8 @@ on validation curves, ABC statistics, and responder diagnostics,
 including examples using `precmed` ([Jiang et al.
 2026](#ref-jiang2026visualization)).
 
-We recommend the following workflow to estimate the overall ATE and
-develop a model for estimating the CATE to identify treatment effect
-heterogeneity:
+For count and survival outcomes, the following workflow estimates the
+ATE and develops and validates a CATE model:
 
 1.  Use
     [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -101,9 +106,18 @@ heterogeneity:
     - Compare the distribution of the estimated ATE across different
       levels of the CATE score percentiles using
       [`boxplot()`](https://rdrr.io/r/graphics/boxplot.html).
-4.  Apply the best modelling approach in the original data or in a new
-    external dataset using
-    [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+4.  Fit the chosen approach using
+    [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+    and assess it in an independent dataset where possible.
+
+For binary outcomes,
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+and
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+are available in the development version. The [binary
+example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+illustrates held-out subgroup assessment. These binary features are not
+in CRAN release 1.1.0.
 
 In the vignettes, we will adopt a different workflow to gradually expose
 the user from simple to more complex methods.
@@ -116,27 +130,32 @@ or
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
 the user has to (at least) input:
 
-- `response`: type of outcome/response (either `count` or `survival`)  
+- `response`: `binary`, `count`, or `survival` for
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md);
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  currently supports `count` and `survival`  
 - `data`: a data frame with individual patient data  
 - `score.method`: methods to estimate the CATE (e.g., `boosting`,
   `poisson`, `twoReg`, `contrastReg`)  
 - `cate.model`: a formula describing the outcome model (e.g., outcome ~
   age + gender + previous_treatment)  
-- `ps.model`: a formula describing the propensity score model to adjust
-  for confounding (e.g., treatment ~ age + previous_treatment)
+- `ps.model`: a formula describing the treatment model to adjust for
+  confounding (e.g., treatment ~ age + previous_treatment)
 
 ## Overview of the vignettes
 
-[1. Getting started with
-precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md)  
-[2. Estimating and validating treatment effects for count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[3. Estimating and validating treatment effects for survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[4. Customizing CATE models and
-validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[5. Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary outcome
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Count outcome
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Survival outcome
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Customizing CATE models and
+  validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+- [ATE
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [CATE development and validation
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## Abbreviations
 

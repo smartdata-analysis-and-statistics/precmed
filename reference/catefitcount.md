@@ -39,8 +39,8 @@ catefitcount(
 
 - data:
 
-  A data frame containing the variables in the outcome and propensity
-  score model; a data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome and treatment
+  model; a data frame with `n` rows (1 row per observation).
 
 - score.method:
 
@@ -55,10 +55,10 @@ catefitcount(
 
 - ps.model:
 
-  A formula describing the propensity score model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized trial,
-  specify `ps.model` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  randomized trial, specify `ps.model` as an intercept-only model.
 
 - ps.method:
 
@@ -318,5 +318,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.09 secs 
+#> Total runtime : 0.17 secs 
 ```

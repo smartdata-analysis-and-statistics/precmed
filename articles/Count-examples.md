@@ -62,6 +62,10 @@ centered at 13,824 USD and divided by 20,172 USD.
 
 ## Estimate the average treatment effect
 
+For the estimators and their assumptions, see [Methods for estimating
+average treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
+
 ### Unadjusted treatment comparison
 
 We first compare relapse rates between treatment groups using a Poisson
@@ -154,12 +158,13 @@ treatment overlap and no unmeasured confounding.
 We now use
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 to estimate a population-level rate ratio, combining outcome and
-propensity score models. The rate ratio estimator is doubly robust,
-meaning that the estimator is consistent if the propensity score (PS)
-model (argument `ps.model`) or the outcome model (argument `cate.model`)
-or both are correctly specified, under the required assumptions. The
-function also provides standard errors, confidence intervals and
-p-values based on bootstrap.
+treatment models. The treatment model estimates the propensity score,
+the probability of receiving treatment 1 given the covariates. The rate
+ratio estimator is doubly robust, meaning that the estimator is
+consistent if the treatment model (argument `ps.model`) or the outcome
+model (argument `cate.model`) or both are correctly specified, under the
+required assumptions. The function also provides standard errors,
+confidence intervals and p-values based on bootstrap.
 
 In this example, the rate ratio compares the relapse rate under drug 1
 with that under drug 0; a rate ratio below 1 favors drug 1. A causal
@@ -190,26 +195,26 @@ are:
 
 &nbsp;
 
-- `ps.model`: A formula describing the propensity score (PS) model to be
-  fitted. The treatment must appear on the left-hand side and the
-  covariates (age and previous treatment in this example) on the
-  right-hand side. The variable `trt` must be supplied as a numeric
-  variable taking only 2 values, 1 for active treatment and 0 for
-  control or comparator. If it is not the case, the function will stop
-  with error if `trt` takes more than 2 distinct values or will
-  automatically transform `trt` into a numeric variable. In this
-  example, `trt` (a factor variable taking values “drug0” and “drug1”)
-  was transformed and an informational message is shown (see output
-  below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
-  If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. The PS model is used to estimate overall and subgroup average
+- `ps.model`: A formula describing the treatment model to be fitted. The
+  treatment must appear on the left-hand side and the covariates (age
+  and previous treatment in this example) on the right-hand side. The
+  variable `trt` must be supplied as a numeric variable taking only 2
+  values, 1 for active treatment and 0 for control or comparator. If it
+  is not the case, the function will stop with error if `trt` takes more
+  than 2 distinct values or will automatically transform `trt` into a
+  numeric variable. In this example, `trt` (a factor variable taking
+  values “drug0” and “drug1”) was transformed and an informational
+  message is shown (see output below):
+  `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the
+  data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The
+  treatment model is used to estimate overall and subgroup average
   treatment effects. It is also used to fit the doubly robust
   two-regression and contrast-regression CATE scores; other scoring
   methods need not use it to construct their scores.
 
 Let’s calculate the ATE for the effect of treatment on y and build an
-outcome model that contains all variables and a PS model with `age` and
-`previous_treatment`.
+outcome model that contains all variables and a treatment model with
+`age` and `previous_treatment`.
 
 ``` r
 
@@ -997,14 +1002,16 @@ the y-axis can have different scales for different scoring methods.
 
 ## Other `precmed` vignettes in this series
 
-[1. Estimating and validating treatment effects for count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Estimating and validating treatment effects for survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Customizing CATE models and
-validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Estimating and validating treatment effects for survival
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Customizing CATE models and
+  validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

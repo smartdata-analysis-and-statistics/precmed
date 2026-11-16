@@ -39,7 +39,7 @@ estmean.multilevel.subgroup(
 
   Matrix of `p.ps` baseline covariates (plus a leading column of 1 for
   the intercept); dimension `n` by `p.ps + 1` (covariates in the
-  propensity score model plus intercept)
+  treatment model plus intercept)
 
 - trt:
 

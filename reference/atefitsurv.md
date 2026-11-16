@@ -31,9 +31,9 @@ atefitsurv(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - cate.model:
 
@@ -43,10 +43,11 @@ atefitsurv(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  randomized controlled trial, specify `ps.model = ~1` as an
+  intercept-only model.
 
 - ps.method:
 
@@ -59,10 +60,10 @@ atefitsurv(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which corresponds to
-  specifying the IPCW with the same covariates as the outcome model
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty. Only
+  applies for survival outcomes. Default is `NULL`, which uses a
+  censoring model with the same covariates as the outcome model
   `cate.model`, plus the treatment.
 
 - ipcw.method:
@@ -188,6 +189,14 @@ bootstrap estimates. If a doubly robust RMST estimate falls outside \[0,
 tau0\], the corresponding outcome-model estimate is substituted and a
 warning is issued. That fallback does not retain the doubly robust
 guarantee.
+
+Failed or non-finite bootstrap estimates are recorded in
+`bootstrap.diagnostics`, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected
+measure is unavailable rather than based on a subset of replicates. See
+also
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+to inspect these records.
 
 ## Examples
 

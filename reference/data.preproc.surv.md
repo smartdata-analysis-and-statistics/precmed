@@ -49,17 +49,17 @@ data.preproc.surv(
 
 - ps.model:
 
-  A formula describing the propensity score model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a RCT, specify
-  `ps.model` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  RCT, specify `ps.model` as an intercept-only model.
 
 - ipcw.model:
 
-  A formula describing inverse probability of censoring weighting(IPCW)
-  model to be fitted. If covariates are the same as outcome model, set
-  `ipcw.model = NULL`. Otherwise, the left-hand side must be empty and
-  the right-hand side is a covariates model.
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). If covariates are the same as outcome
+  model, set `ipcw.model = NULL`. Otherwise, the left-hand side must be
+  empty and the right-hand side is a covariates model.
 
 - tau0:
 
@@ -69,9 +69,8 @@ data.preproc.surv(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and IPCW models; a data frame with `n` rows (1 row per
-  observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models; a data frame with `n` rows (1 row per observation).
 
 - prop.cutoff:
 
@@ -120,15 +119,14 @@ data.preproc.surv(
 A list of elements: - y: outcome; vector of length `n` (observations) -
 d : the event indicator; vector of length `n`; only if
 `respone = "survival"` - trt: binary treatment; vector of length `n` -
-x.ps: matrix of `p.ps` baseline covariates specified in the propensity
-score model (plus intercept); dimension `n` by `p.ps + 1` - x.cate:
-matrix of `p.cate` baseline covariates specified in the outcome model;
-dimension `n` by `p.cate` - x.ipcw: matrix of `p.ipw` baseline covarites
-specified in inverse probability of censoring weighting model; dimension
-`n` by `p.ipw` - time: offset; vector of length `n`; only if
-`response = "count"` - if `fun = "catefit"`: - prop: formatted
-`prop.cutoff` - prop.no1: formatted `prop.cutoff` with 1 removed if
-applicable; otherwise prop.no1 is the same as prop - if
+x.ps: matrix of `p.ps` baseline covariates specified in the treatment
+model (plus intercept); dimension `n` by `p.ps + 1` - x.cate: matrix of
+`p.cate` baseline covariates specified in the outcome model; dimension
+`n` by `p.cate` - x.ipcw: matrix of `p.ipw` baseline covarites specified
+in censoring model; dimension `n` by `p.ipw` - time: offset; vector of
+length `n`; only if `response = "count"` - if `fun = "catefit"`: - prop:
+formatted `prop.cutoff` - prop.no1: formatted `prop.cutoff` with 1
+removed if applicable; otherwise prop.no1 is the same as prop - if
 `fun = "crossv"` - prop.onlyhigh: formatted `prop.cutoff` with 0 removed
 if applicable - prop.bi; formatted `prop.cutoff` with 0 and 1 removed if
 applicable - prop.multi: formatted `prop.multi`, starting with 0 and

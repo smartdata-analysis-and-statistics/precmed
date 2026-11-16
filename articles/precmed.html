@@ -45,10 +45,12 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -72,7 +74,6 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Getting started with precmed</h1>
-            <h3 data-toc-skip class="subtitle">Vignette 1 of 5</h3>
             
             <h4 data-toc-skip class="date">November 16, 2026</h4>
       
@@ -100,6 +101,10 @@ personalization of two competitive treatments using randomized data from
 a clinical trial <span class="citation">(<a href="#ref-zhao2013effectively">Zhao et al. 2013</a>)</span> or using
 real-world data (RWD) from a non-randomized study <span class="citation">(<a href="#ref-yadlowsky2020estimation">Yadlowsky et
 al. 2021</a>)</span>.</p>
+<p>The treatment model estimates propensity scores, and the censoring
+model provides probabilities used for inverse probability of censoring
+weighting (IPCW). The corresponding arguments are <code>ps.model</code>
+and <code>ipcw.model</code>.</p>
 <p>For background on marginal and conditional treatment effects, see
 Chapter 5 <span class="citation">(<a href="#ref-nguyen2026causaleffects">Nguyen et al. 2026</a>)</span>.
 Chapter 17 introduces CATE prediction and model development <span class="citation">(<a href="#ref-hoogland2026introduction">Hoogland et
@@ -121,15 +126,14 @@ follows:</p>
 </h2>
 <p>The <strong>precmed</strong> package contains functions to</p>
 <ul>
-<li>Estimate the average treatment effect (ATE) for count and survival
-outcome data using <code><a href="../reference/atefit.html">atefit()</a></code>
+<li>Estimate the average treatment effect (ATE) for binary, count and
+survival outcomes using <code><a href="../reference/atefit.html">atefit()</a></code>
 </li>
-<li>Estimate the conditional average treatment effect (CATE) using
+<li>Fit CATE scores for binary, count and survival outcomes using
 <code><a href="../reference/catefit.html">catefit()</a></code>
 </li>
-<li>Development and Cross-validation of CATE using
-<code><a href="../reference/catecv.html">catecv()</a></code>
-</li>
+<li>Develop and cross-validate CATE scores using <code><a href="../reference/catecv.html">catecv()</a></code>,
+with count and survival examples</li>
 <li>Plot the proportion of subjects with an estimated treatment effect
 no less than
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>
@@ -150,9 +154,8 @@ discrimination, calibration, and decision accuracy <span class="citation">(<a hr
 2026</a>)</span>. Chapter 20 provides practical guidance on validation
 curves, ABC statistics, and responder diagnostics, including examples
 using <code>precmed</code> <span class="citation">(<a href="#ref-jiang2026visualization">Jiang et al. 2026</a>)</span>.</p>
-<p>We recommend the following workflow to estimate the overall ATE and
-develop a model for estimating the CATE to identify treatment effect
-heterogeneity:</p>
+<p>For count and survival outcomes, the following workflow estimates the
+ATE and develops and validates a CATE model:</p>
 <ol style="list-style-type: decimal">
 <li>Use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate the overall ATE between two
 treatment groups and its uncertainty using bootstrap resampling.</li>
@@ -177,9 +180,13 @@ heterogeneity is captured by the scoring method.</li>
 levels of the CATE score percentiles using <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>.</li>
 </ul>
 </li>
-<li>Apply the best modelling approach in the original data or in a new
-external dataset using <code><a href="../reference/catefit.html">catefit()</a></code>.</li>
+<li>Fit the chosen approach using <code><a href="../reference/catefit.html">catefit()</a></code> and assess it
+in an independent dataset where possible.</li>
 </ol>
+<p>For binary outcomes, <code><a href="../reference/atefit.html">atefit()</a></code> and <code><a href="../reference/catefit.html">catefit()</a></code>
+are available in the development version. The <a href="Binary-examples.html">binary example</a> illustrates held-out
+subgroup assessment. These binary features are not in CRAN release
+1.1.0.</p>
 <p>In the vignettes, we will adopt a different workflow to gradually
 expose the user from simple to more complex methods.</p>
 <div class="section level3">
@@ -189,8 +196,9 @@ expose the user from simple to more complex methods.</p>
 user has to (at least) input:</p>
 <ul>
 <li>
-<code>response</code>: type of outcome/response (either
-<code>count</code> or <code>survival</code>)<br>
+<code>response</code>: <code>binary</code>, <code>count</code>, or
+<code>survival</code> for <code><a href="../reference/catefit.html">catefit()</a></code>; <code><a href="../reference/catecv.html">catecv()</a></code>
+currently supports <code>count</code> and <code>survival</code><br>
 </li>
 <li>
 <code>data</code>: a data frame with individual patient data<br>
@@ -205,20 +213,24 @@ user has to (at least) input:</p>
 (e.g., outcome ~ age + gender + previous_treatment)<br>
 </li>
 <li>
-<code>ps.model</code>: a formula describing the propensity score
-model to adjust for confounding (e.g., treatment ~ age +
-previous_treatment)</li>
+<code>ps.model</code>: a formula describing the treatment model to
+adjust for confounding (e.g., treatment ~ age + previous_treatment)</li>
 </ul>
 </div>
 </div>
 <div class="section level2">
 <h2 id="overview-of-the-vignettes">Overview of the vignettes<a class="anchor" aria-label="anchor" href="#overview-of-the-vignettes"></a>
 </h2>
-<p><a href="precmed.html">1. Getting started with precmed</a><br><a href="Count-examples.html">2. Estimating and validating treatment
-effects for count outcomes</a><br><a href="Survival-examples.html">3. Estimating and validating treatment
-effects for survival outcomes</a><br><a href="Additional-examples.html">4. Customizing CATE models and
-validation</a><br><a href="Theoretical-details.html">5. Methods for estimating and
-validating treatment effects</a></p>
+<ul>
+<li><a href="Binary-examples.html">Binary outcome example</a></li>
+<li><a href="Count-examples.html">Count outcome example</a></li>
+<li><a href="Survival-examples.html">Survival outcome example</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
+<li><a href="ATE-theory.html">ATE methods</a></li>
+<li><a href="Theoretical-details.html">CATE development and validation
+methods</a></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="abbreviations">Abbreviations<a class="anchor" aria-label="anchor" href="#abbreviations"></a>

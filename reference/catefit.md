@@ -1,12 +1,10 @@
-# Estimation of the conditional average treatment effect (CATE) score for count, survival and continuous data
+# Estimate conditional treatment effect scores
 
-Provides singly robust and doubly robust estimation of CATE score for
-count, survival and continuous data with up the following scoring
-methods among the following: Random forest (survival, continuous only),
-boosting, poisson regression (count, survival only), two regressions,
-contrast regression, negative binomial regression (count only), linear
-regression (continuous only), and generalized additive model (continuous
-only).
+Estimate CATE scores for binary, count and survival outcomes. Binary
+scores include pooled logistic regression, separate-arm logistic
+regression and boosting. Count and survival methods include both
+outcome-regression and doubly robust scores. Continuous outcomes are not
+yet implemented.
 
 ## Usage
 
@@ -55,7 +53,7 @@ catefit(
 - response:
 
   A string describing the type of outcome in the data. Allowed values
-  include "count" (see
+  include "binary", "count" (see
   [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
   "survival" (see
   [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
@@ -64,9 +62,9 @@ catefit(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - score.method:
 
@@ -75,7 +73,8 @@ catefit(
   `'poisson'` (count and survival outcomes only), `'randomForest'`
   (survival, continuous outcomes only), `negBin` (count outcomes only),
   `'gam'` (continuous outcomes only), `'gaussian'` (continuous outcomes
-  only).
+  only). For binary outcomes, use `'logistic'`, `'twoReg'`, or
+  `'boosting'`.
 
 - cate.model:
 
@@ -85,10 +84,12 @@ catefit(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. For binary
+  outcomes, logical treatment values `FALSE` and `TRUE` are mapped to 0
+  and 1, respectively. Numeric 0/1 values or two distinct treatment
+  labels are also accepted. If data are from a randomized controlled
+  trial, specify `ps.model = trt ~ 1` as an intercept-only model.
 
 - ps.method:
 
@@ -103,7 +104,8 @@ catefit(
 
   A formula describing the initial predictor model. The outcome must
   appear on the left-hand side. It must be specified when
-  `score.method = contrastReg` or `twoReg`.
+  `score.method = contrastReg` or `twoReg`, except for binary outcomes,
+  which use `cate.model`.
 
 - initial.predictor.method:
 
@@ -120,10 +122,10 @@ catefit(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which corresponds to
-  specifying the IPCW with the same covariates as the outcome model
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty. Only
+  applies for survival outcomes. Default is `NULL`, which uses a
+  censoring model with the same covariates as the outcome model
   `cate.model`, plus the treatment.
 
 - ipcw.method:
@@ -304,6 +306,20 @@ catefit(
   Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
+  For `response = "binary"`, `score.method = "logistic"` fits a logistic
+  model with treatment interactions, and `"twoReg"` fits separate
+  logistic models in each arm. `"boosting"` fits separate Bernoulli
+  gradient-boosting models in each treatment arm, with the number of
+  trees selected by five-fold cross-validation. All three scores are
+  predicted risk differences; subgroup effects are doubly robust risk
+  differences. Binary boosting requires at least one outcome-model
+  covariate and both outcome values in each arm. Its fitted models and
+  selected tree counts are stored in `fit$boosting`. For extra boosting
+  controls, see
+  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  Subgroup fits without both arms or with rank-deficient models return
+  NA.
+
 ## Value
 
 For count response, see description of outputs in
@@ -331,6 +347,11 @@ T.-L. Nguyen, & R. W. Platt (Eds.), *Comparative Effectiveness and
 Personalized Medicine Research Using Real-World Data* (Chapter 17, pp.
 421–463). Chapman & Hall/CRC.
 [doi:10.1201/9781003300809-17](https://doi.org/10.1201/9781003300809-17)
+
+Hoogland, J., IntHout, J., Belias, M., et al. (2021). A tutorial on
+individualized treatment effect prediction from randomized trials with a
+binary endpoint. *Statistics in Medicine*, 40(26), 5961–5981.
+[doi:10.1002/sim.9154](https://doi.org/10.1002/sim.9154)
 
 Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian,
 L. (2026). Visualization and interpretation of individualized treatment

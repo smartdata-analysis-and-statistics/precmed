@@ -27,10 +27,12 @@ two regressions, and contrast regression."><meta property="og:image" content="ht
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -98,8 +100,8 @@ two regressions, and contrast regression.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with <code>n</code> rows (1 row per observation).</p></dd>
+<dd><p>A data frame containing the variables in the outcome, treatment,
+and censoring models (if specified); a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
 <dt id="arg-score-method">score.method<a class="anchor" aria-label="anchor" href="#arg-score-method"></a></dt>
@@ -114,7 +116,7 @@ The outcome must appear on the left-hand side.</p></dd>
 
 
 <dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
-<dd><p>A formula describing the propensity score (PS) model to be fitted. The treatment must
+<dd><p>A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify <code>ps.model = ~1</code> as an intercept-only model.</p></dd>
 
@@ -137,9 +139,9 @@ Default is <code>'randomForest'</code>.</p></dd>
 
 
 <dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
-<dd><p>A formula describing the inverse probability of censoring weighting (IPCW)
-model to be fitted. The left-hand side must be empty. Default is <code>ipcw.model = NULL</code>,
-which corresponds to specifying the IPCW model with the same covariates as the outcome model
+<dd><p>A formula describing the censoring model used for inverse
+probability of censoring weighting (IPCW). The left-hand side must be empty. Default is <code>ipcw.model = NULL</code>,
+which corresponds to specifying the censoring model with the same covariates as the outcome model
 <code>cate.model</code> plus the treatment.</p></dd>
 
 
@@ -196,10 +198,6 @@ It must be a positive value and should be chosen close to 0. Default is <code>0.
 (usually 2-3). Used only if <code>score.method = 'boosting'</code> or
 if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 'twoReg'</code> or
 <code>'contrastReg'</code>. Default is 2.</p></dd>
-
-
-<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
-<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>, <code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
 
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
@@ -288,6 +286,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
 
 
+<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
+<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>,
+<code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms
+and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
@@ -310,7 +314,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <li><p><code>ate.contrastReg</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
  Only provided if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
-<li><p><code>chr.&lt;method&gt;</code>:  Subgroup marginal cumulative hazard ratios at <code>tau0</code>, one for each selected scoring method and cutoff. Undefined estimates are <code>NA</code>; <code>hr.*</code> results are conditional Cox HRs.</p></li>
+<li><p><code>chr.&lt;method&gt;</code>:  A vector of subgroup marginal cumulative hazard
+ ratios at <code>tau0</code>, for each selected scoring method. Undefined estimates
+ are <code>NA</code>; existing <code>hr.*</code> results are conditional Cox HRs.</p></li>
 <li><p><code>hr.randomForest</code>: A vector of numerical values of length <code>prop.cutoff</code>
  containing the adjusted hazard ratio in nested subgroups (defined by <code>prop.cutoff</code>)
  constructed based on the estimated CATE scores with random forest method.

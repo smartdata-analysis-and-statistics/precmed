@@ -42,8 +42,7 @@ drmean(
 
   A numeric matrix of dimension `n` by `p.ps + 1` with a leading column
   of 1 as the intercept and each remaining column representing each
-  baseline covariate specified in the propensity score model for all
-  subjects
+  baseline covariate specified in the treatment model for all subjects
 
 - ps.method:
 

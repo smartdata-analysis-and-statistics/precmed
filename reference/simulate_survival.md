@@ -3,7 +3,7 @@
 Generate fully synthetic data for demonstrating survival
 treatment-effect methods. Baseline covariates are generated
 independently of patient records. Treatment is assigned using a logistic
-propensity model; the numbers in each treatment group arise from those
+treatment model; the numbers in each treatment group arise from those
 probabilities and vary by sample. Event times follow a Weibull model
 with treatment interactions with age and previous relapses. By default,
 censoring is independent of covariates, treatment, and event times.
@@ -26,7 +26,8 @@ simulate_survival(
   shape = 1.15,
   scale = 650,
   treatment_shape = shape,
-  hr_reference_time = scale
+  hr_reference_time = scale,
+  censor_horizon = 900
 )
 ```
 
@@ -35,7 +36,7 @@ simulate_survival(
 - n:
 
   Positive integer giving the total sample size. Default is 4,000.
-  Treatment group sizes are determined by the propensity model.
+  Treatment group sizes are determined by the treatment model.
 
 - seed:
 
@@ -44,7 +45,7 @@ simulate_survival(
 
 - ps_weights:
 
-  Named numeric coefficients for the logistic propensity model.
+  Named numeric coefficients for the logistic treatment model.
   Recognized names are `intercept`, `age`, `drugB`, and `drugC`; named
   subsets override the defaults. Age is measured in decades from 48
   years; previous-treatment drugA is the reference category. The default
@@ -99,6 +100,11 @@ simulate_survival(
   Positive time in days at which `conditional_hr` is defined. Defaults
   to `scale`.
 
+- censor_horizon:
+
+  Administrative censoring time in days. Defaults to 900; use `Inf` for
+  no administrative censoring.
+
 ## Value
 
 A data frame with `n` rows and nine columns: centered `age`, `female`,
@@ -115,11 +121,11 @@ at `hr_reference_time` multiplied by
 `(t / hr_reference_time)^(treatment_shape - shape)`. It increases over
 time if the treated shape is larger, and decreases if it is smaller. By
 default, random censoring times are exponential with mean 450 days;
-administrative censoring occurs at 900 days. Censoring and event times
-are generated independently conditional on covariates and treatment,
-including when censoring depends on those variables. Extreme propensity
-coefficients can produce poor treatment overlap or a sample with no
-patients in one treatment group.
+administrative censoring occurs at `censor_horizon`. Censoring and event
+times are generated independently conditional on covariates and
+treatment, including when censoring depends on those variables. Extreme
+propensity coefficients can produce poor treatment overlap or a sample
+with no patients in one treatment group.
 
 ## Author
 

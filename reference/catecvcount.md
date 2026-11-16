@@ -49,8 +49,8 @@ catecvcount(
 
 - data:
 
-  A data frame containing the variables in the outcome and propensity
-  score model; a data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome and treatment
+  model; a data frame with `n` rows (1 row per observation).
 
 - score.method:
 
@@ -65,10 +65,10 @@ catecvcount(
 
 - ps.model:
 
-  A formula describing the propensity score model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0 or 1. If data are from a randomized trial,
-  specify `ps.model` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0 or 1. If data are from a
+  randomized trial, specify `ps.model` as an intercept-only model.
 
 - ps.method:
 
@@ -455,7 +455,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 5.9 secs 
+#> Total runtime : 9.13 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

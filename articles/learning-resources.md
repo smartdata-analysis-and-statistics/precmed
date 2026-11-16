@@ -36,6 +36,21 @@ book](https://sdas.thinkific.com/courses/rwd-book) provides background
 materials, example R code, and curated references to support practical
 analyses with **precmed** and related methods.
 
+## Other `precmed` vignettes in this series
+
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Estimating and validating treatment effects for count
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Estimating and validating treatment effects for survival
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Customizing CATE models and
+  validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+
 ## Methodological references
 
 The original methodological references are Yadlowsky et al.

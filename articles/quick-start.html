@@ -45,10 +45,12 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -109,7 +111,9 @@ study.</td>
 </tr>
 <tr class="odd">
 <td>What outcomes are supported?</td>
-<td>Count and time-to-event outcomes.</td>
+<td>Binary, count and time-to-event outcomes for ATE and CATE fitting in
+the development version. Continuous outcomes are not yet
+implemented.</td>
 </tr>
 <tr class="even">
 <td>What can I estimate?</td>
@@ -119,8 +123,9 @@ characteristics.</td>
 </tr>
 <tr class="odd">
 <td>Can I assess model performance?</td>
-<td>Cross-validation, subgroup curves and other diagnostics help assess
-treatment-effect predictions.</td>
+<td>
+<code><a href="../reference/catecv.html">catecv()</a></code> cross-validation, subgroup curves and ABC are
+illustrated here for count outcomes and in the survival tutorial.</td>
 </tr>
 <tr class="even">
 <td>Can I interpret the estimates causally?</td>
@@ -134,10 +139,14 @@ confounding and sufficient treatment overlap.</td>
 <div class="section level2">
 <h2 id="install-and-load">Install and load<a class="anchor" aria-label="anchor" href="#install-and-load"></a>
 </h2>
-<p>Install the released version from CRAN, then load the package:</p>
+<p>Install the released version from CRAN, then load the package.
+Binary-outcome fitting is currently available in the development
+version, which can be installed from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"precmed"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"smartdata-analysis-and-statistics/precmed"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/smartdata-analysis-and-statistics/precmed" class="external-link">precmed</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">countExample</span><span class="op">)</span></span></code></pre></div>
 <p>The data contain 4,000 patients. <code>y</code> is the number of
@@ -153,10 +162,10 @@ scaled in this dataset.</p>
 <p>Start with <code><a href="../reference/atefit.html">atefit()</a></code> to estimate the average treatment
 effect across the study population. For count outcomes, it estimates a
 relapse rate ratio comparing <code>drug1</code> with <code>drug0</code>.
-The outcome model includes a log follow-up offset, and the propensity
-score model describes treatment assignment using baseline
-characteristics.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+The outcome model includes a log follow-up offset, and the treatment
+model (propensity-score model) describes treatment assignment using
+baseline characteristics.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">overall</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
@@ -185,10 +194,9 @@ indicates a lower estimated relapse rate with <code>drug1</code>. The
 confidence interval uses the bootstrap standard error. The estimator is
 doubly robust: under the required causal and other regularity
 assumptions, it is consistent if either the outcome model or the
-propensity score model is correctly specified. The 50 bootstrap
-replicates used here keep the example short; use more for a substantive
-analysis.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+treatment model is correctly specified. The 50 bootstrap replicates used
+here keep the example short; use more for a substantive analysis.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">overall</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1.065152</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">overall</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
@@ -203,10 +211,10 @@ explore treatment effect heterogeneity.</p>
 <p><code><a href="../reference/catecv.html">catecv()</a></code> fits a conditional average treatment effect
 (CATE) scoring model and evaluates it with cross-validation. Here, the
 outcome model includes a log follow-up offset to model relapse rates.
-The propensity score model describes treatment assignment using age and
+The treatment model describes treatment assignment using age and
 previous treatment. Because fewer relapses are better, we set
 <code>higher.y = FALSE</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
@@ -222,7 +230,7 @@ previous treatment. Because fewer relapses are better, we set
 <div class="section level2">
 <h2 id="inspect-the-validation-curves">Inspect the validation curves<a class="anchor" aria-label="anchor" href="#inspect-the-validation-curves"></a>
 </h2>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="quick-start_files/figure-html/plot-1.png" class="r-plt" alt="Training and validation curves for estimated treatment effects across nested patient subgroups." width="700"></p>
 <p>The curves summarize estimated treatment effects in nested subgroups
@@ -237,13 +245,18 @@ population.</p>
 <h2 id="next-steps">Next steps<a class="anchor" aria-label="anchor" href="#next-steps"></a>
 </h2>
 <ul>
+<li>Follow the <a href="Binary-examples.html">binary outcome
+tutorial</a> for fixed-horizon response and held-out subgroup
+validation.</li>
 <li>Follow the <a href="Count-examples.html">count outcome tutorial</a>
 to estimate the overall treatment effect, compare scoring methods, and
 interpret validation results.</li>
 <li>See the <a href="Survival-examples.html">survival outcome
 tutorial</a> for time-to-event data.</li>
 <li>Explore <a href="Additional-examples.html">model and validation
-options</a> and the <a href="Theoretical-details.html">methods</a>.</li>
+options</a> and the methods for <a href="ATE-theory.html">average
+treatment effects</a> and <a href="Theoretical-details.html">CATE
+scores</a>.</li>
 </ul>
 <p>For observational data, causal interpretation depends on assumptions
 including adequate control of confounding and sufficient treatment

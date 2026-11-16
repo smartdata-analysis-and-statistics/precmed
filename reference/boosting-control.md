@@ -2,8 +2,8 @@
 
 Boosting uses
 [`gbm3::gbmt()`](https://gbm-developers.github.io/gbm3/reference/gbmt.html)
-for count, continuous, and survival outcomes. Existing public argument
-names are translated internally.
+for binary, count, continuous, and survival outcomes. Existing public
+argument names are translated internally.
 
 ## Details
 

@@ -23,10 +23,12 @@
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -94,7 +96,14 @@
           <code><a href="atefit.html">atefit()</a></code>
 
         </dt>
-        <dd>Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data</dd>
+        <dd>Estimate average treatment effects for binary, count and survival outcomes</dd>
+
+        <dt>
+
+          <code><a href="atefitbinary.html">atefitbinary()</a></code>
+
+        </dt>
+        <dd>Estimate an average treatment effect for a binary outcome</dd>
 
         <dt>
 
@@ -199,7 +208,7 @@
           <code><a href="catefit.html">catefit()</a></code>
 
         </dt>
-        <dd>Estimation of the conditional average treatment effect (CATE) score for count, survival and continuous data</dd>
+        <dd>Estimate conditional treatment effect scores</dd>
 
         <dt>
 
@@ -459,6 +468,13 @@
 
         </dt>
         <dd>Calculate the log CATE score given the baseline covariates and follow-up time for specified scoring method methods for survival outcomes</dd>
+
+        <dt>
+
+          <code><a href="simulate_binary.html">simulate_binary()</a></code>
+
+        </dt>
+        <dd>Simulate a binary response from relapse counts</dd>
 
         <dt>
 

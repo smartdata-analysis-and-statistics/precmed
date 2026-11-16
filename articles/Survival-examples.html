@@ -45,10 +45,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -72,7 +74,6 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Estimating and validating treatment effects for survival outcomes</h1>
-            <h3 data-toc-skip class="subtitle">Vignette 2 of 4</h3>
             
             <h4 data-toc-skip class="date">November 16, 2026</h4>
       
@@ -111,7 +112,7 @@ data contain baseline characteristics, treatment, observed time and an
 event indicator.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">survival_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_survival.html">simulate_survival</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, seed <span class="op">=</span> <span class="fl">20261114</span><span class="op">)</span></span></code></pre></div>
-<p>Treatment is assigned according to the propensity model; its weights
+<p>Treatment is assigned according to the treatment model; its weights
 can be changed to explore different treatment proportions and degrees of
 overlap. For example,
 <code>simulate_survival(n = 4000, seed = 1, ps_weights = c(intercept = -1), conditional_hr = 0.8)</code>
@@ -434,6 +435,8 @@ as treatment effects.</p>
 <div class="section level2">
 <h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
 </h2>
+<p>For the estimators and their assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
+effects</a>.</p>
 <div class="section level3">
 <h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
 </h3>
@@ -553,14 +556,17 @@ relapse-free under each treatment.</p>
 <p>We now use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate population-level
 outcomes over a specified follow-up horizon. For restricted mean
 survival time (RMST) and restricted mean time lost (RMTL), it combines
-outcome and propensity score models with an adjustment for censoring to
-estimate population-level outcomes under each treatment. These measures
-summarize time over the chosen period without requiring a constant
-treatment HR. Under appropriate assumptions, the population-level
-comparison can be interpreted as a causal treatment effect.
-<code><a href="../reference/atefit.html">atefit()</a></code> also estimates a population-level cumulative
-hazard ratio at the horizon. It uses bootstrap resampling to estimate
-uncertainty for all reported measures.</p>
+outcome and treatment models with an adjustment for censoring to
+estimate population-level outcomes under each treatment. The treatment
+model estimates the propensity score, while the censoring model
+estimates probabilities used to construct inverse probability of
+censoring weights (IPCW). These measures summarize time over the chosen
+period without requiring a constant treatment HR. Under appropriate
+assumptions, the population-level comparison can be interpreted as a
+causal treatment effect. <code><a href="../reference/atefit.html">atefit()</a></code> also estimates a
+population-level cumulative hazard ratio at the horizon. It uses
+bootstrap resampling to estimate uncertainty for all reported
+measures.</p>
 <p>RMST is the average event-free time up to a chosen horizon,
 <code>tau0</code>; RMTL is <code>tau0 - RMST</code>. The RMTL ratio
 compares time lost under drug 1 with time lost under drug 0 over that
@@ -571,16 +577,16 @@ treatment effects <span class="citation">(Jiang et al. 2026)</span>.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mi>a</mi><mi>u</mi><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">-\log(S(tau0))</annotation></semantics></math>,
 under the two treatments. <code><a href="../reference/atefit.html">atefit()</a></code> estimates the
 treatment-specific survival probabilities using augmented inverse
-probability of treatment weighting (AIPTW), combining outcome,
-propensity score and censoring models without discretizing event times.
-The estimator requires appropriate censoring assumptions and a correctly
-specified censoring model; its treatment-model double robustness does
-not protect against censoring-model misspecification. The calculation
-reuses the treatment-specific Cox outcome fits, propensity scores and
-censoring model used for RMST. This ratio is distinct from an
-instantaneous HR. If either estimated survival probability is outside
-the interval (0, 1), the ratio is undefined; bootstrap inference is also
-unavailable if any replicate is undefined.</p>
+probability of treatment weighting (AIPTW), combining outcome, treatment
+and censoring models without discretizing event times. The estimator
+requires appropriate censoring assumptions and a correctly specified
+censoring model; its treatment-model double robustness does not protect
+against censoring-model misspecification. The calculation reuses the
+treatment-specific Cox outcome fits, propensity scores and censoring
+model used for RMST. This ratio is distinct from an instantaneous HR. If
+either estimated survival probability is outside the interval (0, 1),
+the ratio is undefined; bootstrap inference is also unavailable if any
+replicate is undefined.</p>
 <p>For this example, we choose an illustrative horizon: the smaller 95th
 percentile of observed follow-up in the two treatment groups.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -595,12 +601,12 @@ that the HR is constant before the horizon. It uses observed times,
 including censoring, and does not guarantee sufficient follow-up;
 inspect numbers at risk and censoring near the horizon in both groups
 and choose a clinically meaningful horizon with adequate support.</p>
-<p>The RMTL estimator is doubly robust with respect to the propensity
-score (PS) and outcome models: under the required assumptions, either
-model may be correctly specified. It also depends on inverse probability
-of censoring weights (IPCW) and a correctly specified censoring model.
-The function provides standard errors, confidence intervals and p-values
-based on bootstrap. If an out-of-range RMST estimate is replaced by an
+<p>The RMTL estimator is doubly robust with respect to the treatment and
+outcome models: under the required assumptions, either model may be
+correctly specified. It also depends on inverse probability of censoring
+weights (IPCW) and a correctly specified censoring model. The function
+provides standard errors, confidence intervals and p-values based on
+bootstrap. If an out-of-range RMST estimate is replaced by an
 outcome-model estimate, that fallback does not retain the doubly robust
 guarantee.</p>
 <p>IPCW adjusts for censoring by weighting patients according to their
@@ -631,27 +637,28 @@ treatment initiation, and number of relapses in the year prior to
 treatment initiation. Non-linear or interaction terms could also be
 included. Note that the treatment variable is not supplied in
 <code>cate.model</code> since this is an outcome model.</p></li>
-<li><p>The <code>ps.model</code> argument specifies the PS model as a
-formula, with the treatment variable <code>trt</code> on the left-hand
-side and the covariates (age and previous treatment in this example) on
-the right-hand side. The variable <code>trt</code> must be supplied as a
-numeric variable taking only 2 values, “1” for active treatment and “0”
-for control or comparator. If it is not the case, <code><a href="../reference/atefit.html">atefit()</a></code>
-will stop with error if <code>trt</code> takes more than 2 distinct
-values or will automatically transform <code>trt</code> into a numeric
-variable. In this example, <code>trt</code> (a factor variable taking
-values “drug0” and “drug1”) was transformed and an informational message
-is shown (see output below):
+<li><p>The <code>ps.model</code> argument specifies the treatment model
+as a formula, with the treatment variable <code>trt</code> on the
+left-hand side and the covariates (age and previous treatment in this
+example) on the right-hand side. The variable <code>trt</code> must be
+supplied as a numeric variable taking only 2 values, “1” for active
+treatment and “0” for control or comparator. If it is not the case,
+<code><a href="../reference/atefit.html">atefit()</a></code> will stop with error if <code>trt</code> takes
+more than 2 distinct values or will automatically transform
+<code>trt</code> into a numeric variable. In this example,
+<code>trt</code> (a factor variable taking values “drug0” and “drug1”)
+was transformed and an informational message is shown (see output
+below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
-= trt ~ 1. The PS model is used in the doubly robust RMTL
+= trt ~ 1. The treatment model is used in the doubly robust RMTL
 estimation.</p></li>
 </ul>
 <p>We also specify the optional argument <code>tau0</code>, the horizon
 for RMST and RMTL, using the value calculated above.</p>
 <p>Now estimate the ATE using an outcome model with age, sex, previous
-cost and previous relapses, and a PS model with <code>age</code> and
-<code>previous_treatment</code>.</p>
+cost and previous relapses, and a treatment model with <code>age</code>
+and <code>previous_treatment</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                        data <span class="op">=</span> <span class="va">survival_data</span>,</span>
@@ -791,13 +798,12 @@ the four reported quantities. A solid red line marks the full-sample
 estimate; a dashed black line marks the null value of 0 in the log-ratio
 panels. Set <code>null.value</code> to another value on the log scale,
 or to <code>NULL</code> or <code>NA</code> to omit the null line. The
-treatment-specific RMST panels have no null line.</p>
+treatment-specific RMST panels have no null line. Select specific facets
+with the <code>metrics</code> argument, for example
+<code>metrics = c("log.rmtl.ratio", "log.cumulative.hazard.ratio")</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/plot_atefit_bootstrap-1.png" class="r-plt" alt="" width="768"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log.rmtl.ratio"</span>, <span class="st">"log.cumulative.hazard.ratio"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Survival-examples_files/figure-html/plot_atefit_bootstrap-2.png" class="r-plt" alt="" width="768"></p>
 <p>Histograms of bootstrap estimates for the four reported
 quantities.</p>
 </div>
@@ -857,9 +863,9 @@ to treatment initiation, and number of relapses in the year prior to
 treatment initiation. Non-linear or interaction terms could also be
 included. Note that the treatment variable is not supplied in
 <code>cate.model</code> since this is an outcome model.</p></li>
-<li><p><code>ps.model</code>: A formula describing the propensity score
-(PS) model to be fitted. The treatment must appear on the left-hand side
-and the covariates (age and previous treatment in this example) on the
+<li><p><code>ps.model</code>: A formula describing the treatment model
+to be fitted. The treatment must appear on the left-hand side and the
+covariates (age and previous treatment in this example) on the
 right-hand side. The variable <code>trt</code> must be supplied as a
 numeric variable taking only 2 values, 1 for active treatment and 0 for
 control or comparator. If it is not the case, the function will stop
@@ -870,8 +876,8 @@ and “drug1”) was transformed and an informational message is shown (see
 output below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
-= trt ~ 1. The PS model is used to estimate overall and subgroup average
-treatment effects. It is also used to fit the doubly robust
+= trt ~ 1. The treatment model is used to estimate overall and subgroup
+average treatment effects. It is also used to fit the doubly robust
 two-regression and contrast-regression CATE scores; other scoring
 methods need not use it to construct their scores.</p></li>
 </ul>
@@ -911,7 +917,7 @@ default values. In this toy example, we keep the default values of the
 remaining arguments. For this toy example we selected
 <code>randomForest</code> and <code>contrastReg</code> to limit run
 time.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survival_data</span>,</span>
 <span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -943,7 +949,7 @@ score so the length of this output is 4,000 for our toy example. Below
 we show the CATE scores estimated with contrast regression for the first
 6 subjects in the data.</li>
 </ol>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
@@ -958,7 +964,7 @@ intercept, so there are 5 rows of estimated coefficients within each
 column. Boosting method does not estimate coefficients (it directly
 predicts the score) so they do not have coefficient results here.</li>
 </ol>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span><span class="co">#&gt;                          contrastReg</span></span>
 <span><span class="co">#&gt; (Intercept)               0.09036581</span></span>
@@ -970,15 +976,14 @@ predicts the score) so they do not have coefficient results here.</li>
 log-RMTL score changes with each covariate. They are estimates from
 these synthetic data.</p>
 <p>The <code>chr</code> outputs provide subgroup cumulative hazard
-ratios at <code>tau0</code>, estimated using the same outcome,
-propensity-score and censoring models as the subgroup RMTL estimates.
-The <code>hr</code> outputs are instead covariate-adjusted Cox hazard
-ratios, with follow-up censored at <code>tau0</code>. These are
-different measures and should be interpreted separately. An undefined
-cumulative hazard ratio is returned as <code>NA</code>, with a warning
-recorded for the subgroup. Use <code>measure = "cumulative_hr"</code> in
-survival validation plots and box plots to display cumulative hazard
-ratios.</p>
+ratios at <code>tau0</code>, estimated using the same outcome, treatment
+and censoring models as the subgroup RMTL estimates. The <code>hr</code>
+outputs are instead covariate-adjusted Cox hazard ratios, with follow-up
+censored at <code>tau0</code>. These are different measures and should
+be interpreted separately. An undefined cumulative hazard ratio is
+returned as <code>NA</code>, with a warning recorded for the subgroup.
+Use <code>measure = "cumulative_hr"</code> in survival validation plots
+and box plots to display cumulative hazard ratios.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>
 <code>ate</code> contains estimated ATEs by each nested subgroup of
@@ -990,13 +995,13 @@ example, the estimated ATE for the subgroup of subjects constructed
 based on the 50% (“prop0.5”) lowest CATE scores estimated from the
 contrast regression is 0.74.</li>
 </ol>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
 <span><span class="co">#&gt; 0.7427012 0.7494395 0.7727382 0.8214067 0.8349706 0.8798625</span></span></code></pre></div>
 <p>The corresponding subgroup cumulative hazard ratios are available
 as:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">chr.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
 <span><span class="co">#&gt; 0.4647887 0.4834859 0.5528552 0.6324199 0.6834531 0.7680014</span></span></code></pre></div>
@@ -1005,7 +1010,7 @@ whichever way that fits their particular situation outside the package’s
 functions. For example, it is possible to plot the densities of all CATE
 scores with <code>ggplot</code>. The score distributions summarize
 variation in predicted treatment benefit across patients.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Random Forest"</span>, <span class="st">"Contrast regression"</span><span class="op">)</span>,</span>
@@ -1136,10 +1141,10 @@ appropriate. It is important for this argument to match with the nature
 of <code>y</code> outcome because it will affect how the subgroups are
 defined by the CATE scores and the performance metrics.</p></li>
 <li><p><code>surv.min</code> truncates the censoring probability
-estimated from the IPCW model with a lower limit to prevent extremely
-small censoring probabilities. It is recommended to choose a small
-positive value close to 0. We chose <code>0.025</code> in the example,
-which corresponds to the default value.</p></li>
+estimated from the censoring model with a lower limit to prevent
+extremely small censoring probabilities. It is recommended to choose a
+small positive value close to 0. We chose <code>0.025</code> in the
+example, which corresponds to the default value.</p></li>
 <li><p>We performed 5 CV iterations by specifying <code>cv.n</code> = 5.
 Typically, more CV iterations are desirable although associated with
 longer computational times.</p></li>
@@ -1168,7 +1173,7 @@ low-responder group contains 20% of that set (about 200 patients), while
 the mutually exclusive groups each contain at least 30%. Actual
 treatment and event counts within each group may be smaller and should
 be checked.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                        data <span class="op">=</span> <span class="va">survival_data</span>,</span>
 <span>                        score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
@@ -1216,7 +1221,7 @@ drug1. When <code>higher.y</code> = FALSE for survival outcomes, higher
 CATE scores correspond to high responders to drug1. Note that this is
 different for count outcomes. The direction of CATE scores depends on
 both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.6 0.4951334 0.4969934 0.5151479 0.4454503 0.5098675</span></span>
@@ -1258,7 +1263,7 @@ FALSE for survival outcomes, lower CATE scores correspond to low
 responders to drug1. Again, this is different for count outcomes. The
 direction of CATE scores depends on both <code>higher.y</code> and
 outcome type.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
 <span><span class="co">#&gt; prop0.4 2.057115 2.159150 1.999794 2.266325 2.100201</span></span>
@@ -1285,7 +1290,7 @@ subgroups of patients in the training
 (<code>$ate.est.train.group.cv</code>) and validation
 (<code>$ate.est.valid.group.cv</code>) sets across all CV
 iterations.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.4 2.0571154 2.1591497 1.9997945 2.2663254 2.1002008</span></span>
@@ -1313,7 +1318,7 @@ subgroup has few patients or observed events. Use
 <code><a href="../reference/diagnostics.html">diagnostics()</a></code> to collect the recorded errors and warnings
 across methods, splits, subgroups and iterations in a table. An empty
 table means no subgroup messages were recorded:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        method      split iteration group subgroup    type</span></span>
 <span><span class="co">#&gt; 1 contrastReg validation         1 group   prop 1 warning</span></span>
@@ -1346,7 +1351,7 @@ random forest) and the horizontal line representing the ATE in the
 validation set. A higher ABC indicates greater separation in the
 expected direction in this example. Chapter 20 discusses this responder
 diagnostic <span class="citation">(Jiang et al. 2026)</span>.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                     cv1         cv2        cv3        cv4         cv5</span></span>
 <span><span class="co">#&gt; randomForest 0.02392067 0.009108896 0.03794881 0.02452175 0.009546674</span></span>
@@ -1355,7 +1360,7 @@ diagnostic <span class="citation">(Jiang et al. 2026)</span>.</p>
 iterations and rows corresponding to the scoring methods specified in
 <code>score.method</code>. Individual iterations can differ; summarize
 across iterations to compare methods:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
 <span><span class="co">#&gt;   0.02100936   0.03391009</span></span></code></pre></div>
@@ -1396,7 +1401,7 @@ overall ratio as the subgroup expands (see <a href="Theoretical-details.html">Va
 statistics</a>). The validation curves and ABC can help compare methods,
 but selection on these same results warrants an independent
 assessment.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="1056"></p>
 <p>The random forest shows much stronger subgroup separation in training
@@ -1413,7 +1418,7 @@ includes everyone in each respective set.</p>
 method, use <code>layout = "method"</code>. Each panel shows one method,
 with a solid training curve and a dashed validation curve. The dotted
 lines mark the corresponding overall treatment effects.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, layout <span class="op">=</span> <span class="st">"method"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_by_method-1.png" class="r-plt" alt="" width="960"></p>
 <p>To inspect a single cross-validation iteration instead of the
@@ -1426,7 +1431,7 @@ instead of the default mean.</p>
 RMTL ratio and the cumulative hazard ratio separately; the latter
 summarizes cumulative hazards up to <code>tau0</code> and is not an
 instantaneous Cox HR. ABC is shown only for the RMTL plot above.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmtl"</span>, <span class="st">"cumulative_hr"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/plot_cumulative_hazard-1.png" class="r-plt" alt="" width="1056"></p>
 <p>In each panel, the dashed line is the overall ratio for that measure
@@ -1456,19 +1461,12 @@ do not have to be equally spaced in terms of percentiles. The box plot
 shows the distribution of the ATEs over all <code>cv.n</code> CV
 iterations, instead of a summary statistics like mean or median in
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>,</span>
 <span>        ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_boxplot-1.png" class="r-plt" alt="" width="700"></p>
 <p>Cumulative hazard ratios can also be shown for the mutually exclusive
-subgroups:</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="st">"cumulative_hr"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Some cumulative hazard ratios are undefined and are omitted from the</span></span>
-<span><span class="co">#&gt; plot.</span></span>
-<span><span class="co">#&gt; Warning: Removed 1 row containing non-finite outside the scale range</span></span>
-<span><span class="co">#&gt; (`stat_boxplot()`).</span></span></code></pre></div>
-<p><img src="Survival-examples_files/figure-html/boxplot_cumulative_hazard-1.png" class="r-plt" alt="" width="700"></p>
+subgroups using <code>measure = "cumulative_hr"</code>.</p>
 <p>The box plots compare estimated RMTL ratios across mutually exclusive
 score-based subgroups for random forest and contrast regression. Read
 them alongside the validation curves and ABC statistics to assess
@@ -1486,11 +1484,18 @@ situation.</p>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
-<p><a href="Count-examples.html">1. Estimating and validating treatment
-effects for count outcomes</a><br><a href="Survival-examples.html">2. Estimating and validating treatment
-effects for survival outcomes</a><br><a href="Additional-examples.html">3. Customizing CATE models and
-validation</a><br><a href="Theoretical-details.html">4. Methods for estimating and
-validating treatment effects</a></p>
+<ul>
+<li><a href="Binary-examples.html">Estimating and validating treatment
+effects for binary outcomes</a></li>
+<li><a href="Count-examples.html">Estimating and validating treatment
+effects for count outcomes</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
+<li><a href="ATE-theory.html">Methods for estimating average treatment
+effects</a></li>
+<li><a href="Theoretical-details.html">Methods for developing and
+validating CATE scores</a></li>
+</ul>
 </div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

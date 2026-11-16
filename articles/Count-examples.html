@@ -45,10 +45,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -72,7 +74,6 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Estimating and validating treatment effects for count outcomes</h1>
-            <h3 data-toc-skip class="subtitle">Vignette 1 of 4</h3>
             
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/Count-examples.Rmd" class="external-link"><code>vignettes/Count-examples.Rmd</code></a></small>
@@ -574,6 +575,8 @@ number of years during follow-up.</p></li>
 <div class="section level2">
 <h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
 </h2>
+<p>For the estimators and their assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
+effects</a>.</p>
 <div class="section level3">
 <h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
 </h3>
@@ -660,13 +663,14 @@ treatment overlap and no unmeasured confounding.</p>
 <code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-using-atefit"></a>
 </h3>
 <p>We now use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate a population-level rate
-ratio, combining outcome and propensity score models. The rate ratio
-estimator is doubly robust, meaning that the estimator is consistent if
-the propensity score (PS) model (argument <code>ps.model</code>) or the
-outcome model (argument <code>cate.model</code>) or both are correctly
-specified, under the required assumptions. The function also provides
-standard errors, confidence intervals and p-values based on
-bootstrap.</p>
+ratio, combining outcome and treatment models. The treatment model
+estimates the propensity score, the probability of receiving treatment 1
+given the covariates. The rate ratio estimator is doubly robust, meaning
+that the estimator is consistent if the treatment model (argument
+<code>ps.model</code>) or the outcome model (argument
+<code>cate.model</code>) or both are correctly specified, under the
+required assumptions. The function also provides standard errors,
+confidence intervals and p-values based on bootstrap.</p>
 <p>In this example, the rate ratio compares the relapse rate under drug
 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal
 interpretation requires appropriate assumptions, including no unmeasured
@@ -693,9 +697,9 @@ patients. Note that the treatment variable is not supplied in
 <!-- * We use all 6 variables in the outcome CATE model and specify the offset as `log(years)`. It is recommended to log-transform the exposure variable.
 * --><ul>
 <li>
-<code>ps.model</code>: A formula describing the propensity score
-(PS) model to be fitted. The treatment must appear on the left-hand side
-and the covariates (age and previous treatment in this example) on the
+<code>ps.model</code>: A formula describing the treatment model to
+be fitted. The treatment must appear on the left-hand side and the
+covariates (age and previous treatment in this example) on the
 right-hand side. The variable <code>trt</code> must be supplied as a
 numeric variable taking only 2 values, 1 for active treatment and 0 for
 control or comparator. If it is not the case, the function will stop
@@ -706,13 +710,13 @@ and “drug1”) was transformed and an informational message is shown (see
 output below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
 If the data are from a RCT, it suffices to specify <code>ps.model</code>
-= trt ~ 1. The PS model is used to estimate overall and subgroup average
-treatment effects. It is also used to fit the doubly robust
+= trt ~ 1. The treatment model is used to estimate overall and subgroup
+average treatment effects. It is also used to fit the doubly robust
 two-regression and contrast-regression CATE scores; other scoring
 methods need not use it to construct their scores.</li>
 </ul>
 <p>Let’s calculate the ATE for the effect of treatment on y and build an
-outcome model that contains all variables and a PS model with
+outcome model that contains all variables and a treatment model with
 <code>age</code> and <code>previous_treatment</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
@@ -1399,11 +1403,18 @@ situation.</p>
 <div class="section level2">
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
-<p><a href="Count-examples.html">1. Estimating and validating treatment
-effects for count outcomes</a><br><a href="Survival-examples.html">2. Estimating and validating treatment
-effects for survival outcomes</a><br><a href="Additional-examples.html">3. Customizing CATE models and
-validation</a><br><a href="Theoretical-details.html">4. Methods for estimating and
-validating treatment effects</a></p>
+<ul>
+<li><a href="Binary-examples.html">Estimating and validating treatment
+effects for binary outcomes</a></li>
+<li><a href="Survival-examples.html">Estimating and validating treatment
+effects for survival outcomes</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
+<li><a href="ATE-theory.html">Methods for estimating average treatment
+effects</a></li>
+<li><a href="Theoretical-details.html">Methods for developing and
+validating CATE scores</a></li>
+</ul>
 </div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

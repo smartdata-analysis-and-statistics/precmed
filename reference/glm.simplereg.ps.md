@@ -20,7 +20,7 @@ glm.simplereg.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
 
   A matrix of `p.ps` baseline covariates (plus a leading column of 1 for
   the intercept); dimension `n` by `p.ps + 1` (covariates in the
-  propensity score model plus intercept)
+  treatment model plus intercept)
 
 - xnew:
 

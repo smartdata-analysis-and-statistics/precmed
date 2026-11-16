@@ -66,8 +66,8 @@ arg.checks(
 
 - data:
 
-  A data frame containing the variables in the outcome and propensity
-  score models; a data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome and treatment
+  models; a data frame with `n` rows (1 row per observation).
 
 - followup.time:
 

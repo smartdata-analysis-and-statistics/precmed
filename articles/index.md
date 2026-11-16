@@ -4,6 +4,10 @@
 
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md):
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md):
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md):
 - [Estimating and validating treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md):
 - [Learning
@@ -14,5 +18,5 @@
   start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.md):
 - [Estimating and validating treatment effects for survival
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md):
-- [Methods for estimating and validating treatment
-  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md):
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md):

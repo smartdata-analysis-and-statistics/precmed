@@ -37,7 +37,7 @@ characteristics, treatment, observed time and an event indicator.
 survival_data <- simulate_survival(n = 4000, seed = 20261114)
 ```
 
-Treatment is assigned according to the propensity model; its weights can
+Treatment is assigned according to the treatment model; its weights can
 be changed to explore different treatment proportions and degrees of
 overlap. For example,
 `simulate_survival(n = 4000, seed = 1, ps_weights = c(intercept = -1), conditional_hr = 0.8)`
@@ -85,6 +85,10 @@ legend("bottomleft", legend = c("drug0", "drug1"),
 ![](Survival-examples_files/figure-html/km_by_treatment-1.png)
 
 ## Estimate the average treatment effect
+
+For the estimators and their assumptions, see [Methods for estimating
+average treatment
+effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
 
 ### Unadjusted treatment comparison
 
@@ -219,12 +223,14 @@ We now use
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 to estimate population-level outcomes over a specified follow-up
 horizon. For restricted mean survival time (RMST) and restricted mean
-time lost (RMTL), it combines outcome and propensity score models with
-an adjustment for censoring to estimate population-level outcomes under
-each treatment. These measures summarize time over the chosen period
-without requiring a constant treatment HR. Under appropriate
-assumptions, the population-level comparison can be interpreted as a
-causal treatment effect.
+time lost (RMTL), it combines outcome and treatment models with an
+adjustment for censoring to estimate population-level outcomes under
+each treatment. The treatment model estimates the propensity score,
+while the censoring model estimates probabilities used to construct
+inverse probability of censoring weights (IPCW). These measures
+summarize time over the chosen period without requiring a constant
+treatment HR. Under appropriate assumptions, the population-level
+comparison can be interpreted as a causal treatment effect.
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 also estimates a population-level cumulative hazard ratio at the
 horizon. It uses bootstrap resampling to estimate uncertainty for all
@@ -241,8 +247,8 @@ $`-\log(S(tau0))`$, under the two treatments.
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 estimates the treatment-specific survival probabilities using augmented
 inverse probability of treatment weighting (AIPTW), combining outcome,
-propensity score and censoring models without discretizing event times.
-The estimator requires appropriate censoring assumptions and a correctly
+treatment and censoring models without discretizing event times. The
+estimator requires appropriate censoring assumptions and a correctly
 specified censoring model; its treatment-model double robustness does
 not protect against censoring-model misspecification. The calculation
 reuses the treatment-specific Cox outcome fits, propensity scores and
@@ -270,12 +276,12 @@ including censoring, and does not guarantee sufficient follow-up;
 inspect numbers at risk and censoring near the horizon in both groups
 and choose a clinically meaningful horizon with adequate support.
 
-The RMTL estimator is doubly robust with respect to the propensity score
-(PS) and outcome models: under the required assumptions, either model
-may be correctly specified. It also depends on inverse probability of
-censoring weights (IPCW) and a correctly specified censoring model. The
-function provides standard errors, confidence intervals and p-values
-based on bootstrap. If an out-of-range RMST estimate is replaced by an
+The RMTL estimator is doubly robust with respect to the treatment and
+outcome models: under the required assumptions, either model may be
+correctly specified. It also depends on inverse probability of censoring
+weights (IPCW) and a correctly specified censoring model. The function
+provides standard errors, confidence intervals and p-values based on
+bootstrap. If an out-of-range RMST estimate is replaced by an
 outcome-model estimate, that fallback does not retain the doubly robust
 guarantee.
 
@@ -311,12 +317,12 @@ are:
   variable is not supplied in `cate.model` since this is an outcome
   model.
 
-- The `ps.model` argument specifies the PS model as a formula, with the
-  treatment variable `trt` on the left-hand side and the covariates (age
-  and previous treatment in this example) on the right-hand side. The
-  variable `trt` must be supplied as a numeric variable taking only 2
-  values, “1” for active treatment and “0” for control or comparator. If
-  it is not the case,
+- The `ps.model` argument specifies the treatment model as a formula,
+  with the treatment variable `trt` on the left-hand side and the
+  covariates (age and previous treatment in this example) on the
+  right-hand side. The variable `trt` must be supplied as a numeric
+  variable taking only 2 values, “1” for active treatment and “0” for
+  control or comparator. If it is not the case,
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   will stop with error if `trt` takes more than 2 distinct values or
   will automatically transform `trt` into a numeric variable. In this
@@ -324,13 +330,13 @@ are:
   was transformed and an informational message is shown (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
   If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. The PS model is used in the doubly robust RMTL estimation.
+  ~ 1. The treatment model is used in the doubly robust RMTL estimation.
 
 We also specify the optional argument `tau0`, the horizon for RMST and
 RMTL, using the value calculated above.
 
 Now estimate the ATE using an outcome model with age, sex, previous cost
-and previous relapses, and a PS model with `age` and
+and previous relapses, and a treatment model with `age` and
 `previous_treatment`.
 
 ``` r
@@ -434,7 +440,8 @@ reported quantities. A solid red line marks the full-sample estimate; a
 dashed black line marks the null value of 0 in the log-ratio panels. Set
 `null.value` to another value on the log scale, or to `NULL` or `NA` to
 omit the null line. The treatment-specific RMST panels have no null
-line.
+line. Select specific facets with the `metrics` argument, for example
+`metrics = c("log.rmtl.ratio", "log.cumulative.hazard.ratio")`.
 
 ``` r
 
@@ -442,13 +449,6 @@ plot(output_atefit)
 ```
 
 ![](Survival-examples_files/figure-html/plot_atefit_bootstrap-1.png)
-
-``` r
-
-plot(output_atefit, metrics = c("log.rmtl.ratio", "log.cumulative.hazard.ratio"))
-```
-
-![](Survival-examples_files/figure-html/plot_atefit_bootstrap-2.png)
 
 Histograms of bootstrap estimates for the four reported quantities.
 
@@ -512,19 +512,19 @@ are:
   Note that the treatment variable is not supplied in `cate.model` since
   this is an outcome model.
 
-- `ps.model`: A formula describing the propensity score (PS) model to be
-  fitted. The treatment must appear on the left-hand side and the
-  covariates (age and previous treatment in this example) on the
-  right-hand side. The variable `trt` must be supplied as a numeric
-  variable taking only 2 values, 1 for active treatment and 0 for
-  control or comparator. If it is not the case, the function will stop
-  with error if `trt` takes more than 2 distinct values or will
-  automatically transform `trt` into a numeric variable. In this
-  example, `trt` (a factor variable taking values “drug0” and “drug1”)
-  was transformed and an informational message is shown (see output
-  below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
-  If the data are from a RCT, it suffices to specify `ps.model` = trt
-  ~ 1. The PS model is used to estimate overall and subgroup average
+- `ps.model`: A formula describing the treatment model to be fitted. The
+  treatment must appear on the left-hand side and the covariates (age
+  and previous treatment in this example) on the right-hand side. The
+  variable `trt` must be supplied as a numeric variable taking only 2
+  values, 1 for active treatment and 0 for control or comparator. If it
+  is not the case, the function will stop with error if `trt` takes more
+  than 2 distinct values or will automatically transform `trt` into a
+  numeric variable. In this example, `trt` (a factor variable taking
+  values “drug0” and “drug1”) was transformed and an informational
+  message is shown (see output below):
+  `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the
+  data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The
+  treatment model is used to estimate overall and subgroup average
   treatment effects. It is also used to fit the doubly robust
   two-regression and contrast-regression CATE scores; other scoring
   methods need not use it to construct their scores.
@@ -634,13 +634,13 @@ log-RMTL score changes with each covariate. They are estimates from
 these synthetic data.
 
 The `chr` outputs provide subgroup cumulative hazard ratios at `tau0`,
-estimated using the same outcome, propensity-score and censoring models
-as the subgroup RMTL estimates. The `hr` outputs are instead
-covariate-adjusted Cox hazard ratios, with follow-up censored at `tau0`.
-These are different measures and should be interpreted separately. An
-undefined cumulative hazard ratio is returned as `NA`, with a warning
-recorded for the subgroup. Use `measure = "cumulative_hr"` in survival
-validation plots and box plots to display cumulative hazard ratios.
+estimated using the same outcome, treatment and censoring models as the
+subgroup RMTL estimates. The `hr` outputs are instead covariate-adjusted
+Cox hazard ratios, with follow-up censored at `tau0`. These are
+different measures and should be interpreted separately. An undefined
+cumulative hazard ratio is returned as `NA`, with a warning recorded for
+the subgroup. Use `measure = "cumulative_hr"` in survival validation
+plots and box plots to display cumulative hazard ratios.
 
 3.  `ate` contains estimated ATEs by each nested subgroup of high
     responders to drug 1 defined by `prop.cutoff`. The subgroups are
@@ -816,11 +816,11 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
   affect how the subgroups are defined by the CATE scores and the
   performance metrics.
 
-- `surv.min` truncates the censoring probability estimated from the IPCW
-  model with a lower limit to prevent extremely small censoring
-  probabilities. It is recommended to choose a small positive value
-  close to 0. We chose `0.025` in the example, which corresponds to the
-  default value.
+- `surv.min` truncates the censoring probability estimated from the
+  censoring model with a lower limit to prevent extremely small
+  censoring probabilities. It is recommended to choose a small positive
+  value close to 0. We chose `0.025` in the example, which corresponds
+  to the default value.
 
 - We performed 5 CV iterations by specifying `cv.n` = 5. Typically, more
   CV iterations are desirable although associated with longer
@@ -1188,18 +1188,7 @@ boxplot(output_catecv,
 ![](Survival-examples_files/figure-html/example_plot_boxplot-1.png)
 
 Cumulative hazard ratios can also be shown for the mutually exclusive
-subgroups:
-
-``` r
-
-boxplot(output_catecv, measure = "cumulative_hr")
-#> Warning: Some cumulative hazard ratios are undefined and are omitted from the
-#> plot.
-#> Warning: Removed 1 row containing non-finite outside the scale range
-#> (`stat_boxplot()`).
-```
-
-![](Survival-examples_files/figure-html/boxplot_cumulative_hazard-1.png)
+subgroups using `measure = "cumulative_hr"`.
 
 The box plots compare estimated RMTL ratios across mutually exclusive
 score-based subgroups for random forest and contrast regression. Read
@@ -1221,14 +1210,16 @@ y-axis can have different scales for different scoring methods.
 
 ## Other `precmed` vignettes in this series
 
-[1. Estimating and validating treatment effects for count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)  
-[2. Estimating and validating treatment effects for survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)  
-[3. Customizing CATE models and
-validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)  
-[4. Methods for estimating and validating treatment
-effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Estimating and validating treatment effects for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Estimating and validating treatment effects for count
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Customizing CATE models and
+  validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

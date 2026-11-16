@@ -26,9 +26,9 @@ atefitcount(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - cate.model:
 
@@ -37,10 +37,11 @@ atefitcount(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0 or 1. If data are from a randomized
-  controlled trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0 or 1. If data are from a
+  randomized controlled trial, specify `ps.model = ~1` as an
+  intercept-only model.
 
 - ps.method:
 
@@ -127,6 +128,14 @@ with a doubly robust estimator that accounts for imbalances in covariate
 distributions between the two treatment groups with inverse probability
 treatment weighting. For count outcomes, the estimated ATE is the
 estimated rate ratio between treatment 1 versus treatment 0.
+
+Failed or non-finite bootstrap estimates are recorded in
+`bootstrap.diagnostics`, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected
+measure is unavailable rather than based on a subset of replicates. See
+also
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+to inspect these records.
 
 ## Examples
 

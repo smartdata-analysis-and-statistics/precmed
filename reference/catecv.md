@@ -67,9 +67,9 @@ catecv(
 
 - data:
 
-  A data frame containing the variables in the outcome, propensity
-  score, and inverse probability of censoring models (if specified); a
-  data frame with `n` rows (1 row per observation).
+  A data frame containing the variables in the outcome, treatment, and
+  censoring models (if specified); a data frame with `n` rows (1 row per
+  observation).
 
 - score.method:
 
@@ -88,10 +88,11 @@ catecv(
 
 - ps.model:
 
-  A formula describing the propensity score (PS) model to be fitted. The
-  treatment must appear on the left-hand side. The treatment must be a
-  numeric vector coded as 0/1. If data are from a randomized controlled
-  trial, specify `ps.model = ~1` as an intercept-only model.
+  A formula describing the treatment model (propensity-score model) to
+  be fitted. The treatment must appear on the left-hand side. The
+  treatment must be a numeric vector coded as 0/1. If data are from a
+  randomized controlled trial, specify `ps.model = ~1` as an
+  intercept-only model.
 
 - ps.method:
 
@@ -123,10 +124,10 @@ catecv(
 
 - ipcw.model:
 
-  A formula describing the inverse probability of censoring weighting
-  (IPCW) model to be fitted. The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which corresponds to
-  specifying the IPCW with the same covariates as the outcome model
+  A formula describing the censoring model used for inverse probability
+  of censoring weighting (IPCW). The left-hand side must be empty. Only
+  applies for survival outcomes. Default is `NULL`, which uses a
+  censoring model with the same covariates as the outcome model
   `cate.model`, plus the treatment.
 
 - ipcw.method:
@@ -428,7 +429,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 7.07 secs 
+#> Total runtime : 10.73 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

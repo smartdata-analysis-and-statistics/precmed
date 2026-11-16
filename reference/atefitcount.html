@@ -27,10 +27,12 @@ inference."><meta property="og:image" content="https://smartdata-analysis-and-st
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for estimating and validating treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -78,8 +80,8 @@ inference.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame containing the variables in the outcome, propensity
-score, and inverse probability of censoring models (if specified); a data
+<dd><p>A data frame containing the variables in the outcome, treatment
+and censoring models (if specified); a data
 frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
@@ -89,8 +91,8 @@ The outcome must appear on the left-hand side.</p></dd>
 
 
 <dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
-<dd><p>A formula describing the propensity score (PS) model to be
-fitted. The treatment must appear on the left-hand side. The treatment must
+<dd><p>A formula describing the treatment model (propensity-score
+model) to be fitted. The treatment must appear on the left-hand side. The treatment must
 be a numeric vector coded as 0 or 1. If data are from a randomized controlled
 trial, specify <code>ps.model = ~1</code> as an intercept-only model.</p></dd>
 
@@ -175,6 +177,11 @@ doubly robust estimator that accounts for imbalances in covariate
 distributions between the two treatment groups with inverse probability
 treatment weighting. For count outcomes, the estimated ATE is the estimated
 rate ratio between treatment 1 versus treatment 0.</p>
+<p>Failed or non-finite bootstrap estimates are recorded in
+<code>bootstrap.diagnostics</code>, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected measure
+is unavailable rather than based on a subset of replicates. See also
+<code><a href="diagnostics.html">diagnostics()</a></code> to inspect these records.</p>
     </div>
 
     <div class="section level2">
