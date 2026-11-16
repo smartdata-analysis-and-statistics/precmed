@@ -25,9 +25,11 @@ boxplot(
   ylab = NULL,
   plot.hr = FALSE,
   title = waiver(),
-  theme = theme_classic(),
+  theme = precmed_plot_theme(),
   hazard.type = c("cumulative", "conditional"),
   measure = "rmtl",
+  show.overall = TRUE,
+  ncol = 2,
   ...
 )
 ```
@@ -56,8 +58,10 @@ boxplot(
 
 - theme:
 
-  Defaults to `theme_classic()`. Other options include `theme_grey()`,
-  `theme_bw()`, `theme_light()`, `theme_dark()`, and `theme_void()`
+  A ggplot2 theme. By default, a customized minimal theme is used;
+  supply, for example,
+  [`ggplot2::theme_classic()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+  to use another theme.
 
 - hazard.type:
 
@@ -73,6 +77,16 @@ boxplot(
   hazard ratio fitted through `tau0`). Earlier measure names remain
   supported as aliases.
 
+- show.overall:
+
+  Whether to show the dashed mean overall validation-set treatment
+  effect across iterations. Defaults to `TRUE`.
+
+- ncol:
+
+  Number of columns for scoring-method panels. Defaults to 2; use 1 to
+  stack panels vertically.
+
 - ...:
 
   Other parameters
@@ -81,7 +95,7 @@ boxplot(
 
 Returns sets of box plots, one set for each scoring method, over each of
 the multi-category subgroups. A gray horizontal dashed line of the
-overall ATE is included as a reference.
+overall ATE is included as a reference when `show.overall = TRUE`.
 
 ## Details
 

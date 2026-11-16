@@ -73,18 +73,22 @@ overall
 ```
 
 The output reports the log rate ratio and bootstrap-based uncertainty.
-Exponentiate the estimate to obtain the rate ratio; a value below 1
-indicates a lower estimated relapse rate with `drug1`. The estimator is
-doubly robust: under the required causal and other regularity
-assumptions, it is consistent if either the outcome model or the
-propensity score model is correctly specified. The 50 bootstrap
-replicates used here keep the example short; use more for a substantive
-analysis.
+Exponentiate the estimate and confidence limits to obtain the rate ratio
+and its 95% confidence interval; a rate ratio below 1 indicates a lower
+estimated relapse rate with `drug1`. The confidence interval uses the
+bootstrap standard error. The estimator is doubly robust: under the
+required causal and other regularity assumptions, it is consistent if
+either the outcome model or the propensity score model is correctly
+specified. The 50 bootstrap replicates used here keep the example short;
+use more for a substantive analysis.
 
 ``` r
 
-exp(overall$log.rate.ratio$estimate)
+unname(exp(coef(overall)))
 #> [1] 1.065152
+exp(confint(overall))[1, ]
+#>     2.5 %    97.5 % 
+#> 0.7747033 1.4644945
 ```
 
 The overall effect can mask differences across patients. Next, we

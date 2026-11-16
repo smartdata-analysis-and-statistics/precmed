@@ -22,13 +22,16 @@ abc(x, ...)
 
 - ...:
 
-  Additional arguments (currently unused).
+  Additional arguments passed to the method, such as `combine` for
+  `precmed` objects; see
+  [`abc.precmed`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.precmed.md).
 
 ## Value
 
 Returns a matrix of numeric values with number of columns equal to the
 number cross-validation iteration and number of rows equal to the number
-of scoring methods in `x`.
+of scoring methods in `x`. With `combine`, returns a named numeric
+vector with one value per method.
 
 ## Details
 
@@ -87,4 +90,10 @@ data(catecvCountExample)
 abc(catecvCountExample)
 #>               cv1       cv2       cv3        cv4       cv5
 #> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103
+abc(catecvCountExample, combine = "mean")
+#>   poisson 
+#> 0.1231947 
+abc(catecvCountExample, combine = median)
+#>   poisson 
+#> 0.1172791 
 ```

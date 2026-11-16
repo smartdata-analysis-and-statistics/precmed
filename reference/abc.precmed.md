@@ -9,7 +9,7 @@ have been obtained.
 
 ``` r
 # S3 method for class 'precmed'
-abc(x, ...)
+abc(x, combine = NULL, ...)
 ```
 
 ## Arguments
@@ -17,6 +17,14 @@ abc(x, ...)
 - x:
 
   An object of class `"precmed"`.
+
+- combine:
+
+  Optional summary across validation iterations for each scoring method.
+  Use `NULL` (the default) for the full matrix, `"mean"` or `"median"`,
+  or a function returning one numeric value from a vector. Missing
+  values are passed to the summary function unchanged; for example, use
+  `function(z) mean(z, na.rm = TRUE)` to omit them explicitly.
 
 - ...:
 
@@ -26,7 +34,8 @@ abc(x, ...)
 
 Returns a matrix of numeric values with number of columns equal to the
 number cross-validation iteration and number of rows equal to the number
-of scoring methods in `x`.
+of scoring methods in `x`. With `combine`, returns a named numeric
+vector with one value per method.
 
 ## Details
 
@@ -85,4 +94,10 @@ data(catecvCountExample)
 abc(catecvCountExample)
 #>               cv1       cv2       cv3        cv4       cv5
 #> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103
+abc(catecvCountExample, combine = "mean")
+#>   poisson 
+#> 0.1231947 
+abc(catecvCountExample, combine = median)
+#>   poisson 
+#> 0.1172791 
 ```

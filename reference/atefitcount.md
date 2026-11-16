@@ -108,6 +108,12 @@ Return an item of the class `atefit` with the following elements:
 
 - `trt.boot`: Estimated log rate ratios in each bootstrap sample.
 
+- `rate.boot`: A data frame of treatment-specific rate estimates in each
+  bootstrap sample, with columns `rate0` and `rate1`.
+
+- `treatment.labels`: Original treatment labels corresponding to 0 and
+  1.
+
 - `warning`: A warning message produced if the treatment variable was
   not coded as 0 or 1. The key to map the original coding of the
   variable to a 0-1 coding is displayed in the warning to facilitate the

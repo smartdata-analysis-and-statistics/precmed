@@ -53,7 +53,16 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'atefit'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">bins</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, title <span class="op">=</span> <span class="fu">waiver</span><span class="op">(</span><span class="op">)</span>, theme <span class="op">=</span> <span class="fu">theme_classic</span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">bins</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  title <span class="op">=</span> <span class="fu">waiver</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  theme <span class="op">=</span> <span class="fu">precmed_plot_theme</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  null.value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  metrics <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -69,7 +78,7 @@
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Opacity</p></dd>
+<dd><p>Histogram bar opacity, between 0 and 1. Defaults to 1.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>
@@ -77,7 +86,23 @@
 
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
-<dd><p>Defaults to <code>theme_classic()</code>. Other options include <code>theme_grey()</code>, <code>theme_bw()</code>, <code>theme_light()</code>, <code>theme_dark()</code>, and <code>theme_void()</code></p></dd>
+<dd><p>A ggplot2 theme. By default, a customized minimal theme is used;
+supply, for example, <code><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">ggplot2::theme_classic()</a></code> to use another theme.</p></dd>
+
+
+<dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
+<dd><p>Reference value on the plotted log-ratio scale. Defaults to
+0 (a ratio of 1); use <code>NULL</code> or <code>NA</code> to omit the null line.</p></dd>
+
+
+<dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
+<dd><p>Character vector of metrics to plot, in display order. For
+count fits, choose from <code>"rate0"</code>, <code>"rate1"</code>, and
+<code>"log.rate.ratio"</code>; for survival fits, choose from <code>"rmst0"</code>,
+<code>"rmst1"</code>, <code>"log.rmtl.ratio"</code>, and
+<code>"log.cumulative.hazard.ratio"</code>. Older survival fits may instead
+contain <code>"log.hazard.ratio"</code>. The default <code>NULL</code> plots all
+metrics available in the object.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -92,9 +117,11 @@ the bootstrap samples</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Create a histogram displaying the distribution of the bootstrap estimates.
-The red vertical reference line represents the final estimate.
-For survival fits, RMST facets use the original treatment labels when available;
-older objects use treatment 0 and treatment 1.</p>
+The solid red vertical line represents the full-sample estimate. A dashed
+black line marks <code>null.value</code> in log-ratio panels only; it is not shown
+in treatment-specific rate or RMST panels.
+Treatment-specific facets use the original treatment labels when available.
+Older count objects without rate bootstrap estimates show only the log rate ratio.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

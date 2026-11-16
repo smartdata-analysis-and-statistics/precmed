@@ -262,14 +262,13 @@ fitted object:
 
 ``` r
 
-rate.ratio <- exp(coef(output_atefit))
+rate.ratio <- unname(exp(coef(output_atefit)))
 rate.ratio
-#> log.rate.ratio 
-#>       1.065152
-CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))
+#> [1] 1.065152
+CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))[1, ]
 CI.rate.ratio
-#>                    2.5 %   97.5 %
-#> log.rate.ratio 0.7747033 1.464495
+#>     2.5 %    97.5 % 
+#> 0.7747033 1.4644945
 ```
 
 The rate ratio of 1.07 along with the 95% confidence interval of (0.77,
@@ -278,15 +277,22 @@ However, the confidence interval includes 1, so there is insufficient
 evidence of a treatment difference, consistent with the p-value of 0.7
 in the output (`$log.rate.ratio$pvalue`).
 
-Using `plot(output_atefit)`, a histograms is generated of the point
-estimates across the `n.boot` bootstrap iterations for the log rate
-ratio. A red vertical line is added to each histogram with the mean of
-the bootstrap estimates.
+`plot(output_atefit)` displays all available metrics by default: the
+bootstrap estimates of the rate for each treatment and the log rate
+ratio. The `metrics` argument selects and orders these panels. Solid red
+lines mark the full-sample estimates, and the dashed black line marks
+the null value of 0 in the log-ratio panel (a rate ratio of 1). Set
+`null.value` to another value on the log scale, or to `NULL` or `NA` to
+omit the null line.
 
-![](atefit_bootstrap_count.png)
+``` r
 
-Histograms of bootstrap log rate ratio estimators after 500 bootstrap
-iterations.
+plot(output_atefit, metrics = c("rate0", "rate1", "log.rate.ratio"))
+```
+
+![](Count-examples_files/figure-html/plot_atefit_bootstrap-1.png)
+
+Bootstrap estimates of the treatment-specific rates and log rate ratio.
 
 ## Estimate CATE scores
 
@@ -790,155 +796,21 @@ diagnostics(output_catecv)
 
 The support table records the number of patients (`n0`, `n1`) and total
 observed relapses (`events0`, `events1`) in each treatment arm for each
-reported subgroup. For example, inspect the validation-set support for
-contrast regression with:
+reported subgroup. For example, inspect the first six validation-set
+support records for contrast regression with:
 
 ``` r
 
-subset(output_catecv$subgroup.support,
-       split == "validation" & method == "contrastReg")
-#>          method      split iteration group                            subgroup
-#> 57  contrastReg validation         1  high                                   1
-#> 58  contrastReg validation         1  high                                 0.5
-#> 59  contrastReg validation         1   low                                 0.5
-#> 60  contrastReg validation         1  high                                 0.6
-#> 61  contrastReg validation         1   low                                 0.4
-#> 62  contrastReg validation         1  high                                 0.7
-#> 63  contrastReg validation         1   low                                 0.3
-#> 64  contrastReg validation         1  high                                 0.8
-#> 65  contrastReg validation         1   low                                 0.2
-#> 66  contrastReg validation         1  high                                 0.9
-#> 67  contrastReg validation         1   low                                 0.1
-#> 68  contrastReg validation         1 group                 0-0.333333333333333
-#> 69  contrastReg validation         1 group 0.333333333333333-0.666666666666667
-#> 70  contrastReg validation         1 group                 0.666666666666667-1
-#> 141 contrastReg validation         2  high                                   1
-#> 142 contrastReg validation         2  high                                 0.5
-#> 143 contrastReg validation         2   low                                 0.5
-#> 144 contrastReg validation         2  high                                 0.6
-#> 145 contrastReg validation         2   low                                 0.4
-#> 146 contrastReg validation         2  high                                 0.7
-#> 147 contrastReg validation         2   low                                 0.3
-#> 148 contrastReg validation         2  high                                 0.8
-#> 149 contrastReg validation         2   low                                 0.2
-#> 150 contrastReg validation         2  high                                 0.9
-#> 151 contrastReg validation         2   low                                 0.1
-#> 152 contrastReg validation         2 group                 0-0.333333333333333
-#> 153 contrastReg validation         2 group 0.333333333333333-0.666666666666667
-#> 154 contrastReg validation         2 group                 0.666666666666667-1
-#> 225 contrastReg validation         3  high                                   1
-#> 226 contrastReg validation         3  high                                 0.5
-#> 227 contrastReg validation         3   low                                 0.5
-#> 228 contrastReg validation         3  high                                 0.6
-#> 229 contrastReg validation         3   low                                 0.4
-#> 230 contrastReg validation         3  high                                 0.7
-#> 231 contrastReg validation         3   low                                 0.3
-#> 232 contrastReg validation         3  high                                 0.8
-#> 233 contrastReg validation         3   low                                 0.2
-#> 234 contrastReg validation         3  high                                 0.9
-#> 235 contrastReg validation         3   low                                 0.1
-#> 236 contrastReg validation         3 group                 0-0.333333333333333
-#> 237 contrastReg validation         3 group 0.333333333333333-0.666666666666667
-#> 238 contrastReg validation         3 group                 0.666666666666667-1
-#> 309 contrastReg validation         4  high                                   1
-#> 310 contrastReg validation         4  high                                 0.5
-#> 311 contrastReg validation         4   low                                 0.5
-#> 312 contrastReg validation         4  high                                 0.6
-#> 313 contrastReg validation         4   low                                 0.4
-#> 314 contrastReg validation         4  high                                 0.7
-#> 315 contrastReg validation         4   low                                 0.3
-#> 316 contrastReg validation         4  high                                 0.8
-#> 317 contrastReg validation         4   low                                 0.2
-#> 318 contrastReg validation         4  high                                 0.9
-#> 319 contrastReg validation         4   low                                 0.1
-#> 320 contrastReg validation         4 group                 0-0.333333333333333
-#> 321 contrastReg validation         4 group 0.333333333333333-0.666666666666667
-#> 322 contrastReg validation         4 group                 0.666666666666667-1
-#> 393 contrastReg validation         5  high                                   1
-#> 394 contrastReg validation         5  high                                 0.5
-#> 395 contrastReg validation         5   low                                 0.5
-#> 396 contrastReg validation         5  high                                 0.6
-#> 397 contrastReg validation         5   low                                 0.4
-#> 398 contrastReg validation         5  high                                 0.7
-#> 399 contrastReg validation         5   low                                 0.3
-#> 400 contrastReg validation         5  high                                 0.8
-#> 401 contrastReg validation         5   low                                 0.2
-#> 402 contrastReg validation         5  high                                 0.9
-#> 403 contrastReg validation         5   low                                 0.1
-#> 404 contrastReg validation         5 group                 0-0.333333333333333
-#> 405 contrastReg validation         5 group 0.333333333333333-0.666666666666667
-#> 406 contrastReg validation         5 group                 0.666666666666667-1
-#>      n0  n1 events0 events1
-#> 57  250 750      78     229
-#> 58  128 372      35      83
-#> 59  122 378      43     146
-#> 60  149 451      40     115
-#> 61  101 299      38     114
-#> 62  179 521      44     137
-#> 63   71 229      34      92
-#> 64  195 605      52     174
-#> 65   55 145      26      55
-#> 66  223 677      65     195
-#> 67   27  73      13      34
-#> 68   87 247      37     102
-#> 69   75 259      13      87
-#> 70   89 245      28      40
-#> 141 250 750      82     259
-#> 142 122 378      37      92
-#> 143 128 372      45     167
-#> 144 146 454      41     135
-#> 145 104 296      41     124
-#> 146 176 524      51     163
-#> 147  74 226      31      96
-#> 148 199 601      63     192
-#> 149  51 149      19      67
-#> 150 222 678      78     218
-#> 151  28  72       4      41
-#> 152  87 247      33     102
-#> 153  81 253      23      98
-#> 154  82 252      26      59
-#> 225 250 750      89     255
-#> 226 125 375      46      98
-#> 227 125 375      43     157
-#> 228 144 456      50     114
-#> 229 106 294      39     141
-#> 230 166 534      62     153
-#> 231  84 216      27     102
-#> 232 198 602      75     177
-#> 233  52 148      14      78
-#> 234 225 675      83     214
-#> 235  25  75       6      41
-#> 236  92 242      29     116
-#> 237  74 260      27      75
-#> 238  84 250      33      64
-#> 309 250 750      81     276
-#> 310 125 375      42      85
-#> 311 125 375      39     191
-#> 312 149 451      48     116
-#> 313 101 299      33     160
-#> 314 172 528      50     153
-#> 315  78 222      31     123
-#> 316 200 600      57     177
-#> 317  50 150      24      99
-#> 318 219 681      72     225
-#> 319  31  69       9      51
-#> 320  83 251      33     139
-#> 321  88 246      21      89
-#> 322  79 255      27      48
-#> 393 250 750      84     281
-#> 394 131 369      50      83
-#> 395 119 381      34     198
-#> 396 153 447      56     118
-#> 397  97 303      28     163
-#> 398 173 527      60     156
-#> 399  77 223      24     125
-#> 400 196 604      69     187
-#> 401  54 146      15      94
-#> 402 221 679      72     241
-#> 403  29  71      12      40
-#> 404  84 250      24     134
-#> 405  86 248      28      90
-#> 406  80 254      32      58
+head(subset(output_catecv$subgroup.support,
+            split == "validation" & method == "contrastReg",
+            select = c(iteration, group, subgroup, n0, n1, events0, events1)))
+#>    iteration group subgroup  n0  n1 events0 events1
+#> 57         1  high        1 250 750      78     229
+#> 58         1  high      0.5 128 372      35      83
+#> 59         1   low      0.5 122 378      43     146
+#> 60         1  high      0.6 149 451      40     115
+#> 61         1   low      0.4 101 299      38     114
+#> 62         1  high      0.7 179 521      44     137
 ```
 
 The contrast-regression convergence vector indicates whether at least
@@ -969,8 +841,7 @@ section for a detailed illustration of the relationship between
 
 ``` r
 
-output_abc <- abc(output_catecv)
-output_abc
+abc(output_catecv)
 #>                    cv1       cv2        cv3        cv4       cv5
 #> poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204
 #> contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554
@@ -979,16 +850,12 @@ output_abc
 
 The output is a matrix with columns corresponding to the CV iterations
 and rows corresponding to the scoring methods specified in
-`score.method`. For example, in CV iteration 1, negative binomial
-(“negBin”) has an ABC of 0.145, which is the highest in this CV
-iteration, meaning that negative binomial offers the best performance in
-the first CV iteration. The user can combine the ABC for each method
-across iterations:
+`score.method`. Individual iterations can differ; summarize across
+iterations to compare methods:
 
 ``` r
 
-average_abc <- apply(output_abc, 1, mean)
-average_abc
+abc(output_catecv, combine = "mean")
 #>     poisson contrastReg      negBin 
 #>   0.1314988   0.1241822   0.1375879
 ```
@@ -1058,6 +925,19 @@ plot(output_catecv,
 ```
 
 ![](Count-examples_files/figure-html/example_plot_lineplot1.1-1.png)
+
+To compare training and validation curves directly for each scoring
+method, use `layout = "method"`. Each panel shows one method, with a
+solid training curve and a dashed validation curve. The dotted lines
+mark the corresponding overall treatment effects.
+
+``` r
+
+plot(output_catecv, layout = "method", show.abc = FALSE,
+     ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+```
+
+![](Count-examples_files/figure-html/example_plot_by_method-1.png)
 
 To plot validation curves for a single CV iteration instead of the
 average, specify `cv.i` (for example, `cv.i = 2` for the second

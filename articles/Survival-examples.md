@@ -429,10 +429,12 @@ For other treatment labels, check the mapping before interpreting the
 ratio. Alternatively, code the treatment as 0 and 1 explicitly to choose
 the reference group.
 
-Using `plot(output_atefit)`, a histograms is generated of the point
-estimates across the `n.boot` bootstrap iterations for 4 estimands
-(`rmst1`, `rmst0`, `log.rmtl.ratio`, `log.cumulative.hazard.ratio`). A
-red vertical line marks the estimate from the original sample.
+`plot(output_atefit)` displays the bootstrap estimates for the four
+reported quantities. A solid red line marks the full-sample estimate; a
+dashed black line marks the null value of 0 in the log-ratio panels. Set
+`null.value` to another value on the log scale, or to `NULL` or `NA` to
+omit the null line. The treatment-specific RMST panels have no null
+line.
 
 ``` r
 
@@ -440,6 +442,13 @@ plot(output_atefit)
 ```
 
 ![](Survival-examples_files/figure-html/plot_atefit_bootstrap-1.png)
+
+``` r
+
+plot(output_atefit, metrics = c("log.rmtl.ratio", "log.cumulative.hazard.ratio"))
+```
+
+![](Survival-examples_files/figure-html/plot_atefit_bootstrap-2.png)
 
 Histograms of bootstrap estimates for the four reported quantities.
 
@@ -666,12 +675,15 @@ predicted treatment benefit across patients.
 
 ``` r
 
-dataplot <- data.frame(score = factor(rep(c("Random Forest", "Contrast regression"), 
-                                          each = length(output_catefit$score.randomForest))), 
-                       value = c(output_catefit$score.randomForest,output_catefit$score.contrastReg))
+dataplot <- data.frame(
+  score = factor(rep(
+    c("Random Forest", "Contrast regression"),
+    each = length(output_catefit$score.randomForest)
+  )),
+  value = c(output_catefit$score.randomForest, output_catefit$score.contrastReg)
+)
 
-dataplot %>% 
-  ggplot(aes(x = value, fill = score)) + 
+ggplot(dataplot, aes(x = value, fill = score)) +
   geom_density(alpha = 0.5) +
   theme_classic() + 
   labs(x = "Estimated CATE score", y = "Density", fill = "Method")
@@ -1036,8 +1048,7 @@ et al. 2026).
 
 ``` r
 
-output_abc <- abc(output_catecv)
-output_abc
+abc(output_catecv)
 #>                     cv1         cv2        cv3        cv4         cv5
 #> randomForest 0.02392067 0.009108896 0.03794881 0.02452175 0.009546674
 #> contrastReg  0.03030992 0.038194989 0.04085908 0.02954575 0.030640717
@@ -1045,15 +1056,12 @@ output_abc
 
 The output is a matrix with columns corresponding to the CV iterations
 and rows corresponding to the scoring methods specified in
-`score.method`. For example, random forest in CV iteration 1 has an ABC
-of 0.024, in the first CV iteration; compare it with the other scoring
-methods rather than relying on a single split. The user can combine the
-ABC for each method across iterations:
+`score.method`. Individual iterations can differ; summarize across
+iterations to compare methods:
 
 ``` r
 
-average_abc <- apply(output_abc, 1, mean)
-average_abc
+abc(output_catecv, combine = "mean")
 #> randomForest  contrastReg 
 #>   0.02100936   0.03391009
 ```
@@ -1113,6 +1121,18 @@ The dashed gray line is the overall treatment ratio in the corresponding
 training or validation sets, averaged across iterations. The curves meet
 it at a subgroup size of 100% because that subgroup includes everyone in
 each respective set.
+
+To compare training and validation curves directly for each scoring
+method, use `layout = "method"`. Each panel shows one method, with a
+solid training curve and a dashed validation curve. The dotted lines
+mark the corresponding overall treatment effects.
+
+``` r
+
+plot(output_catecv, layout = "method")
+```
+
+![](Survival-examples_files/figure-html/example_plot_by_method-1.png)
 
 To inspect a single cross-validation iteration instead of the average,
 set `cv.i` in [`plot()`](https://rdrr.io/r/graphics/plot.default.html);

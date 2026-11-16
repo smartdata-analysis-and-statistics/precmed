@@ -786,14 +786,18 @@ informational message and can be inspected with
 <p>For other treatment labels, check the mapping before interpreting the
 ratio. Alternatively, code the treatment as 0 and 1 explicitly to choose
 the reference group.</p>
-<p>Using <code>plot(output_atefit)</code>, a histograms is generated of
-the point estimates across the <code>n.boot</code> bootstrap iterations
-for 4 estimands (<code>rmst1</code>, <code>rmst0</code>,
-<code>log.rmtl.ratio</code>, <code>log.cumulative.hazard.ratio</code>).
-A red vertical line marks the estimate from the original sample.</p>
+<p><code>plot(output_atefit)</code> displays the bootstrap estimates for
+the four reported quantities. A solid red line marks the full-sample
+estimate; a dashed black line marks the null value of 0 in the log-ratio
+panels. Set <code>null.value</code> to another value on the log scale,
+or to <code>NULL</code> or <code>NA</code> to omit the null line. The
+treatment-specific RMST panels have no null line.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/plot_atefit_bootstrap-1.png" class="r-plt" alt="" width="768"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"log.rmtl.ratio"</span>, <span class="st">"log.cumulative.hazard.ratio"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Survival-examples_files/figure-html/plot_atefit_bootstrap-2.png" class="r-plt" alt="" width="768"></p>
 <p>Histograms of bootstrap estimates for the four reported
 quantities.</p>
 </div>
@@ -907,7 +911,7 @@ default values. In this toy example, we keep the default values of the
 remaining arguments. For this toy example we selected
 <code>randomForest</code> and <code>contrastReg</code> to limit run
 time.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survival_data</span>,</span>
 <span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -939,7 +943,7 @@ score so the length of this output is 4,000 for our toy example. Below
 we show the CATE scores estimated with contrast regression for the first
 6 subjects in the data.</li>
 </ol>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
@@ -954,7 +958,7 @@ intercept, so there are 5 rows of estimated coefficients within each
 column. Boosting method does not estimate coefficients (it directly
 predicts the score) so they do not have coefficient results here.</li>
 </ol>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">coefficients</span></span>
 <span><span class="co">#&gt;                          contrastReg</span></span>
 <span><span class="co">#&gt; (Intercept)               0.09036581</span></span>
@@ -986,13 +990,13 @@ example, the estimated ATE for the subgroup of subjects constructed
 based on the 50% (“prop0.5”) lowest CATE scores estimated from the
 contrast regression is 0.74.</li>
 </ol>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
 <span><span class="co">#&gt; 0.7427012 0.7494395 0.7727382 0.8214067 0.8349706 0.8798625</span></span></code></pre></div>
 <p>The corresponding subgroup cumulative hazard ratios are available
 as:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span><span class="op">$</span><span class="va">chr.contrastReg</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
 <span><span class="co">#&gt; 0.4647887 0.4834859 0.5528552 0.6324199 0.6834531 0.7680014</span></span></code></pre></div>
@@ -1001,13 +1005,16 @@ whichever way that fits their particular situation outside the package’s
 functions. For example, it is possible to plot the densities of all CATE
 scores with <code>ggplot</code>. The score distributions summarize
 variation in predicted treatment benefit across patients.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Random Forest"</span>, <span class="st">"Contrast regression"</span><span class="op">)</span>, </span>
-<span>                                          each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>, </span>
-<span>                       value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span>,<span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dataplot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Random Forest"</span>, <span class="st">"Contrast regression"</span><span class="op">)</span>,</span>
+<span>    each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span><span class="op">)</span></span>
+<span>  <span class="op">)</span><span class="op">)</span>,</span>
+<span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.randomForest</span>, <span class="va">output_catefit</span><span class="op">$</span><span class="va">score.contrastReg</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">dataplot</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, fill <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dataplot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">value</span>, fill <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_density.html" class="external-link">geom_density</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_classic</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Estimated CATE score"</span>, y <span class="op">=</span> <span class="st">"Density"</span>, fill <span class="op">=</span> <span class="st">"Method"</span><span class="op">)</span></span></code></pre></div>
@@ -1161,7 +1168,7 @@ low-responder group contains 20% of that set (about 200 patients), while
 the mutually exclusive groups each contain at least 30%. Actual
 treatment and event counts within each group may be smaller and should
 be checked.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>                        data <span class="op">=</span> <span class="va">survival_data</span>,</span>
 <span>                        score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
@@ -1209,7 +1216,7 @@ drug1. When <code>higher.y</code> = FALSE for survival outcomes, higher
 CATE scores correspond to high responders to drug1. Note that this is
 different for count outcomes. The direction of CATE scores depends on
 both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.6 0.4951334 0.4969934 0.5151479 0.4454503 0.5098675</span></span>
@@ -1251,7 +1258,7 @@ FALSE for survival outcomes, lower CATE scores correspond to low
 responders to drug1. Again, this is different for count outcomes. The
 direction of CATE scores depends on both <code>higher.y</code> and
 outcome type.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
 <span><span class="co">#&gt; prop0.4 2.057115 2.159150 1.999794 2.266325 2.100201</span></span>
@@ -1278,7 +1285,7 @@ subgroups of patients in the training
 (<code>$ate.est.train.group.cv</code>) and validation
 (<code>$ate.est.valid.group.cv</code>) sets across all CV
 iterations.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catecv</span><span class="op">$</span><span class="va">ate.randomForest</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.4 2.0571154 2.1591497 1.9997945 2.2663254 2.1002008</span></span>
@@ -1306,7 +1313,7 @@ subgroup has few patients or observed events. Use
 <code><a href="../reference/diagnostics.html">diagnostics()</a></code> to collect the recorded errors and warnings
 across methods, splits, subgroups and iterations in a table. An empty
 table means no subgroup messages were recorded:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        method      split iteration group subgroup    type</span></span>
 <span><span class="co">#&gt; 1 contrastReg validation         1 group   prop 1 warning</span></span>
@@ -1339,21 +1346,17 @@ random forest) and the horizontal line representing the ATE in the
 validation set. A higher ABC indicates greater separation in the
 expected direction in this example. Chapter 20 discusses this responder
 diagnostic <span class="citation">(Jiang et al. 2026)</span>.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
-<span><span class="va">output_abc</span></span>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                     cv1         cv2        cv3        cv4         cv5</span></span>
 <span><span class="co">#&gt; randomForest 0.02392067 0.009108896 0.03794881 0.02452175 0.009546674</span></span>
 <span><span class="co">#&gt; contrastReg  0.03030992 0.038194989 0.04085908 0.02954575 0.030640717</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
 iterations and rows corresponding to the scoring methods specified in
-<code>score.method</code>. For example, random forest in CV iteration 1
-has an ABC of 0.024, in the first CV iteration; compare it with the
-other scoring methods rather than relying on a single split. The user
-can combine the ABC for each method across iterations:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">average_abc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">output_abc</span>, <span class="fl">1</span>, <span class="va">mean</span><span class="op">)</span></span>
-<span><span class="va">average_abc</span></span>
+<code>score.method</code>. Individual iterations can differ; summarize
+across iterations to compare methods:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">output_catecv</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; randomForest  contrastReg </span></span>
 <span><span class="co">#&gt;   0.02100936   0.03391009</span></span></code></pre></div>
 <p>In this example, contrast regression has a higher average ABC than
@@ -1393,7 +1396,7 @@ overall ratio as the subgroup expands (see <a href="Theoretical-details.html">Va
 statistics</a>). The validation curves and ABC can help compare methods,
 but selection on these same results warrants an independent
 assessment.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="1056"></p>
 <p>The random forest shows much stronger subgroup separation in training
@@ -1406,6 +1409,13 @@ conclusions.</p>
 corresponding training or validation sets, averaged across iterations.
 The curves meet it at a subgroup size of 100% because that subgroup
 includes everyone in each respective set.</p>
+<p>To compare training and validation curves directly for each scoring
+method, use <code>layout = "method"</code>. Each panel shows one method,
+with a solid training curve and a dashed validation curve. The dotted
+lines mark the corresponding overall treatment effects.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, layout <span class="op">=</span> <span class="st">"method"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Survival-examples_files/figure-html/example_plot_by_method-1.png" class="r-plt" alt="" width="960"></p>
 <p>To inspect a single cross-validation iteration instead of the
 average, set <code>cv.i</code> in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>; for example,
 <code>cv.i = 2</code> selects the second iteration. You can use
@@ -1416,7 +1426,7 @@ instead of the default mean.</p>
 RMTL ratio and the cumulative hazard ratio separately; the latter
 summarizes cumulative hazards up to <code>tau0</code> and is not an
 instantaneous Cox HR. ABC is shown only for the RMTL plot above.</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmtl"</span>, <span class="st">"cumulative_hr"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/plot_cumulative_hazard-1.png" class="r-plt" alt="" width="1056"></p>
 <p>In each panel, the dashed line is the overall ratio for that measure
@@ -1446,13 +1456,13 @@ do not have to be equally spaced in terms of percentiles. The box plot
 shows the distribution of the ATEs over all <code>cv.n</code> CV
 iterations, instead of a summary statistics like mean or median in
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>,</span>
 <span>        ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/example_plot_boxplot-1.png" class="r-plt" alt="" width="700"></p>
 <p>Cumulative hazard ratios can also be shown for the mutually exclusive
 subgroups:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">output_catecv</span>, measure <span class="op">=</span> <span class="st">"cumulative_hr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning: Some cumulative hazard ratios are undefined and are omitted from the</span></span>
 <span><span class="co">#&gt; plot.</span></span>

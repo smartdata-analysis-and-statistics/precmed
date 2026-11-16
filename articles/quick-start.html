@@ -179,16 +179,21 @@ characteristics.</p>
 <span><span class="co">#&gt; rate1 0.2860635</span></span>
 <span><span class="co">#&gt; rate0 0.2685660</span></span></code></pre></div>
 <p>The output reports the log rate ratio and bootstrap-based
-uncertainty. Exponentiate the estimate to obtain the rate ratio; a value
-below 1 indicates a lower estimated relapse rate with
-<code>drug1</code>. The estimator is doubly robust: under the required
-causal and other regularity assumptions, it is consistent if either the
-outcome model or the propensity score model is correctly specified. The
-50 bootstrap replicates used here keep the example short; use more for a
-substantive analysis.</p>
+uncertainty. Exponentiate the estimate and confidence limits to obtain
+the rate ratio and its 95% confidence interval; a rate ratio below 1
+indicates a lower estimated relapse rate with <code>drug1</code>. The
+confidence interval uses the bootstrap standard error. The estimator is
+doubly robust: under the required causal and other regularity
+assumptions, it is consistent if either the outcome model or the
+propensity score model is correctly specified. The 50 bootstrap
+replicates used here keep the example short; use more for a substantive
+analysis.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">overall</span><span class="op">$</span><span class="va">log.rate.ratio</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1.065152</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">overall</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1.065152</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">overall</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
+<span><span class="co">#&gt;     2.5 %    97.5 % </span></span>
+<span><span class="co">#&gt; 0.7747033 1.4644945</span></span></code></pre></div>
 <p>The overall effect can mask differences across patients. Next, we
 explore treatment effect heterogeneity.</p>
 </div>

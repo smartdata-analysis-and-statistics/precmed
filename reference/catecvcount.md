@@ -455,7 +455,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 6.61 secs 
+#> Total runtime : 5.9 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

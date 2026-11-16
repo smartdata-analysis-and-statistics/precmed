@@ -28,9 +28,11 @@ plot(
   legend.position = "bottom",
   xlim = NULL,
   title = waiver(),
-  theme = theme_classic(),
+  theme = precmed_plot_theme(),
   hazard.type = c("cumulative", "conditional"),
   measure = "rmtl",
+  show.overall = TRUE,
+  layout = "set",
   ...
 )
 ```
@@ -102,8 +104,10 @@ plot(
 
 - theme:
 
-  Defaults to `theme_classic()`. Other options include `theme_grey()`,
-  `theme_bw()`, `theme_light()`, `theme_dark()`, and `theme_void()`
+  A ggplot2 theme. By default, a customized minimal theme is used;
+  supply, for example,
+  [`ggplot2::theme_classic()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+  to use another theme.
 
 - hazard.type:
 
@@ -121,16 +125,27 @@ plot(
   `"cph"`, `"cumulative_hazard_ratio"`, and `"conditional_hazard_ratio"`
   remain supported as aliases.
 
+- show.overall:
+
+  Whether to show the dashed overall treatment effect reference line in
+  each set. Defaults to `TRUE`.
+
+- layout:
+
+  Use `"set"` (default) for panels by dataset and curves by method, or
+  `"method"` for panels by scoring method and training and validation
+  curves in each panel. Overall-effect reference lines in the latter
+  layout are dotted and colored by dataset.
+
 - ...:
 
   Other parameters
 
 ## Value
 
-Returns two side-by-side line plots, one of which shows the validation
-curves of the training sets and the other the validation curves in the
-validation sets. A gray horizontal dashed line of overall ATE is
-included as a reference. ABC statistics will be added to the legend if
+A ggplot of training and validation curves, faceted by set or method.
+Overall-effect reference lines are included when `show.overall = TRUE`.
+ABC statistics appear in the legend or method headings when
 `show.abc = TRUE`.
 
 ## Details

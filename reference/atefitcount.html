@@ -159,6 +159,9 @@ elements:</p><ul><li><p><code>log.rate.ratio</code>:  A vector of numeric values
   <code>trt=1</code>.</p></li>
 <li><p><code>trt.boot</code>:  Estimated log rate ratios in each bootstrap
   sample.</p></li>
+<li><p><code>rate.boot</code>:  A data frame of treatment-specific rate estimates
+  in each bootstrap sample, with columns <code>rate0</code> and <code>rate1</code>.</p></li>
+<li><p><code>treatment.labels</code>:  Original treatment labels corresponding to 0 and 1.</p></li>
 <li><p><code>warning</code>:  A warning message produced if the treatment
   variable was not coded as 0 or 1. The key to map the original coding of the
   variable to a 0-1 coding is displayed in the warning to facilitate the

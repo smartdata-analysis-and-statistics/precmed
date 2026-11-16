@@ -4,13 +4,12 @@ Generate fully synthetic data for demonstrating survival
 treatment-effect methods. Baseline covariates are generated
 independently of patient records. Treatment is assigned using a logistic
 propensity model; the numbers in each treatment group arise from those
-probabilities and vary by sample. Event times follow a Weibull
-proportional hazards model with treatment interactions with age and
-previous relapses. By default, censoring is independent of covariates,
-treatment, and event times. Default coefficients are chosen to
-illustrate confounding and heterogeneous treatment effects; they are not
-clinical estimates and do not establish the relative performance of
-methods on other data.
+probabilities and vary by sample. Event times follow a Weibull model
+with treatment interactions with age and previous relapses. By default,
+censoring is independent of covariates, treatment, and event times.
+Default coefficients are chosen to illustrate confounding and
+heterogeneous treatment effects; they are not clinical estimates and do
+not establish the relative performance of methods on other data.
 
 ## Usage
 
@@ -23,7 +22,11 @@ simulate_survival(
     previous_number_relapses = 0.16, treatment_age = -0.28, treatment_relapses = -0.16),
   conditional_hr = 0.9,
   censor_weights = c(intercept = log(1/450), age = 0, female = 0, previous_cost = 0,
-    previous_number_relapses = 0, drugB = 0, drugC = 0, treatment = 0)
+    previous_number_relapses = 0, drugB = 0, drugC = 0, treatment = 0),
+  shape = 1.15,
+  scale = 650,
+  treatment_shape = shape,
+  hr_reference_time = scale
 )
 ```
 
@@ -62,7 +65,8 @@ simulate_survival(
 - conditional_hr:
 
   Positive conditional instantaneous hazard ratio for drug1 versus drug0
-  at age 48 with zero previous relapses. For other values, the log HR is
+  at age 48 with zero previous relapses, at `hr_reference_time`. At that
+  time, for other covariate values, the log HR is
   `log(conditional_hr) + treatment_age * (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses`,
   where `age_in_years` is the uncentered age.
 
@@ -76,6 +80,25 @@ simulate_survival(
   and drug0 are the reference groups. The default intercept is
   `log(1/450)` and all other coefficients are zero.
 
+- shape:
+
+  Positive Weibull shape for drug0. Defaults to 1.15.
+
+- scale:
+
+  Positive Weibull baseline scale in days for drug0. Defaults to 650.
+
+- treatment_shape:
+
+  Positive Weibull shape for drug1. Defaults to `shape`, giving
+  proportional hazards. Different shapes produce a time-varying hazard
+  ratio.
+
+- hr_reference_time:
+
+  Positive time in days at which `conditional_hr` is defined. Defaults
+  to `scale`.
+
 ## Value
 
 A data frame with `n` rows and nine columns: centered `age`, `female`,
@@ -87,8 +110,11 @@ and 0 censoring.
 
 ## Details
 
-Event times use a Weibull baseline with shape 1.15 and scale 650 days.
-By default, random censoring times are exponential with mean 450 days;
+At positive time `t`, the covariate-specific hazard ratio is its value
+at `hr_reference_time` multiplied by
+`(t / hr_reference_time)^(treatment_shape - shape)`. It increases over
+time if the treated shape is larger, and decreases if it is smaller. By
+default, random censoring times are exponential with mean 450 days;
 administrative censoring occurs at 900 days. Censoring and event times
 are generated independently conditional on covariates and treatment,
 including when censoring depends on those variables. Extreme propensity
@@ -115,4 +141,5 @@ table(toy_unequal$trt)
 #>   145    55 
 toy_censor <- simulate_survival(n = 200, seed = 1,
   censor_weights = c(treatment = log(2), age = 0.3))
+toy_nonph <- simulate_survival(n = 200, seed = 1, treatment_shape = 1.65)
 ```

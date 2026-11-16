@@ -70,13 +70,15 @@ This should be run only after results of <code><a href="catecv.html">catecv()</a
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments (currently unused).</p></dd>
+<dd><p>Additional arguments passed to the method, such as <code>combine</code>
+for <code>precmed</code> objects; see <code><a href="abc.precmed.html">abc.precmed</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Returns a matrix of numeric values with number of columns equal to the number cross-validation
-iteration and number of rows equal to the number of scoring methods in <code>x</code>.</p>
+iteration and number of rows equal to the number of scoring methods in <code>x</code>.
+With <code>combine</code>, returns a named numeric vector with one value per method.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -124,6 +126,12 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2       cv3        cv4       cv5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103</span>
+<span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">catecvCountExample</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   poisson </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1231947 </span>
+<span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">catecvCountExample</span>, combine <span class="op">=</span> <span class="va">median</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   poisson </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1172791 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -6,7 +6,16 @@ Histogram of bootstrap estimates
 
 ``` r
 # S3 method for class 'atefit'
-plot(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...)
+plot(
+  x,
+  bins,
+  alpha = 1,
+  title = waiver(),
+  theme = precmed_plot_theme(),
+  null.value = 0,
+  metrics = NULL,
+  ...
+)
 ```
 
 ## Arguments
@@ -21,7 +30,7 @@ plot(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...)
 
 - alpha:
 
-  Opacity
+  Histogram bar opacity, between 0 and 1. Defaults to 1.
 
 - title:
 
@@ -29,8 +38,24 @@ plot(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...)
 
 - theme:
 
-  Defaults to `theme_classic()`. Other options include `theme_grey()`,
-  `theme_bw()`, `theme_light()`, `theme_dark()`, and `theme_void()`
+  A ggplot2 theme. By default, a customized minimal theme is used;
+  supply, for example,
+  [`ggplot2::theme_classic()`](https://ggplot2.tidyverse.org/reference/ggtheme.html)
+  to use another theme.
+
+- null.value:
+
+  Reference value on the plotted log-ratio scale. Defaults to 0 (a ratio
+  of 1); use `NULL` or `NA` to omit the null line.
+
+- metrics:
+
+  Character vector of metrics to plot, in display order. For count fits,
+  choose from `"rate0"`, `"rate1"`, and `"log.rate.ratio"`; for survival
+  fits, choose from `"rmst0"`, `"rmst1"`, `"log.rmtl.ratio"`, and
+  `"log.cumulative.hazard.ratio"`. Older survival fits may instead
+  contain `"log.hazard.ratio"`. The default `NULL` plots all metrics
+  available in the object.
 
 - ...:
 
@@ -44,9 +69,12 @@ bootstrap samples
 ## Details
 
 Create a histogram displaying the distribution of the bootstrap
-estimates. The red vertical reference line represents the final
-estimate. For survival fits, RMST facets use the original treatment
-labels when available; older objects use treatment 0 and treatment 1.
+estimates. The solid red vertical line represents the full-sample
+estimate. A dashed black line marks `null.value` in log-ratio panels
+only; it is not shown in treatment-specific rate or RMST panels.
+Treatment-specific facets use the original treatment labels when
+available. Older count objects without rate bootstrap estimates show
+only the log rate ratio.
 
 ## Author
 

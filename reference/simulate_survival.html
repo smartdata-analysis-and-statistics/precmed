@@ -3,7 +3,7 @@
 methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
-Event times follow a Weibull proportional hazards model with treatment
+Event times follow a Weibull model with treatment
 interactions with age and previous relapses. By default, censoring is
 independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
@@ -11,7 +11,7 @@ establish the relative performance of methods on other data."><meta property="og
 methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
-Event times follow a Weibull proportional hazards model with treatment
+Event times follow a Weibull model with treatment
 interactions with age and previous relapses. By default, censoring is
 independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
@@ -67,7 +67,7 @@ establish the relative performance of methods on other data."><meta property="og
 methods. Baseline covariates are generated independently of patient records.
 Treatment is assigned using a logistic propensity model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
-Event times follow a Weibull proportional hazards model with treatment
+Event times follow a Weibull model with treatment
 interactions with age and previous relapses. By default, censoring is
 independent of covariates, treatment, and event times. Default coefficients are chosen to illustrate confounding and
 heterogeneous treatment effects; they are not clinical estimates and do not
@@ -84,7 +84,11 @@ establish the relative performance of methods on other data.</p>
 <span>    previous_number_relapses <span class="op">=</span> <span class="fl">0.16</span>, treatment_age <span class="op">=</span> <span class="op">-</span><span class="fl">0.28</span>, treatment_relapses <span class="op">=</span> <span class="op">-</span><span class="fl">0.16</span><span class="op">)</span>,</span>
 <span>  conditional_hr <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  censor_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>intercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">450</span><span class="op">)</span>, age <span class="op">=</span> <span class="fl">0</span>, female <span class="op">=</span> <span class="fl">0</span>, previous_cost <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>    previous_number_relapses <span class="op">=</span> <span class="fl">0</span>, drugB <span class="op">=</span> <span class="fl">0</span>, drugC <span class="op">=</span> <span class="fl">0</span>, treatment <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span>    previous_number_relapses <span class="op">=</span> <span class="fl">0</span>, drugB <span class="op">=</span> <span class="fl">0</span>, drugC <span class="op">=</span> <span class="fl">0</span>, treatment <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  shape <span class="op">=</span> <span class="fl">1.15</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fl">650</span>,</span>
+<span>  treatment_shape <span class="op">=</span> <span class="va">shape</span>,</span>
+<span>  hr_reference_time <span class="op">=</span> <span class="va">scale</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,7 +129,8 @@ relapse, respectively. Previous cost is centered at 14,362 and divided by
 
 <dt id="arg-conditional-hr">conditional_hr<a class="anchor" aria-label="anchor" href="#arg-conditional-hr"></a></dt>
 <dd><p>Positive conditional instantaneous hazard ratio for
-drug1 versus drug0 at age 48 with zero previous relapses. For other values,
+drug1 versus drug0 at age 48 with zero previous relapses, at
+<code>hr_reference_time</code>. At that time, for other covariate values,
 the log HR is <code>log(conditional_hr) + treatment_age *
 (age_in_years - 48)/10 + treatment_relapses * previous_number_relapses</code>,
 where <code>age_in_years</code> is the uncentered age.</p></dd>
@@ -141,6 +146,25 @@ decades from 48 years; cost uses the scaling described above; drugA and
 drug0 are the reference groups. The default intercept is
 <code>log(1/450)</code> and all other coefficients are zero.</p></dd>
 
+
+<dt id="arg-shape">shape<a class="anchor" aria-label="anchor" href="#arg-shape"></a></dt>
+<dd><p>Positive Weibull shape for drug0. Defaults to 1.15.</p></dd>
+
+
+<dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
+<dd><p>Positive Weibull baseline scale in days for drug0. Defaults to 650.</p></dd>
+
+
+<dt id="arg-treatment-shape">treatment_shape<a class="anchor" aria-label="anchor" href="#arg-treatment-shape"></a></dt>
+<dd><p>Positive Weibull shape for drug1. Defaults to
+<code>shape</code>, giving proportional hazards. Different shapes produce a
+time-varying hazard ratio.</p></dd>
+
+
+<dt id="arg-hr-reference-time">hr_reference_time<a class="anchor" aria-label="anchor" href="#arg-hr-reference-time"></a></dt>
+<dd><p>Positive time in days at which <code>conditional_hr</code>
+is defined. Defaults to <code>scale</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -153,8 +177,11 @@ drug0 are the reference groups. The default intercept is
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Event times use a Weibull baseline with shape 1.15 and scale 650
-  days. By default, random censoring times are exponential with mean 450 days;
+    <p>At positive time <code>t</code>, the covariate-specific hazard ratio is
+  its value at <code>hr_reference_time</code> multiplied by
+  <code>(t / hr_reference_time)^(treatment_shape - shape)</code>. It increases
+  over time if the treated shape is larger, and decreases if it is smaller.
+  By default, random censoring times are exponential with mean 450 days;
   administrative censoring occurs at 900 days. Censoring and event times are generated independently
   conditional on covariates and treatment, including when censoring depends
   on those variables. Extreme propensity coefficients can produce poor
@@ -180,6 +207,7 @@ drug0 are the reference groups. The default intercept is
 <span class="r-out co"><span class="r-pr">#&gt;</span>   145    55 </span>
 <span class="r-in"><span><span class="va">toy_censor</span> <span class="op">&lt;-</span> <span class="fu">simulate_survival</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  censor_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, age <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">toy_nonph</span> <span class="op">&lt;-</span> <span class="fu">simulate_survival</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">200</span>, seed <span class="op">=</span> <span class="fl">1</span>, treatment_shape <span class="op">=</span> <span class="fl">1.65</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

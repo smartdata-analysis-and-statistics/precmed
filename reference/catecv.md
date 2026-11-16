@@ -428,7 +428,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 7.5 secs 
+#> Total runtime : 7.07 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
