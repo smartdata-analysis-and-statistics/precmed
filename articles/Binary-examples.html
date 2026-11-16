@@ -98,14 +98,18 @@ analysis of relapse rates and repeated cross-validation.</p>
 <div class="section level2">
 <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a>
 </h2>
-<p>We simulate counts of relapses during one year using the same
-data-generating model as <code><a href="../reference/simulate_count.html">simulate_count()</a></code>. The outcome is
-<code>y = 1</code> if a patient has at least one relapse and
-<code>y = 0</code> otherwise. The underlying count is retained in
-<code>relapse_count</code>. Everyone has the same follow-up, and the
-outcome is fully observed. Set <code>threshold</code> to a larger
-integer to define an event as more than that many relapses, or change
-<code>followup</code> to study another fixed horizon.</p>
+<p>We consider a simulated dataset of patients with multiple sclerosis
+(MS), in which <code>relapse_count</code> represents the number of
+relapses observed during one year of follow-up. The outcome of interest
+is binary: <code>y = 1</code> if a patient has at least one relapse and
+<code>y = 0</code> otherwise. Relapse counts are generated using the
+same model as <code><a href="../reference/simulate_count.html">simulate_count()</a></code>. Everyone has the same
+follow-up, and the outcome is fully observed. The <code>followup</code>
+argument is measured in years: <code>followup = 1</code> means one year
+for every patient, while <code>followup = 0.5</code> means six months.
+Set <code>threshold</code> to a larger integer to define an event as
+more than that many relapses, or change <code>followup</code> to study
+another fixed horizon.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">binaryExample</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_binary.html">simulate_binary</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">4000</span>, seed <span class="op">=</span> <span class="fl">2026</span>,</span>
 <span>                                 followup <span class="op">=</span> <span class="fl">1</span>, threshold <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
@@ -260,25 +264,96 @@ this fixed-horizon binary outcome.</p>
 <span><span class="co">#&gt;    estimate</span></span>
 <span><span class="co">#&gt; 1 0.3947549</span></span>
 <span><span class="co">#&gt; 2 0.5026833</span></span></code></pre></div>
-<p>The output reports estimated population-average relapse risks of
-0.395 under drug1 and 0.503 under drug0, shown in that order. Their
-difference (drug1 minus drug0) is -0.108, or -10.8 percentage points. A
-negative difference favors drug1. The output also reports the bootstrap
-standard error, a 95% Wald confidence interval, and a two-sided Wald
-p-value for the risk difference. The causal interpretation depends on
-the assumptions described above.</p>
 <p>Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> to extract the
-risk difference and its confidence interval, and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to
-inspect the bootstrap estimates:</p>
+risk difference and its confidence interval:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; risk.difference </span></span>
 <span><span class="co">#&gt;      -0.1079285</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                      2.5 %      97.5 %</span></span>
-<span><span class="co">#&gt; risk.difference -0.1465372 -0.06931972</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"risk0"</span>, <span class="st">"risk1"</span>, <span class="st">"risk.difference"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-examples_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
+<span><span class="co">#&gt; risk.difference -0.1465372 -0.06931972</span></span></code></pre></div>
+<p>The output reports estimated population-average relapse risks of
+0.395 under drug1 and 0.503 under drug0, shown in that order. Their
+difference (drug1 minus drug0) is -0.108, or -10.8 percentage points. A
+negative difference favors drug1. The output also reports the bootstrap
+standard error, a 95% Wald confidence interval of -0.147 to -0.069, and
+a two-sided Wald p-value for the risk difference. The causal
+interpretation depends on the assumptions described above.</p>
+<p>A causal interpretation of this estimate relies on several
+assumptions, including consistency and the stable unit treatment value
+assumption, conditional exchangeability, and positivity; Chapter 5
+discusses these assumptions <span class="citation">(Nguyen et al.
+2026)</span>. Positivity requires that both treatments are possible at
+each relevant combination of covariates in the target population. The
+following diagnostics summarize estimated propensity-score overlap and
+treatment-weight variability in the analysis sample. They can help
+investigate potential practical positivity problems, but cannot
+establish that the positivity assumption holds. The table reports
+propensity scores before truncation and inverse treatment weights after
+truncation. The outside-range count is the number of patients whose
+estimated score falls outside the observed range in the other treatment
+group; its percentage is within the patient’s own treatment group:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">output_atefit</span>, type <span class="op">=</span> <span class="st">"propensity"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="24%">
+<col width="24%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Diagnostic</th>
+<th align="left">drug0</th>
+<th align="left">drug1</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Patients, n</td>
+<td align="left">1858</td>
+<td align="left">2142</td>
+</tr>
+<tr class="even">
+<td align="left">Propensity score, median (min-max)</td>
+<td align="left">0.43 (0.04-0.91)</td>
+<td align="left">0.64 (0.05-0.91)</td>
+</tr>
+<tr class="odd">
+<td align="left">Outside other group’s range, n (%)</td>
+<td align="left">3 (0.2%)</td>
+<td align="left">0 (0.0%)</td>
+</tr>
+<tr class="even">
+<td align="left">Truncated below / above, n</td>
+<td align="left">0 / 0</td>
+<td align="left">0 / 0</td>
+</tr>
+<tr class="odd">
+<td align="left">Treatment weight, median (max)</td>
+<td align="left">1.76 (11.31)</td>
+<td align="left">1.56 (20.71)</td>
+</tr>
+<tr class="even">
+<td align="left">Effective sample size</td>
+<td align="left">1397</td>
+<td align="left">1611</td>
+</tr>
+</tbody>
+</table>
+<p>In this example, 3 patients receiving drug0 and 0 receiving drug1
+have estimated scores outside the observed range in the other group. The
+effective sample sizes are 1397 and 1611, respectively. The effective
+sample size summarizes how concentrated the treatment weights are within
+each group: smaller values indicate that fewer patients carry a larger
+share of the total weight, which can reduce precision. These summaries
+depend on the fitted treatment model and do not establish positivity,
+covariate balance, conditional exchangeability, or the absence of
+unmeasured confounding. Use <code>layout = "arms"</code> for unrounded
+numeric results.</p>
+<p>Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to inspect the bootstrap estimates:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"risk0"</span>, <span class="st">"risk1"</span>, <span class="st">"risk.difference"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Binary-examples_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <p>The plot shows bootstrap relapse risks for drug0 (<code>risk0</code>)
 and drug1 (<code>risk1</code>), followed by their risk difference. Red
 lines mark the full-sample estimates; the dashed line marks zero in the
@@ -396,7 +471,7 @@ estimator and the same data used to build the scores, so they may be
 optimistic. Chapter 17, “Introduction to methods for personalizing
 medicine,” discusses treatment effect heterogeneity and CATE prediction
 <span class="citation">(Hoogland et al. 2026)</span>.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
 <span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
@@ -444,9 +519,9 @@ desirable binary outcome, use <code>higher.y = TRUE</code>.</p>
 <div class="section level3">
 <h3 id="visualize-the-distribution-of-cate-scores">Visualize the distribution of CATE scores<a class="anchor" aria-label="anchor" href="#visualize-the-distribution-of-cate-scores"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catefit</span>, methods <span class="op">=</span> <span class="st">"twoReg"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-examples_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Binary-examples_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
 </div>
 </div>
 <div class="section level2">
@@ -469,7 +544,7 @@ and the full set, and the mutually exclusive groups split each set in
 half. These larger subgroups avoid the rank-deficient fits observed with
 smaller groups in this example; check support and model fit when
 choosing cutoffs for other data.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">binary_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>, score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span><span class="op">)</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>, higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -477,11 +552,11 @@ choosing cutoffs for other data.</p>
 <span>  cv.n <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">102</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">binary_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-examples_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<p><img src="Binary-examples_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">binary_cv</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-examples_files/figure-html/unnamed-chunk-9-2.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<p><img src="Binary-examples_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">binary_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 cv1        cv2        cv3         cv4        cv5        cv6</span></span>
 <span><span class="co">#&gt; logistic 0.02997601 0.01402678 0.03633474 0.004732452 0.01140305 0.01547006</span></span>

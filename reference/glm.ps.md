@@ -12,7 +12,8 @@ glm.ps(
   xnew = NULL,
   minPS = 0.01,
   maxPS = 0.99,
-  solver = c("C", "R")
+  solver = c("C", "R"),
+  return.raw = FALSE
 )
 ```
 
@@ -51,6 +52,10 @@ glm.ps(
   Interaction-screening backend: `"C"` (default) or `"R"`. C screens
   pairs before allocating retained training and prediction columns. Both
   use the strict SMD \> 0.1 rule and positive sample variance.
+
+- return.raw:
+
+  Internal: attach untruncated scores for diagnostics.
 
 ## Value
 

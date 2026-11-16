@@ -74,7 +74,8 @@ of treatment 1 over treatment 0 for survival outcomes.</p>
 <span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  cumulative.hr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  conditional.hr <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  conditional.hr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  diagnostic <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -163,6 +164,10 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 <dt id="arg-conditional-hr">conditional.hr<a class="anchor" aria-label="anchor" href="#arg-conditional-hr"></a></dt>
 <dd><p>Whether to fit the supplementary conditional Cox hazard ratio.</p></dd>
+
+
+<dt id="arg-diagnostic">diagnostic<a class="anchor" aria-label="anchor" href="#arg-diagnostic"></a></dt>
+<dd><p>Internal: retain full-sample treatment overlap diagnostics.</p></dd>
 
 </dl></div>
     <div class="section level2">

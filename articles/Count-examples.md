@@ -249,6 +249,32 @@ output_atefit
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
+The treatment model also provides diagnostics for the full analysis
+sample:
+
+``` r
+
+diagnostics(output_atefit, type = "propensity")
+```
+
+| Diagnostic                         | drug0            | drug1            |
+|:-----------------------------------|:-----------------|:-----------------|
+| Patients, n                        | 998              | 3002             |
+| Propensity score, median (min-max) | 0.75 (0.74-0.76) | 0.75 (0.74-0.76) |
+| Outside other group’s range, n (%) | 2 (0.2%)         | 0 (0.0%)         |
+| Truncated below / above, n         | 0 / 0            | 0 / 0            |
+| Treatment weight, median (max)     | 3.97 (4.21)      | 1.34 (1.36)      |
+| Effective sample size              | 997              | 3002             |
+
+Propensity score summaries use the estimated probabilities before
+truncation. The count of patients outside the other treatment’s
+propensity score range uses the observed range in the other treatment
+group. Treatment weights use the truncated scores; the effective sample
+size summarizes their variability. Percentages are within each treatment
+group. Use `layout = "arms"` for unrounded numeric results. These
+diagnostics do not establish covariate balance or exclude unmeasured
+confounding.
+
 The output of
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 shows the point estimate, standard error (“SE”), lower (“CI.lower”) and

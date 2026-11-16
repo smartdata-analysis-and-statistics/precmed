@@ -54,7 +54,14 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">glm.simplereg.ps</span><span class="op">(</span><span class="va">trt</span>, <span class="va">x.ps</span>, xnew <span class="op">=</span> <span class="cn">NULL</span>, minPS <span class="op">=</span> <span class="fl">0.01</span>, maxPS <span class="op">=</span> <span class="fl">0.99</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">glm.simplereg.ps</span><span class="op">(</span></span>
+<span>  <span class="va">trt</span>,</span>
+<span>  <span class="va">x.ps</span>,</span>
+<span>  xnew <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
+<span>  return.raw <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,6 +90,10 @@ truncated. Default is <code>0.01</code>.</p></dd>
 <dt id="arg-maxps">maxPS<a class="anchor" aria-label="anchor" href="#arg-maxps"></a></dt>
 <dd><p>A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.99</code>.</p></dd>
+
+
+<dt id="arg-return-raw">return.raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>
+<dd><p>Internal: attach untruncated scores for diagnostics.</p></dd>
 
 </dl></div>
     <div class="section level2">

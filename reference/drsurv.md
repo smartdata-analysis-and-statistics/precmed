@@ -24,7 +24,8 @@ drsurv(
   rmst.control = list(),
   ps.control = list(),
   cumulative.hr = FALSE,
-  conditional.hr = TRUE
+  conditional.hr = TRUE,
+  diagnostic = FALSE
 )
 ```
 
@@ -123,6 +124,10 @@ drsurv(
 - conditional.hr:
 
   Whether to fit the supplementary conditional Cox hazard ratio.
+
+- diagnostic:
+
+  Internal: retain full-sample treatment overlap diagnostics.
 
 ## Value
 

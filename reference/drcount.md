@@ -17,7 +17,8 @@ drcount(
   minPS = 0.01,
   maxPS = 0.99,
   interactions = TRUE,
-  ps.control = list()
+  ps.control = list(),
+  diagnostic = FALSE
 )
 ```
 
@@ -84,6 +85,10 @@ drcount(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- diagnostic:
+
+  Internal: retain full-sample treatment overlap diagnostics.
 
 ## Value
 

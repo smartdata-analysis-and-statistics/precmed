@@ -1,47 +1,18 @@
 # Changelog
 
-## precmed (development version)
+## precmed 1.1.0.9000 (development version)
 
 ### Major changes
 
-- Added binary-outcome support to
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-  for logistic, doubly robust two-regression, and boosting scores.
-  Treatment-stratified repeated splits provide training and held-out
-  subgroup risk differences, ABC, plots, and recorded subgroup
-  diagnostics. Binary splits do not use the balanced-split controls
-  `error.max` and `max.iter`.
-
-- Added binary-outcome estimation on the risk-difference scale.
-  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-  and the exported
-  [`atefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md)
-  provide doubly robust ATE estimation;
-  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-  provides pooled logistic, doubly robust two-regression and Bernoulli
-  boosting CATE scores, with doubly robust subgroup estimates. Binary
-  `twoReg` now cross-fits outcome and treatment models and estimates a
-  linear projection of the risk difference; its scores and stored fits
-  differ from earlier development versions, and `B` and `Kfold` control
-  cross-fitting. Added
-  [`simulate_binary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.md)
-  and a vignette illustrating estimation and held-out subgroup
-  assessment. Numeric, logical and two-valued treatment labels are
-  supported.
-
-- [`simulate_binary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.md)
-  now codes `y = 1` when the relapse count exceeds `threshold` (at least
-  one relapse by default), reversing the outcome coding used in earlier
-  development versions. Use `higher.y = FALSE` when ranking treatment
-  benefit for this adverse outcome. This changes simulated outcomes and
-  reverses the direction of risk differences in the binary vignette.
-
-- Binary
-  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-  now returns and prints the `twoReg` risk-difference score coefficients
-  through [`coef()`](https://rdrr.io/r/stats/coef.html), matching the
-  coefficient table used for count scores. Fits without a linear binary
-  score no longer print a stray `NULL`.
+- Added support for binary outcomes on the risk-difference scale to
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
+  and
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
+  including doubly robust estimation, logistic and boosting scores,
+  cross-validated subgroup estimates, and a new vignette. Binary
+  cross-validation uses treatment-stratified splits rather than the
+  balanced-split controls `error.max` and `max.iter`.
 
 - Standardized bootstrap failure handling across binary, count and
   survival
@@ -91,23 +62,24 @@
   settings and random seeds.
 
 - Added
+  [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md),
+  [`simulate_binary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.md),
+  and
   [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
-  to generate reproducible synthetic survival data illustrating
-  confounding and heterogeneous treatment effects. Treatment, outcome,
-  and censoring coefficients can be specified. The survival vignette now
-  uses it; `survivalExample` remains available. Weibull shape and scale,
-  treatment-specific shape, and the hazard ratio reference time are
-  configurable; defaults retain proportional hazards. Event-time
-  calculations are checked in stages, and error messages identify the
-  relevant model parameters. Invalid censoring rates also identify the
-  censoring model parameters. The new `censor_horizon` argument controls
-  administrative censoring (900 days by default; `Inf` disables it).
+  to generate reproducible synthetic data for illustrating and testing
+  the package’s methods with confounding and heterogeneous treatment
+  effects.
 
-- Fixed continuous boosting predictions by retaining the selected tree
-  count for each treatment arm, and forwarding additional boosting
-  controls.
+### Minor changes
 
-### Minor changes and bug fixes
+- `diagnostics(fit, type = "propensity")` now reports full-sample
+  propensity score overlap, truncation, inverse treatment weights and
+  effective sample sizes for newly fitted binary, count and survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  results. The default message table is unchanged. Overlap diagnostics
+  now default to a compact formatted table; use `layout = "arms"` or
+  `layout = "metrics"` for unrounded numeric results; `type = "overlap"`
+  remains an alias.
 
 - Binary
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -212,6 +184,26 @@
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   results.
 
+- Improved performance of balanced splitting, continuous contrast
+  regression, censoring probability calculations, and propensity-score
+  LASSO fitting.
+
+- Updated validation plots and box plots for current ggplot2 and
+  tidyselect versions; ggplot2 \>= 3.4.0 is now required.
+
+- Added the book chapter by Jiang et al. (2026) to the package
+  description and references.
+
+- Added Smart Data Analysis and Statistics B.V. as copyright holder for
+  its contributions after version 1.1.0, alongside the existing Biogen
+  attribution.
+
+### Bug fixes
+
+- Fixed continuous boosting predictions by retaining the selected tree
+  count for each treatment arm, and forwarding additional boosting
+  controls.
+
 - Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead
   of treating observations beyond the horizon as events. This affects
   subgroup and cross-validation hazard ratio estimates; this correction
@@ -246,20 +238,6 @@
 - Removed a duplicate treated-arm boosting fit in count cross-fitting.
   Results obtained with the same seed may change because fewer random
   draws are consumed.
-
-- Improved performance of balanced splitting, continuous contrast
-  regression, censoring probability calculations, and propensity-score
-  LASSO fitting.
-
-- Updated validation plots and box plots for current ggplot2 and
-  tidyselect versions; ggplot2 \>= 3.4.0 is now required.
-
-- Added the book chapter by Jiang et al. (2026) to the package
-  description and references.
-
-- Added Smart Data Analysis and Statistics B.V. as copyright holder for
-  its contributions after version 1.1.0, alongside the existing Biogen
-  attribution.
 
 ## precmed 1.1.0
 

@@ -63,7 +63,11 @@ Survival subgroup messages also remain in <code>object[["errors/warnings"]]</cod
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">object</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">diagnostics</span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"messages"</span>, <span class="st">"propensity"</span>, <span class="st">"overlap"</span><span class="op">)</span>,</span>
+<span>  layout <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"formatted"</span>, <span class="st">"arms"</span>, <span class="st">"metrics"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,6 +76,20 @@ Survival subgroup messages also remain in <code>object[["errors/warnings"]]</cod
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A binary, count or survival <code>atefit</code>, a count or survival <code>catefit</code>, or a binary, count or survival <code>catecv</code> result.</p></dd>
+
+
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>Choose <code>"messages"</code> (the default) for recorded issues or
+<code>"propensity"</code> for full-sample treatment-model diagnostics from a
+binary, count or survival <code>atefit</code> result. <code>"overlap"</code> is an
+alias for <code>"propensity"</code>.</p></dd>
+
+
+<dt id="arg-layout">layout<a class="anchor" aria-label="anchor" href="#arg-layout"></a></dt>
+<dd><p>For overlap diagnostics, <code>"formatted"</code> (the default)
+returns a compact, rounded character table; <code>"arms"</code> returns one
+numeric row per treatment; <code>"metrics"</code> returns one numeric column per
+treatment and one row per diagnostic. Not used for messages.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -86,11 +104,29 @@ Survival subgroup messages also remain in <code>object[["errors/warnings"]]</cod
   Split and iteration are <code>NA</code> for <code>catefit</code>.
   Otherwise, measure is <code>NA</code>
   unless the recorded message identifies it. Returns a zero-row data frame
-  with the same columns when there are no recorded messages.</p>
+  with the same columns when there are no recorded messages.
+For <code>type = "propensity"</code>, the default formatted data frame has one row
+per diagnostic and one character column per treatment. Its percentages use
+the number of patients in the corresponding treatment group. Use
+<code>layout = "arms"</code> or <code>layout = "metrics"</code> for unrounded numeric
+results. The underlying diagnostics report sample size, untruncated propensity score range and median, number
+outside the other arm's observed score range, number truncated below and
+above the specified limits, and the median, maximum and effective sample
+size of the inverse treatment probability weights after truncation. The
+effective sample size is \((\sum w)^2 / \sum w^2\). These are treatment
+weights only, not censoring weights or the complete weights of a particular
+estimator. With <code>layout = "formatted"</code> or <code>layout = "metrics"</code>,
+treatment columns use the
+original labels when available, or treatment 0 and treatment 1 otherwise.
+Older fitted objects do not contain this information.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This reports only diagnostics stored in the result, not every
+    <p>Overlap and weights describe the full analysis sample and the fitted
+treatment model; they do not establish covariate balance, positivity, or
+absence of unmeasured confounding. Extreme weights or little common support
+merit investigation, but no universal cutoff guarantees validity.
+The message view reports only diagnostics stored in the result, not every
   warning emitted during fitting. In particular, <code><a href="atefit.html">atefit()</a></code> stores the
   treatment-recoding information and failed or undefined bootstrap estimates,
   but not all bootstrap warnings. Count
@@ -106,6 +142,8 @@ Survival subgroup messages also remain in <code>object[["errors/warnings"]]</cod
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">output_atefit</span>, type <span class="op">=</span> <span class="st">"propensity"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">output_atefit</span>, type <span class="op">=</span> <span class="st">"propensity"</span>, layout <span class="op">=</span> <span class="st">"arms"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="fu">diagnostics</span><span class="op">(</span><span class="va">output_catecv</span><span class="op">)</span>, <span class="va">split</span> <span class="op">==</span> <span class="st">"validation"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>

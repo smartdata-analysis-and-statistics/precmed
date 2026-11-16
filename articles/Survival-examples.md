@@ -435,6 +435,35 @@ For other treatment labels, check the mapping before interpreting the
 ratio. Alternatively, code the treatment as 0 and 1 explicitly to choose
 the reference group.
 
+The treatment model also provides diagnostics for the full analysis
+sample:
+
+``` r
+
+diagnostics(output_atefit, type = "propensity")
+```
+
+| Diagnostic                         | drug0            | drug1            |
+|:-----------------------------------|:-----------------|:-----------------|
+| Patients, n                        | 1873             | 2127             |
+| Propensity score, median (min-max) | 0.42 (0.03-0.91) | 0.65 (0.09-0.91) |
+| Outside other group’s range, n (%) | 38 (2.0%)        | 0 (0.0%)         |
+| Truncated below / above, n         | 0 / 0            | 0 / 0            |
+| Treatment weight, median (max)     | 1.71 (11.21)     | 1.55 (11.19)     |
+| Effective sample size              | 1348             | 1654             |
+
+Propensity score summaries use the estimated probabilities before
+truncation. The count of patients outside the other treatment’s
+propensity score range uses the observed range in the other treatment
+group. Treatment weights use the truncated scores; the effective sample
+size summarizes their variability. Percentages are within each treatment
+group. Use `layout = "arms"` for unrounded numeric results. These
+diagnostics do not establish covariate balance or exclude unmeasured
+confounding.
+
+For survival outcomes these are treatment weights only; they do not
+summarize censoring weights or follow-up near the horizon.
+
 `plot(output_atefit)` displays the bootstrap estimates for the four
 reported quantities. A solid red line marks the full-sample estimate; a
 dashed black line marks the null value of 0 in the log-ratio panels. Set

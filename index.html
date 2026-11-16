@@ -142,14 +142,35 @@
 <h2 id="package-capabilities">Package capabilities<a class="anchor" aria-label="anchor" href="#package-capabilities"></a>
 </h2>
 <p>The package compares two treatments using outcome-specific effect measures:</p>
-<ul>
-<li>
-<strong>Binary:</strong> the risk difference in outcome probabilities (treatment 1 minus treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">binary example</a> illustrates ATE and CATE estimation.</li>
-<li>
-<strong>Count:</strong> the ratio of event rates (treatment 1 over treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">count example</a> covers estimation and validation.</li>
-<li>
-<strong>Survival:</strong> the ratio of restricted mean time lost at a specified follow-up horizon (treatment 1 over treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">survival example</a> also illustrates population-level cumulative hazard ratios.</li>
-</ul>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Outcome</th>
+<th>Effect measure</th>
+<th>Example</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Binary</td>
+<td>Risk difference in outcome probabilities (treatment 1 minus treatment 0)</td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">Binary outcomes</a></td>
+</tr>
+<tr>
+<td>Count</td>
+<td>Ratio of event rates (treatment 1 over treatment 0)</td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">Count outcomes</a></td>
+</tr>
+<tr>
+<td>Survival</td>
+<td>Ratio of restricted mean time lost at a specified follow-up horizon; population-level cumulative hazard ratio (treatment 1 over treatment 0)</td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival outcomes</a></td>
+</tr>
+</tbody>
+</table>
 <p>Count and survival ATE effect estimates and CATE scores are returned on the log-ratio scale; exponentiate them to obtain ratios. The ATE summarizes the population, while CATE scores describe effects conditional on observed characteristics.</p>
 <p>The main functions in the <strong>precmed</strong> package are:</p>
 <table class="table">
@@ -214,27 +235,6 @@
 </ol>
 <p>For binary outcomes, the binary example illustrates <code><a href="reference/atefit.html">atefit()</a></code>, <code><a href="reference/catefit.html">catefit()</a></code> and a separate held-out subgroup assessment.</p>
 <p>In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.</p>
-</div>
-<div class="section level2">
-<h2 id="user-input">User input<a class="anchor" aria-label="anchor" href="#user-input"></a>
-</h2>
-<p>When applying <code><a href="reference/catefit.html">catefit()</a></code> or <code><a href="reference/catecv.html">catecv()</a></code>, the user has to (at least) input:</p>
-<ul>
-<li>
-<code>response</code>: outcome type, such as <code>binary</code>, <code>count</code>, or <code>survival</code>; see the relevant function’s documentation<br>
-</li>
-<li>
-<code>data</code>: a data frame with individual patient data<br>
-</li>
-<li>
-<code>score.method</code>: methods to estimate the CATE (e.g., <code>boosting</code>, <code>poisson</code>, <code>twoReg</code>, <code>contrastReg</code>)<br>
-</li>
-<li>
-<code>cate.model</code>: a formula describing the outcome model (e.g., outcome ~ age + gender + previous_treatment)<br>
-</li>
-<li>
-<code>ps.model</code>: a formula describing the treatment model (propensity-score model) used to adjust for confounding (e.g., treatment ~ age + previous_treatment)</li>
-</ul>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>

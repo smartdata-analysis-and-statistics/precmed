@@ -6,7 +6,14 @@ effects only
 ## Usage
 
 ``` r
-glm.simplereg.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
+glm.simplereg.ps(
+  trt,
+  x.ps,
+  xnew = NULL,
+  minPS = 0.01,
+  maxPS = 0.99,
+  return.raw = FALSE
+)
 ```
 
 ## Arguments
@@ -38,6 +45,10 @@ glm.simplereg.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
   A numerical value (in \`(0, 1\]\`) above which estimated propensity
   scores should be truncated. Must be strictly greater than `minPS`.
   Default is `0.99`.
+
+- return.raw:
+
+  Internal: attach untruncated scores for diagnostics.
 
 ## Value
 

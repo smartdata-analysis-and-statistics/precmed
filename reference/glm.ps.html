@@ -60,7 +60,8 @@
 <span>  xnew <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
-<span>  solver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"R"</span><span class="op">)</span></span>
+<span>  solver <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C"</span>, <span class="st">"R"</span><span class="op">)</span>,</span>
+<span>  return.raw <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,6 +97,10 @@ truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.
 <dd><p>Interaction-screening backend: <code>"C"</code> (default) or
 <code>"R"</code>. C screens pairs before allocating retained training and prediction
 columns. Both use the strict SMD &gt; 0.1 rule and positive sample variance.</p></dd>
+
+
+<dt id="arg-return-raw">return.raw<a class="anchor" aria-label="anchor" href="#arg-return-raw"></a></dt>
+<dd><p>Internal: attach untruncated scores for diagnostics.</p></dd>
 
 </dl></div>
     <div class="section level2">

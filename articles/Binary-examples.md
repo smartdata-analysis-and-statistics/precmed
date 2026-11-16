@@ -19,12 +19,15 @@ library(precmed)
 
 ## Example data
 
-We simulate counts of relapses during one year using the same
-data-generating model as
+We consider a simulated dataset of patients with multiple sclerosis
+(MS), in which `relapse_count` represents the number of relapses
+observed during one year of follow-up. The outcome of interest is
+binary: `y = 1` if a patient has at least one relapse and `y = 0`
+otherwise. Relapse counts are generated using the same model as
 [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md).
-The outcome is `y = 1` if a patient has at least one relapse and `y = 0`
-otherwise. The underlying count is retained in `relapse_count`. Everyone
-has the same follow-up, and the outcome is fully observed. Set
+Everyone has the same follow-up, and the outcome is fully observed. The
+`followup` argument is measured in years: `followup = 1` means one year
+for every patient, while `followup = 0.5` means six months. Set
 `threshold` to a larger integer to define an event as more than that
 many relapses, or change `followup` to study another fixed horizon.
 
@@ -195,19 +198,9 @@ output_atefit
 #> 2 0.5026833
 ```
 
-The output reports estimated population-average relapse risks of 0.395
-under drug1 and 0.503 under drug0, shown in that order. Their difference
-(drug1 minus drug0) is -0.108, or -10.8 percentage points. A negative
-difference favors drug1. The output also reports the bootstrap standard
-error, a 95% Wald confidence interval, and a two-sided Wald p-value for
-the risk difference. The causal interpretation depends on the
-assumptions described above.
-
 Use [`coef()`](https://rdrr.io/r/stats/coef.html) and
 [`confint()`](https://rdrr.io/r/stats/confint.html) to extract the risk
-difference and its confidence interval, and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) to inspect the
-bootstrap estimates:
+difference and its confidence interval:
 
 ``` r
 
@@ -217,10 +210,65 @@ coef(output_atefit)
 confint(output_atefit)
 #>                      2.5 %      97.5 %
 #> risk.difference -0.1465372 -0.06931972
+```
+
+The output reports estimated population-average relapse risks of 0.395
+under drug1 and 0.503 under drug0, shown in that order. Their difference
+(drug1 minus drug0) is -0.108, or -10.8 percentage points. A negative
+difference favors drug1. The output also reports the bootstrap standard
+error, a 95% Wald confidence interval of -0.147 to -0.069, and a
+two-sided Wald p-value for the risk difference. The causal
+interpretation depends on the assumptions described above.
+
+A causal interpretation of this estimate relies on several assumptions,
+including consistency and the stable unit treatment value assumption,
+conditional exchangeability, and positivity; Chapter 5 discusses these
+assumptions (Nguyen et al. 2026). Positivity requires that both
+treatments are possible at each relevant combination of covariates in
+the target population. The following diagnostics summarize estimated
+propensity-score overlap and treatment-weight variability in the
+analysis sample. They can help investigate potential practical
+positivity problems, but cannot establish that the positivity assumption
+holds. The table reports propensity scores before truncation and inverse
+treatment weights after truncation. The outside-range count is the
+number of patients whose estimated score falls outside the observed
+range in the other treatment group; its percentage is within the
+patient’s own treatment group:
+
+``` r
+
+diagnostics(output_atefit, type = "propensity")
+```
+
+| Diagnostic                         | drug0            | drug1            |
+|:-----------------------------------|:-----------------|:-----------------|
+| Patients, n                        | 1858             | 2142             |
+| Propensity score, median (min-max) | 0.43 (0.04-0.91) | 0.64 (0.05-0.91) |
+| Outside other group’s range, n (%) | 3 (0.2%)         | 0 (0.0%)         |
+| Truncated below / above, n         | 0 / 0            | 0 / 0            |
+| Treatment weight, median (max)     | 1.76 (11.31)     | 1.56 (20.71)     |
+| Effective sample size              | 1397             | 1611             |
+
+In this example, 3 patients receiving drug0 and 0 receiving drug1 have
+estimated scores outside the observed range in the other group. The
+effective sample sizes are 1397 and 1611, respectively. The effective
+sample size summarizes how concentrated the treatment weights are within
+each group: smaller values indicate that fewer patients carry a larger
+share of the total weight, which can reduce precision. These summaries
+depend on the fitted treatment model and do not establish positivity,
+covariate balance, conditional exchangeability, or the absence of
+unmeasured confounding. Use `layout = "arms"` for unrounded numeric
+results.
+
+Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to inspect
+the bootstrap estimates:
+
+``` r
+
 plot(output_atefit, metrics = c("risk0", "risk1", "risk.difference"))
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-6-1.png)
+![](Binary-examples_files/figure-html/unnamed-chunk-7-1.png)
 
 The plot shows bootstrap relapse risks for drug0 (`risk0`) and drug1
 (`risk1`), followed by their risk difference. Red lines mark the
@@ -344,7 +392,7 @@ because relapse is an adverse event. For a desirable binary outcome, use
 plot(output_catefit, methods = "twoReg")
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-8-1.png)
+![](Binary-examples_files/figure-html/unnamed-chunk-9-1.png)
 
 ## Internally validate CATE scores
 
@@ -377,14 +425,14 @@ binary_cv <- catecv(
 plot(binary_cv, show.abc = FALSE)
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-9-1.png)
+![](Binary-examples_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
 
 boxplot(binary_cv)
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-9-2.png)
+![](Binary-examples_files/figure-html/unnamed-chunk-10-2.png)
 
 ``` r
 
