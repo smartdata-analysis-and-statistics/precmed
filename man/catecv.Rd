@@ -2,7 +2,7 @@
 % Please edit documentation in R/crossv.R
 \name{catecv}
 \alias{catecv}
-\title{Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes}
+\title{Cross-validation of the conditional average treatment effect (CATE) score}
 \usage{
 catecv(
   response,
@@ -49,7 +49,7 @@ catecv(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data.
-Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
+Allowed values include "binary", "count" (see \code{\link{catecvcount}()}), "survival"
 (see \code{\link{catecvsurv}()}) and "continuous" (see
 \code{\link{catecvmean}()}) .}
 
@@ -59,15 +59,18 @@ and censoring models (if specified); a data frame with \code{n} rows (1 row per 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-\code{'gaussian'} (continuous outcomes only).}
+\code{'gaussian'} (continuous outcomes only). Binary outcomes support
+\code{'logistic'}, \code{'twoReg'}, and \code{'boosting'}.}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a
 \code{Surv} object must be used to describe the outcome.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+appear on the left-hand side. For binary outcomes, logical and two-valued treatment
+labels are also supported; the effect is the risk under the second label minus
+that under the first. For randomized trials, an intercept-only treatment model
+can be specified as \code{trt ~ 1}.}
 
 \item{ps.method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
@@ -77,7 +80,7 @@ two-way interactions (added to the model if interactions are not specified in \c
 Relevant only when \code{ps.model} has more than one variable.}
 
 \item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
+It must be specified when \code{score.method = contrastReg} or \code{twoReg}, except for binary outcomes, which use \code{cate.model}.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
@@ -116,21 +119,21 @@ maximum survival time in the data.}
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
 
 \item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
 
 \item{prop.multi}{A vector of numerical values (in `[0, 1]`) specifying percentiles of the
-estimated log CATE scores to define mutually exclusive subgroups.
+estimated CATE scores to define mutually exclusive subgroups.
 It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 Each element represents the cutoff to separate the observations into
 \code{length(prop.multi) - 1} mutually exclusive subgroups.
 Default is \code{c(0, 1/3, 2/3, 1)}.}
 
 \item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
+at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.}
 
 \item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
@@ -141,10 +144,10 @@ Default is \code{10}.}
 \item{error.max}{A numerical value > 0 indicating the tolerance (maximum value of error)
 for the largest standardized absolute difference in the covariate distributions or in the
 doubly robust estimated rate ratios between the training and validation sets. This is used
-to define a balanced training-validation splitting. Default is \code{0.1}.}
+to define a balanced training-validation splitting. Default is \code{0.1}. Not available for binary outcomes, which use treatment-stratified random splits.}
 
 \item{max.iter}{A positive integer value indicating the maximum number of iterations when
-searching for a balanced training-validation split. Default is \code{5,000}.}
+searching for a balanced training-validation split. Default is \code{5,000}. Not available for binary outcomes.}
 
 \item{surv.min}{Lower truncation limit for the probability of being censored.
 It must be a positive value and should be chosen close to 0. Only applies for survival
@@ -230,16 +233,39 @@ interaction selection rule are unchanged. Kept separate from boosting's
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 }
 \value{
+For binary response, a \code{"precmed"} object with one \code{ate.*}
+list per method, containing matrices of training and validation risk differences
+for nested high and low subgroups and mutually exclusive groups, with one column
+per iteration, and \code{abc.valid} when requested. It also contains overall
+training and validation effects, \code{props}, \code{splits} (row indices),
+\code{subgroup.support}, and messages accessible with \code{diagnostics()}.
 For count response, see description of outputs in \code{\link{catecvcount}()}.
 For survival response, see description of outputs in \code{\link{catecvsurv}()}.
 For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 }
 \description{
-Provides (doubly robust) estimation of the average treatment effect (ATE) for count, survival or continuous
+Provides (doubly robust) estimation of the average treatment effect (ATE) for binary, count, survival or continuous
 outcomes in nested and mutually exclusive subgroups of patients defined by an estimated conditional
 average treatment effect (CATE) score via cross-validation (CV).
 }
 \details{
+For binary outcomes, each iteration randomly splits each treatment
+arm into training and validation sets. The score is fitted on training data
+only and applied to both sets. Percentile cutoffs are calculated separately
+in each set using its scores, without using validation outcomes. Ties may make
+nested groups larger than their nominal proportions. Mutually exclusive
+groups use half-open intervals, with the last interval including its upper
+endpoint; tied cutoffs can produce empty groups. Subgroup risk differences
+are estimated separately in each set using an augmented inverse-propensity
+estimator. Score-fitting or subgroup failures return NA with a warning and
+recorded diagnostics; ABC is NA if any required estimate is unavailable.
+ABC integrates the validation risk-difference curve minus the overall
+validation effect, reversing the sign when lower outcomes are desirable.
+These subgroup comparisons assess ranking, not calibration; causal
+interpretation requires exchangeability, positivity, consistency, and
+appropriate nuisance-model assumptions. \code{error.max} and \code{max.iter}
+are not supported for binary splits. The binary score methods are described
+in \code{\link{catefit}()}.
 For count response, see details in \code{\link{catecvcount}()}.
 For survival response, see details in \code{\link{catecvsurv}()}.
 For continuous response, see details in \code{\link{catecvmean}()}.

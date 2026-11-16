@@ -378,21 +378,12 @@ The corresponding subgroup cumulative hazard ratios are available as:
 output_catefit$chr.contrastReg
 ```
 
-You are encouraged to summarize and visualize the outputs in whichever way that fits their particular situation outside the package's functions. For example, it is possible to plot the densities of all CATE scores with `ggplot`. The score distributions summarize variation in predicted treatment benefit across patients.
+Use `plot()` to compare the estimated score distributions across methods. The
+scores are on the log restricted mean time lost ratio scale, with zero
+indicating a ratio of 1.
 
 ```{r plot_score, eval = T, echo = T, fig.align='center'}
-dataplot <- data.frame(
-  score = factor(rep(
-    c("Random Forest", "Contrast regression"),
-    each = length(output_catefit$score.randomForest)
-  )),
-  value = c(output_catefit$score.randomForest, output_catefit$score.contrastReg)
-)
-
-ggplot(dataplot, aes(x = value, fill = score)) +
-  geom_density(alpha = 0.5) +
-  theme_classic() + 
-  labs(x = "Estimated CATE score", y = "Density", fill = "Method")
+plot(output_catefit, type = "density")
 ```
 
 Compare the spread of the estimated scores for the two methods. Differences may reflect model flexibility, estimation noise or overfitting; a narrower distribution could also reflect constraints imposed by the contrast-regression model. The plot alone cannot distinguish these explanations. Internal validation assesses whether the predicted differences in treatment benefit persist in patients not used to fit the scores.

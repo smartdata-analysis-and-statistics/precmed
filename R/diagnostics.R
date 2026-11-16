@@ -1,11 +1,11 @@
 #' Summarize recorded fitting diagnostics
 #'
 #' Collect treatment-recoding information from \code{atefit()}, or recorded
-#' subgroup errors and warnings from count or survival \code{catefit()} and
+#' subgroup errors and warnings from count or survival \code{catefit()} and binary, count or survival
 #' \code{catecv()}, into a data frame. Each row represents one recorded message.
 #' Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 #'
-#' @param object A binary, count or survival \code{atefit}, or a count or survival \code{catefit} or \code{catecv} result.
+#' @param object A binary, count or survival \code{atefit}, a count or survival \code{catefit}, or a binary, count or survival \code{catecv} result.
 #' @return A data frame with columns \code{method}, \code{split},
 #'   \code{iteration}, \code{group}, \code{subgroup}, \code{type},
 #'   \code{measure}, and \code{message}. For count mutually exclusive groups,
@@ -34,8 +34,8 @@
 diagnostics <- function(object) {
   if (!inherits(object, c("atefit", "precmed", "catefit")) ||
       !(object$response %in% c("survival", "count") ||
-        (inherits(object, "atefit") && identical(object$response, "binary"))))
-    stop("object must be a binary, count or survival atefit, or a count or survival catefit or catecv result.")
+        (inherits(object, c("atefit", "precmed")) && identical(object$response, "binary"))))
+    stop("object must be a binary, count or survival atefit, a count or survival catefit, or a binary, count or survival catecv result.")
 
   out <- data.frame(method = character(), split = character(), iteration = integer(),
                     group = character(), subgroup = character(), type = character(),
@@ -55,7 +55,7 @@ diagnostics <- function(object) {
     }
     return(out)
   }
-  if (identical(object$response, "count")) {
+  if (identical(object$response, "count") || identical(object$response, "binary")) {
     if (!is.null(object$diagnostic.messages)) return(object$diagnostic.messages)
     return(out)
   }

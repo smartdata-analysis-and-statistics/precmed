@@ -32,7 +32,7 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(),
+catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
                           tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = TRUE, ...) {
   if (!ps.method %in% c("glm", "lasso") || minPS < 0 || maxPS > 1 || minPS >= maxPS) stop("Invalid propensity score settings.")
   resolve_ps_control(ps.control)
@@ -40,13 +40,18 @@ catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = 
   if (!is.numeric(prop.cutoff) || !length(prop.cutoff) || anyNA(prop.cutoff) || any(prop.cutoff <= 0 | prop.cutoff > 1)) stop("prop.cutoff must contain values in (0, 1].")
   d <- binary_data(data, cate.model, ps.model)
   if (!is.null(seed)) set.seed(seed)
-  prop <- sort(prop.cutoff); out <- list(response = "binary", score.method = score.method, fit = list(), coefficients = NULL)
+  prop <- sort(prop.cutoff); out <- list(response = "binary", score.method = score.method, fit = list(), coefficients = NULL, treatment.labels = d$labels)
   for (method in score.method) {
-    pred <- if (method == "boosting") binary_boosting(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) else
+    pred <- if (method == "twoReg") binary_tworeg_dr(d, ps.method, minPS, maxPS, ps.control, B, Kfold) else if (method == "boosting") binary_boosting(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) else
       binary_predictions(d$y, d$trt, d$x, method)
-    score <- pred$mu1 - pred$mu0
+    score <- if (method == "twoReg") pred$score else pred$mu1 - pred$mu0
     out[[paste0("score.", method)]] <- score
     out$fit[[method]] <- pred$fit
+    if (method == "twoReg") {
+      beta <- pred$fit$coefficients
+      out$coefficients <- data.frame(twoReg = beta[, "treated"] - beta[, "control"],
+                                     row.names = rownames(beta))
+    }
     ranking <- if (higher.y) score else -score
     effects <- vapply(prop, function(p) {
       selected <- ranking >= unname(stats::quantile(ranking, 1 - p))

@@ -432,6 +432,7 @@ catefitsurv <- function(data,
 
   result$response <- "survival"
   result$score.method <- score.method
+  result$treatment.labels <- if (is.null(out$cat.trt)) c("0", "1") else as.character(out$cat.trt)
 
   class(result) <- "catefit"
   return(result)

@@ -1,11 +1,11 @@
-#' Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
+#' Cross-validation of the conditional average treatment effect (CATE) score
 #'
-#' Provides (doubly robust) estimation of the average treatment effect (ATE) for count, survival or continuous
+#' Provides (doubly robust) estimation of the average treatment effect (ATE) for binary, count, survival or continuous
 #' outcomes in nested and mutually exclusive subgroups of patients defined by an estimated conditional
 #' average treatment effect (CATE) score via cross-validation (CV).
 #'
 #' @param response A string describing the type of outcome in the data.
-#' Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
+#' Allowed values include "binary", "count" (see \code{\link{catecvcount}()}), "survival"
 #' (see \code{\link{catecvsurv}()}) and "continuous" (see
 #' \code{\link{catecvmean}()}) .
 #' @param data A data frame containing the variables in the outcome, treatment,
@@ -13,13 +13,16 @@
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 #' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-#' \code{'gaussian'} (continuous outcomes only).
+#' \code{'gaussian'} (continuous outcomes only). Binary outcomes support
+#' \code{'logistic'}, \code{'twoReg'}, and \code{'boosting'}.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a
 #' \code{Surv} object must be used to describe the outcome.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' appear on the left-hand side. For binary outcomes, logical and two-valued treatment
+#' labels are also supported; the effect is the risk under the second label minus
+#' that under the first. For randomized trials, an intercept-only treatment model
+#' can be specified as \code{trt ~ 1}.
 #' @param ps.method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
@@ -27,7 +30,7 @@
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}, except for binary outcomes, which use \code{cate.model}.
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
@@ -57,19 +60,19 @@
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-#' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+#' estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
 #' @param prop.multi A vector of numerical values (in `[0, 1]`) specifying percentiles of the
-#' estimated log CATE scores to define mutually exclusive subgroups.
+#' estimated CATE scores to define mutually exclusive subgroups.
 #' It should start with 0, end with 1, and be of \code{length(prop.multi) > 2}.
 #' Each element represents the cutoff to separate the observations into
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
 #' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
+#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.
 #' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
@@ -77,9 +80,9 @@
 #' @param error.max A numerical value > 0 indicating the tolerance (maximum value of error)
 #' for the largest standardized absolute difference in the covariate distributions or in the
 #' doubly robust estimated rate ratios between the training and validation sets. This is used
-#' to define a balanced training-validation splitting. Default is \code{0.1}.
+#' to define a balanced training-validation splitting. Default is \code{0.1}. Not available for binary outcomes, which use treatment-stratified random splits.
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
-#' searching for a balanced training-validation split. Default is \code{5,000}.
+#' searching for a balanced training-validation split. Default is \code{5,000}. Not available for binary outcomes.
 #' @param surv.min Lower truncation limit for the probability of being censored.
 #' It must be a positive value and should be chosen close to 0. Only applies for survival
 #' outcomes. Default is \code{0.025}.
@@ -129,11 +132,34 @@
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
 #'
-#' @return For count response, see description of outputs in \code{\link{catecvcount}()}.
+#' @return For binary response, a \code{"precmed"} object with one \code{ate.*}
+#' list per method, containing matrices of training and validation risk differences
+#' for nested high and low subgroups and mutually exclusive groups, with one column
+#' per iteration, and \code{abc.valid} when requested. It also contains overall
+#' training and validation effects, \code{props}, \code{splits} (row indices),
+#' \code{subgroup.support}, and messages accessible with \code{diagnostics()}.
+#' For count response, see description of outputs in \code{\link{catecvcount}()}.
 #' For survival response, see description of outputs in \code{\link{catecvsurv}()}.
 #' For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 #'
-#' @details For count response, see details in \code{\link{catecvcount}()}.
+#' @details For binary outcomes, each iteration randomly splits each treatment
+#' arm into training and validation sets. The score is fitted on training data
+#' only and applied to both sets. Percentile cutoffs are calculated separately
+#' in each set using its scores, without using validation outcomes. Ties may make
+#' nested groups larger than their nominal proportions. Mutually exclusive
+#' groups use half-open intervals, with the last interval including its upper
+#' endpoint; tied cutoffs can produce empty groups. Subgroup risk differences
+#' are estimated separately in each set using an augmented inverse-propensity
+#' estimator. Score-fitting or subgroup failures return NA with a warning and
+#' recorded diagnostics; ABC is NA if any required estimate is unavailable.
+#' ABC integrates the validation risk-difference curve minus the overall
+#' validation effect, reversing the sign when lower outcomes are desirable.
+#' These subgroup comparisons assess ranking, not calibration; causal
+#' interpretation requires exchangeability, positivity, consistency, and
+#' appropriate nuisance-model assumptions. \code{error.max} and \code{max.iter}
+#' are not supported for binary splits. The binary score methods are described
+#' in \code{\link{catefit}()}.
+#' For count response, see details in \code{\link{catecvcount}()}.
 #' For survival response, see details in \code{\link{catecvsurv}()}.
 #' For continuous response, see details in \code{\link{catecvmean}()}.
 #'
@@ -266,7 +292,6 @@ catecv <- function(response,
                    verbose = 0,
                    contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
   check_response(response)
-  if (response == "binary") stop("Binary outcomes are not yet supported by catecv().")
   check_score_method(response, score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
@@ -280,6 +305,12 @@ catecv <- function(response,
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  if (response == "binary") {
+    supported <- c("data", "score.method", "cate.model", "ps.model", "ps.method", "minPS", "maxPS", "higher.y", "prop.cutoff", "prop.multi", "abc", "train.prop", "cv.n", "tree.depth", "n.trees.boosting", "B", "Kfold", "seed", "plot.gbmperf", "verbose", "ps.control")
+    unused <- setdiff(names(.args), supported)
+    if (length(unused)) stop("Unsupported binary catecv argument(s): ", paste(unused, collapse = ", "), ".")
+    return(do.call(catecvbinary, .args, envir = parent.frame()))
+  }
   if (response == "count") .args$rf.control <- NULL
   if (response != "survival") .args$rmst.control <- NULL
   if (response == "continuous") .args$contrast.control <- NULL
@@ -2480,7 +2511,7 @@ plot.precmed <- function(x,
                          theme = precmed_plot_theme(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", show.overall = TRUE, layout = "set", ...) {
 
   # Must be count or survival data for this function
-  stopifnot(x$response %in% c("count", "survival", "continuous"))
+  stopifnot(x$response %in% c("binary", "count", "survival", "continuous"))
   if (!is.logical(show.overall) || length(show.overall) != 1L || is.na(show.overall))
     stop("show.overall must be TRUE or FALSE.")
   if (!is.character(layout) || length(layout) != 1L || is.na(layout) || !layout %in% c("set", "method"))
@@ -2606,6 +2637,8 @@ plot.precmed <- function(x,
       } else {
         plot.ratio <- "RMTL ratio"
       }
+    } else if (x$response == "binary") {
+      plot.ratio <- "Risk difference"
     } else if (x$response == "continuous") {
       plot.ratio <- "Mean difference"
     }
@@ -2616,12 +2649,12 @@ plot.precmed <- function(x,
     } else if (is.null(x$formulas$trt_labels) & x$response != "continuous") {
       ylab <- paste0(plot.ratio, " ", trt, "=1 vs ", trt, "=0\nin each subgroup")
     } else {
-      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], if (x$response == "continuous") " - " else " vs ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], if (x$response %in% c("continuous", "binary")) " - " else " vs ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
     }
   }
 
   # Define x-axis label
-  if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response == "continuous")) {
+  if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response %in% c("continuous", "binary"))) {
     xlab <- "Subgroup size\n(% of subjects with lowest estimated CATE)"
   } else {
     xlab <- "Subgroup size\n(% of subjects with highest estimated CATE)"
@@ -2635,6 +2668,7 @@ plot.precmed <- function(x,
            "contrastReg" = "Contrast Regression",
            "negBin" = "Negative Binomial",
            "gaussian" = "Linear Regression",
+           "logistic" = "Logistic Regression",
            "gam" = "Generalized Additive Models")
   score.method <- str_extract(names(x), "(?<=^ate\\.).*$")
   score.method <- score.method[!is.na(score.method)]
@@ -2712,12 +2746,12 @@ plot.precmed <- function(x,
                                               from = prop.onlyhigh[xmin.idx], to = prop.onlyhigh[xmax.idx],
                                               type = "spline")
 
-        } else if (x$higher.y == TRUE & x$response == "continuous") {
+        } else if (x$higher.y == TRUE & x$response %in% c("continuous", "binary")) {
           abc[m * l + (i - 1) * l + 1] <- auc(x = prop.onlyhigh, y = temp - overall.hline.valid,
                                               from = prop.onlyhigh[xmin.idx], to = prop.onlyhigh[xmax.idx],
                                               type = "spline")
 
-        } else if (x$higher.y == FALSE & x$response == "continuous"){
+        } else if (x$higher.y == FALSE & x$response %in% c("continuous", "binary")){
           abc[m * l + (i - 1) * l + 1] <- auc(x = prop.onlyhigh, y = overall.hline.valid - temp,
                                               from = prop.onlyhigh[xmin.idx], to = prop.onlyhigh[xmax.idx],
                                               type = "spline")
@@ -2737,7 +2771,7 @@ plot.precmed <- function(x,
   mapped.method <- map[score.method]
   if (x$response == "count") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(as.character(mapped.method), "ABC:", sprintf('%.3f', abc)))
   if (x$response == "survival") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(rep(rep(mapped.method, each = l), 2), "ABC:", sprintf('%.3f', abc)))
-  if (x$response == "continuous") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(as.character(mapped.method), "ABC:", sprintf('%.3f', abc)))
+  if (x$response %in% c("continuous", "binary")) abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(as.character(mapped.method), "ABC:", sprintf('%.3f', abc)))
 
   cv.suffix <- if (is.null(cv.i)) "" else paste0(" (CV iteration ", cv.i, ")")
   training.label <- paste0("Training set", cv.suffix)
@@ -2777,6 +2811,7 @@ plot.precmed <- function(x,
   map.color <- c("randomForest" = "magenta4",
                  "boosting" = "orangered2",
                  "poisson" = "gray30",
+                 "logistic" = "gray30",
                  "gaussian" = "gray30", #Only one of poisson or gaussian is mapped depending on the data type
                  "twoReg" = "springgreen3",
                  "contrastReg" = "dodgerblue",
@@ -2902,7 +2937,7 @@ boxplot.precmed <- function(x, ylab = NULL,
                             theme = precmed_plot_theme(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", show.overall = TRUE, ncol = 2, ...) {
 
   # Must be count or survival data for this function
-  stopifnot(x$response %in% c("count", "survival", "continuous"))
+  stopifnot(x$response %in% c("binary", "count", "survival", "continuous"))
   if (!is.logical(show.overall) || length(show.overall) != 1L || is.na(show.overall))
     stop("show.overall must be TRUE or FALSE.")
   if (!is.numeric(ncol) || length(ncol) != 1L || is.na(ncol) ||
@@ -2944,7 +2979,7 @@ boxplot.precmed <- function(x, ylab = NULL,
   l <- length(prop.multi) - 1
 
   # Define x-axis
-  if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response == "continuous")) {
+  if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response %in% c("continuous", "binary"))) {
     xlab <- paste0("Subgroup \n (from lowest [0%] to highest [100%] estimated CATE)") # lower score = better responder to trt=1
   } else {
     xlab <- paste0("Subgroup \n (from highest [0%] to lowest [100%] estimated CATE)") # higher score = better responder to trt=1
@@ -2963,6 +2998,8 @@ boxplot.precmed <- function(x, ylab = NULL,
       } else {
         plot.ratio = "RMTL ratio"
       }
+    } else if (x$response == "binary") {
+      plot.ratio = "Risk difference"
     } else if (x$response == "continuous") {
       plot.ratio = "Mean difference"
     }
@@ -2973,7 +3010,7 @@ boxplot.precmed <- function(x, ylab = NULL,
     } else if (is.null(x$formulas$trt_labels) == TRUE & x$response != "continuous") {
       ylab <- paste0(plot.ratio, " ", trt, "=1 vs ", trt, "=0\nin each subgroup")
     } else {
-      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], if (x$response == "continuous") " - " else " vs ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
+      ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], if (x$response %in% c("continuous", "binary")) " - " else " vs ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
     }
   }
 
@@ -2982,6 +3019,7 @@ boxplot.precmed <- function(x, ylab = NULL,
            "boosting" = "Boosting",
            "poisson" = "Naive Poisson",
            "gaussian" = "Linear Regression",
+           "logistic" = "Logistic Regression",
            "negBin" = "Negative Binomial",
            "twoReg" = "Two Regressions",
            "contrastReg" = "Contrast Regression",

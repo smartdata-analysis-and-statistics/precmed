@@ -41,6 +41,50 @@ binary_predictions <- function(y, trt, x, method = "twoReg", interactions = TRUE
   list(mu0 = f0$pred, mu1 = f1$pred, fit = list(control = f0$fit, treated = f1$fit))
 }
 
+# Cross-fit nuisance models and project each augmented potential outcome on x.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+binary_tworeg_dr <- function(d, ps.method, minPS, maxPS, ps.control, B, Kfold) {
+  if (length(B) != 1L || !is.numeric(B) || !is.finite(B) || B < 1 || B != floor(B) ||
+      length(Kfold) != 1L || !is.numeric(Kfold) || !is.finite(Kfold) || Kfold < 2 || Kfold != floor(Kfold))
+    stop("B must be a positive integer and Kfold must be an integer of at least 2.")
+  if (any(tabulate(d$trt + 1L, 2L) < Kfold))
+    stop("Binary twoReg requires at least Kfold observations in each treatment group.")
+  if (qr(d$x)$rank < ncol(d$x)) stop("Binary twoReg projection design is rank deficient.")
+  coefs <- array(NA_real_, c(ncol(d$x), 2L, B))
+  for (b in seq_len(B)) {
+    fold <- integer(length(d$y))
+    for (arm in 0:1) {
+      idx <- which(d$trt == arm)
+      fold[idx] <- sample(rep(seq_len(Kfold), length.out = length(idx)))
+    }
+    mu0 <- mu1 <- p <- numeric(length(d$y))
+    for (k in seq_len(Kfold)) {
+      train <- fold != k; valid <- !train
+      for (arm in 0:1) {
+        selected <- train & d$trt == arm
+        fit <- stats::glm.fit(d$x[selected, , drop = FALSE], d$y[selected], family = stats::binomial())
+        if (!fit$converged || fit$rank < ncol(d$x) || any(!is.finite(fit$coefficients)))
+          stop("Binary twoReg outcome model failed to converge or is rank deficient in a cross-fitting fold.")
+        pred <- stats::plogis(drop(d$x[valid, , drop = FALSE] %*% fit$coefficients))
+        if (arm == 0) mu0[valid] <- pred else mu1[valid] <- pred
+      }
+      args <- list(trt = d$trt[train], x.ps = d$z[train, , drop = FALSE],
+                   xnew = d$z[valid, , drop = FALSE], minPS = minPS, maxPS = maxPS)
+      if (ps.method == "lasso") args$solver <- resolve_ps_control(ps.control)$solver
+      p[valid] <- do.call(if (ps.method == "glm") glm.simplereg.ps else glm.ps, args)
+    }
+    if (any(!is.finite(p) | p <= 0 | p >= 1)) stop("Propensity scores must be strictly between 0 and 1.")
+    pseudo0 <- mu0 + (1 - d$trt) * (d$y - mu0) / (1 - p)
+    pseudo1 <- mu1 + d$trt * (d$y - mu1) / p
+    coefs[, 1, b] <- stats::lm.fit(d$x, pseudo0)$coefficients
+    coefs[, 2, b] <- stats::lm.fit(d$x, pseudo1)$coefficients
+  }
+  beta <- apply(coefs, c(1, 2), mean)
+  dimnames(beta) <- list(colnames(d$x), c("control", "treated"))
+  list(score = drop(d$x %*% (beta[, 2] - beta[, 1])),
+       fit = list(coefficients = beta, B = B, Kfold = Kfold))
+}
+
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE) {
   if (length(unique(d$trt)) != 2L) stop("Both treatment groups are required.")

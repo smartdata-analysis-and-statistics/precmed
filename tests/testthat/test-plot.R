@@ -158,6 +158,34 @@ test_that("ATE bootstrap null lines use the log-ratio panels", {
   expect_equal(as.integer(tail(selected$data, 1)[[1]]$PANEL), 1L)
 })
 
+test_that("binary ATE plots select treatment risks and risk differences", {
+  fit <- structure(list(response = "binary", n.boot = 3,
+    treatment.labels = c("control", "new drug"),
+    risk0 = data.frame(estimate = .4), risk1 = data.frame(estimate = .25),
+    risk.difference = data.frame(estimate = -.15), trt.boot = c(-.1, -.2, -.15),
+    risk.boot = data.frame(risk0 = c(.35, .45, .4), risk1 = c(.25, .25, .25))), class = "atefit")
+  p <- plot(fit)
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(as.character(built$layout$layout$key), c("risk0", "risk1", "risk.difference"))
+  expect_equal(unname(unlist(p$facet$params$labeller(data.frame(key = c("risk0", "risk1", "risk.difference"))))),
+               c("Risk (control)", "Risk (new drug)", "Risk difference"))
+  expect_equal(built$data[[2]]$xintercept, c(.4, .25, -.15))
+  expect_equal(as.integer(built$data[[3]]$PANEL), 3L)
+  selected <- ggplot2::ggplot_build(plot(fit, metrics = c("risk.difference", "risk0")))
+  expect_equal(as.character(selected$layout$layout$key), c("risk.difference", "risk0"))
+  expect_equal(as.integer(selected$data[[3]]$PANEL), 1L)
+  expect_length(plot(fit, metrics = "risk1")$layers, 2L)
+  expect_length(plot(fit, null.value = NULL)$layers, 2L)
+  expect_error(plot(fit, metrics = c("risk0", "risk0")), "distinct")
+  expect_error(plot(fit, metrics = "p0"), "available metric")
+  fit$treatment.labels <- NULL
+  expect_equal(unname(unlist(plot(fit)$facet$params$labeller(data.frame(key = c("risk0", "risk1"))))),
+               c("Risk (treatment 0)", "Risk (treatment 1)"))
+  fit$risk.boot <- NULL
+  expect_s3_class(plot(fit), "ggplot")
+  expect_error(plot(fit, metrics = "risk0"), "available metric")
+})
+
 test_that("count ATE plots show treatment-specific bootstrap rates", {
   fit <- structure(list(response = "count", n.boot = 2,
     treatment.labels = c("control", "new drug"),

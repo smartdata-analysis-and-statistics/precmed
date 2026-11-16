@@ -27,10 +27,12 @@
 \item{theme}{A ggplot2 theme. By default, a customized minimal theme is used;
 supply, for example, \code{ggplot2::theme_classic()} to use another theme.}
 
-\item{null.value}{Reference value on the plotted log-ratio scale. Defaults to
-0 (a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.}
+\item{null.value}{Reference value on the plotted effect scale. Defaults to
+0 (no risk difference or a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.}
 
 \item{metrics}{Character vector of metrics to plot, in display order. For
+binary fits, choose from \code{"risk0"}, \code{"risk1"}, and
+\code{"risk.difference"}. For
 count fits, choose from \code{"rate0"}, \code{"rate1"}, and
 \code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
 \code{"rmst1"}, \code{"log.rmtl.ratio"}, and
@@ -50,10 +52,11 @@ Histogram of bootstrap estimates
 \details{
 Create a histogram displaying the distribution of the bootstrap estimates.
 The solid red vertical line represents the full-sample estimate. A dashed
-black line marks \code{null.value} in log-ratio panels only; it is not shown
-in treatment-specific rate or RMST panels.
+black line marks \code{null.value} in risk-difference and log-ratio panels;
+it is not shown in treatment-specific risk, rate or RMST panels.
 Treatment-specific facets use the original treatment labels when available.
-Older count objects without rate bootstrap estimates show only the log rate ratio.
+Older binary or count objects without treatment-specific bootstrap estimates
+show only the risk difference or log rate ratio, respectively.
 }
 \author{
 Thomas Debray

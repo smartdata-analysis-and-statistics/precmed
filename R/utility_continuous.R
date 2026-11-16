@@ -266,9 +266,9 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
     }
 
     if (any(score.method %in% c("contrastReg", "twoReg"))){
-      return(list(y = y, trt = trt, x.cate = x.cate, x.init = x.init, x.ps = x.ps, prop = prop))
+      return(list(y = y, trt = trt, x.cate = x.cate, x.init = x.init, x.ps = x.ps, prop = prop, treatment.labels = if (is.null(cat)) c("0", "1") else as.character(cat)))
     } else {
-      return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, prop = prop))
+      return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, prop = prop, treatment.labels = if (is.null(cat)) c("0", "1") else as.character(cat)))
     }
 
   } else if (fun == "crossv") {

@@ -453,7 +453,7 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
       warning("The first element of prop.cutoff cannot be 0 and has been removed.")
     }
 
-    return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, prop = prop))
+    return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, prop = prop, treatment.labels = treatment.labels))
   } else if (fun == "crossv") {
     ## Check values of prop.cutoff and prop.multi
     prop.onlyhigh <- prop.bi <- sort(prop.cutoff)

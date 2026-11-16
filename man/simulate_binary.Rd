@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_binary.R
 \name{simulate_binary}
 \alias{simulate_binary}
-\title{Simulate a binary response from relapse counts}
+\title{Simulate a binary relapse outcome from relapse counts}
 \usage{
 simulate_binary(n = 4000L, seed = 20261114L, followup = 1, threshold = 0L, ...)
 }
@@ -14,8 +14,8 @@ state. Supplying a seed sets R's random-number state.}
 
 \item{followup}{Positive finite common follow-up in years. Default is 1.}
 
-\item{threshold}{Non-negative integer maximum number of relapses for a
-response. The default, 0, defines a relapse-free responder.}
+\item{threshold}{Non-negative integer relapse count above which an event is
+recorded. The default, 0, defines an event as at least one relapse.}
 
 \item{...}{Additional arguments to \code{simulate_count()}, such as
 \code{conditional_rr}, \code{ps_weights}, \code{lp_weights}, or
@@ -24,20 +24,20 @@ fixed by \code{followup}.}
 }
 \value{
 A data frame with the same covariates, treatment and \code{years} as
-  \code{simulate_count()}, a 0/1 response \code{y}, and the underlying count
-  \code{relapse_count}. A value of 1 means the count is at most the threshold.
+  \code{simulate_count()}, a 0/1 outcome \code{y}, and the underlying count
+  \code{relapse_count}. A value of 1 means the count exceeds the threshold.
   Treatment labels are \code{drug0} and \code{drug1}.
 }
 \description{
 Generate synthetic relapse counts over a common follow-up period with
-\code{simulate_count()}, then classify patients as responders when their
-count is at most a chosen threshold. The data-generating model and its
+\code{simulate_count()}, then define an event when the relapse count exceeds
+a chosen threshold. The data-generating model and its
 coefficients are illustrative, not clinical estimates.
 }
 \details{
 The binary outcome is fully observed at the common horizon; there
   is no censoring. A treatment effect on the relapse rate generally implies
-  a different effect on the response probability, depending on follow-up,
+  a different effect on the event probability, depending on follow-up,
   the threshold, covariates and count distribution. The model does not
   reconstruct any patient population or individual patient records.
 }

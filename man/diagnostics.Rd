@@ -7,7 +7,7 @@
 diagnostics(object)
 }
 \arguments{
-\item{object}{A binary, count or survival \code{atefit}, or a count or survival \code{catefit} or \code{catecv} result.}
+\item{object}{A binary, count or survival \code{atefit}, a count or survival \code{catefit}, or a binary, count or survival \code{catecv} result.}
 }
 \value{
 A data frame with columns \code{method}, \code{split},
@@ -24,7 +24,7 @@ A data frame with columns \code{method}, \code{split},
 }
 \description{
 Collect treatment-recoding information from \code{atefit()}, or recorded
-subgroup errors and warnings from count or survival \code{catefit()} and
+subgroup errors and warnings from count or survival \code{catefit()} and binary, count or survival
 \code{catecv()}, into a data frame. Each row represents one recorded message.
 Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 }

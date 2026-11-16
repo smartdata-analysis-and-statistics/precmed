@@ -198,9 +198,11 @@ precmed_plot_theme <- function() {
 #' @param title The text for the title
 #' @param theme A ggplot2 theme. By default, a customized minimal theme is used;
 #' supply, for example, \code{ggplot2::theme_classic()} to use another theme.
-#' @param null.value Reference value on the plotted log-ratio scale. Defaults to
-#' 0 (a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.
+#' @param null.value Reference value on the plotted effect scale. Defaults to
+#' 0 (no risk difference or a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.
 #' @param metrics Character vector of metrics to plot, in display order. For
+#' binary fits, choose from \code{"risk0"}, \code{"risk1"}, and
+#' \code{"risk.difference"}. For
 #' count fits, choose from \code{"rate0"}, \code{"rate1"}, and
 #' \code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
 #' \code{"rmst1"}, \code{"log.rmtl.ratio"}, and
@@ -214,10 +216,11 @@ precmed_plot_theme <- function() {
 #'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
 #' The solid red vertical line represents the full-sample estimate. A dashed
-#' black line marks \code{null.value} in log-ratio panels only; it is not shown
-#' in treatment-specific rate or RMST panels.
+#' black line marks \code{null.value} in risk-difference and log-ratio panels;
+#' it is not shown in treatment-specific risk, rate or RMST panels.
 #' Treatment-specific facets use the original treatment labels when available.
-#' Older count objects without rate bootstrap estimates show only the log rate ratio.
+#' Older binary or count objects without treatment-specific bootstrap estimates
+#' show only the risk difference or log rate ratio, respectively.
 #' @author Thomas Debray
 #'
 #' @importFrom dplyr %>% add_row mutate
@@ -240,7 +243,43 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
   }
 
   if (identical(x$response, "binary")) {
-    if (!is.null(metrics) && !identical(metrics, "risk.difference")) stop("Binary plots support only metrics = \"risk.difference\".")
+    has.risks <- !is.null(x$risk.boot) && all(c("risk0", "risk1") %in% names(x$risk.boot)) &&
+      !is.null(x$risk0$estimate) && !is.null(x$risk1$estimate)
+    available <- c(if (has.risks) c("risk0", "risk1"), "risk.difference")
+    if (is.null(metrics)) metrics <- available
+    if (!is.character(metrics) || !length(metrics) || anyNA(metrics))
+      stop("metrics must be a non-empty vector of distinct available metric names: ", paste(available, collapse = ", "), ".")
+    if (anyDuplicated(metrics) || any(!metrics %in% available))
+      stop("metrics must be a non-empty vector of distinct available metric names: ", paste(available, collapse = ", "), ".")
+    if (has.risks) {
+      treatment.labels <- x$treatment.labels
+      if (is.null(treatment.labels) || length(treatment.labels) != 2L ||
+          anyNA(treatment.labels) || any(!nzchar(treatment.labels)))
+        treatment.labels <- c("treatment 0", "treatment 1")
+      facet.labels <- c(risk0 = paste0("Risk (", treatment.labels[1], ")"),
+                        risk1 = paste0("Risk (", treatment.labels[2], ")"),
+                        risk.difference = "Risk difference")
+      boot.df <- data.frame(risk0 = x$risk.boot$risk0, risk1 = x$risk.boot$risk1,
+                            risk.difference = x$trt.boot) %>%
+        gather(key = "key", value = "value") %>%
+        dplyr::filter(.data$key %in% metrics) %>%
+        mutate(key = factor(.data$key, levels = metrics))
+      estimates <- c(risk0 = x$risk0$estimate, risk1 = x$risk1$estimate,
+                     risk.difference = x$risk.difference$estimate)
+      est.df <- data.frame(key = factor(metrics, levels = metrics), value = unname(estimates[metrics]))
+      p <- ggplot(boot.df, aes(x = .data$value)) +
+        geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white", linewidth = 0.3) +
+        facet_wrap(. ~ .data$key, nrow = 1, scales = "free",
+                   labeller = ggplot2::as_labeller(facet.labels)) +
+        geom_vline(data = est.df, aes(xintercept = .data$value), color = "#B43B35", linewidth = 0.8) +
+        theme + labs(x = "Bootstrap estimate", y = "Frequency", title = title,
+                     caption = if (show.null && "risk.difference" %in% metrics) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
+      if (show.null && "risk.difference" %in% metrics) {
+        null.df <- data.frame(key = factor("risk.difference", levels = metrics), value = null.value)
+        p <- p + geom_vline(data = null.df, aes(xintercept = .data$value), linetype = 2, color = "#303030", linewidth = 0.7)
+      }
+      return(p)
+    }
     p <- ggplot(data.frame(value = x$trt.boot), aes(x = .data$value)) +
       geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white") +
       geom_vline(xintercept = x$risk.difference$estimate, color = "#B43B35") +

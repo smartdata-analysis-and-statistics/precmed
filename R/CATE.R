@@ -1,7 +1,7 @@
 #' Estimate conditional treatment effect scores
 #'
 #' Estimate CATE scores for binary, count and survival outcomes. Binary scores
-#' include pooled logistic regression, separate-arm logistic regression and
+#' include pooled logistic regression, doubly robust two-regression estimation and
 #' boosting. Count and survival methods include both outcome-regression and
 #' doubly robust scores. Continuous outcomes are not yet implemented.
 #'
@@ -114,17 +114,35 @@
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' For \code{response = "binary"}, \code{score.method = "logistic"}
-#' fits a logistic model with treatment interactions, and \code{"twoReg"}
-#' fits separate logistic models in each arm. \code{"boosting"} fits
+#' fits a logistic model with treatment interactions. \code{"twoReg"} cross-fits
+#' separate logistic outcome models and a treatment model, then projects the
+#' augmented inverse-propensity outcomes for each arm onto the covariates in
+#' \code{cate.model} using linear regression. The score is the difference of
+#' these projections, averaged over \code{B} repetitions of \code{Kfold} folds.
+#' It estimates the linear projection of the conditional risk difference if
+#' either the treatment model or both outcome models are correct, under
+#' identification and positivity assumptions. Propensity score truncation can
+#' affect this property. The projection need not lie between -1 and 1 and
+#' equals the conditional risk difference only if that difference is linear in
+#' the specified design. The difference between arm coefficients is returned in
+#' \code{coefficients$twoReg} and by \code{coef()}; the separate arm coefficients
+#' are stored in \code{fit$twoReg$coefficients}. Logistic model coefficients are
+#' on the log-odds scale and are stored in \code{fit$logistic}; they are not
+#' linear risk-difference score coefficients. Boosting does not have a linear
+#' score coefficient vector. With neither \code{twoReg} nor another linear
+#' binary score, \code{coef()} returns \code{NULL}.
+#' \code{"boosting"} fits
 #' separate Bernoulli gradient-boosting models in each treatment arm, with
 #' the number of trees selected by five-fold cross-validation. All three scores
 #' are predicted risk differences; subgroup effects are doubly robust risk
 #' differences. Binary boosting requires at least one outcome-model covariate
 #' and both outcome values in each arm. Its fitted models and selected tree
-#' counts are stored in \code{fit$boosting}. For extra boosting controls,
+#' counts are stored in \code{fit$boosting}. Scores and subgroup effects are
+#' estimated on the same data; they are not independent validation. For extra boosting controls,
 #' see \code{\link{boosting-control}}.
 #' Subgroup fits without both arms or with rank-deficient models return NA.
-#' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
+#' @return Fitted objects retain \code{treatment.labels} in treatment 0/1 order
+#' for score plot labels. For count response, see description of other outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 #'
 #' @details For count response, see details in \code{\link{catefitcount}()}.
@@ -278,9 +296,9 @@ catefit <- function(response,
 #' @param x An object of class \code{"catefit"}.
 #' @param ... Other parameters
 #'
-#' @details Display the estimated treatment effects for survival outcomes (log
-#' restricted mean time lost ratio and log hazard ratio) and count outcomes
-#' (the log rate ratio).
+#' @details Display subgroup treatment effects and available score coefficients.
+#' Binary effects and \code{twoReg} coefficients are on the risk-difference
+#' scale; count and survival score coefficients are on log-ratio scales.
 #'
 #' @return No return value
 #'
@@ -322,7 +340,7 @@ print.catefit <- function(x, ...) {
       cat("\n")
     }
   }
-  print(coef(x))
+  if (!identical(x$response, "binary") || !is.null(coef(x))) print(coef(x))
 
   if (!is.null(x$warning)) {
     cat("\n")

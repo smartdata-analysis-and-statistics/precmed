@@ -332,6 +332,8 @@ catefitmean <- function(data,
   }
 
   result$score.method <- score.method
+  result$response <- "continuous"
+  result$treatment.labels <- out$treatment.labels
 
   class(result) <- "catefit"
   return(result)

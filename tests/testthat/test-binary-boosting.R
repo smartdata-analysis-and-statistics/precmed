@@ -29,5 +29,7 @@ test_that("binary boosting validates unsupported and small-sample inputs", {
   d$y[d$trt == "drug0"] <- 0
   common$data <- d
   expect_error(do.call(catefit, c(common, list(cate.model = y ~ age))), "both outcome values")
-  expect_error(catecv("binary", d, "boosting", y ~ age, trt ~ 1), "not yet supported")
+  expect_warning(cv <- catecv("binary", d, "boosting", y ~ age, trt ~ 1,
+                              cv.n = 1, abc = FALSE, seed = 1), "score fitting failed")
+  expect_true(all(is.na(cv$ate.boosting$ate.est.valid.high.cv)))
 })

@@ -338,6 +338,7 @@ catefitcount <- function(data,
 
   result$response <- "count"
   result$score.method <- score.method
+  result$treatment.labels <- out$treatment.labels
 
   class(result) <- "catefit"
   return(result)

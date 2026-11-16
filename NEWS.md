@@ -2,13 +2,32 @@
 
 ## Major changes
 
+* Added binary-outcome support to `catecv()` for logistic, doubly robust
+  two-regression, and boosting scores. Treatment-stratified repeated splits
+  provide training and held-out subgroup risk differences, ABC, plots, and
+  recorded subgroup diagnostics. Binary splits do not use the balanced-split
+  controls `error.max` and `max.iter`.
+
 * Added binary-outcome estimation on the risk-difference scale. `atefit()` and
   the exported `atefitbinary()` provide doubly robust ATE estimation;
-  `catefit()` provides pooled logistic, separate-arm logistic and Bernoulli
-  boosting CATE scores, with doubly robust subgroup estimates. Added
+  `catefit()` provides pooled logistic, doubly robust two-regression and Bernoulli
+  boosting CATE scores, with doubly robust subgroup estimates. Binary `twoReg`
+  now cross-fits outcome and treatment models and estimates a linear projection
+  of the risk difference; its scores and stored fits differ from earlier
+  development versions, and `B` and `Kfold` control cross-fitting. Added
   `simulate_binary()` and a vignette illustrating estimation and held-out
   subgroup assessment. Numeric, logical and two-valued treatment labels are
   supported.
+
+* `simulate_binary()` now codes `y = 1` when the relapse count exceeds
+  `threshold` (at least one relapse by default), reversing the outcome coding
+  used in earlier development versions. Use `higher.y = FALSE` when ranking
+  treatment benefit for this adverse outcome. This changes simulated outcomes
+  and reverses the direction of risk differences in the binary vignette.
+
+* Binary `catefit()` now returns and prints the `twoReg` risk-difference score
+  coefficients through `coef()`, matching the coefficient table used for count
+  scores. Fits without a linear binary score no longer print a stray `NULL`.
 
 * Standardized bootstrap failure handling across binary, count and survival
   `atefit()`: affected measures now have unavailable inference if any replicate
@@ -59,6 +78,23 @@
   for each treatment arm, and forwarding additional boosting controls.
 
 ## Minor changes and bug fixes
+
+* Binary `atefit()` bootstrap plots now display the treatment-specific risks
+  and risk difference by default. `metrics` selects and orders `risk0`, `risk1`, and
+  `risk.difference`. Older objects
+  without risk bootstrap estimates retain the risk-difference plot.
+
+* Added `plot()` support for `catefit` score distributions, with histograms,
+  optional density curves, method selection, and a configurable reference line.
+  The score axis uses the original treatment labels when available; newly fitted
+  `catefit` objects retain these labels, while older fits use treatment 0/1.
+  Binary, count and survival vignettes now use this method.
+
+* The binary vignette compares logistic and two-regression scores on the same
+  internal validation splits, uses 10 iterations and larger subgroups to
+  reduce rank-deficient fits, removes the redundant manual validation example,
+  and explains the printed average treatment effect
+  before showing extraction and plotting commands.
 
 * Standardized documentation terminology for outcome, treatment and censoring
   models, clarifying propensity scores and inverse probability of censoring weights.
