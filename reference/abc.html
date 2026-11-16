@@ -44,7 +44,7 @@ This should be run only after results of catecv() have been obtained.'><meta pro
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Compute the area between curves from the <code>"precmed"</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/R/crossv.R" class="external-link"><code>R/crossv.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/R/abc.R" class="external-link"><code>R/abc.R</code></a></small>
       <div class="d-none name"><code>abc.Rd</code></div>
     </div>
 
@@ -96,6 +96,12 @@ the validation curves in the validation set in <code><a href="https://rdrr.io/r/
     <p>Zhao, L., Tian, L., Cai, T., Claggett, B., &amp; Wei, L. J. (2013).
 <em>Effectively selecting a target population for a future comparative study.
 Journal of the American Statistical Association, 108(502), 527-539.</em></p>
+<p>Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., &amp; Tian, L. (2026).
+Visualization and interpretation of individualized treatment rule results. In
+T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
+<em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em>
+(Chapter 20, pp. 513–536). Chapman &amp; Hall/CRC.
+<a href="https://doi.org/10.1201/9781003300809-20" class="external-link">doi:10.1201/9781003300809-20</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -105,71 +111,19 @@ Journal of the American Statistical Association, 108(502), 527-539.</em></p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># Count outcome</span></span></span>
-<span class="r-in"><span><span class="va">cv_count</span> <span class="op">&lt;-</span> <span class="fu"><a href="catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"count"</span>,</span></span>
-<span class="r-in"><span>                   data <span class="op">=</span> <span class="va">countExample</span>,</span></span>
-<span class="r-in"><span>                   score.method <span class="op">=</span> <span class="st">"poisson"</span>,</span></span>
-<span class="r-in"><span>                   cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                                <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                                <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                   ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                   higher.y <span class="op">=</span> <span class="cn">FALSE</span>, cv.n <span class="op">=</span> <span class="fl">5</span>, verbose <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cv = 1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 18.98 secs </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
-<span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_count</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              cv1        cv2      cv3        cv4        cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.130039 0.06693188 0.109117 0.08043419 0.09978397</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">cv_surv</span> <span class="op">&lt;-</span> <span class="fu"><a href="catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span></span>
-<span class="r-in"><span>                  data <span class="op">=</span> <span class="va">survivalExample</span>,</span></span>
-<span class="r-in"><span>                  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"randomForest"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                  cate.model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                               <span class="va">previous_number_relapses</span>,</span></span>
-<span class="r-in"><span>                  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>                  cv.n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>No value supplied for tau0. Default sets tau0 to the maximum survival time.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># ABC of the validation curves for each method and each CV iteration</span></span></span>
-<span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">cv_surv</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    cv1       cv2       cv3       cv4       cv5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> poisson      0.1568946 0.1900703 0.1595795 0.2002690 0.1982377</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> randomForest 0.1509198 0.1799083 0.1556191 0.1996184 0.1890215</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># The result was created with:</span></span></span>
+<span class="r-in"><span><span class="co"># catecvCountExample &lt;- catecv(</span></span></span>
+<span class="r-in"><span><span class="co">#   response = "count", data = countExample, score.method = "poisson",</span></span></span>
+<span class="r-in"><span><span class="co">#   cate.model = y ~ age + female + previous_treatment + previous_cost +</span></span></span>
+<span class="r-in"><span><span class="co">#     previous_number_relapses + offset(log(years)),</span></span></span>
+<span class="r-in"><span><span class="co">#   ps.model = trt ~ age + previous_treatment, higher.y = FALSE,</span></span></span>
+<span class="r-in"><span><span class="co">#   cv.n = 5, seed = 999, verbose = 0)</span></span></span>
+<span class="r-in"><span><span class="co"># Load the pre-fitted result instead of repeating the calculation.</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Rows are scoring methods; columns are validation iterations.</span></span></span>
+<span class="r-in"><span><span class="fu">abc</span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               cv1       cv2       cv3        cv4       cv5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

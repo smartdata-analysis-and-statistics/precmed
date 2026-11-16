@@ -56,6 +56,12 @@
 
 ### Minor changes and bug fixes
 
+- Validate outcome types and outcome-specific CATE scoring methods
+  before fitting, including empty and invalid inputs.
+
+- Added `catecvCountExample`, a pre-fitted validation result used in the
+  ABC and plotting examples to avoid repeatedly fitting models.
+
 - Label survival
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   bootstrap plot panels with the original treatment names when

@@ -59,7 +59,9 @@
 </ul></div>
 <div class="section level3">
 <h3 id="minor-changes-and-bug-fixes-development-version">Minor changes and bug fixes<a class="anchor" aria-label="anchor" href="#minor-changes-and-bug-fixes-development-version"></a></h3>
-<ul><li><p>Label survival <code><a href="../reference/atefit.html">atefit()</a></code> bootstrap plot panels with the original treatment names when available, and use readable names for the treatment effects.</p></li>
+<ul><li><p>Validate outcome types and outcome-specific CATE scoring methods before fitting, including empty and invalid inputs.</p></li>
+<li><p>Added <code>catecvCountExample</code>, a pre-fitted validation result used in the ABC and plotting examples to avoid repeatedly fitting models.</p></li>
+<li><p>Label survival <code><a href="../reference/atefit.html">atefit()</a></code> bootstrap plot panels with the original treatment names when available, and use readable names for the treatment effects.</p></li>
 <li><p>Report automatic treatment recoding as an informational message rather than a warning, while retaining the mapping in existing result objects.</p></li>
 <li><p>Added <code><a href="../reference/diagnostics.html">diagnostics()</a></code> to summarize recorded survival <code><a href="../reference/atefit.html">atefit()</a></code> treatment recoding information and subgroup errors and warnings from <code><a href="../reference/catefit.html">catefit()</a></code> and <code><a href="../reference/catecv.html">catecv()</a></code> results in a data frame.</p></li>
 <li><p>Added <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> methods for extracting supported treatment effects and confidence intervals from count and survival <code><a href="../reference/atefit.html">atefit()</a></code> results.</p></li>

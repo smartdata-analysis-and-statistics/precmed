@@ -116,16 +116,9 @@ should be plotted (<code>TRUE</code>). Otherwise, the validation curves in both 
 sets are plotted side-by-side (<code>FALSE</code>). Default is <code>FALSE</code>.</p></dd>
 
 
-<dt id="arg-measure">measure<a class="anchor" aria-label="anchor" href="#arg-measure"></a></dt>
-<dd><p>For survival outcomes, select <code>"rmtl"</code> (default), <code>"cumulative_hr"</code> (cumulative hazard ratio), or <code>"conditional_hr"</code> (conditional Cox hazard ratio fitted through <code>tau0</code>). Earlier measure names remain supported as aliases. Supply a vector to display multiple measures in separate panels.</p></dd>
-
-
 <dt id="arg-plot-hr">plot.hr<a class="anchor" aria-label="anchor" href="#arg-plot-hr"></a></dt>
-<dd><p>Deprecated; use <code>measure</code> instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio. The default hazard-based measure is the marginal cumulative hazard ratio.</p></dd>
-
-
-<dt id="arg-hazard-type">hazard.type<a class="anchor" aria-label="anchor" href="#arg-hazard-type"></a></dt>
-<dd><p>Deprecated; use <code>measure</code> instead. Choose <code>"cumulative"</code> (default) or <code>"conditional"</code> for the supplementary Cox HR when <code>plot.hr = TRUE</code>. Older objects without cumulative ratios must be refitted or plotted with <code>hazard.type = "conditional"</code>.</p></dd>
+<dd><p>Deprecated; use <code>measure</code> instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio.
+When <code>TRUE</code>, the default is the marginal cumulative hazard ratio.</p></dd>
 
 
 <dt id="arg-ylab">ylab<a class="anchor" aria-label="anchor" href="#arg-ylab"></a></dt>
@@ -149,6 +142,20 @@ range specified.</p></dd>
 
 <dt id="arg-theme">theme<a class="anchor" aria-label="anchor" href="#arg-theme"></a></dt>
 <dd><p>Defaults to <code>theme_classic()</code>. Other options include <code>theme_grey()</code>, <code>theme_bw()</code>, <code>theme_light()</code>, <code>theme_dark()</code>, and <code>theme_void()</code></p></dd>
+
+
+<dt id="arg-hazard-type">hazard.type<a class="anchor" aria-label="anchor" href="#arg-hazard-type"></a></dt>
+<dd><p>Deprecated; use <code>measure</code> instead. Select <code>"cumulative"</code> (default) or the supplementary
+<code>"conditional"</code> Cox HR when <code>plot.hr = TRUE</code>. Older objects without cumulative
+hazard ratios require <code>hazard.type = "conditional"</code> or refitting.</p></dd>
+
+
+<dt id="arg-measure">measure<a class="anchor" aria-label="anchor" href="#arg-measure"></a></dt>
+<dd><p>For survival outcomes, a vector of <code>"rmtl"</code> (default),
+<code>"cumulative_hr"</code> (cumulative hazard ratio), and <code>"conditional_hr"</code>
+(conditional Cox hazard ratio fitted through <code>tau0</code>). Multiple measures appear in separate panels.
+The earlier names <code>"chr"</code>, <code>"cph"</code>, <code>"cumulative_hazard_ratio"</code>,
+and <code>"conditional_hazard_ratio"</code> remain supported as aliases.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -194,71 +201,13 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="co"># Count outcome</span></span></span>
-<span class="r-in"><span><span class="va">eval_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"count"</span>,</span></span>
-<span class="r-in"><span>                 data <span class="op">=</span> <span class="va">countExample</span>,</span></span>
-<span class="r-in"><span>                 score.method <span class="op">=</span> <span class="st">"poisson"</span>,</span></span>
-<span class="r-in"><span>                 cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                                  <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                 ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                 higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>                 cv.n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># default setting</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.precmed-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># turn off ABC annotation</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecvCountExample</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.precmed-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># use a different theme</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span>, theme <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecvCountExample</span>, cv.i <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.precmed-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plot the validation curves from the 2nd CV iteration instead of the mean</span></span></span>
-<span class="r-in"><span><span class="co"># of all validation curves</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span>, cv.i <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.precmed-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># median of the validation curves</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span>, combine <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.precmed-5.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plot validation curves in validation set only</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_1</span>, valid.only <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.precmed-6.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Survival outcome</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span></span>
-<span class="r-in"><span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">eval_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span></span>
-<span class="r-in"><span>                 data <span class="op">=</span> <span class="va">survivalExample</span>,</span></span>
-<span class="r-in"><span>                 score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"randomForest"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                 cate.model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>                                           <span class="va">previous_number_relapses</span>,</span></span>
-<span class="r-in"><span>                 ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                 initial.predictor.method <span class="op">=</span> <span class="st">"randomForest"</span>,</span></span>
-<span class="r-in"><span>                 ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>,</span></span>
-<span class="r-in"><span>                 cv.n <span class="op">=</span> <span class="fl">5</span>,</span></span>
-<span class="r-in"><span>                 seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># default setting, plot RMTL ratios in both training and validation sets</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_2</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="plot.precmed-7.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># plot hazard ratio</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">eval_2</span>, measure <span class="op">=</span> <span class="st">"cumulative_hr"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some subgroup cumulative hazard ratios are undefined; summaries use available folds.</span>
-<span class="r-plt img"><img src="plot.precmed-8.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

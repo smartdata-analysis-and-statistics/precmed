@@ -199,13 +199,6 @@ catefit(
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
 
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
-
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
@@ -299,6 +292,13 @@ catefit(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 - ...:
 
   Additional boosting arguments; see
@@ -324,6 +324,13 @@ Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L.
 (2020). *Estimation and validation of ratio-based conditional average
 treatment effects using observational data. Journal of the American
 Statistical Association, 1-18.* DOI: 10.1080/01621459.2020.1772080.
+
+Hoogland, J., Debray, T. P. A., Desachy, G., & Nguyen, T.-L. (2026).
+Introduction to methods for personalizing medicine. In T. P. A. Debray,
+T.-L. Nguyen, & R. W. Platt (Eds.), *Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data* (Chapter 17, pp.
+421–463). Chapman & Hall/CRC.
+[doi:10.1201/9781003300809-17](https://doi.org/10.1201/9781003300809-17)
 
 Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian,
 L. (2026). Visualization and interpretation of individualized treatment

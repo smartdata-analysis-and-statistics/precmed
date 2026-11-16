@@ -72,69 +72,17 @@ function and [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
 ## Examples
 
 ``` r
-# \donttest{
-# Count outcome
-cv_count <- catecv(response = "count",
-                   data = countExample,
-                   score.method = "poisson",
-                   cate.model = y ~ age + female + previous_treatment +
-                                previous_cost + previous_number_relapses +
-                                offset(log(years)),
-                   ps.model = trt ~ age + previous_treatment,
-                   higher.y = FALSE, cv.n = 5, verbose = 1)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>   |                                                                              |                                                                      |   0%
-#> cv = 1 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 2 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 3 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 4 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 5 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> Total runtime : 16.53 secs 
-
-# ABC of the validation curves for each method and each CV iteration
-abc(cv_count)
-#>              cv1       cv2        cv3        cv4       cv5
-#> poisson 0.103961 0.1039346 0.07946991 0.08785729 0.0931491
-
-# Survival outcome
-library(survival)
-cv_surv <- catecv(response = "survival",
-                  data = survivalExample,
-                  score.method = c("poisson", "randomForest"),
-                  cate.model = Surv(y, d) ~ age + female + previous_cost +
-                               previous_number_relapses,
-                  ps.model = trt ~ age + previous_treatment,
-                  higher.y = FALSE,
-                  cv.n = 5)
-#> Warning: No value supplied for tau0. Default sets tau0 to the maximum survival time.
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
-
-# ABC of the validation curves for each method and each CV iteration
-abc(cv_surv)
-#>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1727195 0.1784517 0.1892362 0.1786517 0.1880207
-#> randomForest 0.1621080 0.1795924 0.1872378 0.1721504 0.1804008
-
-# }
+# The result was created with:
+# catecvCountExample <- catecv(
+#   response = "count", data = countExample, score.method = "poisson",
+#   cate.model = y ~ age + female + previous_treatment + previous_cost +
+#     previous_number_relapses + offset(log(years)),
+#   ps.model = trt ~ age + previous_treatment, higher.y = FALSE,
+#   cv.n = 5, seed = 999, verbose = 0)
+# Load the pre-fitted result instead of repeating the calculation.
+data(catecvCountExample)
+# Rows are scoring methods; columns are validation iterations.
+abc(catecvCountExample)
+#>               cv1       cv2       cv3        cv4       cv5
+#> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103
 ```

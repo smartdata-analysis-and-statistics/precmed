@@ -57,6 +57,13 @@ Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
 study. Journal of the American Statistical Association, 108(502),
 527-539.*
 
+Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian,
+L. (2026). Visualization and interpretation of individualized treatment
+rule results. In T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+*Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data* (Chapter 20, pp. 513–536). Chapman & Hall/CRC.
+[doi:10.1201/9781003300809-20](https://doi.org/10.1201/9781003300809-20)
+
 ## See also
 
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
@@ -67,69 +74,17 @@ function and [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
 ## Examples
 
 ``` r
-# \donttest{
-# Count outcome
-cv_count <- catecv(response = "count",
-                   data = countExample,
-                   score.method = "poisson",
-                   cate.model = y ~ age + female + previous_treatment +
-                                previous_cost + previous_number_relapses +
-                                offset(log(years)),
-                   ps.model = trt ~ age + previous_treatment,
-                   higher.y = FALSE, cv.n = 5, verbose = 1)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>   |                                                                              |                                                                      |   0%
-#> cv = 1 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 2 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 3 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 4 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> cv = 5 
-#>   splitting the data..
-#>   training..
-#>   validating..
-#> 
-#> Total runtime : 18.98 secs 
-
-# ABC of the validation curves for each method and each CV iteration
-abc(cv_count)
-#>              cv1        cv2      cv3        cv4        cv5
-#> poisson 0.130039 0.06693188 0.109117 0.08043419 0.09978397
-
-# Survival outcome
-library(survival)
-cv_surv <- catecv(response = "survival",
-                  data = survivalExample,
-                  score.method = c("poisson", "randomForest"),
-                  cate.model = Surv(y, d) ~ age + female + previous_cost +
-                               previous_number_relapses,
-                  ps.model = trt ~ age + previous_treatment,
-                  higher.y = FALSE,
-                  cv.n = 5)
-#> Warning: No value supplied for tau0. Default sets tau0 to the maximum survival time.
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning: Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.
-
-# ABC of the validation curves for each method and each CV iteration
-abc(cv_surv)
-#>                    cv1       cv2       cv3       cv4       cv5
-#> poisson      0.1568946 0.1900703 0.1595795 0.2002690 0.1982377
-#> randomForest 0.1509198 0.1799083 0.1556191 0.1996184 0.1890215
-
-# }
+# The result was created with:
+# catecvCountExample <- catecv(
+#   response = "count", data = countExample, score.method = "poisson",
+#   cate.model = y ~ age + female + previous_treatment + previous_cost +
+#     previous_number_relapses + offset(log(years)),
+#   ps.model = trt ~ age + previous_treatment, higher.y = FALSE,
+#   cv.n = 5, seed = 999, verbose = 0)
+# Load the pre-fitted result instead of repeating the calculation.
+data(catecvCountExample)
+# Rows are scoring methods; columns are validation iterations.
+abc(catecvCountExample)
+#>               cv1       cv2       cv3        cv4       cv5
+#> poisson 0.1375899 0.1172791 0.1120313 0.06136285 0.1877103
 ```

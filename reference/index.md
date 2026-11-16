@@ -84,6 +84,9 @@
   : Cross-validation of the conditional average treatment effect (CATE)
   score for count, survival or continuous outcomes
 
+- [`catecvCountExample`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvCountExample.md)
+  : Pre-fitted count outcome validation example
+
 - [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)
   : Cross-validation of the conditional average treatment effect (CATE)
   score for count outcomes

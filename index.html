@@ -82,11 +82,11 @@
 <p><strong>precmed</strong> is an R package for estimating average treatment effects (ATEs) and estimating and validating conditional average treatment effects (CATEs) in randomized trials and observational studies, with methods for count and survival outcomes. The ATE describes an effect across a population, while the CATE describes an average effect among patients with particular observed characteristics. Together, they support the study of treatment effect heterogeneity and precision medicine.</p>
 <p>Use <strong>precmed</strong> when you want to:</p>
 <ul>
-<li>Estimate the ATE for two treatments using doubly robust methods.</li>
+<li>Estimate the ATE comparing two treatments using doubly robust methods.</li>
 <li>Explore treatment effect heterogeneity by developing and cross-validating CATE models.</li>
 <li>Visualize and compare estimated effects across patient subgroups.</li>
 </ul>
-<p>The methods support causal inference under appropriate assumptions; for observational data, these include adequate control of confounding and sufficient treatment overlap. The package builds on work by Zhao et al. (2013) and Yadlowsky et al. (2021).</p>
+<p>The methods support causal inference under appropriate assumptions; for observational data, these include adequate control of confounding and sufficient treatment overlap. The package combines outcome-regression approaches, such as Poisson models fitted separately in each treatment group, with doubly robust methods for estimating and validating treatment effects. Its methods build on work by Zhao et al. (2013) and Yadlowsky et al. (2021); Jiang et al. (2026) illustrate their application and interpretation.</p>
 <p>See <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me">Is precmed suitable for me?</a> for a quick overview of supported data, outcomes and analyses.</p>
 </div>
 <div class="section level2">
@@ -94,6 +94,8 @@
 </h2>
 <p>For a broader introduction to personalized medicine using real-world data, see <em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em> (Debray, Nguyen, and Platt 2026). The following chapters are particularly relevant to <strong>precmed</strong>:</p>
 <ul>
+<li>
+<a href="https://doi.org/10.1201/9781003300809-5" class="external-link">Chapter 5</a>: defining causal effects and understanding marginal and conditional treatment effects (Nguyen et al. 2026).</li>
 <li>
 <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">Chapter 17</a>: principles of CATE prediction and model development in randomized and non-randomized data (Hoogland et al. 2026).</li>
 <li>
@@ -250,6 +252,9 @@ Hoogland, Jeroen, Thomas P. A. Debray, Guillaume Desachy, and Tri-Long Nguyen. 2
 </div>
 <div id="ref-jiang2026visualization" class="csl-entry">
 Jiang, Xiaotong, Gabrielle Simoneau, Fabio Pellegrini, Changyu Shen, Carl de Moor, and Lu Tian. 2026. “Visualization and Interpretation of Individualized Treatment Rule Results.” In <em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-20" class="external-link uri">https://doi.org/10.1201/9781003300809-20</a>.
+</div>
+<div id="ref-nguyen2026causaleffects" class="csl-entry">
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.” In <em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 65–80. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-5" class="external-link uri">https://doi.org/10.1201/9781003300809-5</a>.
 </div>
 <div id="ref-thao2026validation" class="csl-entry">
 Thao, Le Thi Phuong, Orestis Efthimiou, Tibor V. Varga, Jeroen Hoogland, and Thomas P. A. Debray. 2026. “Validation of Prediction Models for Patient Outcomes and Individualized Treatment Effect.” In <em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em>, edited by Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 485–512. Chapman &amp; Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-19" class="external-link uri">https://doi.org/10.1201/9781003300809-19</a>.

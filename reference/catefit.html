@@ -234,10 +234,6 @@ if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 
 <code>'contrastReg'</code>. Default is 2.</p></dd>
 
 
-<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
-<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>, <code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
-
-
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
 <dd><p>A positive integer specifying the number of trees in random forest.
 Used if <code>score.method = 'randomForest'</code> or if <code>initial.predictor.method = 'randomForest'</code>
@@ -324,6 +320,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
 
 
+<dt id="arg-rf-control">rf.control<a class="anchor" aria-label="anchor" href="#arg-rf-control"></a></dt>
+<dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>,
+<code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms
+and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
@@ -343,6 +345,12 @@ For survival response, see details in <code><a href="catefitsurv.html">catefitsu
     <p>Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., &amp; Tian, L. (2020).
 <em>Estimation and validation of ratio-based conditional average treatment effects using
 observational data. Journal of the American Statistical Association, 1-18.</em> DOI: 10.1080/01621459.2020.1772080.</p>
+<p>Hoogland, J., Debray, T. P. A., Desachy, G., &amp; Nguyen, T.-L. (2026).
+Introduction to methods for personalizing medicine. In T. P. A. Debray,
+T.-L. Nguyen, &amp; R. W. Platt (Eds.),
+<em>Comparative Effectiveness and Personalized Medicine Research Using Real-World Data</em>
+(Chapter 17, pp. 421–463). Chapman &amp; Hall/CRC.
+<a href="https://doi.org/10.1201/9781003300809-17" class="external-link">doi:10.1201/9781003300809-17</a></p>
 <p>Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., &amp; Tian, L. (2026).
 Visualization and interpretation of individualized treatment rule results. In
 T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),

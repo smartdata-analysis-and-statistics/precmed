@@ -74,26 +74,11 @@ plot(
   curves in both the training and validation sets are plotted
   side-by-side (`FALSE`). Default is `FALSE`.
 
-- measure:
-
-  For survival outcomes, select `"rmtl"` (default), `"cumulative_hr"`
-  (cumulative hazard ratio), or `"conditional_hr"` (conditional Cox
-  hazard ratio fitted through `tau0`). Earlier measure names remain
-  supported as aliases. Supply a vector to display multiple measures in
-  separate panels.
-
 - plot.hr:
 
   Deprecated; use `measure` instead. Whether to plot a hazard-based
-  ratio for survival outcomes instead of the RMTL ratio. The default
-  hazard-based measure is the marginal cumulative hazard ratio.
-
-- hazard.type:
-
-  Deprecated; use `measure` instead. Choose `"cumulative"` (default) or
-  `"conditional"` for the supplementary Cox HR when `plot.hr = TRUE`.
-  Older objects without cumulative ratios must be refitted or plotted
-  with `hazard.type = "conditional"`.
+  ratio for survival outcomes instead of the RMTL ratio. When `TRUE`,
+  the default is the marginal cumulative hazard ratio.
 
 - ylab:
 
@@ -119,6 +104,22 @@ plot(
 
   Defaults to `theme_classic()`. Other options include `theme_grey()`,
   `theme_bw()`, `theme_light()`, `theme_dark()`, and `theme_void()`
+
+- hazard.type:
+
+  Deprecated; use `measure` instead. Select `"cumulative"` (default) or
+  the supplementary `"conditional"` Cox HR when `plot.hr = TRUE`. Older
+  objects without cumulative hazard ratios require
+  `hazard.type = "conditional"` or refitting.
+
+- measure:
+
+  For survival outcomes, a vector of `"rmtl"` (default),
+  `"cumulative_hr"` (cumulative hazard ratio), and `"conditional_hr"`
+  (conditional Cox hazard ratio fitted through `tau0`). Multiple
+  measures appear in separate panels. The earlier names `"chr"`,
+  `"cph"`, `"cumulative_hazard_ratio"`, and `"conditional_hazard_ratio"`
+  remain supported as aliases.
 
 - ...:
 
@@ -176,69 +177,11 @@ and [`boxplot()`](https://rdrr.io/r/graphics/boxplot.html) for
 ## Examples
 
 ``` r
-# \donttest{
-# Count outcome
-eval_1 <- catecv(response = "count",
-                 data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
-                                  previous_cost + previous_number_relapses + offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
-                 higher.y = FALSE,
-                 cv.n = 5)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+data(catecvCountExample)
+plot(catecvCountExample)
 
-# default setting
-plot(eval_1)
+plot(catecvCountExample, show.abc = FALSE)
 
+plot(catecvCountExample, cv.i = 2)
 
-# turn off ABC annotation
-plot(eval_1, show.abc = FALSE)
-
-
-# use a different theme
-plot(eval_1, theme = ggplot2::theme_bw())
-
-
-# plot the validation curves from the 2nd CV iteration instead of the mean
-# of all validation curves
-plot(eval_1, cv.i = 2)
-
-
-# median of the validation curves
-plot(eval_1, combine = "median")
-
-
-# plot validation curves in validation set only
-plot(eval_1, valid.only = TRUE)
-
-
-# Survival outcome
-library(survival)
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-eval_2 <- catecv(response = "survival",
-                 data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
-                                           previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "randomForest",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
-                 tau0 = tau0,
-                 cv.n = 5,
-                 seed = 999)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-
-
-# default setting, plot RMTL ratios in both training and validation sets
-plot(eval_2)
-
-
-# plot hazard ratio
-plot(eval_2, measure = "cumulative_hr")
-#> Warning: Some subgroup cumulative hazard ratios are undefined; summaries use available folds.
-
-
-# }
 ```

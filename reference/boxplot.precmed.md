@@ -44,25 +44,11 @@ boxplot(
   Default is `NULL`, which creates a default y-axis label based on
   available data.
 
-- measure:
-
-  For survival outcomes, select `"rmtl"` (default), `"cumulative_hr"`
-  (cumulative hazard ratio), or `"conditional_hr"` (conditional Cox
-  hazard ratio fitted through `tau0`). Earlier measure names remain
-  supported as aliases.
-
 - plot.hr:
 
   Deprecated; use `measure` instead. Whether to plot a hazard-based
-  ratio for survival outcomes instead of the RMTL ratio. The default
-  hazard-based measure is the marginal cumulative hazard ratio.
-
-- hazard.type:
-
-  Deprecated; use `measure` instead. Choose `"cumulative"` (default) or
-  `"conditional"` for the supplementary Cox HR when `plot.hr = TRUE`.
-  Older objects without cumulative ratios must be refitted or plotted
-  with `hazard.type = "conditional"`.
+  ratio for survival outcomes instead of the RMTL ratio. When `TRUE`,
+  the default is the marginal cumulative hazard ratio.
 
 - title:
 
@@ -72,6 +58,20 @@ boxplot(
 
   Defaults to `theme_classic()`. Other options include `theme_grey()`,
   `theme_bw()`, `theme_light()`, `theme_dark()`, and `theme_void()`
+
+- hazard.type:
+
+  Deprecated; use `measure` instead. Select `"cumulative"` (default) or
+  the supplementary `"conditional"` Cox HR when `plot.hr = TRUE`. Older
+  objects without cumulative hazard ratios require
+  `hazard.type = "conditional"` or refitting.
+
+- measure:
+
+  For survival outcomes, choose `"rmtl"` (default), `"cumulative_hr"`
+  (cumulative hazard ratio), or `"conditional_hr"` (conditional Cox
+  hazard ratio fitted through `tau0`). Earlier measure names remain
+  supported as aliases.
 
 - ...:
 
@@ -123,43 +123,7 @@ for `"precmed"` objects.
 ## Examples
 
 ``` r
-# \donttest{
-# Count outcome
-eval_1 <- catecv(response = "count",
-                 data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
-                                  previous_cost + previous_number_relapses +
-                                  offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
-                 higher.y = FALSE,
-                 cv.n = 5)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+data(catecvCountExample)
+boxplot(catecvCountExample, ylab = "Rate ratio in each subgroup")
 
-boxplot(eval_1, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
-
-
-# Survival outcome
-library(survival)
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-eval_2 <- catecv(response = "survival",
-                 data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
-                                           previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "randomForest",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
-                 tau0 = tau0,
-                 higher.y = TRUE,
-                 cv.n = 5,
-                 seed = 999)
-#> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-
-boxplot(eval_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#> Warning: Removed 10 rows containing non-finite outside the scale range
-#> (`stat_boxplot()`).
-
-# }
 ```

@@ -241,13 +241,6 @@ catecv(
   `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
   or `'contrastReg'`. Default is 2.
 
-- rf.control:
-
-  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
-  `nodedepth`, and `splitrule`. Applies to both treatment arms and
-  survival initial-predictor forests. Use `n.trees.rf` for the number of
-  trees.
-
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
@@ -342,6 +335,13 @@ catecv(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
+- rf.control:
+
+  Named list of randomForestSRC options: `mtry`, `nodesize`, `nsplit`,
+  `nodedepth`, and `splitrule`. Applies to both treatment arms and
+  survival initial-predictor forests. Use `n.trees.rf` for the number of
+  trees.
+
 ## Value
 
 For count response, see description of outputs in
@@ -366,6 +366,14 @@ Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L.
 (2020). *Estimation and validation of ratio-based conditional average
 treatment effects using observational data. Journal of the American
 Statistical Association, 1-18.* DOI: 10.1080/01621459.2020.1772080.
+
+Thao, L. T. P., Efthimiou, O., Varga, T. V., Hoogland, J., & Debray, T.
+P. A. (2026). Validation of prediction models for patient outcomes and
+individualized treatment effect. In T. P. A. Debray, T.-L. Nguyen, & R.
+W. Platt (Eds.), *Comparative Effectiveness and Personalized Medicine
+Research Using Real-World Data* (Chapter 19, pp. 485–512). Chapman &
+Hall/CRC.
+[doi:10.1201/9781003300809-19](https://doi.org/10.1201/9781003300809-19)
 
 Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian,
 L. (2026). Visualization and interpretation of individualized treatment
@@ -420,7 +428,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.07 secs 
+#> Total runtime : 7.5 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
