@@ -22,15 +22,19 @@ medicine.
 
 Use **precmed** when you want to:
 
-- Estimate the ATE for two treatments using doubly robust methods.
+- Estimate the ATE comparing two treatments using doubly robust methods.
 - Explore treatment effect heterogeneity by developing and
   cross-validating CATE models.
 - Visualize and compare estimated effects across patient subgroups.
 
 The methods support causal inference under appropriate assumptions; for
 observational data, these include adequate control of confounding and
-sufficient treatment overlap. The package builds on work by Zhao et al.
-(2013) and Yadlowsky et al. (2021).
+sufficient treatment overlap. The package combines outcome-regression
+approaches, such as Poisson models fitted separately in each treatment
+group, with doubly robust methods for estimating and validating
+treatment effects. Its methods build on work by Zhao et al. (2013) and
+Yadlowsky et al. (2021); Jiang et al. (2026) illustrate their
+application and interpretation.
 
 See [Is precmed suitable for
 me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me)
