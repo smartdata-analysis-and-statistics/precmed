@@ -1,9 +1,10 @@
-# Cross-validation of the conditional average treatment effect (CATE) score for count, survival or continuous outcomes
+# Cross-validation of the conditional average treatment effect (CATE) score
 
 Provides (doubly robust) estimation of the average treatment effect
-(ATE) for count, survival or continuous outcomes in nested and mutually
-exclusive subgroups of patients defined by an estimated conditional
-average treatment effect (CATE) score via cross-validation (CV).
+(ATE) for binary, count, survival or continuous outcomes in nested and
+mutually exclusive subgroups of patients defined by an estimated
+conditional average treatment effect (CATE) score via cross-validation
+(CV).
 
 ## Usage
 
@@ -57,7 +58,7 @@ catecv(
 - response:
 
   A string describing the type of outcome in the data. Allowed values
-  include "count" (see
+  include "binary", "count" (see
   [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
   "survival" (see
   [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
@@ -78,7 +79,8 @@ catecv(
   `'poisson'` (count and survival outcomes only), `'randomForest'`
   (survival, continuous outcomes only), `negBin` (count outcomes only),
   `'gam'` (continuous outcomes only), `'gaussian'` (continuous outcomes
-  only).
+  only). Binary outcomes support `'logistic'`, `'twoReg'`, and
+  `'boosting'`.
 
 - cate.model:
 
@@ -89,10 +91,11 @@ catecv(
 - ps.model:
 
   A formula describing the treatment model (propensity-score model) to
-  be fitted. The treatment must appear on the left-hand side. The
-  treatment must be a numeric vector coded as 0/1. If data are from a
-  randomized controlled trial, specify `ps.model = ~1` as an
-  intercept-only model.
+  be fitted. The treatment must appear on the left-hand side. For binary
+  outcomes, logical and two-valued treatment labels are also supported;
+  the effect is the risk under the second label minus that under the
+  first. For randomized trials, an intercept-only treatment model can be
+  specified as `trt ~ 1`.
 
 - ps.method:
 
@@ -107,7 +110,8 @@ catecv(
 
   A formula describing the initial predictor model. The outcome must
   appear on the left-hand side. It must be specified when
-  `score.method = contrastReg` or `twoReg`.
+  `score.method = contrastReg` or `twoReg`, except for binary outcomes,
+  which use `cate.model`.
 
 - initial.predictor.method:
 
@@ -171,17 +175,17 @@ catecv(
 - prop.cutoff:
 
   A vector of numerical values (in \`(0, 1\]\`) specifying percentiles
-  of the estimated log CATE scores to define nested subgroups. Each
-  element represents the cutoff to separate observations in nested
-  subgroups (below vs above cutoff). The length of `prop.cutoff` is the
-  number of nested subgroups. An equally-spaced sequence of proportions
-  ending with 1 is recommended. Default is `seq(0.5, 1, length = 6)`.
+  of the estimated CATE scores to define nested subgroups. Each element
+  represents the cutoff to separate observations in nested subgroups
+  (below vs above cutoff). The length of `prop.cutoff` is the number of
+  nested subgroups. An equally-spaced sequence of proportions ending
+  with 1 is recommended. Default is `seq(0.5, 1, length = 6)`.
 
 - prop.multi:
 
   A vector of numerical values (in \`\[0, 1\]\`) specifying percentiles
-  of the estimated log CATE scores to define mutually exclusive
-  subgroups. It should start with 0, end with 1, and be of
+  of the estimated CATE scores to define mutually exclusive subgroups.
+  It should start with 0, end with 1, and be of
   `length(prop.multi) > 2`. Each element represents the cutoff to
   separate the observations into `length(prop.multi) - 1` mutually
   exclusive subgroups. Default is `c(0, 1/3, 2/3, 1)`.
@@ -190,7 +194,8 @@ catecv(
 
   A logical value indicating whether the area between curves (ABC)
   should be calculated at each cross-validation iterations, for each
-  `score.method`. Default is `TRUE`.
+  `score.method`. Default is `TRUE`. Binary ABC requires at least two
+  distinct `prop.cutoff` values.
 
 - train.prop:
 
@@ -208,13 +213,15 @@ catecv(
   error) for the largest standardized absolute difference in the
   covariate distributions or in the doubly robust estimated rate ratios
   between the training and validation sets. This is used to define a
-  balanced training-validation splitting. Default is `0.1`.
+  balanced training-validation splitting. Default is `0.1`. Not
+  available for binary outcomes, which use treatment-stratified random
+  splits.
 
 - max.iter:
 
   A positive integer value indicating the maximum number of iterations
   when searching for a balanced training-validation split. Default is
-  `5,000`.
+  `5,000`. Not available for binary outcomes.
 
 - surv.min:
 
@@ -345,6 +352,13 @@ catecv(
 
 ## Value
 
+For binary response, a `"precmed"` object with one `ate.*` list per
+method, containing matrices of training and validation risk differences
+for nested high and low subgroups and mutually exclusive groups, with
+one column per iteration, and `abc.valid` when requested. It also
+contains overall training and validation effects, `props`, `splits` (row
+indices), `subgroup.support`, and messages accessible with
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md).
 For count response, see description of outputs in
 [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md).
 For survival response, see description of outputs in
@@ -354,6 +368,24 @@ For continuous response, see description of outputs in
 
 ## Details
 
+For binary outcomes, each iteration randomly splits each treatment arm
+into training and validation sets. The score is fitted on training data
+only and applied to both sets. Percentile cutoffs are calculated
+separately in each set using its scores, without using validation
+outcomes. Ties may make nested groups larger than their nominal
+proportions. Mutually exclusive groups use half-open intervals, with the
+last interval including its upper endpoint; tied cutoffs can produce
+empty groups. Subgroup risk differences are estimated separately in each
+set using an augmented inverse-propensity estimator. Score-fitting or
+subgroup failures return NA with a warning and recorded diagnostics; ABC
+is NA if any required estimate is unavailable. ABC integrates the
+validation risk-difference curve minus the overall validation effect,
+reversing the sign when lower outcomes are desirable. These subgroup
+comparisons assess ranking, not calibration; causal interpretation
+requires exchangeability, positivity, consistency, and appropriate
+nuisance-model assumptions. `error.max` and `max.iter` are not supported
+for binary splits. The binary score methods are described in
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 For count response, see details in
 [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md).
 For survival response, see details in
@@ -429,7 +461,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 10.73 secs 
+#> Total runtime : 8.88 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

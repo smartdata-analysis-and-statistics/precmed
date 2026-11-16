@@ -15,7 +15,6 @@ cross-validation.
 ``` r
 
 library(precmed)
-library(ggplot2)
 ```
 
 ## Example data
@@ -23,11 +22,11 @@ library(ggplot2)
 We simulate counts of relapses during one year using the same
 data-generating model as
 [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md).
-A patient is a responder (`y = 1`) if they have no relapses; otherwise
-`y = 0`. The underlying count is retained in `relapse_count`. Everyone
-has the same follow-up, and response is fully observed. Set `threshold`
-to a larger integer to define response as at most that many relapses, or
-change `followup` to study another fixed horizon.
+The outcome is `y = 1` if a patient has at least one relapse and `y = 0`
+otherwise. The underlying count is retained in `relapse_count`. Everyone
+has the same follow-up, and the outcome is fully observed. Set
+`threshold` to a larger integer to define an event as more than that
+many relapses, or change `followup` to study another fixed horizon.
 
 ``` r
 
@@ -42,29 +41,29 @@ head(binaryExample)
 #> 5  -5.9997565      0              drugC    0.55030741                        1
 #> 6 -22.6448013      1              drugB   -0.59281629                        1
 #>   previous_number_relapses   trt y years relapse_count
-#> 1                        0 drug1 0     1             1
-#> 2                        0 drug0 0     1             1
-#> 3                        0 drug1 0     1             1
-#> 4                        0 drug1 1     1             0
-#> 5                        1 drug1 0     1             2
-#> 6                        1 drug0 1     1             0
+#> 1                        0 drug1 1     1             1
+#> 2                        0 drug0 1     1             1
+#> 3                        0 drug1 1     1             1
+#> 4                        0 drug1 0     1             0
+#> 5                        1 drug1 1     1             2
+#> 6                        1 drug0 0     1             0
 table(binaryExample$trt, binaryExample$y)
 #>        
 #>            0    1
-#>   drug0  855 1003
-#>   drug1  869 1273
+#>   drug0 1003  855
+#>   drug1 1273  869
 prop.table(table(binaryExample$trt, binaryExample$y), margin = 1)
 #>        
 #>                 0         1
-#>   drug0 0.4601722 0.5398278
-#>   drug1 0.4056956 0.5943044
+#>   drug0 0.5398278 0.4601722
+#>   drug1 0.5943044 0.4056956
 ```
 
 Treatment is assigned using age and previous treatment, so the treatment
 groups need not be comparable without adjustment. Age is centered at 48
 years and previous cost is centered at 13,824 USD and divided by 20,172
 USD. The simulation coefficients are illustrative and are not clinical
-estimates. Unlike a count rate ratio, the response risk difference
+estimates. Unlike a count rate ratio, the relapse risk difference
 depends on the selected threshold and follow-up period.
 
 ## Estimate the average treatment effect
@@ -75,28 +74,25 @@ effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/AT
 
 ### Unadjusted treatment comparison
 
-We first compare the observed response proportions under drug1 and
-drug0.
+We first compare the observed relapse proportions under drug1 and drug0.
 
 ``` r
 
-response_rates <- with(binaryExample, tapply(y, trt, mean))
-response_rates
+relapse_risks <- with(binaryExample, tapply(y, trt, mean))
+relapse_risks
 #>     drug0     drug1 
-#> 0.5398278 0.5943044
+#> 0.4601722 0.4056956
 ```
 
 The unadjusted risk difference for drug1 versus drug0 is calculated by
-subtracting the response proportion for drug0 from that for drug1. A
-positive value means a higher observed response proportion under drug1.
-Here, the unadjusted risk difference is 0.054. This means the observed
-proportion of patients who remained relapse-free was 5.4 percentage
-points higher in the drug1 group than in the drug0 group; equivalently,
-the proportion experiencing at least one relapse was that much lower.
-This unadjusted comparison may reflect baseline differences between the
-groups rather than a genuine treatment effect.
+subtracting the relapse proportion for drug0 from that for drug1. A
+negative value means a lower observed relapse proportion under drug1.
+Here, the unadjusted risk difference is -0.054, or -5.4 percentage
+points for drug1 minus drug0. This unadjusted comparison may reflect
+baseline differences between the groups rather than a genuine treatment
+effect.
 
-The 95% confidence interval is 0.024 to 0.085, based on a normal
+The 95% confidence interval is -0.085 to -0.024, based on a normal
 approximation for two independent proportions.
 
 ### Covariate-adjusted treatment comparison
@@ -123,14 +119,14 @@ summary(adjusted)
 #> 
 #> Coefficients:
 #>                            Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept)               0.5703967  0.0204141  27.941  < 2e-16 ***
-#> trtdrug1                  0.0973253  0.0170384   5.712 1.12e-08 ***
-#> age                      -0.0056606  0.0009682  -5.846 5.02e-09 ***
-#> female                   -0.0535246  0.0171345  -3.124  0.00179 ** 
-#> previous_treatmentdrugB  -0.0131217  0.0176378  -0.744  0.45690    
-#> previous_treatmentdrugC   0.0326664  0.0205354   1.591  0.11167    
-#> previous_cost            -0.0398499  0.0163037  -2.444  0.01452 *  
-#> previous_number_relapses -0.0228496  0.0087874  -2.600  0.00932 ** 
+#> (Intercept)               0.4296033  0.0204141  21.044  < 2e-16 ***
+#> trtdrug1                 -0.0973253  0.0170384  -5.712 1.12e-08 ***
+#> age                       0.0056606  0.0009682   5.846 5.02e-09 ***
+#> female                    0.0535246  0.0171345   3.124  0.00179 ** 
+#> previous_treatmentdrugB   0.0131217  0.0176378   0.744  0.45690    
+#> previous_treatmentdrugC  -0.0326664  0.0205354  -1.591  0.11167    
+#> previous_cost             0.0398499  0.0163037   2.444  0.01452 *  
+#> previous_number_relapses  0.0228496  0.0087874   2.600  0.00932 ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -144,8 +140,8 @@ summary(adjusted)
 ```
 
 The adjusted risk difference for drug1 versus drug0 is captured by the
-coefficient for `trtdrug1` and estimated as 0.097 (95% CI: 0.064 to
-0.131). The interval is a model-based Wald interval. The model assumes
+coefficient for `trtdrug1` and estimated as -0.097 (95% CI: -0.131 to
+-0.064). The interval is a model-based Wald interval. The model assumes
 that the risk difference is the same at every covariate value; under
 this assumption, the coefficient is also the risk difference averaged
 over the study population. A causal interpretation requires, among other
@@ -154,20 +150,20 @@ confounding, and adequate treatment overlap.
 
 ### Population-level treatment comparison using `atefit()`
 
-`atefit(response = "binary")` estimates the difference in response
-probability under drug1 and drug0. Positive values favor drug1 because
-response is desirable. The estimator combines a logistic outcome model
-and a treatment model (the propensity-score model), which estimates the
-probability of receiving treatment 1 given the covariates. Under the
-usual identification and regularity assumptions, the estimator is
-consistent if either model is correctly specified. Causal interpretation
-also requires well-defined treatments, no unmeasured confounding, and
-adequate treatment overlap. Bootstrap samples provide uncertainty
-estimates. These synthetic counts do not in general imply an exactly
-logistic response model; the treatment model is correctly specified by
-construction in this example. Chapter 5, “Understanding and defining
-causal effects,” discusses marginal and conditional causal effects
-(Nguyen et al. 2026).
+`atefit(response = "binary")` estimates the difference in relapse
+probability under drug1 and drug0. Negative values favor drug1 because
+relapse is an adverse outcome. The estimator combines a logistic outcome
+model and a treatment model (the propensity-score model), which
+estimates the probability of receiving treatment 1 given the covariates.
+Under the usual identification and regularity assumptions, the estimator
+is consistent if either model is correctly specified. Causal
+interpretation also requires well-defined treatments, no unmeasured
+confounding, and adequate treatment overlap. Bootstrap samples provide
+uncertainty estimates. These synthetic counts do not in general imply an
+exactly logistic outcome model; the treatment model is correctly
+specified by construction in this example. Chapter 5, “Understanding and
+defining causal effects,” discusses marginal and conditional causal
+effects (Nguyen et al. 2026).
 
 The outcome formula excludes treatment:
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -189,33 +185,50 @@ output_atefit <- atefit(
 output_atefit
 #> Average treatment effect (risk difference):
 #> 
-#>                  estimate        SE   CI.lower  CI.upper       pvalue
-#> risk.difference 0.1079285 0.0196987 0.06931972 0.1465372 4.278253e-08
+#>                   estimate        SE   CI.lower    CI.upper       pvalue
+#> risk.difference -0.1079285 0.0196987 -0.1465372 -0.06931972 4.278253e-08
 #> 
 #> Estimated risks:
 #> 
 #>    estimate
-#> 1 0.6052451
-#> 2 0.4973167
-coef(output_atefit)
-#> risk.difference 
-#>       0.1079285
-confint(output_atefit)
-#>                      2.5 %    97.5 %
-#> risk.difference 0.06931972 0.1465372
-plot(output_atefit)
+#> 1 0.3947549
+#> 2 0.5026833
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-5-1.png)
+The output reports estimated population-average relapse risks of 0.395
+under drug1 and 0.503 under drug0, shown in that order. Their difference
+(drug1 minus drug0) is -0.108, or -10.8 percentage points. A negative
+difference favors drug1. The output also reports the bootstrap standard
+error, a 95% Wald confidence interval, and a two-sided Wald p-value for
+the risk difference. The causal interpretation depends on the
+assumptions described above.
 
-`risk0` and `risk1` are the estimated marginal response probabilities;
-`risk.difference` is drug1 minus drug0. The plot shows the bootstrap
-risk differences, the full-sample estimate in red and the null value
-zero as a dashed line. This example uses only 100 bootstrap replicates
-to keep the vignette fast; use more for an analysis. If a bootstrap
-model fails, the package reports unavailable inference rather than
-silently dropping it. Augmented estimates of risk are not constrained to
-lie within 0 and 1.
+Use [`coef()`](https://rdrr.io/r/stats/coef.html) and
+[`confint()`](https://rdrr.io/r/stats/confint.html) to extract the risk
+difference and its confidence interval, and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) to inspect the
+bootstrap estimates:
+
+``` r
+
+coef(output_atefit)
+#> risk.difference 
+#>      -0.1079285
+confint(output_atefit)
+#>                      2.5 %      97.5 %
+#> risk.difference -0.1465372 -0.06931972
+plot(output_atefit, metrics = c("risk0", "risk1", "risk.difference"))
+```
+
+![](Binary-examples_files/figure-html/unnamed-chunk-6-1.png)
+
+The plot shows bootstrap relapse risks for drug0 (`risk0`) and drug1
+(`risk1`), followed by their risk difference. Red lines mark the
+full-sample estimates; the dashed line marks zero in the risk-difference
+panel. This example uses only 100 bootstrap replicates to keep the
+vignette fast; use more for an analysis. If a bootstrap model fails, the
+package reports unavailable inference rather than silently dropping it.
+Augmented estimates of risk are not constrained to lie within 0 and 1.
 
 ### Compare risk differences
 
@@ -233,9 +246,9 @@ uses a Wald interval based on its bootstrap standard error.
 
 | Estimation method | Interpretation | Risk difference | 95% CI |
 |:---|:---|---:|:---|
-| Unadjusted observed proportions | Unadjusted observed group difference | 0.054 | 0.024 to 0.085 |
-| Adjusted binomial identity-link model | Conditional; also marginal under the constant-difference model | 0.097 | 0.064 to 0.131 |
-| Doubly robust atefit() | Marginal population-average difference | 0.108 | 0.069 to 0.147 |
+| Unadjusted observed proportions | Unadjusted observed group difference | -0.054 | -0.085 to -0.024 |
+| Adjusted binomial identity-link model | Conditional; also marginal under the constant-difference model | -0.097 | -0.131 to -0.064 |
+| Doubly robust atefit() | Marginal population-average difference | -0.108 | -0.147 to -0.069 |
 
 The unadjusted difference compares the observed treatment groups; it is
 not necessarily a causal marginal effect. The binomial model’s
@@ -247,23 +260,27 @@ targets the population-average difference without requiring a constant
 conditional risk difference. Causal interpretations require the
 assumptions described above.
 
-A risk difference of 0.10 corresponds to 10 percentage points more
-responders under drug1. The intervals describe uncertainty around each
-estimate; they do not test whether the methods differ from one another.
+A risk difference of -0.10 corresponds to 10 percentage points fewer
+patients with a relapse under drug1. The intervals describe uncertainty
+around each estimate; they do not test whether the methods differ from
+one another.
 
 ## Estimate CATE scores
 
-CATE scores estimate the difference in response probability for patients
+CATE scores estimate the difference in relapse probability for patients
 with different baseline covariates. The `logistic` method fits one
-logistic model with treatment-covariate interactions; `twoReg` fits
-separate logistic models in each arm. With the same covariates and a
-full set of interactions, these are equivalent parameterizations and
-should give the same fitted scores up to numerical tolerance. The
-`boosting` method instead fits a Bernoulli gradient boosting model in
-each treatment arm and subtracts the predicted response probabilities.
-Five-fold cross-validation selects the number of trees in each arm;
-`tree.depth` and `n.trees.boosting` control the fitted trees. These
-scores are model-based; the subgroup ATEs shown by
+logistic model with treatment-covariate interactions; `twoReg`
+cross-fits separate logistic outcome models and a treatment model, then
+projects augmented outcomes for each arm onto the outcome-model design.
+The difference is a doubly robust linear projection of the risk
+difference if either the treatment model or both outcome models are
+correct, subject to identification, positivity and truncation. It need
+not lie between -1 and 1. The `boosting` method fits a Bernoulli
+gradient boosting model in each treatment arm and subtracts the
+predicted relapse probabilities. Five-fold cross-validation selects the
+number of trees in each arm; `tree.depth` and `n.trees.boosting` control
+the fitted trees. These scores are estimated on the training data; the
+subgroup ATEs shown by
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
 use the doubly robust estimator and the same data used to build the
 scores, so they may be optimistic. Chapter 17, “Introduction to methods
@@ -276,168 +293,133 @@ output_catefit <- catefit(
   response = "binary", data = binaryExample,
   score.method = c("logistic", "twoReg", "boosting"),
   cate.model = outcome_formula, ps.model = ps_formula,
-  higher.y = TRUE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
+  higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, plot.gbmperf = FALSE, n.cores = 1
 )
 output_catefit
 #> Estimated ATE in the nested subgroups:
 #> 
-#>             prop0.5  prop0.75     prop1
-#> boosting 0.2284609 0.1651624 0.1079285
-#> twoReg   0.1885092 0.1455664 0.1079285
-#> logistic 0.1885092 0.1455664 0.1079285
+#>              prop0.5   prop0.75      prop1
+#> boosting -0.1957055 -0.1773050 -0.1079285
+#> twoReg   -0.1792806 -0.1474149 -0.1079285
+#> logistic -0.1885092 -0.1455664 -0.1079285
 #> 
-#> NULL
+#>                               twoReg
+#> (Intercept)              -0.16042803
+#> age                      -0.00747815
+#> female                    0.11779453
+#> previous_treatmentdrugB   0.03065470
+#> previous_treatmentdrugC   0.02705082
+#> previous_cost            -0.01405964
+#> previous_number_relapses -0.06104685
 head(output_catefit$score.twoReg)
 #>             1             2             3             4             5 
-#>  0.1494940561 -0.0684159431  0.0643461646  0.0001343911  0.1432787574 
+#> -1.642382e-01  6.177954e-02 -5.741223e-02  5.561457e-05 -1.572941e-01 
 #>             6 
-#> -0.1195886110
+#>  1.046504e-01
 output_catefit$ate.twoReg
-#>   prop0.5  prop0.75     prop1 
-#> 0.1885092 0.1455664 0.1079285
+#>    prop0.5   prop0.75      prop1 
+#> -0.1792806 -0.1474149 -0.1079285
 output_catefit$ate.boosting
-#>   prop0.5  prop0.75     prop1 
-#> 0.2284609 0.1651624 0.1079285
+#>    prop0.5   prop0.75      prop1 
+#> -0.1957055 -0.1773050 -0.1079285
 ```
 
-For example, `prop0.5` is the estimated ATE in the half with the highest
+The printed coefficient table and `coef(output_catefit)` show the
+`twoReg` linear risk-difference score coefficients. Logistic
+coefficients are on the log-odds scale and are stored in
+`output_catefit$fit$logistic`; boosting has no linear score coefficient
+vector.
+
+For example, `prop0.5` is the estimated ATE in the half with the lowest
 scores, using a sample quantile cutoff; ties can make the subgroup
-larger. `higher.y = TRUE` selects higher risk differences as favorable.
-If the binary outcome instead represents an adverse event, use
-`higher.y = FALSE`.
+larger. `higher.y = FALSE` selects lower risk differences as favorable
+because relapse is an adverse event. For a desirable binary outcome, use
+`higher.y = TRUE`.
 
 ### Visualize the distribution of CATE scores
 
 ``` r
 
-ggplot(data.frame(score = output_catefit$score.twoReg), aes(x = score)) +
-  geom_histogram(bins = 30, fill = "#7293AD", color = "white") +
-  geom_vline(xintercept = 0, linetype = 2) +
-  labs(x = "Predicted response risk difference (drug1 - drug0)",
-       y = "Patients") + theme_minimal()
+plot(output_catefit, methods = "twoReg")
 ```
 
-![](Binary-examples_files/figure-html/unnamed-chunk-7-1.png)
+![](Binary-examples_files/figure-html/unnamed-chunk-8-1.png)
 
 ## Internally validate CATE scores
 
-We illustrate validation with a single held-out split. We fit the
-two-regression score only in the training set, choose its median cutoff
-in that set, and apply the same fitted models and cutoff to the
-validation set. No validation outcomes enter score fitting or cutoff
-selection. A single split can be unstable; repeated cross-validation or
-an independent external dataset provides stronger evidence. Chapter 19,
-“Validation of prediction models for patient outcomes and individualized
-treatment effect,” discusses discrimination, calibration and decision
-accuracy, which require additional assessments beyond this subgroup
-comparison (Thao et al. 2026).
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+repeats treatment-stratified training and validation splits. It fits the
+score in each training set, applies it to the corresponding validation
+set, and estimates subgroup risk differences separately in each set.
+Percentile cutoffs are calculated within each set without using
+validation outcomes. We compare `logistic` and `twoReg` on the same
+splits. The validation curves and ABC compare how the scores rank
+patients by estimated treatment benefit; they do not assess calibration.
+[`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
+reports unavailable subgroup estimates and `subgroup.support` records
+arm sizes. We use 10 repeated splits and one inner cross-fitting
+repetition to balance run time and illustration; more repetitions and
+independent validation can give a more reliable assessment. The nested
+cutoffs select the best-scoring 50% and the full set, and the mutually
+exclusive groups split each set in half. These larger subgroups avoid
+the rank-deficient fits observed with smaller groups in this example;
+check support and model fit when choosing cutoffs for other data.
 
 ``` r
 
-set.seed(101)
-train_id <- sample(seq_len(nrow(binaryExample)), size = floor(0.7 * nrow(binaryExample)))
-train <- binaryExample[train_id, ]
-valid <- binaryExample[-train_id, ]
-train_fit <- catefit(
-  response = "binary", data = train, score.method = "twoReg",
-  cate.model = outcome_formula, ps.model = ps_formula,
-  higher.y = TRUE, prop.cutoff = 1
+binary_cv <- catecv(
+  response = "binary", data = binaryExample, score.method = c("logistic", "twoReg"),
+  cate.model = outcome_formula, ps.model = ps_formula, higher.y = FALSE,
+  prop.cutoff = c(0.5, 1), prop.multi = c(0, 0.5, 1),
+  cv.n = 10, B = 1, seed = 102
 )
+plot(binary_cv, show.abc = FALSE)
 ```
 
-The current binary
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-interface does not yet provide a prediction method for new data. To
-apply its two-regression score, refit the same two logistic models on
-the training data using [`glm()`](https://rdrr.io/r/stats/glm.html) and
-predict both potential response probabilities in each set. The equality
-check verifies that these training predictions reproduce the package
-score.
+![](Binary-examples_files/figure-html/unnamed-chunk-9-1.png)
 
 ``` r
 
-fit0 <- glm(outcome_formula, data = train, subset = trt == "drug0",
-            family = binomial())
-fit1 <- glm(outcome_formula, data = train, subset = trt == "drug1",
-            family = binomial())
-score_train <- predict(fit1, newdata = train, type = "response") -
-  predict(fit0, newdata = train, type = "response")
-score_valid <- predict(fit1, newdata = valid, type = "response") -
-  predict(fit0, newdata = valid, type = "response")
-stopifnot(isTRUE(all.equal(unname(score_train),
-                           unname(train_fit$score.twoReg), tolerance = 1e-6)))
-cutoff <- unname(quantile(score_train, 0.5))
-train$subgroup <- ifelse(score_train >= cutoff, "Higher predicted benefit", "Lower predicted benefit")
-valid$subgroup <- ifelse(score_valid >= cutoff, "Higher predicted benefit", "Lower predicted benefit")
-table(train$subgroup, train$trt)
-#>                           
-#>                            drug0 drug1
-#>   Higher predicted benefit   443   957
-#>   Lower predicted benefit    829   571
-table(valid$subgroup, valid$trt)
-#>                           
-#>                            drug0 drug1
-#>   Higher predicted benefit   207   358
-#>   Lower predicted benefit    379   256
+boxplot(binary_cv)
 ```
 
-### Compare treatment effects across responder subgroups
-
-Estimate a doubly robust risk difference separately in each subgroup and
-each split. The validation estimates are independent of score
-development, but subgroup estimates still depend on adequate overlap and
-on the outcome or treatment model within each subgroup. Small subgroups,
-missing treatment arms, or rank-deficient fits can make estimates
-unavailable. Confidence intervals below use each subgroup’s bootstrap
-standard error and do not account for uncertainty in training the score
-or selecting its cutoff.
+![](Binary-examples_files/figure-html/unnamed-chunk-9-2.png)
 
 ``` r
 
-# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-subgroup_effects <- function(data, split) {
-  groups <- c("Lower predicted benefit", "Higher predicted benefit")
-  do.call(rbind, lapply(seq_along(groups), function(i) {
-    fit <- atefit("binary", data[data$subgroup == groups[i], ],
-                  cate.model = outcome_formula, ps.model = ps_formula,
-                  n.boot = 50, seed = 200 + i)
-    data.frame(split = split, subgroup = groups[i],
-               n = sum(data$subgroup == groups[i]),
-               estimate = fit$risk.difference$estimate,
-               lower = fit$risk.difference$CI.lower,
-               upper = fit$risk.difference$CI.upper)
-  }))
-}
-comparison <- rbind(subgroup_effects(train, "Training"),
-                    subgroup_effects(valid, "Validation"))
-comparison
-#>        split                 subgroup    n    estimate       lower      upper
-#> 1   Training  Lower predicted benefit 1400 0.009431206 -0.05711395 0.07597636
-#> 2   Training Higher predicted benefit 1400 0.223775132  0.16109858 0.28645169
-#> 3 Validation  Lower predicted benefit  635 0.048215004 -0.03814598 0.13457599
-#> 4 Validation Higher predicted benefit  565 0.116244507  0.01644873 0.21604029
+abc(binary_cv)
+#>                 cv1        cv2        cv3         cv4        cv5        cv6
+#> logistic 0.02997601 0.01402678 0.03633474 0.004732452 0.01140305 0.01547006
+#> twoReg   0.02638229 0.01288020 0.03879525 0.007680507 0.01207716 0.01261662
+#>                 cv7        cv8        cv9       cv10
+#> logistic 0.01857408 0.01841614 0.02342370 0.01266026
+#> twoReg   0.01806718 0.01906034 0.02641335 0.01410169
+abc(binary_cv, combine = "mean")
+#>   logistic     twoReg 
+#> 0.01850173 0.01880746
 ```
 
-``` r
+The plotted curves use the two requested subgroup proportions.
+[`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
+uses 100 proportions between 0.5 and 1 in each validation iteration, so
+its values summarize a finer curve; the plot omits its separate, coarser
+ABC annotation.
 
-ggplot(comparison, aes(x = subgroup, y = estimate, color = split)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_pointrange(aes(ymin = lower, ymax = upper),
-                  position = position_dodge(width = 0.5)) +
-  labs(x = NULL, y = "Estimated response risk difference (drug1 - drug0)",
-       color = "Data") + theme_minimal()
-```
+In this example, the mean validation ABC is 0.0185 for `logistic` and
+0.0188 for `twoReg`. These similar values suggest comparable ranking
+performance in these splits. The ABC varies across iterations, and this
+comparison does not establish that the methods are equivalent in this
+population or in other data.
 
-![](Binary-examples_files/figure-html/unnamed-chunk-11-1.png)
-
-Compare the higher- and lower-score subgroup estimates in the validation
-set, including their uncertainty, rather than judging the score solely
-by the training results. This illustrative comparison does not by itself
-establish that the difference between subgroup effects is statistically
-significant. Chapter 20, “Visualization and interpretation of
-individualized treatment rule results,” discusses responder diagnostics
-and treatment-rule interpretation (Jiang et al. 2026).
+Compare the validation curves and subgroup estimates with the training
+results, accounting for variation across splits. Lower scores indicate
+greater predicted benefit in this example. These summaries assess
+ranking; they do not by themselves establish calibration, clinical
+usefulness, or a statistically significant difference between subgroup
+effects. Chapter 19 discusses broader validation (Thao et al. 2026), and
+Chapter 20 discusses responder diagnostics and treatment-rule
+interpretation (Jiang et al. 2026).
 
 ## Other `precmed` vignettes in this series
 

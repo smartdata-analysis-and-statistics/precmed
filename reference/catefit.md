@@ -1,8 +1,8 @@
 # Estimate conditional treatment effect scores
 
 Estimate CATE scores for binary, count and survival outcomes. Binary
-scores include pooled logistic regression, separate-arm logistic
-regression and boosting. Count and survival methods include both
+scores include pooled logistic regression, doubly robust two-regression
+estimation and boosting. Count and survival methods include both
 outcome-regression and doubly robust scores. Continuous outcomes are not
 yet implemented.
 
@@ -307,14 +307,33 @@ catefit(
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
   For `response = "binary"`, `score.method = "logistic"` fits a logistic
-  model with treatment interactions, and `"twoReg"` fits separate
-  logistic models in each arm. `"boosting"` fits separate Bernoulli
-  gradient-boosting models in each treatment arm, with the number of
-  trees selected by five-fold cross-validation. All three scores are
-  predicted risk differences; subgroup effects are doubly robust risk
-  differences. Binary boosting requires at least one outcome-model
-  covariate and both outcome values in each arm. Its fitted models and
-  selected tree counts are stored in `fit$boosting`. For extra boosting
+  model with treatment interactions. `"twoReg"` cross-fits separate
+  logistic outcome models and a treatment model, then projects the
+  augmented inverse-propensity outcomes for each arm onto the covariates
+  in `cate.model` using linear regression. The score is the difference
+  of these projections, averaged over `B` repetitions of `Kfold` folds.
+  It estimates the linear projection of the conditional risk difference
+  if either the treatment model or both outcome models are correct,
+  under identification and positivity assumptions. Propensity score
+  truncation can affect this property. The projection need not lie
+  between -1 and 1 and equals the conditional risk difference only if
+  that difference is linear in the specified design. The difference
+  between arm coefficients is returned in `coefficients$twoReg` and by
+  [`coef()`](https://rdrr.io/r/stats/coef.html); the separate arm
+  coefficients are stored in `fit$twoReg$coefficients`. Logistic model
+  coefficients are on the log-odds scale and are stored in
+  `fit$logistic`; they are not linear risk-difference score
+  coefficients. Boosting does not have a linear score coefficient
+  vector. With neither `twoReg` nor another linear binary score,
+  [`coef()`](https://rdrr.io/r/stats/coef.html) returns `NULL`.
+  `"boosting"` fits separate Bernoulli gradient-boosting models in each
+  treatment arm, with the number of trees selected by five-fold
+  cross-validation. All three scores are predicted risk differences;
+  subgroup effects are doubly robust risk differences. Binary boosting
+  requires at least one outcome-model covariate and both outcome values
+  in each arm. Its fitted models and selected tree counts are stored in
+  `fit$boosting`. Scores and subgroup effects are estimated on the same
+  data; they are not independent validation. For extra boosting
   controls, see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
   Subgroup fits without both arms or with rank-deficient models return
@@ -322,7 +341,9 @@ catefit(
 
 ## Value
 
-For count response, see description of outputs in
+Fitted objects retain `treatment.labels` in treatment 0/1 order for
+score plot labels. For count response, see description of other outputs
+in
 [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md).
 For survival response, see description of outputs in
 [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md).

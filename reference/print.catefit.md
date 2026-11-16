@@ -25,9 +25,9 @@ No return value
 
 ## Details
 
-Display the estimated treatment effects for survival outcomes (log
-restricted mean time lost ratio and log hazard ratio) and count outcomes
-(the log rate ratio).
+Display subgroup treatment effects and available score coefficients.
+Binary effects and `twoReg` coefficients are on the risk-difference
+scale; count and survival score coefficients are on log-ratio scales.
 
 ## Author
 

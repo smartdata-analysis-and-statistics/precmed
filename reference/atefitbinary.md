@@ -144,8 +144,8 @@ fit <- atefitbinary(d, cate.model = y ~ age + female,
                     ps.model = trt ~ age, n.boot = 10, seed = 42)
 coef(fit)
 #> risk.difference 
-#>       0.0287478 
+#>      -0.0287478 
 confint(fit)
 #>                       2.5 %     97.5 %
-#> risk.difference -0.03955799 0.09705359
+#> risk.difference -0.09705359 0.03955799
 ```

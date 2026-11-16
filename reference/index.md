@@ -85,7 +85,7 @@
 
 - [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
   : Cross-validation of the conditional average treatment effect (CATE)
-  score for count, survival or continuous outcomes
+  score
 
 - [`catecvCountExample`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvCountExample.md)
   : Pre-fitted count outcome validation example
@@ -233,6 +233,9 @@
 - [`plot(`*`<atefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.atefit.md)
   : Histogram of bootstrap estimates
 
+- [`plot(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.catefit.md)
+  : Plot estimated conditional treatment-effect scores
+
 - [`plot(`*`<precmed>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.precmed.md)
   :
 
@@ -259,7 +262,7 @@
   outcomes
 
 - [`simulate_binary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_binary.md)
-  : Simulate a binary response from relapse counts
+  : Simulate a binary relapse outcome from relapse counts
 
 - [`simulate_count()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_count.md)
   : Simulate an illustrative count-outcome dataset

@@ -93,12 +93,14 @@ supply, for example, <code><a href="https://ggplot2.tidyverse.org/reference/ggth
 
 
 <dt id="arg-null-value">null.value<a class="anchor" aria-label="anchor" href="#arg-null-value"></a></dt>
-<dd><p>Reference value on the plotted log-ratio scale. Defaults to
-0 (a ratio of 1); use <code>NULL</code> or <code>NA</code> to omit the null line.</p></dd>
+<dd><p>Reference value on the plotted effect scale. Defaults to
+0 (no risk difference or a ratio of 1); use <code>NULL</code> or <code>NA</code> to omit the null line.</p></dd>
 
 
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
 <dd><p>Character vector of metrics to plot, in display order. For
+binary fits, choose from <code>"risk0"</code>, <code>"risk1"</code>, and
+<code>"risk.difference"</code>. For
 count fits, choose from <code>"rate0"</code>, <code>"rate1"</code>, and
 <code>"log.rate.ratio"</code>; for survival fits, choose from <code>"rmst0"</code>,
 <code>"rmst1"</code>, <code>"log.rmtl.ratio"</code>, and
@@ -120,10 +122,11 @@ the bootstrap samples</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Create a histogram displaying the distribution of the bootstrap estimates.
 The solid red vertical line represents the full-sample estimate. A dashed
-black line marks <code>null.value</code> in log-ratio panels only; it is not shown
-in treatment-specific rate or RMST panels.
+black line marks <code>null.value</code> in risk-difference and log-ratio panels;
+it is not shown in treatment-specific risk, rate or RMST panels.
 Treatment-specific facets use the original treatment labels when available.
-Older count objects without rate bootstrap estimates show only the log rate ratio.</p>
+Older binary or count objects without treatment-specific bootstrap estimates
+show only the risk difference or log rate ratio, respectively.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

@@ -4,7 +4,7 @@ Collect treatment-recoding information from
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
 or recorded subgroup errors and warnings from count or survival
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-and
+and binary, count or survival
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
 into a data frame. Each row represents one recorded message. Survival
 subgroup messages also remain in `object[["errors/warnings"]]`.
@@ -19,8 +19,8 @@ diagnostics(object)
 
 - object:
 
-  A binary, count or survival `atefit`, or a count or survival `catefit`
-  or `catecv` result.
+  A binary, count or survival `atefit`, a count or survival `catefit`,
+  or a binary, count or survival `catecv` result.
 
 ## Value
 

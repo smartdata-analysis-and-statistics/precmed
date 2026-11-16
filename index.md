@@ -31,16 +31,6 @@ See [Is precmed suitable for
 me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me)
 for a quick overview of supported data, outcomes and analyses.
 
-The development version supports binary
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-and
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-with risk differences. Continuous-outcome fitting is not yet
-implemented. See the [binary outcome
-example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
-for a held-out subgroup illustration. These development features are not
-in the CRAN release 1.1.0.
-
 ## Learning resources
 
 For a broader introduction to personalized medicine using real-world
@@ -111,6 +101,27 @@ message, and a minimal reproducible example using simulated or
 non-sensitive data.
 
 ## Package capabilities
+
+The package compares two treatments using outcome-specific effect
+measures:
+
+- **Binary:** the risk difference in outcome probabilities (treatment 1
+  minus treatment 0). The [binary
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
+  illustrates ATE and CATE estimation.
+- **Count:** the ratio of event rates (treatment 1 over treatment 0).
+  The [count
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
+  covers estimation and validation.
+- **Survival:** the ratio of restricted mean time lost at a specified
+  follow-up horizon (treatment 1 over treatment 0). The [survival
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)
+  also illustrates population-level cumulative hazard ratios.
+
+Count and survival ATE effect estimates and CATE scores are returned on
+the log-ratio scale; exponentiate them to obtain ratios. The ATE
+summarizes the population, while CATE scores describe effects
+conditional on observed characteristics.
 
 The main functions in the **precmed** package are:
 

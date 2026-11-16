@@ -90,7 +90,6 @@
 </ul>
 <p>The methods support causal inference under appropriate assumptions; for observational data, these include adequate control of confounding and sufficient treatment overlap. The package combines outcome-regression approaches, such as Poisson models fitted separately in each treatment group, with doubly robust methods for estimating and validating treatment effects. Its methods build on work by Zhao et al. (2013) and Yadlowsky et al. (2021); Jiang et al. (2026) illustrate their application and interpretation.</p>
 <p>See <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me">Is precmed suitable for me?</a> for a quick overview of supported data, outcomes and analyses.</p>
-<p>The development version supports binary <code><a href="reference/atefit.html">atefit()</a></code> and <code><a href="reference/catefit.html">catefit()</a></code> with risk differences. Continuous-outcome fitting is not yet implemented. See the <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">binary outcome example</a> for a held-out subgroup illustration. These development features are not in the CRAN release 1.1.0.</p>
 </div>
 <div class="section level2">
 <h2 id="learning-resources">Learning resources<a class="anchor" aria-label="anchor" href="#learning-resources"></a>
@@ -142,6 +141,16 @@
 <div class="section level2">
 <h2 id="package-capabilities">Package capabilities<a class="anchor" aria-label="anchor" href="#package-capabilities"></a>
 </h2>
+<p>The package compares two treatments using outcome-specific effect measures:</p>
+<ul>
+<li>
+<strong>Binary:</strong> the risk difference in outcome probabilities (treatment 1 minus treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">binary example</a> illustrates ATE and CATE estimation.</li>
+<li>
+<strong>Count:</strong> the ratio of event rates (treatment 1 over treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">count example</a> covers estimation and validation.</li>
+<li>
+<strong>Survival:</strong> the ratio of restricted mean time lost at a specified follow-up horizon (treatment 1 over treatment 0). The <a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">survival example</a> also illustrates population-level cumulative hazard ratios.</li>
+</ul>
+<p>Count and survival ATE effect estimates and CATE scores are returned on the log-ratio scale; exponentiate them to obtain ratios. The ATE summarizes the population, while CATE scores describe effects conditional on observed characteristics.</p>
 <p>The main functions in the <strong>precmed</strong> package are:</p>
 <table class="table">
 <colgroup>

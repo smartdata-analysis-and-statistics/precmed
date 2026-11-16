@@ -472,33 +472,13 @@ that treatment effects truly differ; validation is needed to assess
 whether the scores distinguish responder groups. Chapter 20 discusses
 score distributions alongside validation curves (Jiang et al. 2026).
 
-You are encouraged to summarize and visualize the outputs in whichever
-way that fits a particular situation outside the package’s functions.
-For example, it is possible to plot the densities of all CATE scores
-with [`ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html).
-There are some subjects with extremely low CATE scores but most of the
-samples fall between -1 and 1 with triple modes at around -0.5, 0, and
-0.8.
+Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
+the estimated score distributions across methods. The scores are on the
+log rate-ratio scale, with zero indicating a rate ratio of 1.
 
 ``` r
 
-dataplot <- data.frame(
-  score = factor(rep(
-    c("Boosting", "Naive Poisson", "Two regressions", "Contrast regression",
-      "Negative Binomial"),
-    each = length(output_catefit$score.boosting)
-  )),
-  value = c(
-    output_catefit$score.boosting, output_catefit$score.poisson,
-    output_catefit$score.twoReg, output_catefit$score.contrastReg,
-    output_catefit$score.negBin
-  )
-)
-
-ggplot(dataplot, aes(x = value, fill = score)) +
-  geom_density(alpha = 0.5) +
-  theme_classic() + 
-  labs(x = "Estimated CATE score", y = "Density", fill = "Method")
+plot(output_catefit, type = "density")
 ```
 
 ![](Count-examples_files/figure-html/plot_score-1.png)

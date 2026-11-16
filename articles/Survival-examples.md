@@ -667,26 +667,14 @@ output_catefit$chr.contrastReg
 #> 0.4647887 0.4834859 0.5528552 0.6324199 0.6834531 0.7680014
 ```
 
-You are encouraged to summarize and visualize the outputs in whichever
-way that fits their particular situation outside the package’s
-functions. For example, it is possible to plot the densities of all CATE
-scores with `ggplot`. The score distributions summarize variation in
-predicted treatment benefit across patients.
+Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
+the estimated score distributions across methods. The scores are on the
+log restricted mean time lost ratio scale, with zero indicating a ratio
+of 1.
 
 ``` r
 
-dataplot <- data.frame(
-  score = factor(rep(
-    c("Random Forest", "Contrast regression"),
-    each = length(output_catefit$score.randomForest)
-  )),
-  value = c(output_catefit$score.randomForest, output_catefit$score.contrastReg)
-)
-
-ggplot(dataplot, aes(x = value, fill = score)) +
-  geom_density(alpha = 0.5) +
-  theme_classic() + 
-  labs(x = "Estimated CATE score", y = "Density", fill = "Method")
+plot(output_catefit, type = "density")
 ```
 
 ![](Survival-examples_files/figure-html/plot_score-1.png)

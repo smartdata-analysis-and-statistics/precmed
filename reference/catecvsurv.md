@@ -552,33 +552,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 12:26:21 2026 
+#>    Mon Nov 16 14:22:27 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 12:26:26 2026 
+#>    Mon Nov 16 14:22:31 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 12:26:31 2026 
+#>    Mon Nov 16 14:22:35 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 12:26:36 2026 
+#>    Mon Nov 16 14:22:39 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 12:26:40 2026 
+#>    Mon Nov 16 14:22:42 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 23.45 secs 
+#> Total runtime : 18.31 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

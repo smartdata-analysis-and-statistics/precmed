@@ -45,17 +45,18 @@ plot(
 
 - null.value:
 
-  Reference value on the plotted log-ratio scale. Defaults to 0 (a ratio
-  of 1); use `NULL` or `NA` to omit the null line.
+  Reference value on the plotted effect scale. Defaults to 0 (no risk
+  difference or a ratio of 1); use `NULL` or `NA` to omit the null line.
 
 - metrics:
 
-  Character vector of metrics to plot, in display order. For count fits,
-  choose from `"rate0"`, `"rate1"`, and `"log.rate.ratio"`; for survival
-  fits, choose from `"rmst0"`, `"rmst1"`, `"log.rmtl.ratio"`, and
-  `"log.cumulative.hazard.ratio"`. Older survival fits may instead
-  contain `"log.hazard.ratio"`. The default `NULL` plots all metrics
-  available in the object.
+  Character vector of metrics to plot, in display order. For binary
+  fits, choose from `"risk0"`, `"risk1"`, and `"risk.difference"`. For
+  count fits, choose from `"rate0"`, `"rate1"`, and `"log.rate.ratio"`;
+  for survival fits, choose from `"rmst0"`, `"rmst1"`,
+  `"log.rmtl.ratio"`, and `"log.cumulative.hazard.ratio"`. Older
+  survival fits may instead contain `"log.hazard.ratio"`. The default
+  `NULL` plots all metrics available in the object.
 
 - ...:
 
@@ -70,11 +71,12 @@ bootstrap samples
 
 Create a histogram displaying the distribution of the bootstrap
 estimates. The solid red vertical line represents the full-sample
-estimate. A dashed black line marks `null.value` in log-ratio panels
-only; it is not shown in treatment-specific rate or RMST panels.
-Treatment-specific facets use the original treatment labels when
-available. Older count objects without rate bootstrap estimates show
-only the log rate ratio.
+estimate. A dashed black line marks `null.value` in risk-difference and
+log-ratio panels; it is not shown in treatment-specific risk, rate or
+RMST panels. Treatment-specific facets use the original treatment labels
+when available. Older binary or count objects without treatment-specific
+bootstrap estimates show only the risk difference or log rate ratio,
+respectively.
 
 ## Author
 
