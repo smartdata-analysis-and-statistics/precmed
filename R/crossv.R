@@ -2529,10 +2529,10 @@ plot.precmed <- function(x,
       ranges$measure <- factor(ranges$measure, levels = levels(result$data$measure))
       result$scales$scales <- Filter(function(scale) !"y" %in% scale$aesthetics, result$scales$scales)
       facet <- if (layout == "set") {
-        ggplot2::facet_wrap(ggplot2::vars(measure, set), ncol = 2, scales = "free_y",
+        ggplot2::facet_wrap(ggplot2::vars(.data$measure, .data$set), ncol = 2, scales = "free_y",
                             labeller = function(labels) list(paste(labels$measure, labels$set, sep = "  |  ")))
       } else {
-        ggplot2::facet_wrap(ggplot2::vars(measure, score), ncol = length(unique(result$data$score)), scales = "free_y",
+        ggplot2::facet_wrap(ggplot2::vars(.data$measure, .data$score), ncol = length(unique(result$data$score)), scales = "free_y",
                             labeller = function(labels) list(paste(labels$measure, labels$score, sep = "  |  ")))
       }
       result <- result + ggplot2::geom_blank(data = ranges, aes(y = .data$y), inherit.aes = FALSE) + facet +
@@ -2800,8 +2800,8 @@ plot.precmed <- function(x,
     p <- p + geom_line(aes(color = .data$score), linewidth = 1.2) +
       facet_wrap(~ .data$set, ncol = 2) + scale_color_manual(name = "Method", values = colors)
   } else {
-    set.colors <- setNames(c("#35658A", "#B43B35"), c(training.label, validation.label))
-    set.types <- setNames(c("solid", "dashed"), c(training.label, validation.label))
+    set.colors <- stats::setNames(c("#35658A", "#B43B35"), c(training.label, validation.label))
+    set.types <- stats::setNames(c("solid", "dashed"), c(training.label, validation.label))
     p <- p + geom_line(aes(color = .data$set, linetype = .data$set, group = .data$set), linewidth = 1.2) +
       facet_wrap(~ .data$score, ncol = 2) +
       scale_color_manual(name = "Set", values = set.colors, drop = FALSE, limits = levels(droplevels(dat$set))) +

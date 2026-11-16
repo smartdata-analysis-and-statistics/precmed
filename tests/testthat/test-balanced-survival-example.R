@@ -57,6 +57,13 @@ test_that("survival simulator rejects invalid inputs and allows extreme allocati
   expect_error(simulate_survival(ps_weights = c(unknown = 1)), "ps_weights")
   expect_error(simulate_survival(lp_weights = c(unknown = 1)), "lp_weights")
   expect_error(simulate_survival(conditional_hr = 0), "conditional_hr")
+  expect_error(simulate_survival(lp_weights = c(intercept = 1000)),
+               "invalid hazard multiplier.*lp_weights.*conditional_hr")
+  expect_error(simulate_survival(n = 100, seed = 1, treatment_shape = 2000,
+                                hr_reference_time = 1300),
+               "invalid Weibull adjustment.*shape.*scale.*treatment_shape.*hr_reference_time")
+  expect_error(simulate_survival(n = 100, seed = 1, scale = .Machine$double.xmin * .Machine$double.eps),
+               "invalid event times.*lp_weights.*conditional_hr.*shape.*scale.*treatment_shape.*hr_reference_time")
   expect_error(simulate_survival(seed = 1.5), "seed")
   extreme <- simulate_survival(n = 100, seed = 1,
     ps_weights = c(intercept = 1000, age = 0, drugB = 0, drugC = 0))
@@ -82,5 +89,32 @@ test_that("censoring model preserves defaults and responds to coefficients", {
   expect_gt(sum(treated$d[base$trt == "drug1"] == 0),
             sum(base$d[base$trt == "drug1"] == 0))
   expect_error(simulate_survival(censor_weights = c(unknown = 1)), "censor_weights")
-  expect_error(simulate_survival(censor_weights = c(intercept = 1000)), "invalid rates")
+  expect_error(simulate_survival(censor_weights = c(intercept = 1000)), "invalid rates.*censor_weights")
+})
+
+test_that("nonproportional survival follows the specified Weibull hazards", {
+  base <- simulate_survival(n = 2000, seed = 42)
+  expect_identical(base, simulate_survival(n = 2000, seed = 42,
+    shape = 1.15, scale = 650, treatment_shape = 1.15, hr_reference_time = 650))
+  changed <- simulate_survival(n = 2000, seed = 42, treatment_shape = 1.65)
+  expect_identical(base$y[base$trt == "drug0"], changed$y[base$trt == "drug0"])
+  expect_error(simulate_survival(shape = 0), "shape")
+  expect_error(simulate_survival(scale = Inf), "scale")
+  expect_error(simulate_survival(treatment_shape = -1), "treatment_shape")
+  expect_error(simulate_survival(hr_reference_time = c(1, 2)), "hr_reference_time")
+
+  weights <- c(intercept = 0, age = 0, female = 0, previous_cost = 0,
+               previous_number_relapses = 0, treatment_age = 0, treatment_relapses = 0)
+  for (delta in c(-0.5, 0, 0.5)) {
+    dat <- simulate_survival(n = 40000, seed = 123, lp_weights = weights,
+      conditional_hr = 0.8, shape = 1.4, scale = 500,
+      treatment_shape = 1.4 + delta, hr_reference_time = 300,
+      censor_weights = c(intercept = log(1e-12)))
+    for (trt in 0:1) for (time in c(200, 650, 800)) {
+      shape <- 1.4 + trt * delta
+      expected <- exp(-0.8^trt * 1.4 / shape * (500 / 300)^(trt * delta) * (time / 500)^shape)
+      observed <- mean(dat$y[dat$trt == paste0("drug", trt)] > time)
+      expect_equal(observed, expected, tolerance = 0.015)
+    }
+  }
 })

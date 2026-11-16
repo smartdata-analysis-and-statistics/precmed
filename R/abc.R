@@ -4,13 +4,8 @@
 #' This should be run only after results of \code{\link{catecv}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
-#' @param combine Optional summary across validation iterations for each
-#' scoring method. Use \code{NULL} (the default) for the full matrix,
-#' \code{"mean"} or \code{"median"}, or a function returning one numeric
-#' value from a vector. Missing values are passed to the summary function
-#' unchanged; for example, use \code{function(z) mean(z, na.rm = TRUE)} to
-#' omit them explicitly.
-#' @param ... Additional arguments (currently unused).
+#' @param ... Additional arguments passed to the method, such as \code{combine}
+#' for \code{precmed} objects; see \code{\link{abc.precmed}}.
 #'
 #'
 #' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation

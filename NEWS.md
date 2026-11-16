@@ -21,7 +21,11 @@
 * Added `simulate_survival()` to generate reproducible synthetic survival data
   illustrating confounding and heterogeneous treatment effects. Treatment,
   outcome, and censoring coefficients can be specified. The survival vignette
-  now uses it; `survivalExample` remains available.
+  now uses it; `survivalExample` remains available. Weibull shape and scale,
+  treatment-specific shape, and the hazard ratio reference time are configurable;
+  defaults retain proportional hazards. Event-time calculations are checked in
+  stages, and error messages identify the relevant model parameters. Invalid
+  censoring rates also identify the censoring model parameters.
 
 * Added C backends, enabled by default, for count and survival contrast
   regression, Cox restricted mean survival integration, and LASSO propensity-score
