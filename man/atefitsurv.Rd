@@ -24,14 +24,14 @@ atefitsurv(
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome, treatment,
+and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 must be used to describe the outcome.}
 
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
@@ -42,9 +42,9 @@ Allowed values include one of:
 two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 Relevant only when \code{ps.model} has more than one variable.}
 
-\item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
-model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+\item{ipcw.model}{A formula describing the censoring model used for inverse
+probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+Default is \code{NULL}, which uses a censoring model with the same covariates
 as the outcome model \code{cate.model}, plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Only applies for survival
@@ -130,6 +130,12 @@ p-value, and a histogram of the bootstrap estimates.
 If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
 outcome-model estimate is substituted and a warning is issued. That fallback
 does not retain the doubly robust guarantee.
+
+Failed or non-finite bootstrap estimates are recorded in
+\code{bootstrap.diagnostics}, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected measure
+is unavailable rather than based on a subset of replicates. See also
+\code{diagnostics()} to inspect these records.
 }
 \examples{
 \donttest{

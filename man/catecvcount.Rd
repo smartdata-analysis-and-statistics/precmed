@@ -40,7 +40,7 @@ catecvcount(
 }
 \arguments{
 \item{data}{A data frame containing the variables in the outcome and
-propensity score model; a data frame with \code{n} rows (1 row per
+treatment model; a data frame with \code{n} rows (1 row per
 observation).}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE
@@ -50,7 +50,7 @@ score. Allowed values are: \code{'boosting'}, \code{'poisson'},
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
-\item{ps.model}{A formula describing the propensity score model to be fitted.
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a
 numeric vector coded as 0 or 1. If data are from a randomized trial, specify
 \code{ps.model} as an intercept-only model.}

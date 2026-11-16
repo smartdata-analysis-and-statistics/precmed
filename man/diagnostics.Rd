@@ -7,15 +7,17 @@
 diagnostics(object)
 }
 \arguments{
-\item{object}{A count or survival \code{atefit}, \code{catefit}, or \code{catecv} result.}
+\item{object}{A binary, count or survival \code{atefit}, or a count or survival \code{catefit} or \code{catecv} result.}
 }
 \value{
 A data frame with columns \code{method}, \code{split},
   \code{iteration}, \code{group}, \code{subgroup}, \code{type},
-  \code{measure}, and \code{message}. Count mutually exclusive groups use
-  lower and upper boundaries; survival uses the upper percentile label.
-  Method, split, iteration, group, subgroup, and measure are \code{NA} for
-  \code{atefit}; split and iteration are \code{NA} for \code{catefit}.
+  \code{measure}, and \code{message}. For count mutually exclusive groups,
+  \code{subgroup} gives the lower and upper boundaries; survival uses the
+  upper percentile label recorded by the estimator.
+  For \code{atefit}, bootstrap failures have split \code{bootstrap},
+  the replicate number in iteration, and the affected estimate in measure.
+  Split and iteration are \code{NA} for \code{catefit}.
   Otherwise, measure is \code{NA}
   unless the recorded message identifies it. Returns a zero-row data frame
   with the same columns when there are no recorded messages.
@@ -29,9 +31,10 @@ Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 \details{
 This reports only diagnostics stored in the result, not every
   warning emitted during fitting. In particular, \code{atefit()} stores the
-  treatment-recoding information, but not all bootstrap warnings. Count fits
-  record subgroup support in \code{object$subgroup.support}. Continuous results
-  are not supported by this helper.
+  treatment-recoding information and failed or undefined bootstrap estimates,
+  but not all bootstrap warnings. Count
+  fits record subgroup messages and support in \code{object$subgroup.support}.
+  Continuous results are not supported by this helper.
 }
 \examples{
 \dontrun{

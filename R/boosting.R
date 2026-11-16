@@ -24,7 +24,7 @@ fit_boosting <- function(formula, data, distribution, weights = NULL,
   if (is.null(mFeatures)) mFeatures <- ncol(predictors)
   if (is.null(weights)) weights <- rep(1, nrow(data))
   loss <- switch(distribution,
-                 gaussian = "Gaussian", poisson = "Poisson",
+                 gaussian = "Gaussian", poisson = "Poisson", bernoulli = "Bernoulli",
                  stop("Unsupported boosting distribution: ", distribution))
   params <- gbm3::training_params(
     num_trees = n.trees, interaction_depth = interaction.depth,
@@ -51,7 +51,7 @@ best_boosting_iteration <- function(object, method, plot.it = TRUE) {
 
 #' Boosting controls and GBM3 backend
 #'
-#' Boosting uses \code{gbm3::gbmt()} for count, continuous, and survival
+#' Boosting uses \code{gbm3::gbmt()} for binary, count, continuous, and survival
 #' outcomes. Existing public argument names are translated internally.
 #'
 #' @details Additional arguments passed through \code{...} can include

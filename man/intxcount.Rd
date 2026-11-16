@@ -37,7 +37,7 @@ intxcount(
 \item{x.cate}{Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)}
 
 \item{x.ps}{Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)}
+dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)}
 
 \item{time}{Log-transformed person-years of follow-up; vector of size \code{n}}
 

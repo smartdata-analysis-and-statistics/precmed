@@ -1,6 +1,5 @@
 ---
 title: "Getting started with precmed"
-subtitle: "Vignette 1 of 5"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   html_document:
@@ -28,6 +27,8 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 
 **precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
+The treatment model estimates propensity scores, and the censoring model provides probabilities used for inverse probability of censoring weighting (IPCW). The corresponding arguments are `ps.model` and `ipcw.model`.
+
 For background on marginal and conditional treatment effects, see Chapter 5 [@nguyen2026causaleffects]. Chapter 17 introduces CATE prediction and model development [@hoogland2026introduction].
 
 ## Install precmed
@@ -49,9 +50,9 @@ devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 
 The **precmed** package contains functions to
 
--	Estimate the average treatment effect (ATE) for count and survival outcome data using `atefit()`
--	Estimate the conditional average treatment effect (CATE) using `catefit()`
--	Development and Cross-validation of CATE using `catecv()` 
+-	Estimate the average treatment effect (ATE) for binary, count and survival outcomes using `atefit()`
+-	Fit CATE scores for binary, count and survival outcomes using `catefit()`
+-	Develop and cross-validate CATE scores using `catecv()`, with count and survival examples 
 -	Plot the proportion of subjects with an estimated treatment effect no less than $c$ over a range of values for $c$ [@zhao2013effectively]. 
 -	Compute the area between the average treatment difference curve of competing models for the CATE using `abc()`  [@zhao2013effectively]
 
@@ -59,7 +60,7 @@ The **precmed** package contains functions to
 
 Chapter 19 discusses validation strategies and the assessment of discrimination, calibration, and decision accuracy [@thao2026validation]. Chapter 20 provides practical guidance on validation curves, ABC statistics, and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
 
-We recommend the following workflow to estimate the overall ATE and develop a model for estimating the CATE to identify treatment effect heterogeneity:
+For count and survival outcomes, the following workflow estimates the ATE and develops and validates a CATE model:
 
 1. Use `atefit()` to estimate the overall ATE between two treatment groups and its uncertainty using bootstrap resampling.
 2. Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE using cross-validation through `catecv()`.
@@ -67,7 +68,9 @@ We recommend the following workflow to estimate the overall ATE and develop a mo
     * Compare the steepness of the validation curves in the validation samples across methods using `plot()`. Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under the argument `score.method`.
     * The area between curves (ABC) using `abc()` quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
     * Compare the distribution of the estimated ATE across different levels of the CATE score percentiles using `boxplot()`. 
-4. Apply the best modelling approach in the original data or in a new external dataset using `catefit()`.
+4. Fit the chosen approach using `catefit()` and assess it in an independent dataset where possible.
+
+For binary outcomes, `atefit()` and `catefit()` are available in the development version. The [binary example](Binary-examples.html) illustrates held-out subgroup assessment. These binary features are not in CRAN release 1.1.0.
 
 In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.
 
@@ -75,21 +78,22 @@ In the vignettes, we will adopt a different workflow to gradually expose the use
 
 When applying `catefit()` or `catecv()`, the user has to (at least) input:
 
-- `response`: type of outcome/response (either `count` or `survival`)  
+- `response`: `binary`, `count`, or `survival` for `catefit()`; `catecv()` currently supports `count` and `survival`  
 - `data`: a data frame with individual patient data  
 - `score.method`: methods to estimate the CATE (e.g., `boosting`, `poisson`, `twoReg`, `contrastReg`)  
 - `cate.model`: a formula describing the outcome model (e.g., outcome ~ age + gender + previous_treatment)  
-- `ps.model`: a formula describing the propensity score model to adjust for confounding (e.g., treatment ~ age + previous_treatment) 
+- `ps.model`: a formula describing the treatment model to adjust for confounding (e.g., treatment ~ age + previous_treatment) 
 
 
 ## Overview of the vignettes
-  
-[1. Getting started with precmed](precmed.html)  
-[2. Estimating and validating treatment effects for count outcomes](Count-examples.html)  
-[3. Estimating and validating treatment effects for survival outcomes](Survival-examples.html)  
-[4. Customizing CATE models and validation](Additional-examples.html)  
-[5. Methods for estimating and validating treatment effects](Theoretical-details.html)   
-  
+
+- [Binary outcome example](Binary-examples.html)
+- [Count outcome example](Count-examples.html)
+- [Survival outcome example](Survival-examples.html)
+- [Customizing CATE models and validation](Additional-examples.html)
+- [ATE methods](ATE-theory.html)
+- [CATE development and validation methods](Theoretical-details.html)
+
 ## Abbreviations
 
 Abbreviation        Full Name

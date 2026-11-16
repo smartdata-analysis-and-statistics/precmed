@@ -27,18 +27,18 @@ and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No def
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
-\item{ps.model}{A formula describing the propensity score model to be fitted.
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
 
-\item{ipcw.model}{A formula describing inverse probability of censoring weighting(IPCW) model to be fitted.
+\item{ipcw.model}{A formula describing the censoring model used for inverse probability of censoring weighting (IPCW).
 If covariates are the same as outcome model, set \code{ipcw.model = NULL}.
 Otherwise, the left-hand side must be empty and the right-hand side is a covariates model.}
 
 \item{tau0}{The truncation time for defining restricted mean time lost. Default is \code{NULL},
 which corresponds to setting the truncation time as the maximum survival time in the data}
 
-\item{data}{A data frame containing the variables in the outcome, propensity score, and IPCW models;
+\item{data}{A data frame containing the variables in the outcome, treatment, and censoring models;
 a data frame with \code{n} rows (1 row per observation).}
 
 \item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
@@ -77,9 +77,9 @@ A list of elements:
            - y: outcome; vector of length \code{n} (observations)
            - d : the event indicator; vector of length \code{n}; only if \code{respone = "survival"}
            - trt: binary treatment; vector of length \code{n}
-           - x.ps: matrix of \code{p.ps} baseline covariates specified in the propensity score model (plus intercept); dimension \code{n} by \code{p.ps + 1}
+           - x.ps: matrix of \code{p.ps} baseline covariates specified in the treatment model (plus intercept); dimension \code{n} by \code{p.ps + 1}
            - x.cate: matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}
-           - x.ipcw: matrix of \code{p.ipw} baseline covarites specified in inverse probability of censoring weighting model; dimension \code{n} by \code{p.ipw}
+           - x.ipcw: matrix of \code{p.ipw} baseline covarites specified in censoring model; dimension \code{n} by \code{p.ipw}
            - time: offset; vector of length \code{n}; only if \code{response = "count"}
            - if \code{fun = "catefit"}:
                - prop: formatted \code{prop.cutoff}

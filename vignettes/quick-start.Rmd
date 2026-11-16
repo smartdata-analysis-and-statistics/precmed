@@ -18,17 +18,21 @@ This example uses **precmed** to explore whether treatment effects differ across
 |---|---|
 | What data can I use? | Individual-level data from a randomized trial or an observational study. |
 | What treatments can I compare? | Two treatments at a time. |
-| What outcomes are supported? | Count and time-to-event outcomes. |
+| What outcomes are supported? | Binary, count and time-to-event outcomes for ATE and CATE fitting in the development version. Continuous outcomes are not yet implemented. |
 | What can I estimate? | An overall average treatment effect (ATE) and conditional average treatment effects (CATEs) for patients with given observed characteristics. |
-| Can I assess model performance? | Cross-validation, subgroup curves and other diagnostics help assess treatment-effect predictions. |
+| Can I assess model performance? | `catecv()` cross-validation, subgroup curves and ABC are illustrated here for count outcomes and in the survival tutorial. |
 | Can I interpret the estimates causally? | Only when the relevant assumptions are justified. Observational analyses require, among other assumptions, adequate control of confounding and sufficient treatment overlap. |
 
 ## Install and load
 
-Install the released version from CRAN, then load the package:
+Install the released version from CRAN, then load the package. Binary-outcome fitting is currently available in the development version, which can be installed from GitHub:
 
 ```{r install, eval=FALSE}
 install.packages("precmed")
+```
+
+```{r install-development, eval=FALSE}
+devtools::install_github("smartdata-analysis-and-statistics/precmed")
 ```
 
 ```{r load}
@@ -40,7 +44,7 @@ The data contain 4,000 patients. `y` is the number of relapses, `years` is follo
 
 ## Estimate the overall treatment effect
 
-Start with `atefit()` to estimate the average treatment effect across the study population. For count outcomes, it estimates a relapse rate ratio comparing `drug1` with `drug0`. The outcome model includes a log follow-up offset, and the propensity score model describes treatment assignment using baseline characteristics.
+Start with `atefit()` to estimate the average treatment effect across the study population. For count outcomes, it estimates a relapse rate ratio comparing `drug1` with `drug0`. The outcome model includes a log follow-up offset, and the treatment model (propensity-score model) describes treatment assignment using baseline characteristics.
 
 ```{r ate, message=FALSE, warning=FALSE}
 overall <- atefit(
@@ -56,7 +60,7 @@ overall <- atefit(
 overall
 ```
 
-The output reports the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the propensity score model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
+The output reports the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
 
 ```{r rate-ratio}
 unname(exp(coef(overall)))
@@ -67,7 +71,7 @@ The overall effect can mask differences across patients. Next, we explore treatm
 
 ## Fit and validate a model
 
-`catecv()` fits a conditional average treatment effect (CATE) scoring model and evaluates it with cross-validation. Here, the outcome model includes a log follow-up offset to model relapse rates. The propensity score model describes treatment assignment using age and previous treatment. Because fewer relapses are better, we set `higher.y = FALSE`.
+`catecv()` fits a conditional average treatment effect (CATE) scoring model and evaluates it with cross-validation. Here, the outcome model includes a log follow-up offset to model relapse rates. The treatment model describes treatment assignment using age and previous treatment. Because fewer relapses are better, we set `higher.y = FALSE`.
 
 ```{r fit, message=FALSE, warning=FALSE}
 fit <- catecv(
@@ -93,9 +97,10 @@ The curves summarize estimated treatment effects in nested subgroups ranked by t
 
 ## Next steps
 
+- Follow the [binary outcome tutorial](Binary-examples.html) for fixed-horizon response and held-out subgroup validation.
 - Follow the [count outcome tutorial](Count-examples.html) to estimate the overall treatment effect, compare scoring methods, and interpret validation results.
 - See the [survival outcome tutorial](Survival-examples.html) for time-to-event data.
-- Explore [model and validation options](Additional-examples.html) and the [methods](Theoretical-details.html).
+- Explore [model and validation options](Additional-examples.html) and the methods for [average treatment effects](ATE-theory.html) and [CATE scores](Theoretical-details.html).
 
 For observational data, causal interpretation depends on assumptions including adequate control of confounding and sufficient treatment overlap. A CATE describes an average effect conditional on observed characteristics; it does not reveal an individual patient's actual benefit.
 

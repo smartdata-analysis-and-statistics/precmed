@@ -1,24 +1,27 @@
-#' Estimation of the conditional average treatment effect (CATE) score for count, survival and continuous data
+#' Estimate conditional treatment effect scores
 #'
-#' Provides singly robust and doubly robust estimation of CATE score for count, survival and continuous data with
-#' up the following scoring methods among the following: Random forest (survival, continuous only), boosting,
-#' poisson regression (count, survival only), two regressions, contrast regression, negative binomial regression (count only),
-#' linear regression (continuous only), and generalized additive model (continuous only).
+#' Estimate CATE scores for binary, count and survival outcomes. Binary scores
+#' include pooled logistic regression, separate-arm logistic regression and
+#' boosting. Count and survival methods include both outcome-regression and
+#' doubly robust scores. Continuous outcomes are not yet implemented.
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' "binary", "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 #' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-#' \code{'gaussian'} (continuous outcomes only).
+#' \code{'gaussian'} (continuous outcomes only). For binary outcomes, use
+#' \code{'logistic'}, \code{'twoReg'}, or \code{'boosting'}.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+#' appear on the left-hand side. For binary outcomes, logical treatment values
+#' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
+#' Numeric 0/1 values or two distinct treatment labels are also accepted.
+#' If data are from a randomized controlled trial, specify \code{ps.model = trt ~ 1} as an intercept-only model.
 #' @param ps.method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
@@ -26,7 +29,7 @@
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}, except for binary outcomes, which use \code{cate.model}.
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
@@ -34,9 +37,9 @@
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
 #' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 #' for count outcomes and \code{'randomForest'} for survival outcomes.
-#' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
-#' model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-#' Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+#' @param ipcw.model A formula describing the censoring model used for inverse
+#' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+#' Default is \code{NULL}, which uses a censoring model with the same covariates
 #' as the outcome model \code{cate.model}, plus the treatment.
 #' @param ipcw.method A character value for the censoring model. Only applies for survival
 #' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
@@ -110,6 +113,17 @@
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
+#' For \code{response = "binary"}, \code{score.method = "logistic"}
+#' fits a logistic model with treatment interactions, and \code{"twoReg"}
+#' fits separate logistic models in each arm. \code{"boosting"} fits
+#' separate Bernoulli gradient-boosting models in each treatment arm, with
+#' the number of trees selected by five-fold cross-validation. All three scores
+#' are predicted risk differences; subgroup effects are doubly robust risk
+#' differences. Binary boosting requires at least one outcome-model covariate
+#' and both outcome values in each arm. Its fitted models and selected tree
+#' counts are stored in \code{fit$boosting}. For extra boosting controls,
+#' see \code{\link{boosting-control}}.
+#' Subgroup fits without both arms or with rank-deficient models return NA.
 #' @return For count response, see description of outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 #'
@@ -126,6 +140,11 @@
 #' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
 #' (Chapter 17, pp. 421--463). Chapman & Hall/CRC.
 #' \doi{10.1201/9781003300809-17}
+#'
+#' Hoogland, J., IntHout, J., Belias, M., et al. (2021). A tutorial on
+#' individualized treatment effect prediction from randomized trials with a
+#' binary endpoint. \emph{Statistics in Medicine}, 40(26), 5961--5981.
+#' \doi{10.1002/sim.9154}
 #'
 #' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
 #' Visualization and interpretation of individualized treatment rule results. In
@@ -237,6 +256,9 @@ catefit <- function(response,
   if (response != "survival") .args$rmst.control <- NULL
   if (response == "continuous") .args$contrast.control <- NULL
   switch(response,
+         binary = {
+           fitout <- do.call(catefitbinary, .args, envir = parent.frame())
+         },
          count = {
            fitout <- do.call(catefitcount, .args)
          },
@@ -273,7 +295,7 @@ print.catefit <- function(x, ...) {
   cat("Estimated ATE in the nested subgroups:\n\n ")
 
   evalm <- c("boosting", "twoReg", "contrastReg", "poisson", "randomForest",
-             "negBin", "gam", "gaussian")
+             "negBin", "gam", "gaussian", "logistic")
 
   snames <- c()
   out <- NULL

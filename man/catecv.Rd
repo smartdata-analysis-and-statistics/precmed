@@ -53,8 +53,8 @@ Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
 (see \code{\link{catecvsurv}()}) and "continuous" (see
 \code{\link{catecvmean}()}) .}
 
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome, treatment,
+and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
@@ -65,7 +65,7 @@ Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \c
 The outcome must appear on the left-hand side. For survival outcomes, a
 \code{Surv} object must be used to describe the outcome.}
 
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
@@ -87,9 +87,9 @@ when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allow
 \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 for count outcomes and \code{'randomForest'} for survival outcomes.}
 
-\item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
-model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+\item{ipcw.model}{A formula describing the censoring model used for inverse
+probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+Default is \code{NULL}, which uses a censoring model with the same covariates
 as the outcome model \code{cate.model}, plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Only applies for survival

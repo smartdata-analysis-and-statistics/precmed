@@ -5,20 +5,22 @@
 #' \code{catecv()}, into a data frame. Each row represents one recorded message.
 #' Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 #'
-#' @param object A count or survival \code{atefit}, \code{catefit}, or \code{catecv} result.
+#' @param object A binary, count or survival \code{atefit}, or a count or survival \code{catefit} or \code{catecv} result.
 #' @return A data frame with columns \code{method}, \code{split},
 #'   \code{iteration}, \code{group}, \code{subgroup}, \code{type},
 #'   \code{measure}, and \code{message}. For count mutually exclusive groups,
 #'   \code{subgroup} gives the lower and upper boundaries; survival uses the
 #'   upper percentile label recorded by the estimator.
-#'   Method, split, iteration, group, subgroup, and measure are \code{NA} for
-#'   \code{atefit}; split and iteration are \code{NA} for \code{catefit}.
+#'   For \code{atefit}, bootstrap failures have split \code{bootstrap},
+#'   the replicate number in iteration, and the affected estimate in measure.
+#'   Split and iteration are \code{NA} for \code{catefit}.
 #'   Otherwise, measure is \code{NA}
 #'   unless the recorded message identifies it. Returns a zero-row data frame
 #'   with the same columns when there are no recorded messages.
 #' @details This reports only diagnostics stored in the result, not every
 #'   warning emitted during fitting. In particular, \code{atefit()} stores the
-#'   treatment-recoding information, but not all bootstrap warnings. Count
+#'   treatment-recoding information and failed or undefined bootstrap estimates,
+#'   but not all bootstrap warnings. Count
 #'   fits record subgroup messages and support in \code{object$subgroup.support}.
 #'   Continuous results are not supported by this helper.
 #' @examples
@@ -31,8 +33,9 @@
 #' @export
 diagnostics <- function(object) {
   if (!inherits(object, c("atefit", "precmed", "catefit")) ||
-      !object$response %in% c("survival", "count"))
-    stop("object must be a count or survival atefit, catefit, or catecv result.")
+      !(object$response %in% c("survival", "count") ||
+        (inherits(object, "atefit") && identical(object$response, "binary"))))
+    stop("object must be a binary, count or survival atefit, or a count or survival catefit or catecv result.")
 
   out <- data.frame(method = character(), split = character(), iteration = integer(),
                     group = character(), subgroup = character(), type = character(),
@@ -42,6 +45,13 @@ diagnostics <- function(object) {
       out[nrow(out) + 1L, ] <- list(NA_character_, NA_character_, NA_integer_,
                                      NA_character_, NA_character_, "info",
                                      NA_character_, trimws(message))
+    }
+    issues <- object$bootstrap.diagnostics
+    if (!is.null(issues) && nrow(issues)) {
+      for (i in seq_len(nrow(issues))) {
+        out[nrow(out) + 1L, ] <- list(NA_character_, "bootstrap", issues$iteration[i],
+          NA_character_, NA_character_, "error", issues$measure[i], issues$reason[i])
+      }
     }
     return(out)
   }

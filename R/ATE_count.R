@@ -7,12 +7,12 @@
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score (PS) model to be
-#' fitted. The treatment must appear on the left-hand side. The treatment must
+#' @param ps.model A formula describing the treatment model (propensity-score
+#' model) to be fitted. The treatment must appear on the left-hand side. The treatment must
 #' be a numeric vector coded as 0 or 1. If data are from a randomized controlled
 #' trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, propensity
-#' score, and inverse probability of censoring models (if specified); a data
+#' @param data A data frame containing the variables in the outcome, treatment
+#' and censoring models (if specified); a data
 #' frame with \code{n} rows (1 row per observation).
 #' @param ps.method A character value for the method to estimate the propensity
 #' score. Allowed values include one of: \code{'glm'} for logistic regression
@@ -65,6 +65,12 @@
 #' distributions between the two treatment groups with inverse probability
 #' treatment weighting. For count outcomes, the estimated ATE is the estimated
 #' rate ratio between treatment 1 versus treatment 0.
+#'
+#' @details Failed or non-finite bootstrap estimates are recorded in
+#' \code{bootstrap.diagnostics}, with replicate number, affected measure and
+#' reason. A warning summarizes failures; inference for each affected measure
+#' is unavailable rather than based on a subset of replicates. See also
+#' \code{diagnostics()} to inspect these records.
 #'
 #' @examples
 #' output <- atefitcount(data = countExample,
@@ -135,7 +141,7 @@ atefitcount <- function(data,
 
   # Apply bootstrap
   n <- length(y)
-  if (is.na(logrr)) {
+  if (!is.finite(logrr)) {
     stop("Impossible to use bootstrap, log(RR)=NA.")
   }
 
@@ -146,9 +152,12 @@ atefitcount <- function(data,
                          max = n.boot,
                          style = 3)
 
+  errors <- rep(NA_character_, n.boot)
   for (i.boot in seq(n.boot)) {
     idsub.boot <- sample(n, size = n, replace = TRUE)
-    boot.est <- drcount(y = y[idsub.boot],
+    boot.est <- tryCatch({
+      if (length(unique(trt[idsub.boot])) != 2L) stop("Both treatment groups are required")
+      drcount(y = y[idsub.boot],
                                 x.cate = x.cate[idsub.boot, , drop = FALSE],
                                 x.ps = x.ps[idsub.boot, , drop = FALSE],
                                 trt = trt[idsub.boot],
@@ -157,17 +166,25 @@ atefitcount <- function(data,
                                 minPS = minPS,
                                 maxPS = maxPS,
                                 interactions = interactions, ps.control = ps.control)
-    trt.boot[i.boot] <- boot.est$log.rate.ratio
-    rate.boot$rate0[i.boot] <- boot.est$rate0
-    rate.boot$rate1[i.boot] <- boot.est$rate1
+    }, error = function(e) { errors[i.boot] <<- conditionMessage(e); NULL })
+    if (!is.null(boot.est)) {
+      trt.boot[i.boot] <- boot.est$log.rate.ratio
+      rate.boot$rate0[i.boot] <- boot.est$rate0
+      rate.boot$rate1[i.boot] <- boot.est$rate1
+    }
 
     if (verbose == 1) setTxtProgressBar(pb, i.boot)
   }
   close(pb)
 
+  boot.values <- cbind(rate0 = rate.boot$rate0, rate1 = rate.boot$rate1,
+                       log.rate.ratio = trt.boot)
+  issues <- ate_bootstrap_diagnostics(boot.values, errors,
+    c(log.rate.ratio = "Rate ratio is undefined: treatment-specific rates yield a non-positive or non-finite ratio"))
+  ate_bootstrap_warn(issues)
   out <- c()
   out$response <- "count"
-  se.est <- sd(trt.boot, na.rm = TRUE)
+  se.est <- if (any(!is.finite(trt.boot))) NA_real_ else sd(trt.boot)
   out$log.rate.ratio <- data.frame(estimate = logrr,
                                    SE = se.est,
                                    CI.lower = logrr - qnorm(0.975) * se.est,
@@ -183,6 +200,7 @@ atefitcount <- function(data,
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
   out$rate.boot <- rate.boot
+  out$bootstrap.diagnostics <- issues
   out$treatment.labels <- preproc$treatment.labels
   out$warning <- preproc$warning
 
@@ -207,7 +225,7 @@ atefitcount <- function(data,
 #' model for all subjects.
 #' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
 #' a leading column of 1 as the intercept and each remaining column
-#' representing each baseline covariate specified in the propensity score model
+#' representing each baseline covariate specified in the treatment model
 #' for all subjects.
 #' @param time A numeric vector of size \code{n} with each element representing
 #' the log-transformed person-years of follow-up for each subject.
@@ -355,7 +373,7 @@ drcount.matrix <- function(y, trt, outcome.design, x.ps, time, families,
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
 #' @param score Estimated log CATE scores for all \code{n} observations from one of the four methods
 #' (boosting, naive Poisson, two regressions, contrast regression); vector of size \code{n}
@@ -423,7 +441,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
 #' @param score Estimated log CATE scores for all \code{n} observations from one of the four methods
 #' (boosting, naive Poisson, two regressions, contrast regression); vector of size \code{n}

@@ -8,11 +8,11 @@
 #' The outcome must appear on the left-hand side.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 #' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side.
 #' The treatment must be a numeric vector coded as 0/1.
 #' If data are from a RCT, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'},
@@ -455,7 +455,7 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' @param x.init Matrix of \code{p.init} baseline covariates; dimension \code{n} by \code{p.init}
 #' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code{'contrastReg'},

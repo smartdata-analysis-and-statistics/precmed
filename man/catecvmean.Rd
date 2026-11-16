@@ -40,7 +40,7 @@ catecvmean(
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome and propensity score models;
+\item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
@@ -50,7 +50,7 @@ Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
-\item{ps.model}{A formula describing the propensity score model to be fitted.
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
 
@@ -125,8 +125,6 @@ Default is \code{NULL}, which uses all variables in \code{init.model}.}
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 \code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
 
-\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
-
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
 Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
@@ -169,6 +167,10 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+\code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

@@ -1,6 +1,5 @@
 ---
 title: "Customizing CATE models and validation"
-subtitle: "Vignette 3 of 4"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 bibliography: references.bib
 output: 
@@ -48,7 +47,7 @@ library(ggplot2)
 
 ## Customize models for count outcomes
 ### Initial predictor method
-If you choose two regressions or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the CV fold) are calculated. See [Methods for estimating and validating treatment effects](Theoretical-details.html) section for the background of these initial predictors and how they are used in two and contrast regressions. Here is a list of all 3 options:
+If you choose two regressions or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the CV fold) are calculated. See [Methods for developing and validating CATE scores](Theoretical-details.html) section for the background of these initial predictors and how they are used in two and contrast regressions. Here is a list of all 3 options:
 
 * "poisson" (Poisson regression from the `glm()` function) 
   * generalized linear model, strong assumption on Poisson distribution, fast
@@ -132,7 +131,7 @@ Because we have new `prop.cutoff` with 11 values as opposed to only 6 in the ori
 plot(output_catecv2) 
 ```
 
-The validation curves use the 11 nested subgroup cutoffs specified above, so they contain more line segments than the main example. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section. 
+The validation curves use the 11 nested subgroup cutoffs specified above, so they contain more line segments than the main example. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for developing and validating CATE scores](Theoretical-details.html) section. 
 
 
 ```{r subgroup_proportion4_count, eval = T, echo = T}
@@ -184,7 +183,7 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 
 ### Initial predictor method
 
-If you choose two and/or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the cross validation fold) are calculated. See [Methods for estimating and validating treatment effects](Theoretical-details.html) section for the background of these initial predictors and how they are used in the two and contrast regression. Here is a list of all 3 options:
+If you choose two and/or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the cross validation fold) are calculated. See [Methods for developing and validating CATE scores](Theoretical-details.html) section for the background of these initial predictors and how they are used in the two and contrast regression. Here is a list of all 3 options:
 
 -   "logistic" (logistic regression from the `glm()` function)
     -   generalized linear model, strong assumption on binomial
@@ -297,7 +296,7 @@ plot(output_catecv2)
 ```
 
 The validation curves depend on `prop.cutoff` and have more line segments than the one presented in the main example because they contain 9 sets of subgroups instead of 5 sets (although it is not so obvious here in this example). The ABC statistic is not affected by this because the calculation of ABC statistics depends on the minimum and maximum of
-the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are created from this range. The highest proportion cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See more theoretical details on ABC calculation in the [Methods for estimating and validating treatment effects](Theoretical-details.html) section.
+the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are created from this range. The highest proportion cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See more theoretical details on ABC calculation in the [Methods for developing and validating CATE scores](Theoretical-details.html) section.
 
 ```{r subgroup_proportion4, eval = T, echo = T}
 print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
@@ -345,12 +344,12 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 2.  We do not recommend choosing values too close to 0 either because this will generate very small subgroups which may lead to numerical instability, e.g., 10/90 split specified by 0.1 in this example. In this situation, either the validation curves will be plotted by the range of the unstable ATE estimates will make them useless or the validation curves will not be plotted if the numerical instability due to an extreme split leads to missing or infinite values, in which case a warning or error is printed as in the example above.
 3.  In general, we do not recommend specifying too few proportions for `prop.cutoff` (e.g., 2 or 3) because the validation curves will look very jagged. The validation curves will be smoother with more proportions and more spread out over the range of proportions. If computation is an issue, however, choosing too many values for `prop.cutoff` or `prop.multi` can be time consuming. It is recommended to start from a smaller length and you can increase the length as needed.
 
-### IPCW model and method
+### Censoring model and method
 
-The default IPCW model uses the same covariates as the outcome model `cate.model` plus the treatment. The default IPCW method is a Cox regression with Breslow estimator of the baseline survivor function from `coxph()` function in the `survival` package. Different variables or different method can be specified in the IPCW model. In the example below, we changed the covariates to the number of symptoms and number relapses in the pre-index period and specified the Weibull accelerated failure time (AFT) regression model using the location-scale parameterization. The `survreg()` function in the `survival` package was used to fit the AFT model.
+The censoring model estimates the probabilities used for inverse probability of censoring weighting (IPCW). The default censoring model uses the same covariates as the outcome model `cate.model` plus the treatment. The default IPCW method is a Cox regression with Breslow estimator of the baseline survivor function from `coxph()` function in the `survival` package. Different variables or different method can be specified in the censoring model. In the example below, we changed the covariates to the number of symptoms and number relapses in the pre-index period and specified the Weibull accelerated failure time (AFT) regression model using the location-scale parameterization. The `survreg()` function in the `survival` package was used to fit the AFT model.
 
 ```{r ipcw, eval = F, echo = T, cache = doc.cache}
-# An example of a different IPCW model with different covariates from default
+# An example of a different censoring model with different covariates from default
 output_catecv4 <- catecv(response = "survival",
                          data = survivalExample,
                          score.method = c("poisson", "contrastReg"),
@@ -378,7 +377,7 @@ The argument `tau0` specifies the truncation time for RMTL. The default is the m
 In the main example, we used the minimum of the 95th percentile of survival time in either treatment group as `tau0`. Below we show how setting different values of the truncation time.
 
 ```{r time, eval = T, echo = T, cache = doc.cache}
-# An example of a different IPCW model with different covariates from default
+# An example of a different censoring model with different covariates from default
 output_catecv5 <- catecv(response = "survival",
                          data = survivalExample,
                          score.method = c("poisson", "contrastReg"),
@@ -401,12 +400,13 @@ plot(output_catecv5)
 ```
 
 
-## Other `precmed` vignettes in this series  
-  
-[1. Estimating and validating treatment effects for count outcomes](Count-examples.html)  
-[2. Estimating and validating treatment effects for survival outcomes](Survival-examples.html)  
-[3. Customizing CATE models and validation](Additional-examples.html)  
-[4. Methods for estimating and validating treatment effects](Theoretical-details.html)    
+## Other `precmed` vignettes in this series
+
+- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
+- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
+- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Methods for estimating average treatment effects](ATE-theory.html)
+- [Methods for developing and validating CATE scores](Theoretical-details.html)
 
 ## References
     

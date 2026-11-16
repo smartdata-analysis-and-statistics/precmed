@@ -4,14 +4,14 @@
 #' among the following: Poisson regression, boosting, two regressions, contrast regression, and
 #' negative binomial.
 #'
-#' @param data A data frame containing the variables in the outcome and propensity score model; a data frame with \code{n} rows
+#' @param data A data frame containing the variables in the outcome and treatment model; a data frame with \code{n} rows
 #' (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
 #' and \code{'negBin'}.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
@@ -501,7 +501,7 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' @param y Observed outcome; vector of size \code{n} (observations)
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.

@@ -47,7 +47,7 @@ and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No def
 
 \item{response}{The type of response. Always 'survival' for this function.}
 
-\item{data}{A data frame containing the variables in the outcome and propensity score models;
+\item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
 \item{followup.time}{Follow-up time, interpreted as the potential censoring time. If the potential censoring time is known,

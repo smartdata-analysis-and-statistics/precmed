@@ -1,9 +1,9 @@
 #' Extract average treatment effect estimates and confidence intervals
 #'
 #' Extract treatment effects from an \code{atefit} object on their native
-#' estimation scale: the log rate ratio for count outcomes, or the log RMTL
+#' estimation scale: the risk difference for binary outcomes, the log rate ratio for count outcomes, or the log RMTL
 #' ratio and log cumulative hazard ratio for survival outcomes. Exponentiate the returned
-#' estimates and interval limits to obtain ratios.
+#' ratio estimates and interval limits to obtain ratios.
 #'
 #' @param object An object of class \code{atefit}.
 #' @param ... Additional arguments; currently unused.
@@ -29,6 +29,7 @@ NULL
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 atefit_effect_terms <- function(object) {
   switch(object$response,
+         binary = "risk.difference",
          count = "log.rate.ratio",
          survival = c("log.rmtl.ratio",
                       if (!is.null(object$log.cumulative.hazard.ratio)) "log.cumulative.hazard.ratio" else if (!is.null(object$log.hazard.ratio)) "log.hazard.ratio"),

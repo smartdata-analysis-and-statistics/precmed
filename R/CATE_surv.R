@@ -6,17 +6,17 @@
 #'
 #' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
 #' \code{'contrastReg'}.
-#' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
-#' model to be fitted. The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-#' which corresponds to specifying the IPCW model with the same covariates as the outcome model
+#' @param ipcw.model A formula describing the censoring model used for inverse
+#' probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
+#' which corresponds to specifying the censoring model with the same covariates as the outcome model
 #' \code{cate.model} plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Default is \code{followup.time = NULL},
@@ -624,7 +624,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' @param d The event indicator, normally \code{1 = event, 0 = censored}; vector of size \code{n}.
 #' @param trt Treatment received; vector of size \code{n} with treatment coded as 0/1.
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
-#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.
+#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
 #' @param tau0 The truncation time for defining restricted mean time lost.

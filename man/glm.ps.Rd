@@ -17,7 +17,7 @@ glm.ps(
 \item{trt}{Treatment received; vector of size \code{n} (observations) with treatment coded as 0/1}
 
 \item{x.ps}{Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)}
+dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)}
 
 \item{xnew}{Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept)
 for which we want propensity scores predictions; dimension \code{m} (observations in the new data set) by \code{p.ps + 1}}

@@ -7,14 +7,14 @@
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
-#' model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-#' Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' @param ipcw.model A formula describing the censoring model used for inverse
+#' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+#' Default is \code{NULL}, which uses a censoring model with the same covariates
 #' as the outcome model \code{cate.model}, plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
@@ -79,6 +79,12 @@
 #' If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
 #' outcome-model estimate is substituted and a warning is issued. That fallback
 #' does not retain the doubly robust guarantee.
+#'
+#' @details Failed or non-finite bootstrap estimates are recorded in
+#' \code{bootstrap.diagnostics}, with replicate number, affected measure and
+#' reason. A warning summarizes failures; inference for each affected measure
+#' is unavailable rather than based on a subset of replicates. See also
+#' \code{diagnostics()} to inspect these records.
 #'
 #' @examples
 #' \donttest{
@@ -183,23 +189,27 @@ atefitsurv <- function(data,
                          style = 3)
 
   fallback.boot <- 0L
+  errors <- rep(NA_character_, n.boot)
   for (i in seq(n.boot)) {
     idsub.boot <- sample(n, size = n, replace  = TRUE)
     fallback.in.sample <- FALSE
-    est.boot <- withCallingHandlers(drsurv(y = y[idsub.boot],
+    est.boot <- tryCatch(withCallingHandlers({
+      if (length(unique(trt[idsub.boot])) != 2L) stop("Both treatment groups are required")
+      drsurv(y = y[idsub.boot],
                        d = d[idsub.boot],
-                       x.cate = x.cate[idsub.boot, ],
+                       x.cate = x.cate[idsub.boot, , drop = FALSE],
                        x.ps = x.ps[idsub.boot, , drop = FALSE],
-                       x.ipcw = x.ipcw[idsub.boot, ],
+                       x.ipcw = x.ipcw[idsub.boot, , drop = FALSE],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE),
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE)
+    },
       rmst_fallback = function(w) {
         fallback.in.sample <<- TRUE
         invokeRestart("muffleWarning")
-      })
+      }), error = function(e) { errors[i] <<- conditionMessage(e); NULL })
     fallback.boot <- fallback.boot + as.integer(fallback.in.sample)
-    save.boot[i,] <- unlist(est.boot)[effect.names]
+    if (!is.null(est.boot)) save.boot[i,] <- unlist(est.boot)[effect.names]
 
     if (verbose == 1) setTxtProgressBar(pb, i)
   }
@@ -208,12 +218,17 @@ atefitsurv <- function(data,
   if (fallback.boot > 0L) warning("RMST outcome-model fallback occurred in ",
                                   fallback.boot, " bootstrap sample(s); bootstrap inference includes these estimates.", call. = FALSE)
 
-  invalid.chr <- sum(!is.finite(save.boot[, "log.cumulative.hazard.ratio"]))
-  if (!is.finite(est["log.cumulative.hazard.ratio"]) || invalid.chr > 0L) {
-    warning("The cumulative hazard ratio is undefined for the original sample or ",
-            invalid.chr, " bootstrap sample(s); its bootstrap inference is unavailable.", call. = FALSE)
-  }
-  se.est <- apply(save.boot, 2, sd)
+  issues <- ate_bootstrap_diagnostics(save.boot, errors, c(
+    log.rmtl.ratio = "RMTL ratio is undefined or non-finite given the estimated restricted means",
+    log.cumulative.hazard.ratio = "Cumulative hazard ratio is undefined: estimated survival is outside (0, 1) or the transformed ratio is non-finite"))
+  ate_bootstrap_warn(issues)
+  invalid.original <- names(est)[!is.finite(est)]
+  if (length(invalid.original)) warning("Non-finite original-sample estimates: ",
+    paste(invalid.original, collapse = ", "), "; their inference is unavailable.", call. = FALSE)
+  se.est <- vapply(seq_along(effect.names), function(j) {
+    if (!is.finite(est[j]) || any(!is.finite(save.boot[, j]))) NA_real_ else sd(save.boot[, j])
+  }, numeric(1))
+  names(se.est) <- effect.names
   cil.est <- est - qnorm(0.975) * se.est
   ciu.est <- est + qnorm(0.975) * se.est
   p.est  <- 1 - pchisq(est^2 / se.est^2, df = 1)
@@ -232,6 +247,7 @@ atefitsurv <- function(data,
   out$log.cumulative.hazard.ratio <- data.frame(est.all[4, ])
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
+  out$bootstrap.diagnostics <- issues
   out$warning <- preproc$warning
   out$treatment.labels <- preproc$treatment.labels
 
@@ -249,7 +265,7 @@ atefitsurv <- function(data,
 #' @param y Observed survival or censoring time; vector of size \code{n}.
 #' @param d The event indicator, normally \code{1 = event, 0 = censored}; vector of size \code{n}.
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
-#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.
+#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param trt Treatment received; vector of size \code{n} with treatment coded as 0/1.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
@@ -379,7 +395,7 @@ rmst_outcome_fallback <- function(estimate, predictions, tau0, arm) {
 #' @param y Observed survival or censoring time; vector of size \code{n}.
 #' @param d The event indicator, normally \code{1 = event, 0 = censored}; vector of size \code{n}.
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
-#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.
+#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param trt Treatment received; vector of size \code{n} with treatment coded as 0/1.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
@@ -483,7 +499,7 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
 #' @param y Observed survival or censoring time; vector of size \code{n}.
 #' @param d The event indicator, normally \code{1 = event, 0 = censored}; vector of size \code{n}.
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
-#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.
+#' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param trt Treatment received; vector of size \code{n} with treatment coded as 0/1.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.

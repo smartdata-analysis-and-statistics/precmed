@@ -146,7 +146,7 @@ arg.checks.common <- function(fun,
 #' @param fun A function for which argument check is needed; "catefit" for \code{catefitcount()} and \code{catefitsurv()}, "crossv" for \code{catecvcount()} and \code{catecvsurv()},
 #' and "drinf" for \code{drcount.inference()} and \code{drsurv.inference()}. No default.
 #' @param response The type of response. Always 'survival' for this function.
-#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
 #' @param followup.time Follow-up time, interpreted as the potential censoring time. If the potential censoring time is known,
 #' followup.time is the name of a corresponding column in the data. Otherwise, set \code{followup.time == NULL}.
@@ -315,14 +315,15 @@ arg.checks <- function(fun, response, data,
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 check_response <- function(response) {
   if (!is.character(response) || length(response) != 1L || is.na(response) ||
-      !response %in% c("count", "survival", "continuous"))
-    stop("response must be one of 'count', 'survival', or 'continuous'.", call. = FALSE)
+      !response %in% c("count", "survival", "continuous", "binary"))
+    stop("response must be one of 'count', 'survival', 'continuous', or 'binary'.", call. = FALSE)
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 check_score_method <- function(response, score.method) {
   check_response(response)
   allowed <- switch(response,
+    binary = c("logistic", "twoReg", "boosting"),
     count = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"),
     survival = c("boosting", "poisson", "twoReg", "contrastReg", "randomForest"),
     continuous = c("boosting", "gaussian", "twoReg", "contrastReg", "randomForest", "gam"))
@@ -339,10 +340,10 @@ check_score_method <- function(response, score.method) {
 #' and "drinf" for \code{drcount.inference()}. No default.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to

@@ -8,8 +8,8 @@
 #' Allowed values include "count" (see \code{\link{catecvcount}()}), "survival"
 #' (see \code{\link{catecvsurv}()}) and "continuous" (see
 #' \code{\link{catecvmean}()}) .
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
 #' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
@@ -17,7 +17,7 @@
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side. For survival outcomes, a
 #' \code{Surv} object must be used to describe the outcome.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
 #' @param ps.method A character value for the method to estimate the propensity score.
@@ -35,9 +35,9 @@
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
 #' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 #' for count outcomes and \code{'randomForest'} for survival outcomes.
-#' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
-#' model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-#' Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+#' @param ipcw.model A formula describing the censoring model used for inverse
+#' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+#' Default is \code{NULL}, which uses a censoring model with the same covariates
 #' as the outcome model \code{cate.model}, plus the treatment.
 #' @param ipcw.method A character value for the censoring model. Only applies for survival
 #' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
@@ -266,6 +266,7 @@ catecv <- function(response,
                    verbose = 0,
                    contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
   check_response(response)
+  if (response == "binary") stop("Binary outcomes are not yet supported by catecv().")
   check_score_method(response, score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
@@ -308,17 +309,17 @@ catecv <- function(response,
 #'
 #' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score (PS) model to be fitted. The treatment must
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, propensity score, and inverse
-#' probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
 #' \code{'contrastReg'}.
-#' @param ipcw.model A formula describing the inverse probability of censoring weighting (IPCW)
-#' model to be fitted. The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-#' which corresponds to specifying the IPCW model with the same covariates as the outcome model
+#' @param ipcw.model A formula describing the censoring model used for inverse
+#' probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
+#' which corresponds to specifying the censoring model with the same covariates as the outcome model
 #' \code{cate.model} plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Default is \code{followup.time = NULL},
@@ -1114,12 +1115,12 @@ catecvsurv <- function(data,
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a
 #' numeric vector coded as 0 or 1. If data are from a randomized trial, specify
 #' \code{ps.model} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and
-#' propensity score model; a data frame with \code{n} rows (1 row per
+#' treatment model; a data frame with \code{n} rows (1 row per
 #' observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE
 #' score. Allowed values are: \code{'boosting'}, \code{'poisson'},
@@ -1752,10 +1753,10 @@ catecvcount <- function(data,
 #' The outcome must appear on the left-hand side.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 #' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code{'contrastReg'},
@@ -3048,7 +3049,7 @@ boxplot.precmed <- function(x, ylab = NULL,
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate}
 #' (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
@@ -3067,12 +3068,12 @@ boxplot.precmed <- function(x, ylab = NULL,
 #'             y.train          - observed outcome in the training set; vector of size \code{m} (observations in the training set)
 #'             trt.train        - treatment received in the training set; vector of size \code{m} coded as 0/1
 #'             x.cate.train     - baseline covariates for the outcome model in the training set; matrix of dimension \code{m} by \code{p.cate}
-#'             x.ps.train       - baseline covariates (plus intercept) for the propensity score model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
+#'             x.ps.train       - baseline covariates (plus intercept) for the treatment model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
 #'             time.train       - log-transformed person-years of follow-up in the training set; vector of size \code{m}
 #'             y.valid          - observed outcome in the validation set; vector of size \code{n-m}
 #'             trt.valid        - treatment received in the validation set; vector of size \code{n-m} coded as 0/1
 #'             x.cate.valid     - baseline covariates for the outcome model in the validation set; matrix of dimension \code{n-m} by \code{p.cate}
-#'             x.ps.valid       - baseline covariates (plus intercept) for the propensity score model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
+#'             x.ps.valid       - baseline covariates (plus intercept) for the treatment model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
 #'             time.valid       - log-transformed person-years of follow-up in the validation set; vector of size \code{n-m}
 balance.split <- function(y, trt, x.cate, x.ps, time,
                           minPS = 0.01, maxPS = 0.99,

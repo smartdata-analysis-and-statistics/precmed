@@ -1,7 +1,7 @@
 #' Simulate an illustrative count-outcome dataset
 #'
 #' Generate fully synthetic data for demonstrating count treatment-effect
-#' methods. Treatment is assigned by a logistic propensity model. Relapse counts
+#' methods. Treatment is assigned by a logistic treatment model. Relapse counts
 #' follow a Poisson or negative binomial distribution with a log-rate model,
 #' treatment interactions and varying follow-up. Coefficients are illustrative,
 #' not clinical estimates or a reconstruction of the MarketScan data.

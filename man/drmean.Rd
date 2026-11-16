@@ -29,7 +29,7 @@ model for all subjects.}
 
 \item{x.ps}{A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
 a leading column of 1 as the intercept and each remaining column representing
-each baseline covariate specified in the propensity score model for all
+each baseline covariate specified in the treatment model for all
 subjects}
 
 \item{ps.method}{A character value for the method to estimate the propensity

@@ -16,17 +16,18 @@ simulate_survival(
   shape = 1.15,
   scale = 650,
   treatment_shape = shape,
-  hr_reference_time = scale
+  hr_reference_time = scale,
+  censor_horizon = 900
 )
 }
 \arguments{
 \item{n}{Positive integer giving the total sample size. Default is 4,000.
-Treatment group sizes are determined by the propensity model.}
+Treatment group sizes are determined by the treatment model.}
 
 \item{seed}{An integer seed for reproducibility, or \code{NULL} to use the
 current random-number state. Supplying a seed sets R's random-number state.}
 
-\item{ps_weights}{Named numeric coefficients for the logistic propensity model.
+\item{ps_weights}{Named numeric coefficients for the logistic treatment model.
 Recognized names are \code{intercept}, \code{age},
 \code{drugB}, and \code{drugC}; named subsets override the defaults.
 Age is measured in decades from 48 years;
@@ -69,6 +70,9 @@ time-varying hazard ratio.}
 
 \item{hr_reference_time}{Positive time in days at which \code{conditional_hr}
 is defined. Defaults to \code{scale}.}
+
+\item{censor_horizon}{Administrative censoring time in days. Defaults to
+900; use \code{Inf} for no administrative censoring.}
 }
 \value{
 A data frame with \code{n} rows and nine columns:
@@ -81,7 +85,7 @@ A data frame with \code{n} rows and nine columns:
 \description{
 Generate fully synthetic data for demonstrating survival treatment-effect
 methods. Baseline covariates are generated independently of patient records.
-Treatment is assigned using a logistic propensity model; the numbers in
+Treatment is assigned using a logistic treatment model; the numbers in
 each treatment group arise from those probabilities and vary by sample.
 Event times follow a Weibull model with treatment
 interactions with age and previous relapses. By default, censoring is
@@ -95,7 +99,7 @@ At positive time \code{t}, the covariate-specific hazard ratio is
   \code{(t / hr_reference_time)^(treatment_shape - shape)}. It increases
   over time if the treated shape is larger, and decreases if it is smaller.
   By default, random censoring times are exponential with mean 450 days;
-  administrative censoring occurs at 900 days. Censoring and event times are generated independently
+  administrative censoring occurs at \code{censor_horizon}. Censoring and event times are generated independently
   conditional on covariates and treatment, including when censoring depends
   on those variables. Extreme propensity coefficients can produce poor
   treatment overlap or a sample with no patients in one treatment group.

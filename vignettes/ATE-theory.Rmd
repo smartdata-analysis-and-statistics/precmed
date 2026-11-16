@@ -1,0 +1,265 @@
+---
+title: "Methods for estimating average treatment effects"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+bibliography: references.bib
+output:
+  html_document:
+    toc: TRUE
+    number_sections: FALSE
+    toc_depth: 3
+    fig_caption: yes
+    fig_width: 9
+    fig_height: 6
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = "#>", collapse = TRUE)
+```
+
+This vignette describes how `atefit()` estimates population-average treatment
+effects for binary, count and survival outcomes, including the outcome and
+treatment models, assumptions and bootstrap inference. Chapter 5 discusses
+marginal and conditional causal effects [@nguyen2026causaleffects]. For CATE
+score development and validation, see [Methods for developing and validating
+CATE scores](Theoretical-details.html).
+
+We use **outcome model** for the model of the outcome given treatment and
+covariates, **treatment model** for the model of treatment assignment given
+covariates, and **censoring model** for the model used to account for censoring
+in survival analyses. For binary treatment, the treatment model estimates the
+probability of treatment 1, also called the **propensity score**. These terms
+reflect the roles of the models discussed in causal inference, including
+@hernan2020whatif. The argument names `ps.model` and `ipcw.model` refer to the
+treatment and censoring models, respectively.
+
+## Average treatment effect for binary outcomes
+
+For a fully observed binary outcome, `atefit(response = "binary")` estimates a
+population-average **risk difference** using augmented inverse probability
+weighting (AIPW). This section describes the overall ATE; it does not describe
+binary CATE scoring or validation. See @kurz2022aipw for an introduction to AIPW
+and its double-robustness property, and @hoogland2021binary for treatment
+effect prediction with binary endpoints.
+
+### Estimand and assumptions
+
+For patient $i$, let $R_i\in\{0,1\}$ denote treatment, $Y_i\in\{0,1\}$ the
+observed outcome, and $\boldsymbol X_i$ the baseline covariates. The outcome
+must be observed for all patients at the chosen, common follow-up horizon; the
+binary estimator does not adjust for censoring. Let $Y_i^{(r)}$ denote the
+potential outcome under treatment $r$. The marginal ATE on the risk difference
+scale is
+
+$$\Delta = \mathbb E[Y^{(1)}] - \mathbb E[Y^{(0)}] = \mu_1 - \mu_0.$$
+
+For an outcome coded as a favorable response, $\Delta>0$ means a higher
+response probability under treatment 1; for an adverse outcome, it means a
+higher adverse-event probability. For example, 0.10 is a difference of 10
+percentage points. A causal interpretation requires consistency, no unmeasured
+treatment--outcome confounding given the adjustment covariates, and positivity
+(both treatments must be possible at relevant covariate values). Chapter 5
+introduces marginal and conditional effects [@nguyen2026causaleffects].
+
+### Outcome and treatment models
+
+Write $m_r(\boldsymbol x)=\Pr(Y=1\mid R=r,\boldsymbol X=\boldsymbol x)$ and
+$\pi(\boldsymbol x)=\Pr(R=1\mid\boldsymbol X=\boldsymbol x)$. `cate.model`
+specifies the outcome and covariates for a binomial logistic model. By default,
+`interactions = TRUE` adds treatment and treatment interactions with all
+outcome-model covariates. The resulting model gives separate logistic
+regressions by treatment arm in an equivalent parameterization. With
+`interactions = FALSE`, the fitted logistic model contains treatment and the
+specified covariates without treatment--covariate interactions. In both cases,
+$\hat m_0(\boldsymbol X_i)$ and $\hat m_1(\boldsymbol X_i)$ predict response
+for every patient under each treatment.
+
+`ps.model` specifies treatment and covariates for the treatment model. The
+default `ps.method = "glm"` uses logistic regression; `"lasso"` uses the
+package's LASSO propensity procedure. Write the fitted treatment-1 propensity
+as $\hat\pi_i$. It is truncated to `[minPS, maxPS]`, by default `[0.01, 0.99]`,
+before calculating the treatment weights. For a randomized trial an
+intercept-only treatment model can be specified as `trt ~ 1`.
+
+### Augmented inverse probability weighting
+
+For each arm, `atefit()` averages the predicted outcome plus an
+inverse-propensity-weighted residual correction:
+
+$$\hat\mu_1 = \frac{1}{n}\sum_{i=1}^n\left[
+  \hat m_1(\boldsymbol X_i) + \frac{R_i}{\hat\pi_i}
+  \{Y_i-\hat m_1(\boldsymbol X_i)\}\right],$$
+
+$$\hat\mu_0 = \frac{1}{n}\sum_{i=1}^n\left[
+  \hat m_0(\boldsymbol X_i) + \frac{1-R_i}{1-\hat\pi_i}
+  \{Y_i-\hat m_0(\boldsymbol X_i)\}\right],\qquad
+\hat\Delta=\hat\mu_1-\hat\mu_0.$$
+
+The returned `risk1`, `risk0`, and `risk.difference` contain these estimates.
+The outcome and treatment models are fitted using the same analysis sample;
+this binary ATE implementation does not cross-fit them. Unlike a weighted
+identity-link regression coefficient, the estimated contrast above is obtained
+by subtracting two augmented population means. The construction is the same
+kind of augmented mean used for count outcomes, with response probabilities
+and their difference replacing rates and their ratio.
+
+Under the identification assumptions and suitable regularity conditions, the
+estimator is consistent if either the treatment-specific outcome models are
+correctly specified or the treatment model is correctly specified
+[@kurz2022aipw]. This does not protect against unmeasured confounding, poor
+overlap, or misspecification of both models. In particular, if truncation
+changes the true propensity scores, consistency based solely on a correctly
+specified treatment model is not guaranteed. The augmented estimates of
+$\mu_0$ and $\mu_1$ are not constrained to $[0,1]$, nor is their difference
+constrained to $[-1,1]$.
+
+## Average treatment effect for count outcomes
+
+For count outcomes, `atefit(response = "count")` estimates the population-level
+ratio of event rates for treatment 1 versus treatment 0. Let $Y_i$ be the event
+count observed during exposure $T_i>0$, $R_i$ the treatment, and
+$\boldsymbol X_i$ the baseline covariates. The target is a ratio of
+population-average rates, rather than a conditional Poisson regression rate
+ratio. Identification requires appropriate treatment exchangeability,
+positivity, consistency and assumptions about the observation time and the
+relationship between counts and exposure.
+
+### Outcome and treatment models
+
+`cate.model` specifies the count outcome and covariates; an
+`offset(log(T))` accounts for exposure. The outcome model is Poisson with a
+log link. With `interactions = TRUE` and more than ten observations in each
+treatment arm, the implementation fits separate Poisson models for the arms.
+Otherwise it fits a pooled model with a treatment main effect and no
+interactions. Predicted rates per unit of exposure are written
+$\hat m_r(\boldsymbol X_i)$, for $r=0,1$. A treatment model estimates
+$\hat\pi_i=\Pr(R_i=1\mid\boldsymbol X_i)$; as for binary outcomes, its fitted
+values are truncated using `minPS` and `maxPS`.
+
+### Augmented rate estimates
+
+Using the notation for the binary ATE above, the augmented estimate of the
+rate for treatment $r$ is
+
+$$\hat\lambda_r = \frac{1}{n}\sum_{i=1}^{n}\left[
+\hat m_r(\boldsymbol X_i) +
+\frac{\mathbf{1}(R_i=r)}{\hat p_{ri}}
+\left\{\frac{Y_i}{T_i}-\hat m_r(\boldsymbol X_i)\right\}\right],$$
+
+where $\hat p_{1i}=\hat\pi_i$ and $\hat p_{0i}=1-\hat\pi_i$. The output
+contains `rate1`, `rate0`, and the log rate ratio
+$\log(\hat\lambda_1/\hat\lambda_0)$ as `log.rate.ratio`. Exponentiating the
+latter gives the estimated rate ratio. This uses the same augmented-mean
+structure as the binary estimator, but the outcome is a rate and the contrast
+is a ratio.
+
+Under the relevant identification and regularity assumptions, the augmented
+rates are consistent if either the outcome-rate model or the treatment model
+is correctly specified. This does not remove the need for appropriate
+exposure assumptions, overlap, or control of confounding. Truncating propensity
+scores can affect the guarantee based on the treatment model. A rate ratio
+is undefined when the estimated rates do not yield a valid positive ratio.
+
+## Average treatment effect for survival outcomes
+
+For survival outcomes, `atefit(response = "survival")` estimates population
+summaries at a chosen horizon $\tau_0$. For treatment $r$, let $T^{(r)}$ be the
+potential event time. Restricted mean survival time (RMST) is
+$\mu_r(\tau_0)=\mathbb E[\min\{T^{(r)},\tau_0\}]$, and restricted mean time
+lost (RMTL) is $\tau_0-\mu_r(\tau_0)$. The main treatment contrast is the
+log RMTL ratio
+
+$$\log\!\left(\frac{\tau_0-\mu_1(\tau_0)}{\tau_0-\mu_0(\tau_0)}\right).$$
+
+The function also reports a population-level cumulative hazard ratio at the
+horizon, derived from the treatment-specific marginal survival probabilities.
+These summaries have different interpretations from a conditional Cox hazard
+ratio.
+
+### Outcome, treatment and censoring models
+
+The outcome model fits a Cox model separately in each treatment arm and uses
+its predictions to estimate each patient's RMST and survival probability at
+$\tau_0$ under each treatment. A treatment model estimates treatment
+probabilities, and a censoring model provides inverse probability of censoring
+weights (IPCW). The censoring model is controlled by `ipcw.model`,
+`ipcw.method`, and `surv.min`; the treatment model and truncation use the same
+controls described above. Because censoring can leave the event time unobserved,
+causal interpretation requires appropriate censoring assumptions and sufficient
+follow-up in addition to the treatment identification assumptions.
+
+### Augmented RMST and RMTL estimates
+
+Let $U_i=\min(Y_i,\tau_0)$ be the observed time restricted at the horizon,
+$\hat m_r(\boldsymbol X_i)$ the arm-specific predicted RMST, and
+$\hat p_{ri}$ the estimated probability of receiving treatment $r$. Let
+$w_i$ be the implemented IPCW weight for an observed restricted outcome,
+normalized to have mean one. The implementation computes
+
+$$\hat\mu_r = \frac{1}{n}\sum_i \hat m_r(\boldsymbol X_i) +
+\frac{\sum_i w_i\mathbf{1}(R_i=r)\{U_i-\hat m_r(\boldsymbol X_i)\}/\hat p_{ri}}
+     {\sum_i\mathbf{1}(R_i=r)/\hat p_{ri}}.$$
+
+It reports `rmst1`, `rmst0`, and `log.rmtl.ratio` computed from these
+estimates. Under appropriate assumptions, including a correctly specified
+censoring model, the RMST estimator is doubly robust with respect to the
+outcome and treatment models. Propensity-score truncation can affect that property.
+If an augmented RMST lies outside $[0,\tau_0]$, the implementation warns and
+substitutes the average outcome-model prediction for that arm; this fallback is
+not doubly robust.
+
+### Cumulative hazard ratio
+
+The function also constructs augmented marginal survival estimates
+$\hat S_0(\tau_0)$ and $\hat S_1(\tau_0)$ using arm-specific Cox survival
+predictions, treatment weights and censoring weights. For valid survival
+estimates strictly between zero and one, it reports
+
+$$\log\!\left(\frac{-\log\hat S_1(\tau_0)}{-\log\hat S_0(\tau_0)}\right)$$
+
+as `log.cumulative.hazard.ratio`. This population-level ratio of cumulative
+hazards at $\tau_0$ is not a conditional Cox hazard ratio. If either estimated
+survival probability is outside $(0,1)$, the ratio is undefined rather than
+clipped to a valid range.
+
+## Bootstrap inference and assessment
+
+For each outcome type, `atefit()` resamples patients with replacement `n.boot`
+times and refits the models used for estimation in each sample. It uses the
+standard deviation of the bootstrap estimates as the standard error and reports
+a normal Wald confidence interval and a two-sided Wald p-value. The default
+95% interval is $\hat\theta \pm 1.96\,\widehat{SE}$. `confint()` uses the
+stored standard error for other confidence levels without repeating the
+bootstrap. Supplying `seed` makes the resampling reproducible.
+
+The effect scale depends on the outcome: bootstrap inference is on the risk
+difference for binary outcomes, the log rate ratio for counts, and the log
+RMTL ratio and log cumulative hazard ratio for survival. Exponentiate the
+log-ratio estimates and interval limits to obtain ratios. Treatment-specific
+bootstrap estimates are also retained and can be visualized with `plot()`.
+
+Failed or non-finite bootstrap estimates are recorded in
+`bootstrap.diagnostics`, including the replicate, affected measure and reason;
+`diagnostics()` also exposes these records. A warning summarizes the number of
+replicates and reasons. Inference for an affected measure is unavailable if
+any of its replicates is undefined; it is not calculated from only successful
+samples. Other measures with complete replicates can still have inference.
+For survival outcomes, the function also reports RMST outcome-model fallbacks
+in bootstrap samples, which are retained in the bootstrap inference.
+
+Before interpreting an estimate, assess the treatment and outcome model
+covariates, treatment overlap, propensity-score truncation, fitting warnings and
+bootstrap stability. For survival outcomes, also assess censoring and support
+at the chosen horizon. These checks do not establish the absence of unmeasured
+confounding or prove that a model is correctly specified. Confidence intervals
+quantify sampling uncertainty under the estimation procedure, not uncertainty
+about unmeasured confounding or model misspecification. Bootstrap inference for an ATE is not validation of a CATE score.
+
+## Other `precmed` vignettes in this series
+
+- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
+- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
+- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Customizing CATE models and validation](Additional-examples.html)
+- [Methods for developing and validating CATE scores](Theoretical-details.html)
+
+## References

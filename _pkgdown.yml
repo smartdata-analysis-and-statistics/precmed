@@ -20,13 +20,17 @@ navbar:
     href: articles/quick-start.html
   - text: Vignettes
     menu:
+    - text: Estimating and validating treatment effects for binary outcomes
+      href: articles/Binary-examples.html
     - text: Estimating and validating treatment effects for count outcomes
       href: articles/Count-examples.html
     - text: Estimating and validating treatment effects for survival outcomes
       href: articles/Survival-examples.html
     - text: Customizing CATE models and validation
       href: articles/Additional-examples.html
-    - text: Methods for estimating and validating treatment effects
+    - text: Methods for estimating average treatment effects
+      href: articles/ATE-theory.html
+    - text: Methods for developing and validating CATE scores
       href: articles/Theoretical-details.html
     href: articles/index.html
   - text: Learning resources

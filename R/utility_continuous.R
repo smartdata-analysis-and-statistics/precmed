@@ -18,7 +18,7 @@
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate}
 #' (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
@@ -36,11 +36,11 @@
 #'             y.train          - observed outcome in the training set; vector of size \code{m} (observations in the training set)
 #'             trt.train        - treatment received in the training set; vector of size \code{m} coded as 0/1
 #'             x.cate.train     - baseline covariates for the outcome model in the training set; matrix of dimension \code{m} by \code{p.cate}
-#'             x.ps.train       - baseline covariates (plus intercept) for the propensity score model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
+#'             x.ps.train       - baseline covariates (plus intercept) for the treatment model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
 #'             y.valid          - observed outcome in the validation set; vector of size \code{n-m}
 #'             trt.valid        - treatment received in the validation set; vector of size \code{n-m} coded as 0/1
 #'             x.cate.valid     - baseline covariates for the outcome model in the validation set; matrix of dimension \code{n-m} by \code{p.cate}
-#'             x.ps.valid       - baseline covariates (plus intercept) for the propensity score model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
+#'             x.ps.valid       - baseline covariates (plus intercept) for the treatment model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
 #'             bestid.valid     - id for the validation set by the best split; vector of size \code{n-m}
 balancemean.split <- function(y, trt, x.cate, x.ps,
                               minPS = 0.01, maxPS = 0.99,
@@ -145,10 +145,10 @@ balancemean.split <- function(y, trt, x.cate, x.ps,
 #' The outcome must appear on the left-hand side.
 #' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 #' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and propensity score models;
+#' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to

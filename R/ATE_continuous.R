@@ -7,12 +7,12 @@
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param ps.model A formula describing the propensity score model to be fitted.
+#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a
 #' numeric vector coded as 0/1. If data are from a RCT, specify \code{ps.model}
 #' as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and
-#' propensity score models; a data frame with \code{n} rows (1 row per
+#' treatment models; a data frame with \code{n} rows (1 row per
 #' observation).
 #' @param ps.method A character value for the method to estimate the propensity
 #' score. Allowed values include one of: \code{'glm'} for logistic regression
@@ -193,7 +193,7 @@ atefitmean <- function(data,
 #' model for all subjects.
 #' @param x.ps A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
 #' a leading column of 1 as the intercept and each remaining column representing
-#' each baseline covariate specified in the propensity score model for all
+#' each baseline covariate specified in the treatment model for all
 #' subjects
 #' @param ps.method A character value for the method to estimate the propensity
 #' score. Allowed values include one of:
@@ -344,7 +344,7 @@ drmean.matrix <- function(y, trt, outcome.design, x.ps, families,
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param score Estimated CATE scores for all \code{n} observations from one of the six methods
 #' (boosting, linear regression, two regressions, contrast regression, random forest, generalized additive model); vector of size \code{n}
 #' @param prop Proportions corresponding to percentiles in the estimated CATE scores that define subgroups to calculate ATE for;
@@ -412,7 +412,7 @@ estmean.bilevel.subgroups <- function(y, x.cate, x.ps, trt, score, higher.y,
 #' @param trt Treatment received; vector of size \code{n} units with treatment coded as 0/1
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param score Estimated CATE scores for all \code{n} observations from one of the six methods
 #' (boosting, linear regression, two regressions, contrast regression, random forest, generalized additive model); vector of size \code{n}
 #' @param prop Proportions corresponding to percentiles in the estimated CATE scores that define subgroups to calculate ATE for;

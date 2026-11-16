@@ -28,11 +28,11 @@ The outcome must appear on the left-hand side.}
 \item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
 It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
 
-\item{ps.model}{A formula describing the propensity score model to be fitted.
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
 coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
 
-\item{data}{A data frame containing the variables in the outcome and propensity score models;
+\item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
 \item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the

@@ -44,7 +44,7 @@ intxsurv(
 
 \item{x.cate}{Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.}
 
-\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.}
+\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.}
 
 \item{x.ipcw}{Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.}
 
@@ -82,8 +82,6 @@ one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 \code{initial.predictor.method = 'boosting'}. Default is \code{3}.}
-
-\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
 Used if \code{score.method = 'randomForest'} or
@@ -131,6 +129,10 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+\code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

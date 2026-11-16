@@ -2,7 +2,7 @@
 % Please edit documentation in R/ATE.R
 \name{atefit}
 \alias{atefit}
-\title{Doubly robust estimator of and inference for the average treatment effect for count, survival and continuous data}
+\title{Estimate average treatment effects for binary, count and survival outcomes}
 \usage{
 atefit(
   response,
@@ -27,19 +27,21 @@ atefit(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"count" (see \code{\link{catecvcount}()}), "survival" (see
+"binary", "count" (see \code{\link{catecvcount}()}), "survival" (see
 \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).}
 
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome, treatment,
+and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
 \item{cate.model}{A formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side. For survival outcomes,
 a \code{Surv} object must be used to describe the outcome.}
 
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
-appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+appear on the left-hand side. For binary outcomes, logical treatment values
+\code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
+Numeric 0/1 values or two distinct treatment labels are also accepted.
+If data are from a randomized controlled trial, specify \code{ps.model = trt ~ 1} as an intercept-only model.}
 
 \item{ps.method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
@@ -48,9 +50,9 @@ Allowed values include one of:
 two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 Relevant only when \code{ps.model} has more than one variable.}
 
-\item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
-model to be fitted. The left-hand side must be empty. Only applies for survival outcomes.
-Default is \code{NULL}, which corresponds to specifying the IPCW with the same covariates
+\item{ipcw.model}{A formula describing the censoring model used for inverse
+probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
+Default is \code{NULL}, which uses a censoring model with the same covariates
 as the outcome model \code{cate.model}, plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Only applies for survival
@@ -78,7 +80,8 @@ It must be a positive value and should be chosen close to 0. Only applies for su
 outcomes. Default is \code{0.025}.}
 
 \item{interactions}{A logical value indicating whether the outcome model should assume interactions
-between \code{x} and \code{trt}. Applies only to count outcomes. If \code{TRUE}, interactions will
+between \code{x} and \code{trt}. For binary outcomes this controls all
+treatment-covariate interactions in the logistic outcome model. For count outcomes, if \code{TRUE}, interactions will
 be assumed only if at least 10 patients received each treatment option. Default is \code{TRUE}.}
 
 \item{n.boot}{A numeric value indicating the number of bootstrap samples used. Default is \code{500}.}
@@ -87,7 +90,12 @@ be assumed only if at least 10 patients received each treatment option. Default 
 Default is \code{NULL}, corresponding to no seed.}
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
-be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
+be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
+
+Binary outcomes use \code{response = "binary"} and estimate a doubly robust
+risk difference (treatment 1 minus treatment 0) with a logistic outcome model.
+The result includes \code{risk.difference}, \code{risk0}, \code{risk1}, and
+bootstrap estimates. If any bootstrap fit fails, inference is unavailable.}
 
 \item{rmst.control}{Named options for Cox restricted mean survival integration.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
@@ -102,17 +110,27 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 }
 \value{
+For binary response, see \code{\link{atefitbinary}()}.
 For count response, see description of outputs in \code{\link{atefitcount}()}.
 For survival response, see description of outputs in \code{\link{atefitsurv}()}.
 }
 \description{
-Doubly robust estimator of the average treatment effect between two treatments, which is the rate ratio
-for count outcomes, the restricted mean time lost ratio for survival outcomes and the mean difference for continuous outcome. Bootstrap is used for
-inference.
+Doubly robust average treatment effect estimation for two treatments. The
+effect is a risk difference for binary outcomes, a rate ratio for count
+outcomes, or a restricted mean time lost ratio for survival outcomes.
+Bootstrap resampling is used for inference. Continuous outcomes are not
+yet implemented.
 }
 \details{
+For binary response, see \code{\link{atefitbinary}()}.
 For count response, see details in \code{\link{atefitcount}()}.
 For survival response, see details in \code{\link{atefitsurv}()}.
+
+Failed or non-finite bootstrap estimates are recorded in
+\code{bootstrap.diagnostics}, with replicate number, affected measure and
+reason. A warning summarizes failures; inference for each affected measure
+is unavailable rather than based on a subset of replicates. See also
+\code{diagnostics()} to inspect these records.
 }
 \examples{
 
@@ -145,4 +163,15 @@ output2
 plot(output2)
 
 }
+}
+\references{
+Hoogland, J., IntHout, J., Belias, M., et al. (2021). A tutorial on
+individualized treatment effect prediction from randomized trials with a
+binary endpoint. \emph{Statistics in Medicine}, 40(26), 5961--5981.
+\doi{10.1002/sim.9154}
+}
+\author{
+Thomas Debray \email{tdebray@fromdatatowisdom.com}
+
+Xiaotong (Phoebe) Jiang \email{xiaotong.phoebe.jiang@gmail.com}
 }

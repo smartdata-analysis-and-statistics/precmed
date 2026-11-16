@@ -4,7 +4,7 @@
 #'
 #' @param trt Treatment received; vector of size \code{n} (observations) with treatment coded as 0/1
 #' @param x.ps A matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param xnew A matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept)
 #' for which we want PS predictions; dimension \code{m} (observations in the new data set) by \code{p.ps + 1}
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
@@ -36,7 +36,7 @@ glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
 #'
 #' @param trt Treatment received; vector of size \code{n} (observations) with treatment coded as 0/1
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-#' dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)
+#' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param xnew Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept)
 #' for which we want propensity scores predictions; dimension \code{m} (observations in the new data set) by \code{p.ps + 1}
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be

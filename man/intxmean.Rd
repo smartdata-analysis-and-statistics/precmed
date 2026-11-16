@@ -40,7 +40,7 @@ intxmean(
 It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
 
 \item{x.ps}{Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
-dimension \code{n} by \code{p.ps + 1} (covariates in the propensity score model plus intercept)}
+dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code{'contrastReg'},
@@ -78,8 +78,6 @@ Default is \code{NULL}, which uses all variables in \code{cate.model}.}
 if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
 \code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
 
-\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
-
 \item{n.trees.rf}{A positive integer specifying the number of trees. Used only if
 \code{score.method = 'randomForest'}. Default is \code{1000}.}
 
@@ -104,6 +102,10 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+\code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

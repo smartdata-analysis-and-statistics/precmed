@@ -39,8 +39,8 @@ catefitsurv(
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome, propensity score, and inverse
-probability of censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome, treatment,
+and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
@@ -49,7 +49,7 @@ Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, 
 \item{cate.model}{A standard \code{Surv} formula describing the outcome model to be fitted.
 The outcome must appear on the left-hand side.}
 
-\item{ps.model}{A formula describing the propensity score (PS) model to be fitted. The treatment must
+\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
 
@@ -66,9 +66,9 @@ when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allow
 one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 Default is \code{'randomForest'}.}
 
-\item{ipcw.model}{A formula describing the inverse probability of censoring weighting (IPCW)
-model to be fitted. The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-which corresponds to specifying the IPCW model with the same covariates as the outcome model
+\item{ipcw.model}{A formula describing the censoring model used for inverse
+probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
+which corresponds to specifying the censoring model with the same covariates as the outcome model
 \code{cate.model} plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Allowed values are:
@@ -107,8 +107,6 @@ It must be a positive value and should be chosen close to 0. Default is \code{0.
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
 if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 \code{'contrastReg'}. Default is 2.}
-
-\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
 Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
@@ -170,6 +168,10 @@ Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+\code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
@@ -191,7 +193,9 @@ Returns an object of the class \code{catefit} containing the following component
  \item{\code{ate.contrastReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
  Only provided if \code{score.method} includes \code{'contrastReg'}.
- \item{\code{chr.<method>}: } Subgroup marginal cumulative hazard ratios at \code{tau0}, one for each selected scoring method and cutoff. Undefined estimates are \code{NA}; \code{hr.*} results are conditional Cox HRs.
+ \item{\code{chr.<method>}: } A vector of subgroup marginal cumulative hazard
+ ratios at \code{tau0}, for each selected scoring method. Undefined estimates
+ are \code{NA}; existing \code{hr.*} results are conditional Cox HRs.
  \item{\code{hr.randomForest}: }A vector of numerical values of length \code{prop.cutoff}
  containing the adjusted hazard ratio in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with random forest method.

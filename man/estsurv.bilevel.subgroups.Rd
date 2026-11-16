@@ -34,7 +34,7 @@ estsurv.bilevel.subgroups(
 
 \item{x.cate}{Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.}
 
-\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.}
+\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.}
 
 \item{x.ipcw}{Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.}
 

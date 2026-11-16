@@ -30,7 +30,7 @@ model for all subjects.}
 
 \item{x.ps}{A numeric matrix of dimension \code{n} by \code{p.ps + 1} with
 a leading column of 1 as the intercept and each remaining column
-representing each baseline covariate specified in the propensity score model
+representing each baseline covariate specified in the treatment model
 for all subjects.}
 
 \item{time}{A numeric vector of size \code{n} with each element representing

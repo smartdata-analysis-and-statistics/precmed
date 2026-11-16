@@ -4,7 +4,7 @@
 \alias{boosting-control}
 \title{Boosting controls and GBM3 backend}
 \description{
-Boosting uses \code{gbm3::gbmt()} for count, continuous, and survival
+Boosting uses \code{gbm3::gbmt()} for binary, count, continuous, and survival
 outcomes. Existing public argument names are translated internally.
 }
 \details{

@@ -29,6 +29,15 @@ These free courses can help you build the knowledge and practical skills needed 
 </div>
 </div>
 
+## Other `precmed` vignettes in this series
+
+- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
+- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
+- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Customizing CATE models and validation](Additional-examples.html)
+- [Methods for estimating average treatment effects](ATE-theory.html)
+- [Methods for developing and validating CATE scores](Theoretical-details.html)
+
 ## Methodological references
 
 The original methodological references are @yadlowsky2020estimation for ratio-based CATE estimation and validation, and @zhao2013effectively for target-population selection.

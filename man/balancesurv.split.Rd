@@ -28,7 +28,7 @@ balancesurv.split(
 
 \item{x.cate}{Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.}
 
-\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the propensity score model; dimension \code{n} by \code{p.ps}.}
+\item{x.ps}{Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.}
 
 \item{x.ipcw}{Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.}
 
@@ -52,14 +52,14 @@ A list of 14 objects, 7training and 7 validation of y, trt, x.cate, x.ps, x.ipcw
             d.train          - event indicator in the training set; vector of size \code{m} coded as 0/1
             trt.train        - treatment received in the training set; vector of size \code{m} coded as 0/1
             x.cate.train     - baseline covariates for the outcome model in the training set; matrix of dimension \code{m} by \code{p.cate}
-            x.ps.train       - baseline covariates (plus intercept) for the propensity score model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
+            x.ps.train       - baseline covariates (plus intercept) for the treatment model in the training set; matrix of dimension \code{m} by \code{p.ps + 1}
             x.ipcw.train      - baseline covariates for inverse probability of censoring in the training set; matrix of dimension \code{m} by \code{p.ipw}
             yf.train         - follow-up time in the training set; if known, vector of size \code{m}; if unknown, \code{yf == NULL}
             y.valid          - observed survival or censoring time in the validation set; vector of size \code{n-m}
             d.valid          - event indicator in the validation set; vector of size \code{n-m} coded as 0/1
             trt.valid        - treatment received in the validation set; vector of size \code{n-m} coded as 0/1
             x.cate.valid     - baseline covariates for the outcome model in the validation set; matrix of dimension \code{n-m} by \code{p.cate}
-            x.ps.valid       - baseline covariates (plus intercept) for the propensity score model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
+            x.ps.valid       - baseline covariates (plus intercept) for the treatment model in the validation set; matrix of dimension \code{n-m} by \code{p.ps + 1}
             x.ipcw.valid      - baseline covariates for inverse probability of censoring in the validation set; matrix of dimension \code{n-m} by \code{p.ipw}
             yf.valid         - follow-up time in the training set; if known, vector of size \code{n-m}; if unknown, \code{yf == NULL}
 }

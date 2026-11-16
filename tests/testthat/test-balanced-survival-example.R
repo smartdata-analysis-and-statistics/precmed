@@ -92,6 +92,18 @@ test_that("censoring model preserves defaults and responds to coefficients", {
   expect_error(simulate_survival(censor_weights = c(intercept = 1000)), "invalid rates.*censor_weights")
 })
 
+test_that("administrative censoring horizon is configurable", {
+  base <- simulate_survival(n = 2000, seed = 42)
+  expect_identical(base, simulate_survival(n = 2000, seed = 42, censor_horizon = 900))
+  short <- simulate_survival(n = 2000, seed = 42, censor_horizon = 100)
+  unlimited <- simulate_survival(n = 2000, seed = 42, censor_horizon = Inf)
+  expect_equal(short$y, pmin(unlimited$y, 100))
+  expect_true(all(short$d[unlimited$y > 100] == 0))
+  expect_true(any(unlimited$y > 900))
+  for (invalid in list(0, -1, -Inf, NA_real_, NaN, numeric(), c(1, 2), "900"))
+    expect_error(simulate_survival(censor_horizon = invalid), "censor_horizon")
+})
+
 test_that("nonproportional survival follows the specified Weibull hazards", {
   base <- simulate_survival(n = 2000, seed = 42)
   expect_identical(base, simulate_survival(n = 2000, seed = 42,

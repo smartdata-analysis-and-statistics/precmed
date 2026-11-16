@@ -2,6 +2,19 @@
 
 ## Major changes
 
+* Added binary-outcome estimation on the risk-difference scale. `atefit()` and
+  the exported `atefitbinary()` provide doubly robust ATE estimation;
+  `catefit()` provides pooled logistic, separate-arm logistic and Bernoulli
+  boosting CATE scores, with doubly robust subgroup estimates. Added
+  `simulate_binary()` and a vignette illustrating estimation and held-out
+  subgroup assessment. Numeric, logical and two-valued treatment labels are
+  supported.
+
+* Standardized bootstrap failure handling across binary, count and survival
+  `atefit()`: affected measures now have unavailable inference if any replicate
+  fails or is undefined, instead of silently omitting count replicates. Results
+  record replicate-level reasons in `bootstrap.diagnostics` and `diagnostics()`.
+
 * Added the population-level `log.cumulative.hazard.ratio` at `tau0` to
   survival `atefit()`, with bootstrap inference. Inference is unavailable if
   the estimate or any bootstrap replicate is undefined. This replaces the
@@ -18,15 +31,6 @@
   than the conditional Cox HR. Use `measure = "conditional_hr"` to plot the
   latter. Older saved objects must be refitted for cumulative hazard plots.
 
-* Added `simulate_survival()` to generate reproducible synthetic survival data
-  illustrating confounding and heterogeneous treatment effects. Treatment,
-  outcome, and censoring coefficients can be specified. The survival vignette
-  now uses it; `survivalExample` remains available. Weibull shape and scale,
-  treatment-specific shape, and the hazard ratio reference time are configurable;
-  defaults retain proportional hazards. Event-time calculations are checked in
-  stages, and error messages identify the relevant model parameters. Invalid
-  censoring rates also identify the censoring model parameters.
-
 * Added C backends, enabled by default, for count and survival contrast
   regression, Cox restricted mean survival integration, and LASSO propensity-score
   interaction screening. Installing from source now requires a C compiler and
@@ -40,10 +44,31 @@
   names and the learning rate of 0.1 are preserved; stored fits now have class
   `GBMFit`. Results can differ even with identical settings and random seeds.
 
+* Added `simulate_survival()` to generate reproducible synthetic survival data
+  illustrating confounding and heterogeneous treatment effects. Treatment,
+  outcome, and censoring coefficients can be specified. The survival vignette
+  now uses it; `survivalExample` remains available. Weibull shape and scale,
+  treatment-specific shape, and the hazard ratio reference time are configurable;
+  defaults retain proportional hazards. Event-time calculations are checked in
+  stages, and error messages identify the relevant model parameters. Invalid
+  censoring rates also identify the censoring model parameters. The new
+  `censor_horizon` argument controls administrative censoring (900 days by
+  default; `Inf` disables it).
+
 * Fixed continuous boosting predictions by retaining the selected tree count
   for each treatment arm, and forwarding additional boosting controls.
 
 ## Minor changes and bug fixes
+
+* Standardized documentation terminology for outcome, treatment and censoring
+  models, clarifying propensity scores and inverse probability of censoring weights.
+
+* Clarified binary, count and survival outcome support in the package
+  description, README, quick start and function documentation.
+
+* Added an ATE methods vignette covering binary, count and survival outcomes,
+  assumptions and bootstrap inference; the CATE methods vignette separates score
+  development from validation.
 
 * Added `combine` to `abc()` to aggregate cross-validation iterations per
   scoring method with a mean, median, or user-supplied function. The default
