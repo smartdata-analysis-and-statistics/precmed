@@ -120,6 +120,13 @@
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
+#' Hoogland, J., Debray, T. P. A., Desachy, G., & Nguyen, T.-L. (2026).
+#' Introduction to methods for personalizing medicine. In T. P. A. Debray,
+#' T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 17, pp. 421--463). Chapman & Hall/CRC.
+#' \doi{10.1201/9781003300809-17}
+#'
 #' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
 #' Visualization and interpretation of individualized treatment rule results. In
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
@@ -213,12 +220,13 @@ catefit <- function(response,
                     verbose = 0,
                     contrast.control = list(),
                     rmst.control = list(), ps.control = list(), rf.control = list(), ...) {
+  check_response(response)
+  check_score_method(response, score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
   if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
 
 
-  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   if (length(contrast.control) && response == "continuous")
     stop("contrast.control is supported only for count or survival outcomes.")
   if (length(rmst.control) && response != "survival")

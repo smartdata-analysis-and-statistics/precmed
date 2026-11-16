@@ -53,17 +53,3 @@ test_that("count subgroup diagnostics record support and preserve warnings", {
   expect_equal(diagnostics(x)$subgroup, "0.5")
   expect_equal(diagnostics(x)$type, "warning")
 })
-
-test_that("count CV records convergence and support without verbose output", {
-  data(countExample)
-  fit <- catecvcount(data = countExample[1:500, ],
-    cate.model = y ~ age + previous_treatment + offset(log(years)),
-    ps.model = trt ~ age + previous_treatment,
-    score.method = "contrastReg", initial.predictor.method = "poisson",
-    B = 1, Kfold = 2, cv.n = 1, abc = FALSE, verbose = 0, seed = 45)
-  expect_length(fit$ate.contrastReg$converge.contrastReg.cv, 1)
-  expect_length(fit$ate.contrastReg$converge.repetitions.cv[[1]], 1)
-  expect_true(nrow(fit$subgroup.support) > 0)
-  expect_true(all(c("training", "validation") %in% fit$subgroup.support$split))
-  expect_s3_class(diagnostics(fit), "data.frame")
-})

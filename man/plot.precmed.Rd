@@ -44,11 +44,8 @@ CV iteration. Default is \code{TRUE}.}
 should be plotted (\code{TRUE}). Otherwise, the validation curves in both the training and validation
 sets are plotted side-by-side (\code{FALSE}). Default is \code{FALSE}.}
 
-\item{measure}{For survival outcomes, select \code{"rmtl"} (default), \code{"cumulative_hr"} (cumulative hazard ratio), or \code{"conditional_hr"} (conditional Cox hazard ratio fitted through \code{tau0}). Earlier measure names remain supported as aliases. Supply a vector to display multiple measures in separate panels.}
-
-\item{plot.hr}{Deprecated; use \code{measure} instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio. The default hazard-based measure is the marginal cumulative hazard ratio.}
-
-\item{hazard.type}{Deprecated; use \code{measure} instead. Choose \code{"cumulative"} (default) or \code{"conditional"} for the supplementary Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative ratios must be refitted or plotted with \code{hazard.type = "conditional"}.}
+\item{plot.hr}{Deprecated; use \code{measure} instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio.
+When \code{TRUE}, the default is the marginal cumulative hazard ratio.}
 
 \item{ylab}{A character value for the y-axis label to describe what the ATE is. Default is \code{NULL},
 which creates a default y-axis label based on available data.}
@@ -62,6 +59,16 @@ range specified.}
 \item{title}{The text for the title}
 
 \item{theme}{Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
+
+\item{hazard.type}{Deprecated; use \code{measure} instead. Select \code{"cumulative"} (default) or the supplementary
+\code{"conditional"} Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative
+hazard ratios require \code{hazard.type = "conditional"} or refitting.}
+
+\item{measure}{For survival outcomes, a vector of \code{"rmtl"} (default),
+\code{"cumulative_hr"} (cumulative hazard ratio), and \code{"conditional_hr"}
+(conditional Cox hazard ratio fitted through \code{tau0}). Multiple measures appear in separate panels.
+The earlier names \code{"chr"}, \code{"cph"}, \code{"cumulative_hazard_ratio"},
+and \code{"conditional_hazard_ratio"} remain supported as aliases.}
 
 \item{...}{Other parameters}
 }
@@ -91,60 +98,10 @@ validation curves indicate absence of treatment effect heterogeneity (or inabili
 to capture it).
 }
 \examples{
-\donttest{
-# Count outcome
-eval_1 <- catecv(response = "count",
-                 data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
-                                  previous_cost + previous_number_relapses + offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
-                 higher.y = FALSE,
-                 cv.n = 5)
-
-# default setting
-plot(eval_1)
-
-# turn off ABC annotation
-plot(eval_1, show.abc = FALSE)
-
-# use a different theme
-plot(eval_1, theme = ggplot2::theme_bw())
-
-# plot the validation curves from the 2nd CV iteration instead of the mean
-# of all validation curves
-plot(eval_1, cv.i = 2)
-
-# median of the validation curves
-plot(eval_1, combine = "median")
-
-# plot validation curves in validation set only
-plot(eval_1, valid.only = TRUE)
-
-# Survival outcome
-library(survival)
-tau0 <- with(survivalExample,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-eval_2 <- catecv(response = "survival",
-                 data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
-                                           previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "randomForest",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
-                 tau0 = tau0,
-                 cv.n = 5,
-                 seed = 999)
-
-
-# default setting, plot RMTL ratios in both training and validation sets
-plot(eval_2)
-
-# plot hazard ratio
-plot(eval_2, measure = "cumulative_hr")
-
-}
+data(catecvCountExample)
+plot(catecvCountExample)
+plot(catecvCountExample, show.abc = FALSE)
+plot(catecvCountExample, cv.i = 2)
 
 }
 \references{

@@ -141,6 +141,13 @@
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
+#' Thao, L. T. P., Efthimiou, O., Varga, T. V., Hoogland, J., & Debray, T. P. A. (2026).
+#' Validation of prediction models for patient outcomes and individualized treatment effect.
+#' In T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
+#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+#' (Chapter 19, pp. 485--512). Chapman & Hall/CRC.
+#' \doi{10.1201/9781003300809-19}
+#'
 #' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
 #' Visualization and interpretation of individualized treatment rule results. In
 #' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
@@ -258,12 +265,13 @@ catecv <- function(response,
                    plot.gbmperf = TRUE,
                    verbose = 0,
                    contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
+  check_response(response)
+  check_score_method(response, score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
   if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
 
 
-  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
 
   if (length(contrast.control) && response == "continuous")
     stop("contrast.control is supported only for count or survival outcomes.")
@@ -1995,6 +2003,7 @@ catecvmean <- function(data,
                        seed = NULL,
                        verbose = 0,
                        ps.control = list(), rf.control = list(), ...) {
+  check_score_method("continuous", score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
 
@@ -2363,172 +2372,6 @@ catecvmean <- function(data,
 }
 
 
-#' Compute the area between curves from the \code{"precmed"} object
-#'
-#' Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
-#' This should be run only after results of \code{\link{catecv}()} have been obtained.
-#'
-#' @param x An object of class \code{"precmed"}.
-#' @param ... Additional arguments (currently unused).
-#'
-#'
-#' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
-#' iteration and number of rows equal to the number of scoring methods in \code{x}.
-#'
-#' @details The ABC is the area between a validation curve and the overall ATE in the validation set.
-#' It is calculated for each scoring method separately. Higher ABC values are preferable as they
-#' indicate that more treatment effect heterogeneity is captured by the scoring method.
-#' Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-#' The ABC is calculated with the \code{\link{auc}()} in \code{utility.R} with a natural
-#' cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
-#' 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
-#'
-#' The ABC is a metric to help users select the best scoring method in terms of capturing treatment
-#' effect heterogeneity in the data. It should be used in complement to the visual inspection of
-#' the validation curves in the validation set in \code{\link{plot}()}.
-#'
-#' @references Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
-#' \emph{Effectively selecting a target population for a future comparative study.
-#' Journal of the American Statistical Association, 108(502), 527-539.}
-#'
-#' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
-#' \code{"precmed"} objects.
-#'
-#' @examples
-#' \donttest{
-#' # Count outcome
-#' cv_count <- catecv(response = "count",
-#'                    data = countExample,
-#'                    score.method = "poisson",
-#'                    cate.model = y ~ age + female + previous_treatment +
-#'                                 previous_cost + previous_number_relapses +
-#'                                 offset(log(years)),
-#'                    ps.model = trt ~ age + previous_treatment,
-#'                    higher.y = FALSE, cv.n = 5, verbose = 1)
-#'
-#' # ABC of the validation curves for each method and each CV iteration
-#' abc(cv_count)
-#'
-#' # Survival outcome
-#' library(survival)
-#' cv_surv <- catecv(response = "survival",
-#'                   data = survivalExample,
-#'                   score.method = c("poisson", "randomForest"),
-#'                   cate.model = Surv(y, d) ~ age + female + previous_cost +
-#'                                previous_number_relapses,
-#'                   ps.model = trt ~ age + previous_treatment,
-#'                   higher.y = FALSE,
-#'                   cv.n = 5)
-#'
-#' # ABC of the validation curves for each method and each CV iteration
-#' abc(cv_surv)
-#'
-#' }
-#'
-#' @export
-abc <- function(x, ...) UseMethod("abc", x)
-
-#' @export
-#' @rdname abc
-abc.default <- function(x, ...){
-  warning(paste("ABC does not know how to handle object of class ",
-                class(x),
-                "and can only be used on class precmed"))
-}
-
-#' Compute the area between curves from the \code{"precmed"} object
-#'
-#' Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
-#' This should be run only after results of \code{\link{catecv}()} have been obtained.
-#'
-#' @param x An object of class \code{"precmed"}.
-#' @param ... Additional arguments (currently unused).
-#'
-#' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
-#' iteration and number of rows equal to the number of scoring methods in \code{x}.
-#'
-#' @details The ABC is the area between a validation curve and the overall ATE in the validation set.
-#' It is calculated for each scoring method separately. Higher ABC values are preferable as they
-#' indicate that more treatment effect heterogeneity is captured by the scoring method.
-#' Negative values of ABC are possible if segments of the validation curve cross the overall ATE line.
-#' The ABC is calculated with the \code{\link{auc}()} in \code{utility.R} with a natural
-#' cubic spline interpolation. The calculation of the ABC is always based on validation curves based on
-#' 100 proportions equally spaced from \code{min(prop.cutoff)} to \code{max(prop.cutoff)}.
-#'
-#' The ABC is a metric to help users select the best scoring method in terms of capturing treatment
-#' effect heterogeneity in the data. It should be used in complement to the visual inspection of
-#' the validation curves in the validation set in \code{\link{plot}()}.
-#'
-#' @references Zhao, L., Tian, L., Cai, T., Claggett, B., & Wei, L. J. (2013).
-#' \emph{Effectively selecting a target population for a future comparative study.
-#' Journal of the American Statistical Association, 108(502), 527-539.}
-#'
-#' Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
-#' Visualization and interpretation of individualized treatment rule results. In
-#' T. P. A. Debray, T.-L. Nguyen, & R. W. Platt (Eds.),
-#' \emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
-#' (Chapter 20, pp. 513--536). Chapman & Hall/CRC.
-#' \doi{10.1201/9781003300809-20}
-#'
-#' @seealso \code{\link{catecv}()} function and \code{\link{plot}()}, \code{\link{boxplot}()} methods for
-#' \code{"precmed"} objects.
-#'
-#' @examples
-#' \donttest{
-#' # Count outcome
-#' cv_count <- catecv(response = "count",
-#'                    data = countExample,
-#'                    score.method = "poisson",
-#'                    cate.model = y ~ age + female + previous_treatment +
-#'                                 previous_cost + previous_number_relapses +
-#'                                 offset(log(years)),
-#'                    ps.model = trt ~ age + previous_treatment,
-#'                    higher.y = FALSE, cv.n = 5, verbose = 1)
-#'
-#' # ABC of the validation curves for each method and each CV iteration
-#' abc(cv_count)
-#'
-#' # Survival outcome
-#' library(survival)
-#' cv_surv <- catecv(response = "survival",
-#'                   data = survivalExample,
-#'                   score.method = c("poisson", "randomForest"),
-#'                   cate.model = Surv(y, d) ~ age + female + previous_cost +
-#'                                previous_number_relapses,
-#'                   ps.model = trt ~ age + previous_treatment,
-#'                   higher.y = FALSE,
-#'                   cv.n = 5)
-#'
-#' # ABC of the validation curves for each method and each CV iteration
-#' abc(cv_surv)
-#'
-#' }
-#'
-#' @export
-#'
-#' @importFrom stringr str_extract
-abc.precmed <- function(x, ...) {
-
-  # Check the value of abc (must have area between curves values)
-  if (!x$abc) {
-    stop("Area between curves (ABC) must have been calculated in x by setting abc = TRUE in catecv().")
-  }
-
-  score.method <- str_extract(names(x), "(?<=^ate\\.).*$")
-  score.method <- score.method[!is.na(score.method)]
-  m <- length(score.method)
-
-  # Value of ABC
-  value.abc <- matrix(NA, nrow = m, ncol = x$cv.n)
-  for (i in seq(m)) {
-    value.abc[i,] <- x[[paste0("ate.", score.method[i])]]$abc.valid
-  }
-  rownames(value.abc) <- score.method
-  colnames(value.abc) <- paste0("cv", 1:(x$cv.n))
-
-  return(value.abc)
-}
-
 #' Two side-by-side line plots of validation curves from the \code{"precmed"} object
 #'
 #' Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series
@@ -2604,60 +2447,10 @@ abc.precmed <- function(x, ...) {
 #' @seealso \code{\link{abc}()} and \code{\link{boxplot}()} for \code{"precmed"} objects.
 #'
 #' @examples
-#' \donttest{
-#' # Count outcome
-#' eval_1 <- catecv(response = "count",
-#'                  data = countExample,
-#'                  score.method = "poisson",
-#'                  cate.model = y ~ age + female + previous_treatment +
-#'                                   previous_cost + previous_number_relapses + offset(log(years)),
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  higher.y = FALSE,
-#'                  cv.n = 5)
-#'
-#' # default setting
-#' plot(eval_1)
-#'
-#' # turn off ABC annotation
-#' plot(eval_1, show.abc = FALSE)
-#'
-#' # use a different theme
-#' plot(eval_1, theme = ggplot2::theme_bw())
-#'
-#' # plot the validation curves from the 2nd CV iteration instead of the mean
-#' # of all validation curves
-#' plot(eval_1, cv.i = 2)
-#'
-#' # median of the validation curves
-#' plot(eval_1, combine = "median")
-#'
-#' # plot validation curves in validation set only
-#' plot(eval_1, valid.only = TRUE)
-#'
-#' # Survival outcome
-#' library(survival)
-#' tau0 <- with(survivalExample,
-#'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' eval_2 <- catecv(response = "survival",
-#'                  data = survivalExample,
-#'                  score.method = c("poisson", "randomForest"),
-#'                  cate.model = Surv(y, d) ~ age + female + previous_cost +
-#'                                            previous_number_relapses,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  initial.predictor.method = "randomForest",
-#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                  tau0 = tau0,
-#'                  cv.n = 5,
-#'                  seed = 999)
-#'
-#'
-#' # default setting, plot RMTL ratios in both training and validation sets
-#' plot(eval_2)
-#'
-#' # plot hazard ratio
-#' plot(eval_2, measure = "cumulative_hr")
-#'
-#'}
+#' data(catecvCountExample)
+#' plot(catecvCountExample)
+#' plot(catecvCountExample, show.abc = FALSE)
+#' plot(catecvCountExample, cv.i = 2)
 #'
 #' @export
 #'
@@ -3044,39 +2837,8 @@ plot.precmed <- function(x,
 #' @seealso \code{\link{plot}} and \code{\link{abc}()} for \code{"precmed"} objects.
 #'
 #' @examples
-#' \donttest{
-#' # Count outcome
-#' eval_1 <- catecv(response = "count",
-#'                  data = countExample,
-#'                  score.method = "poisson",
-#'                  cate.model = y ~ age + female + previous_treatment +
-#'                                   previous_cost + previous_number_relapses +
-#'                                   offset(log(years)),
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  higher.y = FALSE,
-#'                  cv.n = 5)
-#'
-#' boxplot(eval_1, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
-#'
-#' # Survival outcome
-#' library(survival)
-#' tau0 <- with(survivalExample,
-#'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
-#' eval_2 <- catecv(response = "survival",
-#'                  data = survivalExample,
-#'                  score.method = c("poisson", "randomForest"),
-#'                  cate.model = Surv(y, d) ~ age + female + previous_cost +
-#'                                            previous_number_relapses,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  initial.predictor.method = "randomForest",
-#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
-#'                  tau0 = tau0,
-#'                  higher.y = TRUE,
-#'                  cv.n = 5,
-#'                  seed = 999)
-#'
-#' boxplot(eval_2, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
-#'}
+#' data(catecvCountExample)
+#' boxplot(catecvCountExample, ylab = "Rate ratio in each subgroup")
 #'
 #' @export
 #'

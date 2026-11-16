@@ -133,8 +133,6 @@ Default is \code{NULL}, which uses all variables in \code{init.model}.}
 if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
 \code{'contrastReg'}. Default is 2.}
 
-\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize}, \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
-
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
 Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
 with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
@@ -195,6 +193,10 @@ Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
+\item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+\code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
@@ -249,6 +251,13 @@ coef(fit_2)
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 \emph{Estimation and validation of ratio-based conditional average treatment effects using
 observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
+
+Hoogland, J., Debray, T. P. A., Desachy, G., & Nguyen, T.-L. (2026).
+Introduction to methods for personalizing medicine. In T. P. A. Debray,
+T.-L. Nguyen, & R. W. Platt (Eds.),
+\emph{Comparative Effectiveness and Personalized Medicine Research Using Real-World Data}
+(Chapter 17, pp. 421--463). Chapman & Hall/CRC.
+\doi{10.1201/9781003300809-17}
 
 Jiang, X., Simoneau, G., Pellegrini, F., Shen, C., de Moor, C., & Tian, L. (2026).
 Visualization and interpretation of individualized treatment rule results. In

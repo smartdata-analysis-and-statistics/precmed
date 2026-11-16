@@ -82,3 +82,20 @@
 #' str(survivalExample)
 "survivalExample"
 
+
+#' Pre-fitted count outcome validation example
+#'
+#' A reproducible result of applying \code{catecv()} to \code{countExample}
+#' using the Poisson score and five validation iterations. This saved result
+#' can be used to illustrate plots and area between curves without refitting
+#' the model. The regeneration script is in \code{data-raw/catecvCountExample.R}
+#' in the package source repository.
+#'
+#' @docType data
+#' @usage data(catecvCountExample)
+#' @format An object of class \code{precmed} returned by \code{catecv()}.
+#' @keywords datasets
+#' @examples
+#' data(catecvCountExample)
+#' abc(catecvCountExample)
+"catecvCountExample"

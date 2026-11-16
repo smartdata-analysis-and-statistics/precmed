@@ -254,6 +254,7 @@ arg.checks <- function(fun, response, data,
                        n.boot = NULL, plot.boot = NULL, interactions = NULL){
 
   #### Check common arguments ####
+  if (fun %in% c("catefit", "crossv")) check_score_method(response, score.method)
   arg.checks.common(fun = fun,
                     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                     higher.y = higher.y,
@@ -273,10 +274,6 @@ arg.checks <- function(fun, response, data,
       if (!(initial.predictor.method %in% c("poisson", "boosting", "gam")))
         stop("initial.predictor.method must be 'poisson', 'boosting' or 'gam'.")
     }
-
-    # Check values of score.method
-    if (any(!(score.method %in% c("boosting", "poisson", "twoReg", "contrastReg", "negBin"))))
-      stop("Elements of score.method must come from: 'boosting', 'poisson', 'twoReg', 'contrastReg', 'negBin'.")
 
     if (fun == "drinf") {
       check_boolean(interactions, "interactions")
@@ -312,10 +309,27 @@ arg.checks <- function(fun, response, data,
       if (!(initial.predictor.method %in% c("randomForest", "boosting", "logistic"))) stop("initial.predictor.method must be 'randomForest', 'boosting' or 'logistic'.")
     }
 
-    # Check values of score.method
-    if (any(!(score.method %in% c("boosting", "poisson", "twoReg", "contrastReg", "randomForest")))) stop("Elements of score.method must come from: 'boosting', 'poisson', 'twoReg', 'contrastReg', 'randomForest'.")
-
   }
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+check_response <- function(response) {
+  if (!is.character(response) || length(response) != 1L || is.na(response) ||
+      !response %in% c("count", "survival", "continuous"))
+    stop("response must be one of 'count', 'survival', or 'continuous'.", call. = FALSE)
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+check_score_method <- function(response, score.method) {
+  check_response(response)
+  allowed <- switch(response,
+    count = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"),
+    survival = c("boosting", "poisson", "twoReg", "contrastReg", "randomForest"),
+    continuous = c("boosting", "gaussian", "twoReg", "contrastReg", "randomForest", "gam"))
+  if (!is.character(score.method) || !length(score.method) ||
+      anyNA(score.method) || any(!score.method %in% allowed))
+    stop("score.method for ", response, " outcomes must contain one or more of: ",
+         paste(shQuote(allowed), collapse = ", "), ".", call. = FALSE)
 }
 
 #' Data preprocessing

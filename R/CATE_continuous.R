@@ -204,6 +204,7 @@ catefitmean <- function(data,
                         seed = NULL,
                         verbose = 0,
                         ps.control = list(), rf.control = list(), ...) {
+  check_score_method("continuous", score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
 

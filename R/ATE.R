@@ -121,10 +121,10 @@ atefit <- function(response,
                    n.boot = 500,
                    seed = NULL,
                    verbose = 0, rmst.control = list(), ps.control = list()) {
+  check_response(response)
   resolve_ps_control(ps.control)
 
 
-  stopifnot("`response` must be either `count`, `survival`, or `continuous`." = any(response == c("count", "survival", "continuous")))
   if (length(rmst.control) && response != "survival")
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]

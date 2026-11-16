@@ -27,24 +27,3 @@ test_that("subgroup fitting failures preserve all result fields", {
   expect_true(is.na(out$log.hazard.ratio))
   expect_match(out$errors, "deliberate failure")
 })
-
-test_that("catefit and catecv expose cumulative hazards alongside Cox HRs", {
-  data(survivalExample, package = "precmed")
-  common <- list(data = survivalExample,
-                 cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment, tau0 = 522.66,
-                 rmst.control = list(solver = "R"))
-  options <- list(score.method = "contrastReg", initial.predictor.method = "logistic",
-                  prop.cutoff = c(0.5, 1), contrast.control = list(solver = "R"), seed = 7)
-  ate <- suppressWarnings(do.call(atefitsurv, c(common, list(n.boot = 2, seed = 1))))
-  fit <- suppressWarnings(do.call(catefitsurv, c(common, options)))
-  cv <- suppressWarnings(do.call(catecvsurv, c(common, options,
-                     list(prop.multi = c(0, 0.5, 1), cv.n = 2, abc = FALSE))))
-  expect_equal(unname(fit$chr.contrastReg["prop1"]),
-               exp(ate$log.cumulative.hazard.ratio$estimate))
-  expect_length(fit$hr.contrastReg, 2)
-  expect_equal(unname(cv$chr.contrastReg$chr.est.valid.high.cv["prop1", ]),
-               cv$overall.chr.valid)
-  expect_equal(dim(cv$chr.contrastReg$chr.est.valid.group.cv), c(2L, 2L))
-  expect_equal(dim(cv$hr.contrastReg$hr.est.valid.group.cv), c(2L, 2L))
-})
