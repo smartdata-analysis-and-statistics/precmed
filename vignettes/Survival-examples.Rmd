@@ -210,7 +210,7 @@ We also specify the optional argument `tau0`, the horizon for RMST and RMTL, usi
 
 Now estimate the ATE using an outcome model with age, sex, previous cost and previous relapses, and a treatment model with `age` and `previous_treatment`.
 
-```{r run_atefit_stronger_hte, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), survival_data, "treatment-labels-v1")}
+```{r run_atefit_stronger_hte, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), survival_data, "treatment-labels-overlap-v2")}
 output_atefit <- atefit(response = "survival",
                         data = survival_data,
                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
@@ -275,6 +275,26 @@ diagnostics(output_atefit)
 ```
 
 For other treatment labels, check the mapping before interpreting the ratio. Alternatively, code the treatment as 0 and 1 explicitly to choose the reference group.
+
+The treatment model also provides diagnostics for the full analysis sample:
+
+```{r overlap_atefit_call, eval=FALSE}
+diagnostics(output_atefit, type = "propensity")
+```
+
+```{r overlap_atefit, echo=FALSE}
+knitr::kable(diagnostics(output_atefit, type = "propensity"),
+             digits = 2, row.names = FALSE)
+```
+
+Propensity score summaries use the estimated probabilities before truncation.
+The count of patients outside the other treatment's propensity score range
+uses the observed range in the other treatment group. Treatment weights use the truncated scores;
+the effective sample size summarizes their variability. Percentages are within
+each treatment group. Use `layout = "arms"` for unrounded numeric results. These diagnostics do
+not establish covariate balance or exclude unmeasured confounding.
+
+For survival outcomes these are treatment weights only; they do not summarize censoring weights or follow-up near the horizon.
 
 `plot(output_atefit)` displays the bootstrap estimates for the four reported quantities. A solid red line marks the full-sample estimate; a dashed black line marks the null value of 0 in the log-ratio panels. Set `null.value` to another value on the log scale, or to `NULL` or `NA` to omit the null line. The treatment-specific RMST panels have no null line. Select specific facets with the `metrics` argument, for example `metrics = c("log.rmtl.ratio", "log.cumulative.hazard.ratio")`.
 

@@ -174,8 +174,10 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE)
+                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE, diagnostic = TRUE)
 
+  overlap.diagnostics <- est$overlap.diagnostics
+  est$overlap.diagnostics <- NULL
   effect.names <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.cumulative.hazard.ratio")
   est <- unlist(est)[effect.names]
 
@@ -247,6 +249,7 @@ atefitsurv <- function(data,
   out$log.cumulative.hazard.ratio <- data.frame(est.all[4, ])
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
+  out$overlap.diagnostics <- overlap.diagnostics
   out$bootstrap.diagnostics <- issues
   out$warning <- preproc$warning
   out$treatment.labels <- preproc$treatment.labels
@@ -285,6 +288,7 @@ atefitsurv <- function(data,
 #'
 #' @param cumulative.hr Whether to estimate the marginal cumulative hazard ratio at \code{tau0}.
 #' @param conditional.hr Whether to fit the supplementary conditional Cox hazard ratio.
+#' @param diagnostic Internal: retain full-sample treatment overlap diagnostics.
 #' @return Return a list of estimates:
 #' \itemize{
 #'   \item{\code{rmst1}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 1}.
@@ -307,16 +311,16 @@ atefitsurv <- function(data,
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE, conditional.hr = TRUE) {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE, conditional.hr = TRUE, diagnostic = FALSE) {
   ps.args <- resolve_ps_control(ps.control)
 
   rmst.args <- resolve_rmst_control(rmst.control)
 
 
   if (ps.method == "lasso") {
-    ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
+    ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver, return.raw = diagnostic)
   } else {
-    ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
+    ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, return.raw = diagnostic)
   }
 
   ynew <- pmin(y, tau0)
@@ -357,6 +361,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   if (cumulative.hr) {
     result$log.cumulative.hazard.ratio <- aipw_log_cumulative_hr(y, d, trt, survival0, survival1, ps, surv.new, tau0)
   }
+  if (diagnostic) result$overlap.diagnostics <- treatment_overlap(trt, ps, minPS, maxPS)
   result
 }
 

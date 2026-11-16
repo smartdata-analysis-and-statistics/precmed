@@ -4,7 +4,14 @@
 \alias{glm.simplereg.ps}
 \title{Propensity score estimation with a linear model}
 \usage{
-glm.simplereg.ps(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
+glm.simplereg.ps(
+  trt,
+  x.ps,
+  xnew = NULL,
+  minPS = 0.01,
+  maxPS = 0.99,
+  return.raw = FALSE
+)
 }
 \arguments{
 \item{trt}{Treatment received; vector of size \code{n} (observations) with treatment coded as 0/1}
@@ -20,6 +27,8 @@ truncated. Default is \code{0.01}.}
 
 \item{maxPS}{A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
+
+\item{return.raw}{Internal: attach untruncated scores for diagnostics.}
 }
 \value{
 The estimated propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}

@@ -12,9 +12,10 @@
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #'
+#' @param return.raw Internal: attach untruncated scores for diagnostics.
 #' @return The estimated propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}
 
-glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99) {
+glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99, return.raw = FALSE) {
   fit <- glm(trt ~ -1 + x.ps, family = "binomial")
   beta <- fit$coef
   if (is.null(xnew) == TRUE) {
@@ -24,8 +25,10 @@ glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
     x <- xnew[, is.na(beta) == FALSE, drop = FALSE]
     prob <- as.vector(1 / (1 + exp(-x %*% beta[is.na(beta) == FALSE])))
   }
+  raw <- prob
   prob <- pmin(prob, maxPS)
   prob <- pmax(prob, minPS)
+  if (return.raw) attr(prob, "raw") <- raw
   return(prob)
 }
 
@@ -48,10 +51,11 @@ glm.simplereg.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99)
 #' \code{"R"}. C screens pairs before allocating retained training and prediction
 #' columns. Both use the strict SMD > 0.1 rule and positive sample variance.
 #'
+#' @param return.raw Internal: attach untruncated scores for diagnostics.
 #' @return The trimmed propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}
 
 glm.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99,
-                   solver = c("C", "R")) {
+                   solver = c("C", "R"), return.raw = FALSE) {
   solver <- match.arg(solver)
   x <- x.ps[, -1, drop = FALSE]
   p <- length(x[1, ])
@@ -89,8 +93,10 @@ glm.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99,
     }
   }
 
+  raw <- prob
   prob <- pmin(prob, maxPS)
   prob <- pmax(prob, minPS)
+  if (return.raw) attr(prob, "raw") <- raw
   return(prob)
 }
 

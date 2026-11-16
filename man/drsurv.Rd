@@ -21,7 +21,8 @@ drsurv(
   rmst.control = list(),
   ps.control = list(),
   cumulative.hr = FALSE,
-  conditional.hr = TRUE
+  conditional.hr = TRUE,
+  diagnostic = FALSE
 )
 }
 \arguments{
@@ -73,6 +74,8 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \item{cumulative.hr}{Whether to estimate the marginal cumulative hazard ratio at \code{tau0}.}
 
 \item{conditional.hr}{Whether to fit the supplementary conditional Cox hazard ratio.}
+
+\item{diagnostic}{Internal: retain full-sample treatment overlap diagnostics.}
 }
 \value{
 Return a list of estimates:

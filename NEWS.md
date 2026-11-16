@@ -1,4 +1,4 @@
-# precmed (development version)
+# precmed 1.1.0.9000 (development version)
 
 ## Major changes
 
@@ -77,7 +77,14 @@
 * Fixed continuous boosting predictions by retaining the selected tree count
   for each treatment arm, and forwarding additional boosting controls.
 
-## Minor changes and bug fixes
+## Minor changes
+
+* `diagnostics(fit, type = "propensity")` now reports full-sample propensity
+  score overlap, truncation, inverse treatment weights and effective sample
+  sizes for newly fitted binary, count and survival `atefit()` results. The
+  default message table is unchanged. Overlap diagnostics now default to a
+  compact formatted table; use `layout = "arms"` or `layout = "metrics"`
+  for unrounded numeric results; `type = "overlap"` remains an alias.
 
 * Binary `atefit()` bootstrap plots now display the treatment-specific risks
   and risk difference by default. `metrics` selects and orders `risk0`, `risk1`, and
@@ -154,6 +161,21 @@
 * Added `coef()` and `confint()` methods for extracting supported treatment
   effects and confidence intervals from count and survival `atefit()` results.
 
+* Improved performance of balanced splitting, continuous contrast regression,
+  censoring probability calculations, and propensity-score LASSO fitting.
+
+* Updated validation plots and box plots for current ggplot2 and tidyselect
+  versions; ggplot2 >= 3.4.0 is now required.
+
+* Added the book chapter by Jiang et al. (2026) to the package description and
+  references.
+
+* Added Smart Data Analysis and Statistics B.V. as copyright holder for its
+  contributions after version 1.1.0, alongside the existing Biogen attribution.
+
+
+## Bug fixes
+
 * Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead of
   treating observations beyond the horizon as events. This affects
   subgroup and cross-validation hazard ratio estimates; this correction does
@@ -183,17 +205,6 @@
 * Removed a duplicate treated-arm boosting fit in count cross-fitting. Results
   obtained with the same seed may change because fewer random draws are consumed.
 
-* Improved performance of balanced splitting, continuous contrast regression,
-  censoring probability calculations, and propensity-score LASSO fitting.
-
-* Updated validation plots and box plots for current ggplot2 and tidyselect
-  versions; ggplot2 >= 3.4.0 is now required.
-
-* Added the book chapter by Jiang et al. (2026) to the package description and
-  references.
-
-* Added Smart Data Analysis and Statistics B.V. as copyright holder for its
-  contributions after version 1.1.0, alongside the existing Biogen attribution.
 
 # precmed 1.1.0
 

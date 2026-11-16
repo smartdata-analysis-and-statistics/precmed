@@ -144,18 +144,11 @@ non-sensitive data.
 The package compares two treatments using outcome-specific effect
 measures:
 
-- **Binary:** the risk difference in outcome probabilities (treatment 1
-  minus treatment 0). The [binary
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
-  illustrates ATE and CATE estimation.
-- **Count:** the ratio of event rates (treatment 1 over treatment 0).
-  The [count
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
-  covers estimation and validation.
-- **Survival:** the ratio of restricted mean time lost at a specified
-  follow-up horizon (treatment 1 over treatment 0). The [survival
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)
-  also illustrates population-level cumulative hazard ratios.
+| Outcome | Effect measure | Example |
+|---|---|---|
+| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [Binary outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) |
+| Count | Ratio of event rates (treatment 1 over treatment 0) | [Count outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) |
+| Survival | Ratio of restricted mean time lost at a specified follow-up horizon; population-level cumulative hazard ratio (treatment 1 over treatment 0) | [Survival outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) |
 
 Count and survival ATE effect estimates and CATE scores are returned on
 the log-ratio scale; exponentiate them to obtain ratios. The ATE
@@ -211,22 +204,6 @@ For binary outcomes, the binary example illustrates `atefit()`,
 
 In the vignettes, we will adopt a different workflow to gradually expose
 the user from simple to more complex methods.
-
-## User input
-
-When applying `catefit()` or `catecv()`, the user has to (at least)
-input:
-
-- `response`: outcome type, such as `binary`, `count`, or `survival`;
-  see the relevant function’s documentation  
-- `data`: a data frame with individual patient data  
-- `score.method`: methods to estimate the CATE (e.g., `boosting`,
-  `poisson`, `twoReg`, `contrastReg`)  
-- `cate.model`: a formula describing the outcome model (e.g., outcome ~
-  age + gender + previous_treatment)  
-- `ps.model`: a formula describing the treatment model (propensity-score
-  model) used to adjust for confounding (e.g., treatment ~ age +
-  previous_treatment)
 
 ## Vignettes
 

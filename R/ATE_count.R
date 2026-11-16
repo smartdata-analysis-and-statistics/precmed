@@ -136,7 +136,7 @@ atefitcount <- function(data,
                  ps.method = ps.method,
                  minPS = minPS,
                  maxPS = maxPS,
-                 interactions = interactions, ps.control = ps.control)
+                 interactions = interactions, ps.control = ps.control, diagnostic = TRUE)
   logrr <- est$log.rate.ratio
 
   # Apply bootstrap
@@ -200,6 +200,7 @@ atefitcount <- function(data,
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
   out$rate.boot <- rate.boot
+  out$overlap.diagnostics <- est$overlap.diagnostics
   out$bootstrap.diagnostics <- issues
   out$treatment.labels <- preproc$treatment.labels
   out$warning <- preproc$warning
@@ -250,6 +251,7 @@ atefitcount <- function(data,
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
+#' @param diagnostic Internal: retain full-sample treatment overlap diagnostics.
 #' @return Return a list of 4 elements:
 #' \itemize{
 #'   \item{\code{log.rate.ratio}: } A numeric value of the estimated log rate ratio.
@@ -260,7 +262,7 @@ atefitcount <- function(data,
 
 drcount <- function(y, trt, x.cate, x.ps, time,
                     ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                    interactions = TRUE, ps.control = list()) {
+                    interactions = TRUE, ps.control = list(), diagnostic = FALSE) {
   ps.args <- resolve_ps_control(ps.control)
 
 
@@ -268,9 +270,9 @@ drcount <- function(y, trt, x.cate, x.ps, time,
 
   withCallingHandlers({
     if (ps.method == "lasso") {
-      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
+      ps <- glm.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, solver = ps.args$solver, return.raw = diagnostic)
     } else {
-      ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS)
+      ps <- glm.simplereg.ps(trt = trt, x.ps = x.ps, xnew = NULL, minPS = minPS, maxPS = maxPS, return.raw = diagnostic)
     }
   },
   warning = function(w) {
@@ -314,7 +316,9 @@ drcount <- function(y, trt, x.cate, x.ps, time,
     logrr <- NA
   }
 
-  return(list(log.rate.ratio = logrr, rate0 = mu0dr, rate1 = mu1dr))
+  result <- list(log.rate.ratio = logrr, rate0 = mu0dr, rate1 = mu1dr)
+  if (diagnostic) result$overlap.diagnostics <- treatment_overlap(trt, ps, minPS, maxPS)
+  result
 }
 
 # Matrix-only equivalent of drcount(..., ps.method = "glm", interactions = TRUE).

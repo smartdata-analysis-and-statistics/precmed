@@ -82,7 +82,7 @@ atefitbinary <- function(data, cate.model, ps.model, ps.method = "glm", minPS = 
   if (length(n.boot) != 1L || is.na(n.boot) || n.boot < 2 || n.boot != floor(n.boot)) stop("n.boot must be an integer of at least 2.")
   if (!is.logical(interactions) || length(interactions) != 1L || is.na(interactions)) stop("interactions must be TRUE or FALSE.")
   d <- binary_data(data, cate.model, ps.model)
-  est <- binary_effect(d, ps.method, minPS, maxPS, ps.control, interactions)
+  est <- binary_effect(d, ps.method, minPS, maxPS, ps.control, interactions, diagnostic = TRUE)
   if (!is.null(seed)) set.seed(seed)
   boot <- matrix(NA_real_, nrow = n.boot, ncol = 3L,
                  dimnames = list(NULL, c("risk0", "risk1", "risk.difference")))
@@ -98,6 +98,6 @@ atefitbinary <- function(data, cate.model, ps.model, ps.method = "glm", minPS = 
   if (!is.finite(est[3])) warning("The original-sample risk difference is non-finite; its inference is unavailable.", call. = FALSE)
   se <- if (!is.finite(est[3]) || any(!is.finite(boot[, 3]))) NA_real_ else stats::sd(boot[, 3])
   effect <- data.frame(estimate = unname(est[3]), SE = se, CI.lower = est[3] - qnorm(.975) * se, CI.upper = est[3] + qnorm(.975) * se, pvalue = if (is.na(se) || se == 0) NA_real_ else 2 * pnorm(-abs(est[3] / se)), row.names = "risk.difference")
-  structure(list(response = "binary", risk.difference = effect, risk0 = data.frame(estimate = unname(est[1])), risk1 = data.frame(estimate = unname(est[2])), n.boot = n.boot, trt.boot = boot[, 3], risk.boot = data.frame(risk0 = boot[, 1], risk1 = boot[, 2]), bootstrap.diagnostics = issues, treatment.labels = d$labels), class = "atefit")
+  structure(list(response = "binary", risk.difference = effect, risk0 = data.frame(estimate = unname(est[1])), risk1 = data.frame(estimate = unname(est[2])), n.boot = n.boot, trt.boot = boot[, 3], risk.boot = data.frame(risk0 = boot[, 1], risk1 = boot[, 2]), bootstrap.diagnostics = issues, overlap.diagnostics = attr(est, "overlap"), treatment.labels = d$labels), class = "atefit")
 }
 

@@ -159,7 +159,7 @@ The mandatory arguments for `atefit()` are:
 * `ps.model`: A formula describing the treatment model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and an informational message is shown (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The treatment model is used to estimate overall and subgroup average treatment effects. It is also used to fit the doubly robust two-regression and contrast-regression CATE scores; other scoring methods need not use it to construct their scores.  
 
 Let's calculate the ATE for the effect of treatment on y and build an outcome model that contains all variables and a treatment model with `age` and `previous_treatment`. 
-```{r run_atefit, eval = T, echo = T, cache = doc.cache}
+```{r run_atefit, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), "overlap-v1")}
 output_atefit <- atefit(
   response = "count",
   data = countExample,
@@ -177,6 +177,24 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 ```{r print_atefit, eval = T, echo = T}
 output_atefit
 ```
+
+The treatment model also provides diagnostics for the full analysis sample:
+
+```{r overlap_atefit_call, eval=FALSE}
+diagnostics(output_atefit, type = "propensity")
+```
+
+```{r overlap_atefit, echo=FALSE}
+knitr::kable(diagnostics(output_atefit, type = "propensity"),
+             digits = 2, row.names = FALSE)
+```
+
+Propensity score summaries use the estimated probabilities before truncation.
+The count of patients outside the other treatment's propensity score range
+uses the observed range in the other treatment group. Treatment weights use the truncated scores;
+the effective sample size summarizes their variability. Percentages are within
+each treatment group. Use `layout = "arms"` for unrounded numeric results. These diagnostics do
+not establish covariate balance or exclude unmeasured confounding.
 
 The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. Use `coef()` and `confint()` to extract the log rate ratio and its confidence interval, then exponentiate them to obtain the rate ratio and its interval. The default confidence level is 95%; specify `level`, for example `level = 0.90`, to request a different level. Intervals use the bootstrap standard error already stored in the fitted object:
 

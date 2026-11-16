@@ -4,10 +4,24 @@
 \alias{diagnostics}
 \title{Summarize recorded fitting diagnostics}
 \usage{
-diagnostics(object)
+diagnostics(
+  object,
+  type = c("messages", "propensity", "overlap"),
+  layout = c("formatted", "arms", "metrics")
+)
 }
 \arguments{
 \item{object}{A binary, count or survival \code{atefit}, a count or survival \code{catefit}, or a binary, count or survival \code{catecv} result.}
+
+\item{type}{Choose \code{"messages"} (the default) for recorded issues or
+\code{"propensity"} for full-sample treatment-model diagnostics from a
+binary, count or survival \code{atefit} result. \code{"overlap"} is an
+alias for \code{"propensity"}.}
+
+\item{layout}{For overlap diagnostics, \code{"formatted"} (the default)
+returns a compact, rounded character table; \code{"arms"} returns one
+numeric row per treatment; \code{"metrics"} returns one numeric column per
+treatment and one row per diagnostic. Not used for messages.}
 }
 \value{
 A data frame with columns \code{method}, \code{split},
@@ -21,6 +35,20 @@ A data frame with columns \code{method}, \code{split},
   Otherwise, measure is \code{NA}
   unless the recorded message identifies it. Returns a zero-row data frame
   with the same columns when there are no recorded messages.
+For \code{type = "propensity"}, the default formatted data frame has one row
+per diagnostic and one character column per treatment. Its percentages use
+the number of patients in the corresponding treatment group. Use
+\code{layout = "arms"} or \code{layout = "metrics"} for unrounded numeric
+results. The underlying diagnostics report sample size, untruncated propensity score range and median, number
+outside the other arm's observed score range, number truncated below and
+above the specified limits, and the median, maximum and effective sample
+size of the inverse treatment probability weights after truncation. The
+effective sample size is \eqn{(\sum w)^2 / \sum w^2}. These are treatment
+weights only, not censoring weights or the complete weights of a particular
+estimator. With \code{layout = "formatted"} or \code{layout = "metrics"},
+treatment columns use the
+original labels when available, or treatment 0 and treatment 1 otherwise.
+Older fitted objects do not contain this information.
 }
 \description{
 Collect treatment-recoding information from \code{atefit()}, or recorded
@@ -29,7 +57,11 @@ subgroup errors and warnings from count or survival \code{catefit()} and binary,
 Survival subgroup messages also remain in \code{object[["errors/warnings"]]}.
 }
 \details{
-This reports only diagnostics stored in the result, not every
+Overlap and weights describe the full analysis sample and the fitted
+treatment model; they do not establish covariate balance, positivity, or
+absence of unmeasured confounding. Extreme weights or little common support
+merit investigation, but no universal cutoff guarantees validity.
+The message view reports only diagnostics stored in the result, not every
   warning emitted during fitting. In particular, \code{atefit()} stores the
   treatment-recoding information and failed or undefined bootstrap estimates,
   but not all bootstrap warnings. Count
@@ -39,6 +71,8 @@ This reports only diagnostics stored in the result, not every
 \examples{
 \dontrun{
 diagnostics(output_atefit)
+diagnostics(output_atefit, type = "propensity")
+diagnostics(output_atefit, type = "propensity", layout = "arms")
 diagnostics(output_catecv)
 subset(diagnostics(output_catecv), split == "validation")
 }

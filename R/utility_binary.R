@@ -86,15 +86,17 @@ binary_tworeg_dr <- function(d, ps.method, minPS, maxPS, ps.control, B, Kfold) {
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE) {
+binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE, diagnostic = FALSE) {
   if (length(unique(d$trt)) != 2L) stop("Both treatment groups are required.")
-  p <- if (ps.method == "glm") glm.simplereg.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS) else
-    glm.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS, solver = resolve_ps_control(ps.control)$solver)
+  p <- if (ps.method == "glm") glm.simplereg.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS, return.raw = diagnostic) else
+    glm.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS, solver = resolve_ps_control(ps.control)$solver, return.raw = diagnostic)
   if (any(!is.finite(p) | p <= 0 | p >= 1)) stop("Propensity scores must be strictly between 0 and 1.")
   m <- binary_predictions(d$y, d$trt, d$x, "logistic", interactions)
   r1 <- mean(m$mu1 + d$trt * (d$y - m$mu1) / p)
   r0 <- mean(m$mu0 + (1 - d$trt) * (d$y - m$mu0) / (1 - p))
-  c(risk0 = r0, risk1 = r1, risk.difference = r1 - r0)
+  result <- c(risk0 = r0, risk1 = r1, risk.difference = r1 - r0)
+  if (diagnostic) attr(result, "overlap") <- treatment_overlap(d$trt, p, minPS, maxPS)
+  result
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>

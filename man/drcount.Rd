@@ -14,7 +14,8 @@ drcount(
   minPS = 0.01,
   maxPS = 0.99,
   interactions = TRUE,
-  ps.control = list()
+  ps.control = list(),
+  diagnostic = FALSE
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{diagnostic}{Internal: retain full-sample treatment overlap diagnostics.}
 }
 \value{
 Return a list of 4 elements:

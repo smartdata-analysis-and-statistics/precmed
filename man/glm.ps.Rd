@@ -10,7 +10,8 @@ glm.ps(
   xnew = NULL,
   minPS = 0.01,
   maxPS = 0.99,
-  solver = c("C", "R")
+  solver = c("C", "R"),
+  return.raw = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 \item{solver}{Interaction-screening backend: \code{"C"} (default) or
 \code{"R"}. C screens pairs before allocating retained training and prediction
 columns. Both use the strict SMD > 0.1 rule and positive sample variance.}
+
+\item{return.raw}{Internal: attach untruncated scores for diagnostics.}
 }
 \value{
 The trimmed propensity score for each unit; vector of size \code{n} (if \code{xnew} is NULL) or \code{m}
