@@ -2,32 +2,11 @@
 
 ## Major changes
 
-* Added binary-outcome support to `catecv()` for logistic, doubly robust
-  two-regression, and boosting scores. Treatment-stratified repeated splits
-  provide training and held-out subgroup risk differences, ABC, plots, and
-  recorded subgroup diagnostics. Binary splits do not use the balanced-split
-  controls `error.max` and `max.iter`.
-
-* Added binary-outcome estimation on the risk-difference scale. `atefit()` and
-  the exported `atefitbinary()` provide doubly robust ATE estimation;
-  `catefit()` provides pooled logistic, doubly robust two-regression and Bernoulli
-  boosting CATE scores, with doubly robust subgroup estimates. Binary `twoReg`
-  now cross-fits outcome and treatment models and estimates a linear projection
-  of the risk difference; its scores and stored fits differ from earlier
-  development versions, and `B` and `Kfold` control cross-fitting. Added
-  `simulate_binary()` and a vignette illustrating estimation and held-out
-  subgroup assessment. Numeric, logical and two-valued treatment labels are
-  supported.
-
-* `simulate_binary()` now codes `y = 1` when the relapse count exceeds
-  `threshold` (at least one relapse by default), reversing the outcome coding
-  used in earlier development versions. Use `higher.y = FALSE` when ranking
-  treatment benefit for this adverse outcome. This changes simulated outcomes
-  and reverses the direction of risk differences in the binary vignette.
-
-* Binary `catefit()` now returns and prints the `twoReg` risk-difference score
-  coefficients through `coef()`, matching the coefficient table used for count
-  scores. Fits without a linear binary score no longer print a stray `NULL`.
+* Added support for binary outcomes on the risk-difference scale to `atefit()`,
+  `catefit()`, and `catecv()`, including doubly robust estimation, logistic and
+  boosting scores, cross-validated subgroup estimates, and a new vignette.
+  Binary cross-validation uses treatment-stratified splits rather than the
+  balanced-split controls `error.max` and `max.iter`.
 
 * Standardized bootstrap failure handling across binary, count and survival
   `atefit()`: affected measures now have unavailable inference if any replicate
@@ -63,19 +42,9 @@
   names and the learning rate of 0.1 are preserved; stored fits now have class
   `GBMFit`. Results can differ even with identical settings and random seeds.
 
-* Added `simulate_survival()` to generate reproducible synthetic survival data
-  illustrating confounding and heterogeneous treatment effects. Treatment,
-  outcome, and censoring coefficients can be specified. The survival vignette
-  now uses it; `survivalExample` remains available. Weibull shape and scale,
-  treatment-specific shape, and the hazard ratio reference time are configurable;
-  defaults retain proportional hazards. Event-time calculations are checked in
-  stages, and error messages identify the relevant model parameters. Invalid
-  censoring rates also identify the censoring model parameters. The new
-  `censor_horizon` argument controls administrative censoring (900 days by
-  default; `Inf` disables it).
-
-* Fixed continuous boosting predictions by retaining the selected tree count
-  for each treatment arm, and forwarding additional boosting controls.
+* Added `simulate_count()`, `simulate_binary()`, and `simulate_survival()` to
+  generate reproducible synthetic data for illustrating and testing the
+  package's methods with confounding and heterogeneous treatment effects.
 
 ## Minor changes
 
@@ -175,6 +144,9 @@
 
 
 ## Bug fixes
+
+* Fixed continuous boosting predictions by retaining the selected tree count
+  for each treatment arm, and forwarding additional boosting controls.
 
 * Fixed survival Cox hazard ratios to censor follow-up at `tau0` instead of
   treating observations beyond the horizon as events. This affects
