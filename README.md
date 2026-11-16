@@ -16,13 +16,15 @@ downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r
 effects (CATEs) in randomized trials and observational studies, with
 methods for count and survival outcomes. The ATE describes an effect
 across a population, while the CATE describes an average effect among
-patients with particular observed characteristics. Together, they support
-the study of treatment effect heterogeneity and precision medicine.
+patients with particular observed characteristics. Together, they
+support the study of treatment effect heterogeneity and precision
+medicine.
 
 Use **precmed** when you want to:
 
 - Estimate the ATE for two treatments using doubly robust methods.
-- Explore treatment effect heterogeneity by developing and cross-validating CATE models.
+- Explore treatment effect heterogeneity by developing and
+  cross-validating CATE models.
 - Visualize and compare estimated effects across patient subgroups.
 
 The methods support causal inference under appropriate assumptions; for
@@ -30,7 +32,9 @@ observational data, these include adequate control of confounding and
 sufficient treatment overlap. The package builds on work by Zhao et al.
 (2013) and Yadlowsky et al. (2021).
 
-See [Is precmed suitable for me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me) for a quick overview of supported data, outcomes and analyses.
+See [Is precmed suitable for
+me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me)
+for a quick overview of supported data, outcomes and analyses.
 
 ## Learning resources
 
@@ -39,6 +43,9 @@ data, see *Comparative Effectiveness and Personalized Medicine Research
 Using Real-World Data* (Debray, Nguyen, and Platt 2026). The following
 chapters are particularly relevant to **precmed**:
 
+- [Chapter 5](https://doi.org/10.1201/9781003300809-5): defining causal
+  effects and understanding marginal and conditional treatment effects
+  (Nguyen et al. 2026).
 - [Chapter 17](https://doi.org/10.1201/9781003300809-17): principles of
   CATE prediction and model development in randomized and non-randomized
   data (Hoogland et al. 2026).
@@ -110,13 +117,23 @@ install.packages("devtools")
 devtools::install_github(repo = "smartdata-analysis-and-statistics/precmed")
 ```
 
-Try the [quick start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html) for a complete count-outcome example and validation plot.
+Try the [quick
+start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html)
+for a complete count-outcome example and validation plot.
 
 ## Citation and support
 
-To cite the installed version of **precmed**, run `citation("precmed")` in R, or see the [authors and citation page](https://smartdata-analysis-and-statistics.github.io/precmed/authors.html#citation). Please also cite the methodological references relevant to your analysis.
+To cite the installed version of **precmed**, run `citation("precmed")`
+in R, or see the [authors and citation
+page](https://smartdata-analysis-and-statistics.github.io/precmed/authors.html#citation).
+Please also cite the methodological references relevant to your
+analysis.
 
-For questions, bug reports, or feature requests, use [GitHub issues](https://github.com/smartdata-analysis-and-statistics/precmed/issues). For a bug report, please include your package and R versions, the error message, and a minimal reproducible example using simulated or non-sensitive data.
+For questions, bug reports, or feature requests, use [GitHub
+issues](https://github.com/smartdata-analysis-and-statistics/precmed/issues).
+For a bug report, please include your package and R versions, the error
+message, and a minimal reproducible example using simulated or
+non-sensitive data.
 
 ## Package capabilities
 
@@ -226,6 +243,17 @@ Individualized Treatment Rule Results.” In *Comparative Effectiveness
 and Personalized Medicine Research Using Real-World Data*, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt, 513–36.
 Chapman & Hall/CRC. <https://doi.org/10.1201/9781003300809-20>.
+
+</div>
+
+<div id="ref-nguyen2026causaleffects" class="csl-entry">
+
+Nguyen, Tri-Long, Jessica L. Rohmann, Tat Thang Vo, Robert W. Platt, and
+Thomas P. A. Debray. 2026. “Understanding and Defining Causal Effects.”
+In *Comparative Effectiveness and Personalized Medicine Research Using
+Real-World Data*, edited by Thomas P. A. Debray, Tri-Long Nguyen, and
+Robert W. Platt, 65–80. Chapman & Hall/CRC.
+<https://doi.org/10.1201/9781003300809-5>.
 
 </div>
 
