@@ -420,10 +420,12 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
 
   ## Check treatment binary numeric and coded as 0/1
   cat <- warn.dr <- NULL
+  treatment.labels <- c("0", "1")
   if (as.numeric(length(unique(trt))) != 2) {
     stop("trt should describe two distinct treatments.")
   } else if (!all(unique(trt) %in% c(0, 1))) {
     cat <- sort(unique(trt))
+    treatment.labels <- as.character(cat)
     trt <- ifelse(trt == cat[1], 0, 1)
     warn.dr <- paste0("Variable trt was recoded to 0/1 with ", cat[1], "->0 and ", cat[2], "->1.")
     message(warn.dr)
@@ -477,7 +479,8 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
     return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time,
                 prop.onlyhigh = prop.onlyhigh, prop.bi = prop.bi, prop.multi = prop.multi, cat.trt = cat, initial.predictor.method = initial.predictor.method))
   } else if (fun == "drinf") {
-    return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, warning = warn.dr))
+    return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, warning = warn.dr,
+                treatment.labels = treatment.labels))
   }
 }
 

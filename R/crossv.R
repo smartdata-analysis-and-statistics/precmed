@@ -2393,6 +2393,12 @@ catecvmean <- function(data,
 #' equal to the entire \code{x$prop.onlyhigh} range). If \code{cv.i} is NULL, ABC statistics will be based
 #' on the combined CV iterations. If \code{cv.i} is an integer, ABC statistics will be based solely on that
 #' CV iteration. Default is \code{TRUE}.
+#' @param show.overall Whether to show the dashed overall treatment effect
+#' reference line in each set. Defaults to \code{TRUE}.
+#' @param layout Use \code{"set"} (default) for panels by dataset and curves
+#' by method, or \code{"method"} for panels by scoring method and training and
+#' validation curves in each panel. Overall-effect reference lines in the latter
+#' layout are dotted and colored by dataset.
 #' @param valid.only A logical value indicating whether only the validation curves in the validation set
 #' should be plotted (\code{TRUE}). Otherwise, the validation curves in both the training and validation
 #' sets are plotted side-by-side (\code{FALSE}). Default is \code{FALSE}.
@@ -2413,13 +2419,13 @@ catecvmean <- function(data,
 #' @param xlim A numeric value for the range of the x-axis. Default is \code{NULL}, which means there is no
 #' range specified.
 #' @param title The text for the title
-#' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
+#' @param theme A ggplot2 theme. By default, a customized minimal theme is used;
+#' supply, for example, \code{ggplot2::theme_classic()} to use another theme.
 #' @param ... Other parameters
 #'
-#' @return Returns two side-by-side line plots, one of which shows the validation curves of the training
-#' sets and the other the validation curves in the validation sets. A gray horizontal dashed line of
-#' overall ATE is included as a reference. ABC statistics will be added to the legend if
-#' \code{show.abc = TRUE}.
+#' @return A ggplot of training and validation curves, faceted by set or method.
+#' Overall-effect reference lines are included when \code{show.overall = TRUE}.
+#' ABC statistics appear in the legend or method headings when \code{show.abc = TRUE}.
 #'
 #' @details \code{\link{plot}()} takes in outputs from \code{\link{catecv}()} and generates two plots
 #' of validation curves side-by-side, one for the training set and one for validation set.
@@ -2457,9 +2463,7 @@ catecvmean <- function(data,
 #' @importFrom rlang .data
 #' @importFrom stringr str_extract
 #' @importFrom dplyr filter select mutate group_by ungroup
-#' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line
-#' labs scale_color_manual scale_linetype_manual scale_y_continuous
-#' theme theme_classic waiver
+#' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line labs scale_color_manual scale_linetype_manual scale_y_continuous theme theme_classic waiver
 #' @importFrom tidyr fill
 
 plot.precmed <- function(x,
@@ -2472,10 +2476,14 @@ plot.precmed <- function(x,
                          legend.position = "bottom",
                          xlim = NULL,
                          title = waiver(),
-                         theme = theme_classic(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", ...) {
+                         theme = precmed_plot_theme(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", show.overall = TRUE, layout = "set", ...) {
 
   # Must be count or survival data for this function
   stopifnot(x$response %in% c("count", "survival", "continuous"))
+  if (!is.logical(show.overall) || length(show.overall) != 1L || is.na(show.overall))
+    stop("show.overall must be TRUE or FALSE.")
+  if (!is.character(layout) || length(layout) != 1L || is.na(layout) || !layout %in% c("set", "method"))
+    stop("layout must be 'set' or 'method'.")
 
   legacy <- !missing(plot.hr) || !missing(hazard.type)
   if (legacy && !missing(measure))
@@ -2499,20 +2507,38 @@ plot.precmed <- function(x,
       panels <- lapply(measure, function(which.measure) {
         p <- plot.precmed(x, cv.i = cv.i, combine = combine, show.abc = FALSE,
                           valid.only = valid.only, ylab = ylab, legend.position = legend.position,
-                          xlim = xlim, title = title, theme = theme, measure = which.measure, ...)
+                          xlim = xlim, title = title, theme = theme, measure = which.measure,
+                          show.overall = show.overall, layout = layout, ...)
         p$data$measure <- labels[[which.measure]]
-        p$layers[[2]]$data$measure <- labels[[which.measure]]
+        if (show.overall) p$layers[[2]]$data$measure <- labels[[which.measure]]
         p
       })
       result <- panels[[1]]
       result$data <- do.call(rbind, lapply(panels, function(p) p$data))
-      result$layers[[2]]$data <- do.call(rbind, lapply(panels, function(p) p$layers[[2]]$data))
+      if (show.overall) result$layers[[2]]$data <- do.call(rbind, lapply(panels, function(p) p$layers[[2]]$data))
       result$data$measure <- factor(result$data$measure, levels = unname(labels[measure]))
-      result$layers[[2]]$data$measure <- factor(result$layers[[2]]$data$measure, levels = unname(labels[measure]))
+      if (show.overall) result$layers[[2]]$data$measure <- factor(result$layers[[2]]$data$measure, levels = unname(labels[measure]))
+      # Anchor both panels of each measure to the same y range.
+      ranges <- lapply(levels(result$data$measure), function(metric) {
+        values <- result$data$ate.cv[result$data$measure == metric]
+        if (show.overall) values <- c(values, result$layers[[2]]$data$yintercept[result$layers[[2]]$data$measure == metric])
+        values <- values[is.finite(values)]
+        data.frame(measure = metric, y = range(values))
+      })
+      ranges <- do.call(rbind, ranges)
+      ranges$measure <- factor(ranges$measure, levels = levels(result$data$measure))
       result$scales$scales <- Filter(function(scale) !"y" %in% scale$aesthetics, result$scales$scales)
-      return(result + ggplot2::facet_grid(measure ~ set, scales = "free_y") +
+      facet <- if (layout == "set") {
+        ggplot2::facet_wrap(ggplot2::vars(measure, set), ncol = 2, scales = "free_y",
+                            labeller = function(labels) list(paste(labels$measure, labels$set, sep = "  |  ")))
+      } else {
+        ggplot2::facet_wrap(ggplot2::vars(measure, score), ncol = length(unique(result$data$score)), scales = "free_y",
+                            labeller = function(labels) list(paste(labels$measure, labels$score, sep = "  |  ")))
+      }
+      result <- result + ggplot2::geom_blank(data = ranges, aes(y = .data$y), inherit.aes = FALSE) + facet +
                ggplot2::scale_y_continuous() +
-               labs(y = if (is.null(ylab)) "Treatment effect" else ylab))
+               labs(y = if (is.null(ylab)) "Treatment effect" else ylab)
+      return(result)
     }
     plot.hr <- measure != "rmtl"
     if (plot.hr && missing(show.abc)) show.abc <- FALSE
@@ -2759,16 +2785,28 @@ plot.precmed <- function(x,
   colors <- map.color[score.method]
   attr(colors, "names") <- sapply(1:m, function(x) grep(mapped.method[x], scorevars, value = TRUE))
 
-  p <- dat %>%
-    ggplot(aes(x = .data$prop, y = .data$ate.cv, color = .data$score)) +
-    geom_line(linewidth = 1.2) +
-    facet_wrap(~ .data$set, ncol = 2) +
+  caption <- if (!show.overall) NULL else if (is.null(cv.i)) {
+    paste0(if (layout == "method") "Dotted: " else "Dashed: ", combine, " overall treatment effect across iterations",
+           if (layout == "method") " (matching set)" else "")
+  } else if (layout == "method") "Dotted: overall treatment effect (matching set)" else "Dashed: overall treatment effect"
+  p <- ggplot(dat, aes(x = .data$prop, y = .data$ate.cv)) +
     ggplot2::scale_x_continuous(labels = function(x) paste0(format(100 * x, trim = TRUE, scientific = FALSE), "%")) +
     scale_y_continuous(limits = c(lowery, uppery)) +
-    labs(y = ylab, x = xlab, title = title) +
+    labs(y = ylab, x = xlab, title = title, caption = caption) +
     theme +
-    theme(legend.position = legend.position) +
-    scale_color_manual(name = "Method", values = colors)
+    theme(legend.position = legend.position)
+
+  if (layout == "set") {
+    p <- p + geom_line(aes(color = .data$score), linewidth = 1.2) +
+      facet_wrap(~ .data$set, ncol = 2) + scale_color_manual(name = "Method", values = colors)
+  } else {
+    set.colors <- setNames(c("#35658A", "#B43B35"), c(training.label, validation.label))
+    set.types <- setNames(c("solid", "dashed"), c(training.label, validation.label))
+    p <- p + geom_line(aes(color = .data$set, linetype = .data$set, group = .data$set), linewidth = 1.2) +
+      facet_wrap(~ .data$score, ncol = 2) +
+      scale_color_manual(name = "Set", values = set.colors, drop = FALSE, limits = levels(droplevels(dat$set))) +
+      scale_linetype_manual(name = "Set", values = set.types, drop = FALSE, limits = levels(droplevels(dat$set)))
+  }
 
   # Add overall ATE
   abline <- data.frame(yintercept = c(overall.hline.train, overall.hline.valid),
@@ -2777,8 +2815,10 @@ plot.precmed <- function(x,
     abline <- abline %>% filter(.data$set == validation.label)
   }
 
-  p <- p + geom_hline(data = abline, aes(yintercept = .data$yintercept),
-                      linetype = 2, color = "gray90", linewidth = 0.8)
+  if (show.overall && layout == "set") p <- p + geom_hline(data = abline, aes(yintercept = .data$yintercept),
+                                                            linetype = 2, color = "gray90", linewidth = 0.8)
+  if (show.overall && layout == "method") p <- p + geom_hline(data = abline,
+    aes(yintercept = .data$yintercept, color = .data$set), linetype = "dotted", linewidth = 0.8, show.legend = FALSE)
 
   return(p)
 }
@@ -2805,11 +2845,17 @@ plot.precmed <- function(x,
 #' \code{"conditional"} Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative
 #' hazard ratios require \code{hazard.type = "conditional"} or refitting.
 #' @param title The text for the title
-#' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
+#' @param theme A ggplot2 theme. By default, a customized minimal theme is used;
+#' supply, for example, \code{ggplot2::theme_classic()} to use another theme.
+#' @param show.overall Whether to show the dashed mean overall validation-set
+#' treatment effect across iterations. Defaults to \code{TRUE}.
+#' @param ncol Number of columns for scoring-method panels. Defaults to 2;
+#' use 1 to stack panels vertically.
 #' @param ... Other parameters
 #'
 #' @return Returns sets of box plots, one set for each scoring method, over each of the multi-category
-#' subgroups. A gray horizontal dashed line of the overall ATE is included as a reference.
+#' subgroups. A gray horizontal dashed line of the overall ATE is included as a
+#' reference when \code{show.overall = TRUE}.
 #'
 #' @details \code{\link{boxplot}()} takes in outputs from \code{\link{catecv}()} and generates
 #' the box plots of estimated ATEs for multi-category subgroups of the validation set.
@@ -2844,9 +2890,7 @@ plot.precmed <- function(x,
 #'
 #' @importFrom graphics boxplot
 #' @importFrom dplyr mutate_at vars contains
-#' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line
-#' labs scale_color_manual scale_linetype_manual scale_y_continuous theme
-#' theme_classic waiver scale_fill_hue
+#' @importFrom ggplot2 ggplot aes facet_wrap geom_boxplot geom_hline geom_line labs scale_color_manual scale_linetype_manual scale_y_continuous theme theme_classic waiver scale_fill_hue
 #' @importFrom tidyr pivot_longer
 #' @importFrom rlang .data
 
@@ -2854,10 +2898,15 @@ plot.precmed <- function(x,
 boxplot.precmed <- function(x, ylab = NULL,
                             plot.hr = FALSE,
                             title = waiver(),
-                            theme = theme_classic(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", ...) {
+                            theme = precmed_plot_theme(), hazard.type = c("cumulative", "conditional"), measure = "rmtl", show.overall = TRUE, ncol = 2, ...) {
 
   # Must be count or survival data for this function
   stopifnot(x$response %in% c("count", "survival", "continuous"))
+  if (!is.logical(show.overall) || length(show.overall) != 1L || is.na(show.overall))
+    stop("show.overall must be TRUE or FALSE.")
+  if (!is.numeric(ncol) || length(ncol) != 1L || is.na(ncol) ||
+      !is.finite(ncol) || ncol < 1 || ncol != trunc(ncol))
+    stop("ncol must be a positive integer.")
 
   legacy <- !missing(plot.hr) || !missing(hazard.type)
   if (legacy && !missing(measure))
@@ -2977,12 +3026,13 @@ boxplot.precmed <- function(x, ylab = NULL,
     mutate(Method = factor(.data$Method, levels = mapped.method),
            Subgroup = factor(.data$Subgroup, levels = subgroup_label)) %>%
     ggplot(aes(x = .data$Subgroup, y = .data$ate)) +
-    geom_boxplot(aes(fill = .data$Subgroup)) +
-    geom_hline(yintercept = overall.hline, linetype = "dashed", color = "grey70") +
-    facet_wrap(~ .data$Method, nrow = 2, scales = "fixed") +
-    scale_fill_hue(l = 45) +
-    labs(y = ylab, x = xlab, title = title) +
+    geom_boxplot(fill = "#7293AD", color = "#263746") +
+    facet_wrap(~ .data$Method, ncol = ncol, scales = "fixed") +
+    labs(y = ylab, x = xlab, title = title,
+         caption = if (show.overall) "Dashed: mean overall treatment effect in the validation set across iterations" else NULL) +
     theme + theme(legend.position = "none")
+
+  if (show.overall) p <- p + geom_hline(yintercept = overall.hline, linetype = "dashed", color = "#52616B")
 
   return(p)
 }

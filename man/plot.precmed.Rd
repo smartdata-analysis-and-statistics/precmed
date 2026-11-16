@@ -15,9 +15,11 @@
   legend.position = "bottom",
   xlim = NULL,
   title = waiver(),
-  theme = theme_classic(),
+  theme = precmed_plot_theme(),
   hazard.type = c("cumulative", "conditional"),
   measure = "rmtl",
+  show.overall = TRUE,
+  layout = "set",
   ...
 )
 }
@@ -58,7 +60,8 @@ range specified.}
 
 \item{title}{The text for the title}
 
-\item{theme}{Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
+\item{theme}{A ggplot2 theme. By default, a customized minimal theme is used;
+supply, for example, \code{ggplot2::theme_classic()} to use another theme.}
 
 \item{hazard.type}{Deprecated; use \code{measure} instead. Select \code{"cumulative"} (default) or the supplementary
 \code{"conditional"} Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative
@@ -70,13 +73,20 @@ hazard ratios require \code{hazard.type = "conditional"} or refitting.}
 The earlier names \code{"chr"}, \code{"cph"}, \code{"cumulative_hazard_ratio"},
 and \code{"conditional_hazard_ratio"} remain supported as aliases.}
 
+\item{show.overall}{Whether to show the dashed overall treatment effect
+reference line in each set. Defaults to \code{TRUE}.}
+
+\item{layout}{Use \code{"set"} (default) for panels by dataset and curves
+by method, or \code{"method"} for panels by scoring method and training and
+validation curves in each panel. Overall-effect reference lines in the latter
+layout are dotted and colored by dataset.}
+
 \item{...}{Other parameters}
 }
 \value{
-Returns two side-by-side line plots, one of which shows the validation curves of the training
-sets and the other the validation curves in the validation sets. A gray horizontal dashed line of
-overall ATE is included as a reference. ABC statistics will be added to the legend if
-\code{show.abc = TRUE}.
+A ggplot of training and validation curves, faceted by set or method.
+Overall-effect reference lines are included when \code{show.overall = TRUE}.
+ABC statistics appear in the legend or method headings when \code{show.abc = TRUE}.
 }
 \description{
 Provides validation curves in two side-by-side plots, visualizing the estimated ATEs in a series

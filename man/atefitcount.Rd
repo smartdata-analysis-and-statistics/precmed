@@ -81,6 +81,9 @@ elements:
   \code{trt=1}.
   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
   sample.
+  \item{\code{rate.boot}: } A data frame of treatment-specific rate estimates
+  in each bootstrap sample, with columns \code{rate0} and \code{rate1}.
+  \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1.
   \item{\code{warning}: } A warning message produced if the treatment
   variable was not coded as 0 or 1. The key to map the original coding of the
   variable to a 0-1 coding is displayed in the warning to facilitate the

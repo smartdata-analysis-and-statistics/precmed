@@ -180,21 +180,21 @@ output_atefit
 The output of `atefit()` shows the point estimate, standard error ("SE"), lower ("CI.lower") and upper ("CI.upper") bound of the 95\% confidence interval, and the p-value ("pvalue") for the log rate ratio (`$log.rate.ratio`) as well as the point estimate for the rate in the 2 treatment groups (`$rate0` and `$rate1`). For example, the log rate ratio of `r round(output_atefit$log.rate.ratio$estimate, 2)` and the 95\% confidence interval of (`r round(output_atefit$log.rate.ratio$CI.lower, 2)`, `r round(output_atefit$log.rate.ratio$CI.upper, 2)`) are displayed in the output. Use `coef()` and `confint()` to extract the log rate ratio and its confidence interval, then exponentiate them to obtain the rate ratio and its interval. The default confidence level is 95%; specify `level`, for example `level = 0.90`, to request a different level. Intervals use the bootstrap standard error already stored in the fitted object:
 
 ```{r rmtl_atefit, eval = T, echo = T}
-rate.ratio <- exp(coef(output_atefit))
+rate.ratio <- unname(exp(coef(output_atefit)))
 rate.ratio
-CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))
+CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))[1, ]
 CI.rate.ratio
 ```
 
 The rate ratio of `r round(rate.ratio, 2)` along with the 95\% confidence interval of (`r round(CI.rate.ratio[1], 2)`, `r round(CI.rate.ratio[2], 2)`) indicate a higher estimated relapse rate under drug 1 than drug 0. However, the confidence interval includes 1, so there is insufficient evidence of a treatment difference, consistent with the p-value of `r round(output_atefit$log.rate.ratio$pvalue, 2)` in the output (`$log.rate.ratio$pvalue`).
 
-Using `plot(output_atefit)`, a histograms is generated of the point estimates across the `n.boot` bootstrap iterations for the log rate ratio. A red vertical line is added to each histogram with the mean of the bootstrap estimates.
+`plot(output_atefit)` displays all available metrics by default: the bootstrap estimates of the rate for each treatment and the log rate ratio. The `metrics` argument selects and orders these panels. Solid red lines mark the full-sample estimates, and the dashed black line marks the null value of 0 in the log-ratio panel (a rate ratio of 1). Set `null.value` to another value on the log scale, or to `NULL` or `NA` to omit the null line.
 
-```{r, echo = F}
-knitr::include_graphics("atefit_bootstrap_count.png")
+```{r plot_atefit_bootstrap, fig.width = 10, fig.height = 4}
+plot(output_atefit, metrics = c("rate0", "rate1", "log.rate.ratio"))
 ```
    
-Histograms of bootstrap log rate ratio estimators after 500 bootstrap iterations.
+Bootstrap estimates of the treatment-specific rates and log rate ratio.
 
 
 ## Estimate CATE scores 
@@ -415,11 +415,12 @@ Subgroup estimates can be missing or unstable, for example when a subgroup has f
 diagnostics(output_catecv)
 ```
 
-The support table records the number of patients (`n0`, `n1`) and total observed relapses (`events0`, `events1`) in each treatment arm for each reported subgroup. For example, inspect the validation-set support for contrast regression with:
+The support table records the number of patients (`n0`, `n1`) and total observed relapses (`events0`, `events1`) in each treatment arm for each reported subgroup. For example, inspect the first six validation-set support records for contrast regression with:
 
 ```{r count_support, eval = T, echo = T}
-subset(output_catecv$subgroup.support,
-       split == "validation" & method == "contrastReg")
+head(subset(output_catecv$subgroup.support,
+            split == "validation" & method == "contrastReg",
+            select = c(iteration, group, subgroup, n0, n1, events0, events1)))
 ```
 
 The contrast-regression convergence vector indicates whether at least one cross-fitting repetition converged in each CV iteration. The individual repetition results are available in `output_catecv$ate.contrastReg$converge.repetitions.cv`.
@@ -431,15 +432,13 @@ The ABC statistics is calculated by `abc()` for each scoring method specified in
 Each validation curve summarizes estimated treatment effects in nested high-responder groups, from a smaller group with more favorable scores to the entire validation set. The ABC summarizes the area between that curve and the overall ATE reference line; a higher value indicates greater separation in the expected direction for this example. Chapter 20 describes this responder diagnostic and its interpretation [@jiang2026visualization]. See the [Validation curves and the ABC statistics](Theoretical-details.html) section for a detailed illustration of the relationship between `higher.y`, `abc`, and the validation curves. 
 
 ```{r example_abc, eval = T, echo = T}
-output_abc <- abc(output_catecv)
-output_abc
+abc(output_catecv)
 ```
 
-The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the scoring methods specified in `score.method`. For example, in CV iteration 1, negative binomial ("negBin") has an ABC of `r round(output_abc[3,1], 3)`, which is the highest in this CV iteration, meaning that negative binomial offers the best performance in the first CV iteration. The user can combine the ABC for each method across iterations:
+The output is a matrix with columns corresponding to the CV iterations and rows corresponding to the scoring methods specified in `score.method`. Individual iterations can differ; summarize across iterations to compare methods:
 
 ```{r example_abc_combine, eval = T, echo = T}
-average_abc <- apply(output_abc, 1, mean)
-average_abc
+abc(output_catecv, combine = "mean")
 ```
 
 In this example, negative binomial also offers the best overall performance because it has the highest average ABC, followed closely by Poisson.
@@ -465,6 +464,13 @@ The plot's legend includes the ABC statistics in the validation set. The user ca
 plot(output_catecv, 
      show.abc = FALSE, 
      ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
+```
+
+To compare training and validation curves directly for each scoring method, use `layout = "method"`. Each panel shows one method, with a solid training curve and a dashed validation curve. The dotted lines mark the corresponding overall treatment effects.
+
+```{r example_plot_by_method, fig.width = 10, fig.height = 7}
+plot(output_catecv, layout = "method", show.abc = FALSE,
+     ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 ```
 
 To plot validation curves for a single CV iteration instead of the average, specify `cv.i` (for example, `cv.i = 2` for the second iteration). Set `grayscale = TRUE` to display the curves in grayscale.

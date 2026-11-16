@@ -4,11 +4,18 @@
 #' This should be run only after results of \code{\link{catecv}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
+#' @param combine Optional summary across validation iterations for each
+#' scoring method. Use \code{NULL} (the default) for the full matrix,
+#' \code{"mean"} or \code{"median"}, or a function returning one numeric
+#' value from a vector. Missing values are passed to the summary function
+#' unchanged; for example, use \code{function(z) mean(z, na.rm = TRUE)} to
+#' omit them explicitly.
 #' @param ... Additional arguments (currently unused).
 #'
 #'
 #' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
 #' iteration and number of rows equal to the number of scoring methods in \code{x}.
+#' With \code{combine}, returns a named numeric vector with one value per method.
 #'
 #' @details The ABC is the area between a validation curve and the overall ATE in the validation set.
 #' It is calculated for each scoring method separately. Higher ABC values are preferable as they
@@ -48,6 +55,8 @@
 #' data(catecvCountExample)
 #' # Rows are scoring methods; columns are validation iterations.
 #' abc(catecvCountExample)
+#' abc(catecvCountExample, combine = "mean")
+#' abc(catecvCountExample, combine = median)
 #'
 #' @export
 abc <- function(x, ...) UseMethod("abc", x)
@@ -66,10 +75,18 @@ abc.default <- function(x, ...){
 #' This should be run only after results of \code{\link{catecv}()} have been obtained.
 #'
 #' @param x An object of class \code{"precmed"}.
+#' @param combine Optional summary across validation iterations for each
+#' scoring method. Use \code{NULL} (the default) for the full matrix,
+#' \code{"mean"} or \code{"median"}, or a function returning one numeric
+#' value from a vector. Missing values are passed to the summary function
+#' unchanged; for example, use \code{function(z) mean(z, na.rm = TRUE)} to
+#' omit them explicitly.
 #' @param ... Additional arguments (currently unused).
+#'
 #'
 #' @return Returns a matrix of numeric values with number of columns equal to the number cross-validation
 #' iteration and number of rows equal to the number of scoring methods in \code{x}.
+#' With \code{combine}, returns a named numeric vector with one value per method.
 #'
 #' @details The ABC is the area between a validation curve and the overall ATE in the validation set.
 #' It is calculated for each scoring method separately. Higher ABC values are preferable as they
@@ -109,11 +126,20 @@ abc.default <- function(x, ...){
 #' data(catecvCountExample)
 #' # Rows are scoring methods; columns are validation iterations.
 #' abc(catecvCountExample)
+#' abc(catecvCountExample, combine = "mean")
+#' abc(catecvCountExample, combine = median)
 #'
 #' @export
-#'
 #' @importFrom stringr str_extract
-abc.precmed <- function(x, ...) {
+abc.precmed <- function(x, combine = NULL, ...) {
+
+  if (is.character(combine) && length(combine) == 1L && !is.na(combine)) {
+    if (!combine %in% c("mean", "median"))
+      stop("combine must be NULL, 'mean', 'median', or a function.")
+    combine <- switch(combine, mean = base::mean, median = stats::median)
+  }
+  if (!is.null(combine) && !is.function(combine))
+    stop("combine must be NULL, 'mean', 'median', or a function.")
 
   # Check the value of abc (must have area between curves values)
   if (!x$abc) {
@@ -132,6 +158,14 @@ abc.precmed <- function(x, ...) {
   rownames(value.abc) <- score.method
   colnames(value.abc) <- paste0("cv", 1:(x$cv.n))
 
-  return(value.abc)
+  if (is.null(combine)) return(value.abc)
+  result <- vapply(seq_len(m), function(i) {
+    value <- combine(value.abc[i, ])
+    if (!is.numeric(value) || length(value) != 1L)
+      stop("combine must return one numeric value per scoring method.")
+    unname(value)
+  }, numeric(1))
+  names(result) <- score.method
+  result
 }
 

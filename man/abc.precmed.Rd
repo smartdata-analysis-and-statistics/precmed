@@ -4,16 +4,24 @@
 \alias{abc.precmed}
 \title{Compute the area between curves from the \code{"precmed"} object}
 \usage{
-\method{abc}{precmed}(x, ...)
+\method{abc}{precmed}(x, combine = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{"precmed"}.}
+
+\item{combine}{Optional summary across validation iterations for each
+scoring method. Use \code{NULL} (the default) for the full matrix,
+\code{"mean"} or \code{"median"}, or a function returning one numeric
+value from a vector. Missing values are passed to the summary function
+unchanged; for example, use \code{function(z) mean(z, na.rm = TRUE)} to
+omit them explicitly.}
 
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
 Returns a matrix of numeric values with number of columns equal to the number cross-validation
 iteration and number of rows equal to the number of scoring methods in \code{x}.
+With \code{combine}, returns a named numeric vector with one value per method.
 }
 \description{
 Compute the area between curves (ABC) for each scoring method in the \code{"precmed"} object.
@@ -44,6 +52,8 @@ the validation curves in the validation set in \code{\link{plot}()}.
 data(catecvCountExample)
 # Rows are scoring methods; columns are validation iterations.
 abc(catecvCountExample)
+abc(catecvCountExample, combine = "mean")
+abc(catecvCountExample, combine = median)
 
 }
 \references{

@@ -50,6 +50,9 @@
 #'   \code{trt=1}.
 #'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
 #'   sample.
+#'   \item{\code{rate.boot}: } A data frame of treatment-specific rate estimates
+#'   in each bootstrap sample, with columns \code{rate0} and \code{rate1}.
+#'   \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1.
 #'   \item{\code{warning}: } A warning message produced if the treatment
 #'   variable was not coded as 0 or 1. The key to map the original coding of the
 #'   variable to a 0-1 coding is displayed in the warning to facilitate the
@@ -137,6 +140,7 @@ atefitcount <- function(data,
   }
 
   trt.boot <- rep(NA, n.boot)
+  rate.boot <- data.frame(rate0 = rep(NA_real_, n.boot), rate1 = rep(NA_real_, n.boot))
 
   pb   <- txtProgressBar(min = 1,
                          max = n.boot,
@@ -144,7 +148,7 @@ atefitcount <- function(data,
 
   for (i.boot in seq(n.boot)) {
     idsub.boot <- sample(n, size = n, replace = TRUE)
-    trt.boot[i.boot] <- drcount(y = y[idsub.boot],
+    boot.est <- drcount(y = y[idsub.boot],
                                 x.cate = x.cate[idsub.boot, , drop = FALSE],
                                 x.ps = x.ps[idsub.boot, , drop = FALSE],
                                 trt = trt[idsub.boot],
@@ -152,7 +156,10 @@ atefitcount <- function(data,
                                 ps.method = ps.method,
                                 minPS = minPS,
                                 maxPS = maxPS,
-                                interactions = interactions, ps.control = ps.control)$log.rate.ratio
+                                interactions = interactions, ps.control = ps.control)
+    trt.boot[i.boot] <- boot.est$log.rate.ratio
+    rate.boot$rate0[i.boot] <- boot.est$rate0
+    rate.boot$rate1[i.boot] <- boot.est$rate1
 
     if (verbose == 1) setTxtProgressBar(pb, i.boot)
   }
@@ -175,6 +182,8 @@ atefitcount <- function(data,
 
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- trt.boot #bootstrap estimates of the treatment effect
+  out$rate.boot <- rate.boot
+  out$treatment.labels <- preproc$treatment.labels
   out$warning <- preproc$warning
 
   class(out) <- "atefit"

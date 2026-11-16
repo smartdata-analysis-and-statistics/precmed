@@ -41,6 +41,35 @@
 
 ## Minor changes and bug fixes
 
+* Added `combine` to `abc()` to aggregate cross-validation iterations per
+  scoring method with a mean, median, or user-supplied function. The default
+  still returns the full matrix; missing values are not removed automatically.
+
+* Added a dashed null reference line to count and survival `atefit()` bootstrap
+  log-ratio plots. `null.value` defaults to 0 on the log scale and can be set
+  to another value, `NULL`, or `NA`; treatment-specific RMST panels are unchanged.
+
+* Count `atefit()` now retains bootstrap rate estimates and treatment labels;
+  its bootstrap plot displays rates for both treatments alongside the log rate
+  ratio. Older saved fits continue to display the log-ratio panel only.
+
+* Added `metrics` to `plot.atefit()` to select and order available bootstrap
+  metrics by their names in the fitted object.
+
+* Improved bootstrap histogram styling with a minimal default theme and panel headings, and added a
+  caption explaining the estimate and null reference lines. Supply `theme` to
+  use another ggplot2 theme. Histogram bars now default to `alpha = 1` so the
+  background grid does not show through them.
+
+* Applied the same default theme to validation curves and subgroup box plots;
+  their `theme` argument still accepts a custom ggplot2 theme. Captions explain
+  the dashed overall treatment effect reference lines. Multi-measure survival
+  plots use horizontal panel headings and matched y scales within each measure.
+  Set `show.overall = FALSE` on validation curves or box plots to hide the overall effect line.
+  Validation curves accept `layout = "method"` to compare training and
+  validation curves within method-specific panels.
+  Subgroup box plots now default to two columns; `ncol` controls their layout.
+
 * Validate outcome types and outcome-specific CATE scoring methods before
   fitting, including empty and invalid inputs.
 

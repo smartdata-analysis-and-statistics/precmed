@@ -4,18 +4,39 @@
 \alias{plot.atefit}
 \title{Histogram of bootstrap estimates}
 \usage{
-\method{plot}{atefit}(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...)
+\method{plot}{atefit}(
+  x,
+  bins,
+  alpha = 1,
+  title = waiver(),
+  theme = precmed_plot_theme(),
+  null.value = 0,
+  metrics = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{"atefit"}.}
 
 \item{bins}{Number of bins}
 
-\item{alpha}{Opacity}
+\item{alpha}{Histogram bar opacity, between 0 and 1. Defaults to 1.}
 
 \item{title}{The text for the title}
 
-\item{theme}{Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
+\item{theme}{A ggplot2 theme. By default, a customized minimal theme is used;
+supply, for example, \code{ggplot2::theme_classic()} to use another theme.}
+
+\item{null.value}{Reference value on the plotted log-ratio scale. Defaults to
+0 (a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.}
+
+\item{metrics}{Character vector of metrics to plot, in display order. For
+count fits, choose from \code{"rate0"}, \code{"rate1"}, and
+\code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
+\code{"rmst1"}, \code{"log.rmtl.ratio"}, and
+\code{"log.cumulative.hazard.ratio"}. Older survival fits may instead
+contain \code{"log.hazard.ratio"}. The default \code{NULL} plots all
+metrics available in the object.}
 
 \item{...}{Other parameters}
 }
@@ -28,9 +49,11 @@ Histogram of bootstrap estimates
 }
 \details{
 Create a histogram displaying the distribution of the bootstrap estimates.
-The red vertical reference line represents the final estimate.
-For survival fits, RMST facets use the original treatment labels when available;
-older objects use treatment 0 and treatment 1.
+The solid red vertical line represents the full-sample estimate. A dashed
+black line marks \code{null.value} in log-ratio panels only; it is not shown
+in treatment-specific rate or RMST panels.
+Treatment-specific facets use the original treatment labels when available.
+Older count objects without rate bootstrap estimates show only the log rate ratio.
 }
 \author{
 Thomas Debray

@@ -145,43 +145,124 @@ atefit <- function(response,
 
 }
 
+# Author: Thomas Debray
+precmed_plot_theme <- function() {
+  ggplot2::theme_minimal(base_size = 11) +
+    ggplot2::theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.major.y = ggplot2::element_line(color = "#E5E9ED", linewidth = 0.4),
+      strip.background = ggplot2::element_rect(fill = "#F2F5F7", color = NA),
+      strip.text = ggplot2::element_text(face = "bold", color = "#263746", hjust = 0,
+                                         margin = ggplot2::margin(6, 8, 6, 8)),
+      strip.text.y.right = ggplot2::element_text(angle = 0),
+      axis.title = ggplot2::element_text(color = "#263746"),
+      axis.text = ggplot2::element_text(color = "#52616B"),
+      plot.caption = ggplot2::element_text(color = "#52616B", hjust = 0, margin = ggplot2::margin(t = 10))
+    )
+}
+
 #' Histogram of bootstrap estimates
 #'
 #' @param x An object of class \code{"atefit"}.
 #' @param bins Number of bins
-#' @param alpha Opacity
+#' @param alpha Histogram bar opacity, between 0 and 1. Defaults to 1.
 #' @param title The text for the title
-#' @param theme Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}
+#' @param theme A ggplot2 theme. By default, a customized minimal theme is used;
+#' supply, for example, \code{ggplot2::theme_classic()} to use another theme.
+#' @param null.value Reference value on the plotted log-ratio scale. Defaults to
+#' 0 (a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.
+#' @param metrics Character vector of metrics to plot, in display order. For
+#' count fits, choose from \code{"rate0"}, \code{"rate1"}, and
+#' \code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
+#' \code{"rmst1"}, \code{"log.rmtl.ratio"}, and
+#' \code{"log.cumulative.hazard.ratio"}. Older survival fits may instead
+#' contain \code{"log.hazard.ratio"}. The default \code{NULL} plots all
+#' metrics available in the object.
 #' @param ... Other parameters
 #'
 #' @return A plot of the class \code{ggplot}, displaying the estimated ATE across
 #' the bootstrap samples
 #'
 #' @details Create a histogram displaying the distribution of the bootstrap estimates.
-#' The red vertical reference line represents the final estimate.
-#' For survival fits, RMST facets use the original treatment labels when available;
-#' older objects use treatment 0 and treatment 1.
+#' The solid red vertical line represents the full-sample estimate. A dashed
+#' black line marks \code{null.value} in log-ratio panels only; it is not shown
+#' in treatment-specific rate or RMST panels.
+#' Treatment-specific facets use the original treatment labels when available.
+#' Older count objects without rate bootstrap estimates show only the log rate ratio.
 #' @author Thomas Debray
 #'
 #' @importFrom dplyr %>% add_row mutate
-#' @importFrom ggplot2 ggplot geom_histogram geom_vline theme_classic waiver
+#' @importFrom ggplot2 ggplot geom_histogram geom_vline waiver
 #' @importFrom tidyr gather
 #' @export
 #'
-plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_classic(), ...) {
+plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
+                        theme = precmed_plot_theme(),
+                        null.value = 0, metrics = NULL, ...) {
+
+  if (!is.null(null.value) && (length(null.value) != 1L ||
+      !(is.numeric(null.value) || (is.logical(null.value) && is.na(null.value))) ||
+      (!is.na(null.value) && !is.finite(null.value))))
+    stop("null.value must be a finite numeric value, NA, or NULL.")
+  show.null <- !is.null(null.value) && !is.na(null.value)
 
   if (missing(bins)) {
     bins <- max(1, min(50, floor(x$n.boot/10))) # need at least one bin
   }
 
+  available <- if (x$response == "count") {
+    c(if (!is.null(x$rate.boot)) c("rate0", "rate1"), "log.rate.ratio")
+  } else if (x$response == "survival") {
+    intersect(intersect(c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio",
+                          "log.cumulative.hazard.ratio"), colnames(x$trt.boot)), names(x))
+  } else character()
+  if (is.null(metrics)) metrics <- available
+  if (!is.character(metrics) || !length(metrics) || anyNA(metrics) ||
+      anyDuplicated(metrics) || any(!metrics %in% available))
+    stop("metrics must be a non-empty vector of distinct available metric names: ",
+         paste(available, collapse = ", "), ".")
+
   if (x$response == "count") {
-    x$trt.boot %>% as.data.frame() %>%
+    if (!is.null(x$rate.boot)) {
+      treatment.labels <- x$treatment.labels
+      if (is.null(treatment.labels) || length(treatment.labels) != 2L ||
+          anyNA(treatment.labels) || any(!nzchar(treatment.labels)))
+        treatment.labels <- c("treatment 0", "treatment 1")
+      keys <- metrics
+      facet.labels <- c(rate0 = paste0("Rate (", treatment.labels[1], ")"),
+                        rate1 = paste0("Rate (", treatment.labels[2], ")"),
+                        log.rate.ratio = "Log rate ratio")
+      boot.df <- data.frame(x$rate.boot, log.rate.ratio = x$trt.boot) %>%
+        gather(key = "key", value = "value") %>%
+        dplyr::filter(.data$key %in% keys) %>%
+        mutate(key = factor(.data$key, levels = keys))
+      estimates <- c(rate0 = x$rate0$estimate, rate1 = x$rate1$estimate,
+                     log.rate.ratio = x$log.rate.ratio$estimate)
+      est.df <- data.frame(key = factor(keys, levels = keys), value = unname(estimates[keys]))
+      p <- ggplot(boot.df, aes(x = .data$value)) +
+        geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white", linewidth = 0.3) +
+        facet_wrap(. ~ .data$key, nrow = 1, scales = "free",
+                   labeller = ggplot2::as_labeller(facet.labels)) +
+        geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "#B43B35", linewidth = 0.8) +
+        theme +
+        labs(x = "Bootstrap estimate", y = "Frequency", title = title,
+             caption = if (show.null && "log.rate.ratio" %in% keys) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
+      if (show.null && "log.rate.ratio" %in% keys) {
+        null.df <- data.frame(key = factor("log.rate.ratio", levels = keys), value = null.value)
+        p <- p + geom_vline(data = null.df, aes(xintercept = .data$value), linetype = 2, color = "#303030", linewidth = 0.7)
+      }
+      return(p)
+    }
+    p <- x$trt.boot %>% as.data.frame() %>%
       ggplot(aes(x = .data$.)) +
-      geom_histogram(bins = bins, alpha = alpha) +
+      geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white", linewidth = 0.3) +
       theme +
-      geom_vline(xintercept = x$log.rate.ratio$estimate, linetype = 1, color = "red") +
+      geom_vline(xintercept = x$log.rate.ratio$estimate, linetype = 1, color = "#B43B35", linewidth = 0.8) +
       labs(x = "Bootstrap values of the log rate ratio", y = "Frequency",
-           title = title)
+           title = title, caption = if (show.null) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
+    if (show.null) p <- p + geom_vline(xintercept = null.value, linetype = 2, color = "#303030", linewidth = 0.7)
+    p
   } else if (x$response == "survival") {
 
     treatment.labels <- x$treatment.labels
@@ -203,14 +284,25 @@ plot.atefit <- function(x, bins, alpha = 0.7, title = waiver(), theme = theme_cl
     if (!is.null(x$log.cumulative.hazard.ratio))
       est.df <- est.df %>% add_row(key = "log.cumulative.hazard.ratio", value = x$log.cumulative.hazard.ratio$estimate)
 
-    x$trt.boot %>% as.data.frame() %>%
+    est.df <- est.df[match(metrics, est.df$key), , drop = FALSE]
+    est.df$key <- factor(est.df$key, levels = metrics)
+
+    p <- x$trt.boot %>% as.data.frame() %>%
       gather(key = "key", value = "value") %>% na.omit() %>%
-      mutate(key = factor(.data$key, levels = est.df$key)) %>%
-      ggplot(aes(x = .data$value)) + geom_histogram(bins = bins, alpha = alpha) +
+      dplyr::filter(.data$key %in% metrics) %>%
+      mutate(key = factor(.data$key, levels = metrics)) %>%
+      ggplot(aes(x = .data$value)) + geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white", linewidth = 0.3) +
       facet_wrap(. ~ .data$key, scales = "free", labeller = ggplot2::as_labeller(facet.labels)) +
-      geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "red") +
+      geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "#B43B35", linewidth = 0.8) +
       theme +
-      labs(x = "Bootstrap values", y = "Frequency", title = title)
+      labs(x = "Bootstrap estimate", y = "Frequency", title = title,
+           caption = if (show.null && any(grepl("^log\\.", metrics))) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
+    if (show.null && any(grepl("^log\\.", metrics))) {
+      null.df <- data.frame(key = factor(metrics[grepl("^log\\.", metrics)], levels = metrics), value = null.value)
+      p <- p + geom_vline(data = null.df, aes(xintercept = .data$value),
+                          linetype = 2, color = "#303030", linewidth = 0.7)
+    }
+    p
   }
 
 }

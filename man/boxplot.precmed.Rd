@@ -9,9 +9,11 @@
   ylab = NULL,
   plot.hr = FALSE,
   title = waiver(),
-  theme = theme_classic(),
+  theme = precmed_plot_theme(),
   hazard.type = c("cumulative", "conditional"),
   measure = "rmtl",
+  show.overall = TRUE,
+  ncol = 2,
   ...
 )
 }
@@ -26,7 +28,8 @@ When \code{TRUE}, the default is the marginal cumulative hazard ratio.}
 
 \item{title}{The text for the title}
 
-\item{theme}{Defaults to \code{theme_classic()}. Other options include \code{theme_grey()}, \code{theme_bw()}, \code{theme_light()}, \code{theme_dark()}, and \code{theme_void()}}
+\item{theme}{A ggplot2 theme. By default, a customized minimal theme is used;
+supply, for example, \code{ggplot2::theme_classic()} to use another theme.}
 
 \item{hazard.type}{Deprecated; use \code{measure} instead. Select \code{"cumulative"} (default) or the supplementary
 \code{"conditional"} Cox HR when \code{plot.hr = TRUE}. Older objects without cumulative
@@ -36,11 +39,18 @@ hazard ratios require \code{hazard.type = "conditional"} or refitting.}
 \code{"cumulative_hr"} (cumulative hazard ratio), or \code{"conditional_hr"}
 (conditional Cox hazard ratio fitted through \code{tau0}). Earlier measure names remain supported as aliases.}
 
+\item{show.overall}{Whether to show the dashed mean overall validation-set
+treatment effect across iterations. Defaults to \code{TRUE}.}
+
+\item{ncol}{Number of columns for scoring-method panels. Defaults to 2;
+use 1 to stack panels vertically.}
+
 \item{...}{Other parameters}
 }
 \value{
 Returns sets of box plots, one set for each scoring method, over each of the multi-category
-subgroups. A gray horizontal dashed line of the overall ATE is included as a reference.
+subgroups. A gray horizontal dashed line of the overall ATE is included as a
+reference when \code{show.overall = TRUE}.
 }
 \description{
 Provides box plots which depict distributions of estimated ATEs for each multi-category subgroup in
