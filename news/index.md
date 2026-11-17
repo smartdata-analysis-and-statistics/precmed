@@ -73,7 +73,8 @@
 ### Minor changes
 
 - Added an introductory vignette explaining doubly robust estimation,
-  its assumptions, and its use in `precmed`.
+  propensity score weighting, outcome-model standardization
+  (g-computation), their assumptions, and their use in `precmed`.
 
 - Added
   [`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)

@@ -84,8 +84,8 @@
     
     
 <p>How can we estimate a treatment effect when treated and untreated
-patients differ at baseline? This introduction compares outcome-model
-standardization, inverse probability weighting, and doubly robust
+patients differ at baseline? This introduction compares inverse
+probability weighting, outcome-model standardization, and doubly robust
 estimation. It then shows how to use <code>precmed</code> for a binary
 outcome. For the formulas and outcome-specific assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
 effects</a>.</p>
@@ -101,16 +101,29 @@ marginal effect is distinct from a treatment effect conditional on a
 particular patient’s covariates.</p>
 <p>In observational data, the observed difference in relapse proportions
 may reflect differences in baseline characteristics as well as
-treatment. Two models can help adjust for measured covariates:</p>
+treatment. Two approaches can help adjust for measured covariates:</p>
 <ul>
-<li>An <strong>outcome model</strong> predicts the outcome given
-treatment and covariates. Standardization averages the predicted
-outcomes under each treatment over the target population.</li>
-<li>A <strong>treatment model</strong> predicts treatment assignment
-given covariates. For two treatments, it estimates the propensity score:
-the probability of receiving treatment 1. Inverse probability weighting
-(IPW) gives more weight to patients who received a treatment that was
-less likely given their covariates.</li>
+<li>
+<strong>Inverse probability weighting (IPW)</strong> uses a
+<strong>treatment model</strong> to estimate each patient’s propensity
+score: the probability of receiving treatment 1 given their covariates.
+Patients receive more weight if they received a treatment that was less
+likely given their covariates. The weighted relapse outcomes are then
+compared between treatment groups. Propensity scores can also be used
+for matching, stratification, or regression adjustment; see Chapter 7
+for an introduction to these methods <span class="citation">(Jiang et
+al. 2026)</span>.</li>
+<li>
+<strong>Outcome-model standardization</strong>, also called
+<strong>g-computation</strong>, uses an <strong>outcome model</strong>
+to predict relapse given treatment and covariates. For each patient in
+the target population, the model predicts the probability of relapse
+under treatment 0 and again under treatment 1, using the patient’s
+observed covariates. Averaging the predictions separately for each
+treatment gives two estimated population-average risks; their difference
+estimates the risk difference. For example, average predicted risks of
+20% under treatment 0 and 15% under treatment 1 give a risk difference
+of -5 percentage points.</li>
 </ul>
 <p>Both approaches need causal identification assumptions, including
 well-defined treatments and consistency, no unmeasured treatment–outcome
@@ -248,16 +261,24 @@ establish that either model is correct.</p>
 <div class="section level2">
 <h2 id="choosing-and-using-a-method">Choosing and using a method<a class="anchor" aria-label="anchor" href="#choosing-and-using-a-method"></a>
 </h2>
-<p>Doubly robust estimation is useful when estimating an average
-treatment effect and neither the outcome nor the treatment model can be
-assumed correct with certainty. It is not automatically more accurate in
-every dataset. Specify both models carefully using subject-matter
-knowledge, inspect treatment overlap and extreme weights, assess model
-fit and sensitivity to modeling choices, and report the target
-population and effect scale. Randomization can support exchangeability,
-but overlap and other assumptions still matter. For a simple randomized
-trial, an intercept-only treatment model may be appropriate; account for
-the actual assignment design when choosing it.</p>
+<p>Doubly robust estimation can be useful when there is uncertainty
+about the correct specification of the outcome and treatment models. A
+singly robust approach, such as outcome-model standardization or inverse
+probability weighting, generally relies on correct specification of its
+respective model. A doubly robust estimator such as AIPW is consistent
+if <strong>either the outcome model or the treatment model is correctly
+specified</strong>, provided the required causal identification and
+regularity assumptions also hold. Note that doubly robust methods do not
+protect against unmeasured confounding, poor treatment overlap, or
+misspecification of both models.</p>
+<p>Doubly robust estimation is not automatically more accurate in every
+dataset. Specify both models carefully using subject-matter knowledge,
+inspect treatment overlap and extreme weights, assess model fit and
+sensitivity to modeling choices, and report the target population and
+effect scale. Randomization can support exchangeability, but overlap and
+other assumptions still matter. For a simple randomized trial, an
+intercept-only treatment model may be appropriate; account for the
+actual assignment design when choosing it.</p>
 <p>In <code>precmed</code>, <code><a href="../reference/atefit.html">atefit()</a></code> estimates a marginal
 risk difference for binary outcomes, a marginal rate ratio for count
 outcomes, and, for survival outcomes at a chosen horizon, a marginal
@@ -302,6 +323,14 @@ validating CATE scores</a></li>
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-jiang2026propensity" class="csl-entry">
+Jiang, Tammy, Gabrielle Simoneau, Changyu Shen, Fabio Pellegrini, and
+Carl de Moor. 2026. <span>“Confounding Adjustment Using Propensity Score
+Methods.”</span> Chap. 7 in <em>Comparative Effectiveness and
+Personalized Medicine Research Using Real-World Data</em>, edited by
+Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
+Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-7" class="external-link">https://doi.org/10.1201/9781003300809-7</a>.
+</div>
 <div id="ref-kurz2022aipw" class="csl-entry">
 Kurz, Christoph F. 2022. <span>“Augmented Inverse Probability Weighting
 and the Double Robustness Property.”</span> <em>Medical Decision
