@@ -4,6 +4,7 @@
 .RData
 .Ruserdata
 Rplots.pdf
+/*.tar.gz
 /AGENTS.md
 docs
 inst/doc

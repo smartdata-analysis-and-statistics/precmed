@@ -772,8 +772,8 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
   if ("negBin" %in% score.method) {
     ## Naive negative binomial regression method  (score 5)
-    beta1.ini <- glm.nb(y ~ x.cate + offset(time), subset = (trt == 1), maxit = 500)$coef
-    beta0.ini <- glm.nb(y ~ x.cate + offset(time), subset = (trt == 0), maxit = 500)$coef
+    beta1.ini <- MASS::glm.nb(y ~ x.cate + offset(time), subset = (trt == 1), maxit = 500)$coef
+    beta0.ini <- MASS::glm.nb(y ~ x.cate + offset(time), subset = (trt == 0), maxit = 500)$coef
     delta.negBin <- beta1.ini - beta0.ini
     names(delta.negBin) <- c("(Intercept)", colnames(x.cate))
     result$result.negBin <- delta.negBin

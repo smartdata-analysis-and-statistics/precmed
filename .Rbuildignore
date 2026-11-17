@@ -1,4 +1,6 @@
 ^.*\.Rproj$
+^Rplots\.pdf$
+^precmed_.*\.tar\.gz$
 ^\.Rproj\.user$
 .github
 LICENSE.md

@@ -187,7 +187,7 @@ atefitsurv <- function(data,
   save.boot <- matrix(NA, nrow = n.boot, ncol = length(est))
   colnames(save.boot) <- effect.names
 
-  pb   <- txtProgressBar(min = 1,
+  pb   <- utils::txtProgressBar(min = 1,
                          max = n.boot,
                          style = 3)
 
@@ -214,7 +214,7 @@ atefitsurv <- function(data,
     fallback.boot <- fallback.boot + as.integer(fallback.in.sample)
     if (!is.null(est.boot)) save.boot[i,] <- unlist(est.boot)[effect.names]
 
-    if (verbose == 1) setTxtProgressBar(pb, i)
+    if (verbose == 1) utils::setTxtProgressBar(pb, i)
   }
 
   close(pb)

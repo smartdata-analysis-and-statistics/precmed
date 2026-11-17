@@ -73,7 +73,7 @@ glm.ps <- function(trt, x.ps, xnew = NULL, minPS = 0.01, maxPS = 0.99,
   if (q > p) {
     # Estimate PS with LASSO with penalty term only for interactions
     pf0 <- c(rep(0, p), rep(1, q - p))
-    fit.cv <- cv.glmnet(x = xmat, y = trt, family = "binomial", penalty.factor = pf0)
+    fit.cv <- glmnet::cv.glmnet(x = xmat, y = trt, family = "binomial", penalty.factor = pf0)
     # cv.glmnet already fitted this same full-data regularization path.
     beta <- coef(fit.cv$glmnet.fit, s = fit.cv$lambda.min)
     if (is.null(xnew) == TRUE) {

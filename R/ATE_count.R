@@ -148,7 +148,7 @@ atefitcount <- function(data,
   trt.boot <- rep(NA, n.boot)
   rate.boot <- data.frame(rate0 = rep(NA_real_, n.boot), rate1 = rep(NA_real_, n.boot))
 
-  pb   <- txtProgressBar(min = 1,
+  pb   <- utils::txtProgressBar(min = 1,
                          max = n.boot,
                          style = 3)
 
@@ -173,7 +173,7 @@ atefitcount <- function(data,
       rate.boot$rate1[i.boot] <- boot.est$rate1
     }
 
-    if (verbose == 1) setTxtProgressBar(pb, i.boot)
+    if (verbose == 1) utils::setTxtProgressBar(pb, i.boot)
   }
   close(pb)
 

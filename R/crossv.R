@@ -228,10 +228,7 @@
 #'
 #' @importFrom dplyr %>%
 #' @importFrom gam gam
-#' @importFrom glmnet cv.glmnet glmnet
 #' @importFrom graphics hist lines
-#' @importFrom MASS glm.nb
-#' @importFrom randomForestSRC rfsrc predict.rfsrc
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom survival Surv coxph coxph.detail survreg
@@ -252,7 +249,6 @@
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-#' @importFrom utils setTxtProgressBar txtProgressBar
 
 catecv <- function(response,
                    data,
@@ -633,12 +629,9 @@ catecv <- function(response,
 #' @export
 #'
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.response na.omit optim pchisq predict qnorm quantile sd var
-#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom survival Surv coxph coxph.detail survreg
-#' @importFrom randomForestSRC rfsrc predict.rfsrc
 #' @importFrom gam gam
 #' @importFrom stringr str_replace
-#' @importFrom glmnet cv.glmnet glmnet
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
@@ -815,7 +808,7 @@ catecvsurv <- function(data,
   }
 
   # Set progress bar
-  if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
+  if (verbose >= 1) pb <- utils::txtProgressBar(min = 0, max = cv.n, style = 3)
 
   # Begin CV iteration
   for (cv.i in 1:cv.n) {
@@ -1102,7 +1095,7 @@ catecvsurv <- function(data,
         }
       }
       cat("  ", date(), "\n")
-      setTxtProgressBar(pb, cv.i)
+      utils::setTxtProgressBar(pb, cv.i)
     }
   } # end of cv loop
 
@@ -1395,10 +1388,8 @@ catecvsurv <- function(data,
 #'
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
-#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
-#' @importFrom glmnet cv.glmnet glmnet
 #' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
@@ -1411,7 +1402,6 @@ catecvsurv <- function(data,
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-#' @importFrom MASS glm.nb
 
 catecvcount <- function(data,
                         score.method, # Mandatory argument that needs to be specified
@@ -1527,7 +1517,7 @@ catecvcount <- function(data,
   }
 
   # Set progress bar
-  if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
+  if (verbose >= 1) pb <- utils::txtProgressBar(min = 0, max = cv.n, style = 3)
 
   # Begin CV iteration
   for (cv.i in seq(cv.n)) {
@@ -1737,7 +1727,7 @@ catecvcount <- function(data,
     if (verbose >= 1 & ("contrastReg" %in% score.method)) {
       cat("  convergence", converge.contrastReg.cv[cv.i], "\n")
       cat("  ", date(), "\n")
-      setTxtProgressBar(pb, cv.i)
+      utils::setTxtProgressBar(pb, cv.i)
     }
 
   }
@@ -2005,17 +1995,13 @@ catecvcount <- function(data,
 #'
 #' @importFrom graphics hist lines
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
-#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
-#' @importFrom glmnet cv.glmnet glmnet
-#' @importFrom MASS glm.nb ginv
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-#' @importFrom randomForestSRC rfsrc predict.rfsrc
 
 catecvmean <- function(data,
                        score.method,
@@ -2156,7 +2142,7 @@ catecvmean <- function(data,
   if ("contrastReg" %in% score.method) converge.contrastReg.cv <- rep(NA, cv.n)
 
   # Set progress bar
-  if (verbose >= 1) pb <- txtProgressBar(min = 0, max = cv.n, style = 3)
+  if (verbose >= 1) pb <- utils::txtProgressBar(min = 0, max = cv.n, style = 3)
 
   # Begin CV iteration
   for (cv.i in 1:cv.n) {

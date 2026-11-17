@@ -26,6 +26,19 @@ test_that("binary CATE models return probabilities on the risk difference scale"
   expect_output(print(fit), "logistic")
 })
 
+test_that("public binary CATE interface matches catefit and validates methods", {
+  d <- simulate_binary(n = 200, seed = 42)
+  direct <- precmed::catefitbinary(d, "logistic", y ~ age, trt ~ 1,
+                                  prop.cutoff = 1, seed = 19)
+  dispatched <- catefit("binary", d, "logistic", y ~ age, trt ~ 1,
+                        prop.cutoff = 1, seed = 19)
+  expect_equal(direct, dispatched)
+  expect_error(precmed::catefitbinary(d, "poisson", y ~ age, trt ~ 1),
+               "score.method")
+  expect_error(precmed::catefitbinary(d[d$trt == levels(d$trt)[1], ],
+                                      "logistic", y ~ age, trt ~ 1))
+})
+
 test_that("binary fits without linear score coefficients omit NULL when printed", {
   d <- simulate_binary(n = 200, seed = 24)
   fit <- catefit("binary", d, "logistic", y ~ age, trt ~ 1, prop.cutoff = 1)

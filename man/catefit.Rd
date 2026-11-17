@@ -200,7 +200,57 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.
+\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+}
+\value{
+Fitted objects retain \code{treatment.labels} in treatment 0/1 order
+for score plot labels. For binary response, see \code{\link{catefitbinary}()}.
+For count response, see description of other outputs in \code{\link{catefitcount}()}.
+For survival response, see description of outputs in \code{\link{catefitsurv}()}.
+}
+\description{
+Estimate CATE scores for binary, count and survival outcomes. Binary scores
+include pooled logistic regression, doubly robust two-regression estimation and
+boosting. Count and survival methods include both outcome-regression and
+doubly robust scores. Continuous outcomes are not yet implemented.
+}
+\details{
+The table summarizes the available score-fitting methods. "Yes" in the
+final column indicates a doubly robust score estimator, subject to the
+assumptions described below; "--" means that the method is not available
+for that outcome.
+
+\tabular{lllll}{
+\strong{Score method} \tab \strong{Binary} \tab \strong{Count} \tab \strong{Survival} \tab \strong{Doubly robust} \cr
+\code{twoReg} \tab Yes \tab Yes \tab Yes \tab Yes \cr
+\code{contrastReg} \tab -- \tab Yes \tab Yes \tab Yes \cr
+\code{logistic} \tab Yes \tab -- \tab -- \tab No \cr
+\code{poisson} \tab -- \tab Yes \tab Yes \tab No \cr
+\code{negBin} \tab -- \tab Yes \tab -- \tab No \cr
+\code{boosting} \tab Yes \tab Yes \tab Yes \tab No \cr
+\code{randomForest} \tab -- \tab -- \tab Yes \tab No \cr
+}
+
+The doubly robust methods combine outcome and treatment models. Their
+robustness to misspecification of one of these models is conditional on
+identification, positivity, and method-specific model and regularity
+assumptions. For example, binary \code{twoReg} estimates a linear projection
+of the conditional risk difference; this projection equals the conditional
+risk difference only if the latter is linear in the specified design.
+Truncating propensity scores can affect the robustness property. Survival
+methods also require appropriate censoring assumptions and a correctly
+specified censoring model.
+
+This table describes \emph{score fitting}. Subgroup effects can be estimated
+using doubly robust methods even when the score used to define the subgroups
+is not doubly robust. Neither score fitting nor subgroup estimates calculated
+on the fitting data constitute independent validation; see \code{\link{catecv}}.
+
+For binary response, see the Binary outcomes section below and \code{\link{catefitbinary}()}.
+For count response, see details in \code{\link{catefitcount}()}.
+For survival response, see details in \code{\link{catefitsurv}()}.
+}
+\section{Binary outcomes}{
 
 For \code{response = "binary"}, \code{score.method = "logistic"}
 fits a logistic model with treatment interactions. \code{"twoReg"} cross-fits
@@ -229,23 +279,9 @@ and both outcome values in each arm. Its fitted models and selected tree
 counts are stored in \code{fit$boosting}. Scores and subgroup effects are
 estimated on the same data; they are not independent validation. For extra boosting controls,
 see \code{\link{boosting-control}}.
-Subgroup fits without both arms or with rank-deficient models return NA.}
+Subgroup fits without both arms or with rank-deficient models return NA.
 }
-\value{
-Fitted objects retain \code{treatment.labels} in treatment 0/1 order
-for score plot labels. For count response, see description of other outputs in \code{\link{catefitcount}()}.
-For survival response, see description of outputs in \code{\link{catefitsurv}()}.
-}
-\description{
-Estimate CATE scores for binary, count and survival outcomes. Binary scores
-include pooled logistic regression, doubly robust two-regression estimation and
-boosting. Count and survival methods include both outcome-regression and
-doubly robust scores. Continuous outcomes are not yet implemented.
-}
-\details{
-For count response, see details in \code{\link{catefitcount}()}.
-For survival response, see details in \code{\link{catefitsurv}()}.
-}
+
 \examples{
 # Count outcome
 fit_1 <- catefit(response = "count",

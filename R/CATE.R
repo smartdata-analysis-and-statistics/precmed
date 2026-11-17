@@ -113,6 +113,7 @@
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
+#' @section Binary outcomes:
 #' For \code{response = "binary"}, \code{score.method = "logistic"}
 #' fits a logistic model with treatment interactions. \code{"twoReg"} cross-fits
 #' separate logistic outcome models and a treatment model, then projects the
@@ -142,10 +143,44 @@
 #' see \code{\link{boosting-control}}.
 #' Subgroup fits without both arms or with rank-deficient models return NA.
 #' @return Fitted objects retain \code{treatment.labels} in treatment 0/1 order
-#' for score plot labels. For count response, see description of other outputs in \code{\link{catefitcount}()}.
+#' for score plot labels. For binary response, see \code{\link{catefitbinary}()}.
+#' For count response, see description of other outputs in \code{\link{catefitcount}()}.
 #' For survival response, see description of outputs in \code{\link{catefitsurv}()}.
 #'
-#' @details For count response, see details in \code{\link{catefitcount}()}.
+#' @details
+#' The table summarizes the available score-fitting methods. "Yes" in the
+#' final column indicates a doubly robust score estimator, subject to the
+#' assumptions described below; "--" means that the method is not available
+#' for that outcome.
+#'
+#' \tabular{lllll}{
+#' \strong{Score method} \tab \strong{Binary} \tab \strong{Count} \tab \strong{Survival} \tab \strong{Doubly robust} \cr
+#' \code{twoReg} \tab Yes \tab Yes \tab Yes \tab Yes \cr
+#' \code{contrastReg} \tab -- \tab Yes \tab Yes \tab Yes \cr
+#' \code{logistic} \tab Yes \tab -- \tab -- \tab No \cr
+#' \code{poisson} \tab -- \tab Yes \tab Yes \tab No \cr
+#' \code{negBin} \tab -- \tab Yes \tab -- \tab No \cr
+#' \code{boosting} \tab Yes \tab Yes \tab Yes \tab No \cr
+#' \code{randomForest} \tab -- \tab -- \tab Yes \tab No \cr
+#' }
+#'
+#' The doubly robust methods combine outcome and treatment models. Their
+#' robustness to misspecification of one of these models is conditional on
+#' identification, positivity, and method-specific model and regularity
+#' assumptions. For example, binary \code{twoReg} estimates a linear projection
+#' of the conditional risk difference; this projection equals the conditional
+#' risk difference only if the latter is linear in the specified design.
+#' Truncating propensity scores can affect the robustness property. Survival
+#' methods also require appropriate censoring assumptions and a correctly
+#' specified censoring model.
+#'
+#' This table describes \emph{score fitting}. Subgroup effects can be estimated
+#' using doubly robust methods even when the score used to define the subgroups
+#' is not doubly robust. Neither score fitting nor subgroup estimates calculated
+#' on the fitting data constitute independent validation; see \code{\link{catecv}}.
+#'
+#' For binary response, see the Binary outcomes section below and \code{\link{catefitbinary}()}.
+#' For count response, see details in \code{\link{catefitcount}()}.
 #' For survival response, see details in \code{\link{catefitsurv}()}.
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

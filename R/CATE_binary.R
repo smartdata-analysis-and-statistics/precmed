@@ -31,9 +31,35 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
                   predictor.names = colnames(d$x)[-1]))
 }
 
-# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+#' Estimate conditional treatment-effect scores for binary outcomes
+#'
+#' Fit binary-outcome CATE scores and estimate risk differences in nested
+#' subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
+#'
+#' @inheritParams catefit
+#' @param score.method One or more of \code{"logistic"}, \code{"twoReg"}, and
+#'   \code{"boosting"}.
+#' @return A \code{catefit} object containing treatment labels, fitted models,
+#'   predicted risk-difference scores and nested subgroup risk differences for
+#'   each requested method. Linear \code{twoReg} score coefficients are stored
+#'   in \code{coefficients}.
+#' @details
+#' See the Binary outcomes section of \code{\link{catefit}} for the score
+#' methods, their assumptions, and interpretation. Subgroup effects are estimated
+#' on the fitting data and do not provide independent validation.
+#' @examples
+#' \donttest{
+#' dat <- simulate_binary(n = 400, seed = 2026)
+#' fit <- catefitbinary(data = dat, score.method = "logistic",
+#'                      cate.model = y ~ age + previous_treatment,
+#'                      ps.model = trt ~ age + previous_treatment,
+#'                      seed = 2026)
+#' }
+#' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
+#' @export
 catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
                           tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = TRUE, ...) {
+  check_score_method("binary", score.method)
   if (!ps.method %in% c("glm", "lasso") || minPS < 0 || maxPS > 1 || minPS >= maxPS) stop("Invalid propensity score settings.")
   resolve_ps_control(ps.control)
   if (!is.logical(higher.y) || length(higher.y) != 1L || is.na(higher.y)) stop("higher.y must be TRUE or FALSE.")
