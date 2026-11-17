@@ -22,17 +22,17 @@ navbar:
     menu:
     - text: Understanding doubly robust methods
       href: articles/doubly-robust.html
-    - text: Binary average treatment effects
+    - text: ATE estimation for binary outcomes
       href: articles/Binary-examples.html
-    - text: Binary CATE scores and validation
+    - text: CATE score development and validation for binary outcomes
       href: articles/Binary-CATE.html
-    - text: Count average treatment effects
+    - text: ATE estimation for count outcomes
       href: articles/Count-examples.html
-    - text: Count CATE scores and validation
+    - text: CATE score development and validation for count outcomes
       href: articles/Count-CATE.html
-    - text: Survival average treatment effects
+    - text: ATE estimation for survival outcomes
       href: articles/Survival-examples.html
-    - text: Survival CATE scores and validation
+    - text: CATE score development and validation for survival outcomes
       href: articles/Survival-CATE.html
     - text: Customizing CATE models and validation
       href: articles/Additional-examples.html
@@ -49,8 +49,6 @@ navbar:
     href: news/index.html
   - text: Citation
     href: authors.html#citation
-  - text: Support
-    href: https://github.com/smartdata-analysis-and-statistics/precmed/issues
   right:
   - icon: fa-github
     aria-label: Source code

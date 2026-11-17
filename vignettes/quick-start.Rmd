@@ -54,13 +54,13 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   ps.model = trt ~ age + previous_treatment,
   outcome_method = "poisson",
-  n.boot = 50,
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
 ```
 
-The fitted object contains the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
+The fitted object contains the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 100 bootstrap replicates used here keep the example short; use more for a substantive analysis.
 
 ```{r rate-ratio}
 rate_ratio <- exp(coef(fit_ate))

@@ -121,11 +121,9 @@ legend("bottomleft", legend = c("drug0", "drug1"),
 ```
 
 
-## Estimate the average treatment effect 
-
 For the estimators and their assumptions, see [Methods for estimating average treatment effects](ATE-theory.html).
 
-### Unadjusted treatment comparison
+## Unadjusted treatment comparison
 
 We first compare time to first relapse between treatment groups using a Cox model with treatment as the only predictor. This unadjusted, marginal association does not account for differences in patient characteristics.
 
@@ -149,7 +147,7 @@ abline(h = exp(coef(output_cox)[1]), lty = 3, col = "steelblue")
 
 The dotted line is the constant HR from the Cox model. The smooth curve suggests how the treatment association may vary over time; it is a diagnostic rather than a precise estimate at every time point. The proportional-hazards test for the treatment term gives p `r if (ph_unadjusted$table["trt", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_unadjusted$table["trt", "p"]))`. This test assesses whether the treatment association changes over time; a large p-value does not prove that the HR is constant. Later follow-up is less informative when fewer patients remain at risk, as reflected in the wider uncertainty bands.
 
-### Covariate-adjusted treatment comparison
+## Covariate-adjusted treatment comparison
 
 In this synthetic dataset, treatment assignment depends on baseline characteristics rather than being randomized. To account for measured baseline differences, we first consider a Cox model that adjusts for age, sex, previous medical cost and previous relapses.
 
@@ -169,7 +167,7 @@ ph_adjusted <- cox.zph(output_cox_adjusted, transform = "identity")
 
 For the adjusted model, the proportional-hazards test for the treatment term gives p `r if (ph_adjusted$table["trt", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_adjusted$table["trt", "p"]))`. This test assesses whether the treatment HR changes over time; it does not test whether the treatment effect is zero. The global proportional-hazards test gives p `r if (ph_adjusted$table["GLOBAL", "p"] < 0.001) "< 0.001" else paste0("= ", sprintf("%.3f", ph_adjusted$table["GLOBAL", "p"]))` and assesses the model covariates jointly, so evidence of non-proportional hazards may arise from covariates other than treatment. A large p-value does not establish that the proportional-hazards assumption holds.
 
-### Population-level treatment comparison over a fixed horizon
+## Population-average treatment effects using `atefit()`
 
 The unadjusted Cox model compares treatment groups without accounting for differences in their characteristics. The adjusted Cox model accounts for the selected covariates, but its HR is conditional on those covariates and summarizes the treatment association using a single HR. The diagnostics can be used to assess changes in this association over time; estimates often become less informative later in follow-up. Neither comparison directly describes the average time patients remain relapse-free under each treatment.
 
@@ -212,6 +210,7 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
   tau0 = tau0,
+  n.boot = 100,
   seed = 999
 )
 ```
@@ -236,7 +235,7 @@ The output of `atefit()` shows the point estimate, standard error ("SE"), lower 
 
 For example, the log RMTL ratio of `r round(fit_ate$log.rmtl.ratio$estimate, 2)` and the 95% confidence interval of (`r round(fit_ate$log.rmtl.ratio$CI.lower, 2)`, `r round(fit_ate$log.rmtl.ratio$CI.upper, 2)`) are displayed in the output. The estimated ratio and its interval can be obtained by exponentiating these log-scale values. A ratio above 1 indicates more time lost before `tau0` under drug 1; the interval describes uncertainty in that comparison. The RMST estimates provide the corresponding event-free times up to `tau0`.
 
-#### Treatment and overlap diagnostics
+### Treatment and overlap diagnostics
 
 The RMTL and cumulative hazard ratios compare the treatment coded as 1 with the treatment coded as 0; their log ratios are reported in the output. Here, `trt` is a factor, so `atefit()` recodes `drug0` to 0 and `drug1` to 1. The ratios therefore compare drug 1 with drug 0. The recoding is reported as an informational message and can be inspected with `diagnostics()`:
 
@@ -273,7 +272,7 @@ not establish covariate balance or exclude unmeasured confounding.
 
 For survival outcomes these are treatment weights only; they do not summarize censoring weights or follow-up near the horizon.
 
-#### Inspecting bootstrap estimates
+### Inspecting bootstrap estimates
 
 `plot(fit_ate)` displays the bootstrap estimates for the reported quantities. By default, the first row shows treatment-specific RMST and the log RMTL ratio, the second shows treatment-specific risks and their difference, and the third shows the log cumulative hazard ratio. A solid red line marks the full-sample estimate; a dashed black line marks the null value of 0 in the log-ratio and risk-difference panels. Set `null.value` to another value on the plotted scale, or to `NULL` or `NA` to omit the null line. The treatment-specific RMST and risk panels have no null line. Use `metrics` to select and order facets, for example `metrics = c("risk0", "risk1", "risk_difference")`.
 
@@ -284,7 +283,7 @@ plot(fit_ate)
 
 Histograms of bootstrap estimates for the reported quantities.
 
-#### Comparing outcome models
+### Alternative outcome model
 
 As an alternative, we can fit a Weibull outcome model separately in each
 treatment arm. The Weibull models assume proportional hazards across
@@ -301,12 +300,13 @@ fit_ate_weibull <- atefit(
   outcome_method = "weibull",
   ps.model = trt ~ age + previous_treatment,
   tau0 = tau0,
+  n.boot = 100,
   seed = 999
 )
 ```
 
 The table compares the estimated population-average RMTL ratio for drug 1
-versus drug 0 at `tau0`, with 95% confidence intervals. Both fits use 500
+versus drug 0 at `tau0`, with 95% confidence intervals. Both fits use 100
 bootstrap samples and estimate the same quantity; their estimates can differ
 because of their outcome-model assumptions. The intervals use the bootstrap
 standard errors.

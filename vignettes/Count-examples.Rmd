@@ -104,11 +104,9 @@ For convenience, `age` is centered at 48 years and `previous_cost` is centered a
 data(countExample) # Restore the centered data for analysis.
 ```
 
-## Estimate the average treatment effect 
-
 For the estimators and their assumptions, see [Methods for estimating average treatment effects](ATE-theory.html).
 
-### Unadjusted treatment comparison
+## Unadjusted treatment comparison
 
 We first compare relapse rates between treatment groups using a Poisson model with treatment as the only predictor. The log follow-up time is included as an offset to account for differences in exposure. This unadjusted association does not account for differences in patient characteristics.
 
@@ -120,7 +118,7 @@ summary(output_poisson)
 
 The estimated rate ratio for drug 1 versus drug 0 is `r round(exp(coef(output_poisson)[2]), 2)`. A ratio below 1 corresponds to a lower relapse rate under drug 1. This association does not by itself establish a causal treatment effect.
 
-### Covariate-adjusted treatment comparison
+## Covariate-adjusted treatment comparison
 
 Treatment assignment may differ according to baseline characteristics. To account for measured differences, we fit a Poisson model that adjusts for age, sex, previous treatment, previous medical cost and previous relapses, while retaining the follow-up offset.
 
@@ -135,7 +133,7 @@ summary(output_poisson_adjusted)
 
 The adjusted rate ratio is `r round(exp(coef(output_poisson_adjusted)["trtdrug1"]), 2)`, compared with `r round(exp(coef(output_poisson)[2]), 2)` in the unadjusted model. The adjusted ratio is conditional on the included covariates and does not necessarily represent a causal average treatment effect. A causal interpretation requires, among other assumptions, adequate treatment overlap and no unmeasured confounding.
 
-### Population-level treatment comparison using `atefit()`
+## Population-average treatment effects using `atefit()`
 
 We now use `atefit()` to estimate a population-level rate ratio, combining outcome and treatment models. The treatment model estimates the propensity score, the probability of receiving treatment 1 given the covariates. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the treatment model (argument `ps.model`) or the outcome model (argument `outcome_model`) or both are correctly specified, under the required assumptions. The function also provides standard errors, confidence intervals and p-values based on bootstrap.
 
@@ -163,7 +161,7 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "poisson",
   ps.model = trt ~ age + previous_treatment,
-  n.boot = 50, 
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
@@ -174,6 +172,8 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 ```{r print_atefit, eval = T, echo = T}
 fit_ate
 ```
+
+### Diagnostics
 
 A causal interpretation also requires assumptions including consistency,
 conditional exchangeability and positivity; Chapter 5 discusses these assumptions
@@ -217,6 +217,8 @@ We can plot the distribution of bootstrap estimates using `plot(fit_ate)`; by de
 plot(fit_ate, metrics = c("rate0", "rate1", "log_rate_ratio"))
 ```
 
+### Alternative outcome model
+
 In the calculations above, we used a Poisson outcome model. To assess how the outcome-model choice influences the estimated population-average rate ratio, we can instead fit a negative binomial outcome model with `outcome_method = "negbin"`. The treatment model, exposure offset and doubly robust estimator remain the same. Dispersion is estimated separately in each treatment arm, and the outcome and treatment models are refitted in each bootstrap sample.
 
 ```{r count_ate_negbin, cache = doc.cache}
@@ -227,14 +229,14 @@ fit_ate_negbin <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "negbin",
   ps.model = trt ~ age + previous_treatment,
-  n.boot = 50,
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
 ```
 
 The table below compares the ATE estimated using a Poisson and a negative binomial outcome model.  The estimates can differ because the outcome models are fitted differently;
-neither comparison establishes which model is correct. The intervals use the bootstrap standard errors, based on 50 replicates.
+neither comparison establishes which model is correct. The intervals use the bootstrap standard errors, based on 100 replicates.
 
 ```{r count_ate_negbin_comparison, echo = FALSE}
 comparison <- rbind(
