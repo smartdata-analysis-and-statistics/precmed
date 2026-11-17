@@ -45,7 +45,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -75,7 +76,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Methods for estimating average treatment effects</h1>
             
-            <h4 data-toc-skip class="date">November 16, 2026</h4>
+            <h4 data-toc-skip class="date">November 17, 2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/smartdata-analysis-and-statistics/precmed/blob/main/vignettes/ATE-theory.Rmd" class="external-link"><code>vignettes/ATE-theory.Rmd</code></a></small>
       <div class="d-none name"><code>ATE-theory.Rmd</code></div>
@@ -290,10 +291,11 @@ and restricted mean time lost (RMTL) is
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>τ</mi><mn>0</mn></msub><mo>−</mo><msub><mi>μ</mi><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\tau_0-\mu_r(\tau_0)</annotation></semantics></math>.
 The main treatment contrast is the log RMTL ratio</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><msub><mi>τ</mi><mn>0</mn></msub><mo>−</mo><msub><mi>μ</mi><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><msub><mi>τ</mi><mn>0</mn></msub><mo>−</mo><msub><mi>μ</mi><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">\log\!\left(\frac{\tau_0-\mu_1(\tau_0)}{\tau_0-\mu_0(\tau_0)}\right).</annotation></semantics></math></p>
-<p>The function also reports a population-level cumulative hazard ratio
-at the horizon, derived from the treatment-specific marginal survival
-probabilities. These summaries have different interpretations from a
-conditional Cox hazard ratio.</p>
+<p>The function also reports the population-average event risk
+difference (treatment 1 minus treatment 0) and a population-level
+cumulative hazard ratio at the horizon, derived from the
+treatment-specific marginal survival probabilities. These summaries have
+different interpretations from a conditional Cox hazard ratio.</p>
 <div class="section level3">
 <h3 id="outcome-treatment-and-censoring-models">Outcome, treatment and censoring models<a class="anchor" aria-label="anchor" href="#outcome-treatment-and-censoring-models"></a>
 </h3>
@@ -374,10 +376,11 @@ confidence levels without repeating the bootstrap. Supplying
 <code>seed</code> makes the resampling reproducible.</p>
 <p>The effect scale depends on the outcome: bootstrap inference is on
 the risk difference for binary outcomes, the log rate ratio for counts,
-and the log RMTL ratio and log cumulative hazard ratio for survival.
-Exponentiate the log-ratio estimates and interval limits to obtain
-ratios. Treatment-specific bootstrap estimates are also retained and can
-be visualized with <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
+and, for survival, the log RMTL ratio, log cumulative hazard ratio, and
+event risk difference at the horizon. Exponentiate the log-ratio
+estimates and interval limits to obtain ratios. Treatment-specific
+bootstrap estimates are also retained and can be visualized with
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
 <p>Failed or non-finite bootstrap estimates are recorded in
 <code>bootstrap.diagnostics</code>, including the replicate, affected
 measure and reason; <code><a href="../reference/diagnostics.html">diagnostics()</a></code> also exposes these
@@ -402,6 +405,8 @@ not validation of a CATE score.</p>
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
 <ul>
+<li><a href="doubly-robust.html">Understanding doubly robust
+methods</a></li>
 <li><a href="Binary-examples.html">Estimating and validating treatment
 effects for binary outcomes</a></li>
 <li><a href="Count-examples.html">Estimating and validating treatment

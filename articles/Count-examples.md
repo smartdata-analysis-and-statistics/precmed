@@ -31,7 +31,7 @@ library(ggplot2)
 
 We consider a simulated dataset that is based on real-world claims data
 from patients with multiple sclerosis. The dataset `countExample`
-includes 4,000 patients with information on the following 9 variables.
+includes 4,000 patients.
 
 Alternatively, `simulate_count(n = 4000, seed = 1)` generates a fully
 synthetic dataset with the same analysis variables. Its treatment
@@ -41,21 +41,15 @@ dispersion can be varied; see
 The simulator uses illustrative assumptions and does not reconstruct the
 claims data or the packaged example.
 
+The simulated dataset contains the following baseline covariates,
+summarized overall and by treatment group.
+
 [TABLE]
 
-------------------------------------------------------------------------
-
-Most variables are baseline patient characteristics like age, gender,
-and previous treatment.
-
-- We will use `y` as the count outcome variable, which is the number of
-  relapses during follow-up.
-
-- We will use `years` as the offset variable, which is number of years
-  during follow-up.
-
-- We will use `trt` as the treatment variable, which has 2 drugs (drug0
-  and drug1).
+The outcome variable `y` records the number of relapses during
+follow-up. The variable `years` records follow-up time in years and
+supplies the exposure time for the rate-model offset. The treatment
+variable `trt` identifies drug0 or drug1.
 
 For convenience, `age` is centered at 48 years and `previous_cost` is
 centered at 13,824 USD and divided by 20,172 USD.
@@ -218,7 +212,7 @@ outcome model that contains all variables and a treatment model with
 
 ``` r
 
-output_atefit <- atefit(
+fit_ate <- atefit(
   response = "count",
   data = countExample,
   cate.model = y ~ age + female + previous_treatment +
@@ -235,7 +229,7 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 
 ``` r
 
-output_atefit
+fit_ate
 #> Average treatment effect:
 #> 
 #>                  estimate        SE   CI.lower  CI.upper    pvalue
@@ -249,12 +243,18 @@ output_atefit
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
-The treatment model also provides diagnostics for the full analysis
-sample:
+A causal interpretation also requires assumptions including consistency,
+conditional exchangeability and positivity; Chapter 5 discusses these
+assumptions (Nguyen et al. 2026). Positivity requires that both
+treatments are possible at each relevant combination of covariates in
+the target population. The following diagnostics summarize estimated
+propensity-score overlap and treatment-weight variability in the
+analysis sample. They can help investigate potential practical
+positivity problems, but cannot establish that positivity holds:
 
 ``` r
 
-diagnostics(output_atefit, type = "propensity")
+diagnostics(fit_ate, type = "propensity")
 ```
 
 | Diagnostic                         | drug0            | drug1            |
@@ -293,13 +293,13 @@ fitted object:
 
 ``` r
 
-rate.ratio <- unname(exp(coef(output_atefit)))
-rate.ratio
+rate_ratio <- unname(exp(coef(fit_ate)))
+rate_ratio
 #> [1] 1.065152
-CI.rate.ratio <- exp(confint(output_atefit, level = 0.95))[1, ]
-CI.rate.ratio
-#>     2.5 %    97.5 % 
-#> 0.7747033 1.4644945
+rate_ratio_ci <- exp(confint(fit_ate, level = 0.95))
+rate_ratio_ci
+#>                    2.5 %   97.5 %
+#> log.rate.ratio 0.7747033 1.464495
 ```
 
 The rate ratio of 1.07 along with the 95% confidence interval of (0.77,
@@ -308,17 +308,17 @@ However, the confidence interval includes 1, so there is insufficient
 evidence of a treatment difference, consistent with the p-value of 0.7
 in the output (`$log.rate.ratio$pvalue`).
 
-`plot(output_atefit)` displays all available metrics by default: the
-bootstrap estimates of the rate for each treatment and the log rate
-ratio. The `metrics` argument selects and orders these panels. Solid red
-lines mark the full-sample estimates, and the dashed black line marks
-the null value of 0 in the log-ratio panel (a rate ratio of 1). Set
-`null.value` to another value on the log scale, or to `NULL` or `NA` to
-omit the null line.
+`plot(fit_ate)` displays all available metrics by default: the bootstrap
+estimates of the rate for each treatment and the log rate ratio. The
+`metrics` argument selects and orders these panels. Solid red lines mark
+the full-sample estimates, and the dashed black line marks the null
+value of 0 in the log-ratio panel (a rate ratio of 1). Set `null.value`
+to another value on the log scale, or to `NULL` or `NA` to omit the null
+line.
 
 ``` r
 
-plot(output_atefit, metrics = c("rate0", "rate1", "log.rate.ratio"))
+plot(fit_ate, metrics = c("rate0", "rate1", "log_rate_ratio"))
 ```
 
 ![](Count-examples_files/figure-html/plot_atefit_bootstrap-1.png)
@@ -330,13 +330,13 @@ Bootstrap estimates of the treatment-specific rates and log rate ratio.
 Now we have calculated the ATE we know the effect of both treatments on
 average, but this effect might not be the same for all patients. Thus,
 it might be worthwhile to check if there are subgroups that respond
-differently to the treatments. We can calculate the Conditional Average
-Treatment Effect (CATE) score which calculates the ATE for different
-subgroups in the data. If no internal validation is needed (we get back
-to that later), we can use the
+differently to the treatments. We can fit a conditional average
+treatment effect (CATE) score to rank patients by estimated treatment
+effect. The
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-function to a model directly to the entire data set to estimate the CATE
-score. For the
+function fits scores on the full dataset and estimates treatment effects
+in score-defined subgroups; internal validation is discussed below. For
+the
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
 function we have to define the `score.method`. This arguments specifies
 the precision medicine (PM) method to be used to calculate the CATE
@@ -389,7 +389,7 @@ and the `gbm.parallel` option is unset.
 
 ``` r
 
-output_catefit <- catefit(
+fit_cate <- catefit(
   response = "count",
   data = countExample,
   score.method = c(
@@ -406,108 +406,87 @@ output_catefit <- catefit(
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
-Each method specified in `score.method` has the following sets of
-results in
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md):
+## Inspect CATE scores and subgroup estimates
 
-1.  `score` contains the log-transformed estimated CATE scores for each
-    subject. CATE score is a linear combination of the variables
-    specified in the `cate.model` argument. Same as the outcome, lower
-    CATE scores are more desirable if `higher.y` = FALSE and vice versa.
-    Each subject has one CATE score so the length of this output is
-    4,000 for our toy example. Below we show the CATE scores estimated
-    with contrast regression for the first 6 subjects in the data.
+The fitted object contains scores, available score coefficients, and
+estimated treatment effects in score-defined subgroups. These are
+results from the fitting sample, not an assessment of performance in new
+patients.
+
+The fitted scores estimate conditional log rate ratios. The relationship
+between covariates and the score depends on the scoring method. Here,
+lower scores indicate greater estimated benefit from drug 1 because
+fewer relapses are desirable. Use
+[`predict()`](https://rdrr.io/r/stats/predict.html) to retrieve scores
+for the original analysis sample; prediction for new data is not
+currently supported. Below are the contrast-regression scores for the
+first 6 patients.
 
 ``` r
 
-length(output_catefit$score.contrastReg)
-#> [1] 4000
-head(output_catefit$score.contrastReg)
+scores <- predict(fit_cate, method = "contrastReg")
+head(scores)
 #> [1]  0.1223985  0.2463684  0.5284533 -0.8525778 -0.1547064 -0.3700220
 ```
 
-2.  `coefficients` contains the estimated coefficients of the CATE score
-    for each scoring method. It is a data frame of the covariates
-    (including intercept) as rows and scoring methods as columns. In our
-    toy example, there are 5 covariates in the `cate.model` (including a
-    categorical variable with 3 distinct factors) so there are 7 rows of
-    estimated coefficients within each column. Since contrast regression
-    is one of the scoring methods specified in the example, we see that
-    contrast regression has an additional column with the standard
-    errors of the estimated coefficients. Boosting does not estimate
-    coefficients (it directly predicts the score) so there is no
-    coefficient result for this method.
-
-``` r
-
-output_catefit$coefficients
-#>                              poisson      twoReg contrastReg SE_contrastReg
-#> (Intercept)              -0.58185218 -0.56778393 -0.60435660     0.36100821
-#> age                      -0.01117701 -0.04025351 -0.03586527     0.01320552
-#> female                    0.58829733  0.73513308  0.75637775     0.35381160
-#> previous_treatmentdrugB   0.73724361  0.63387929  0.78891625     0.32100476
-#> previous_treatmentdrugC   0.15545985 -0.26859734 -0.15584596     0.24006620
-#> previous_cost            -0.13035642 -0.08233598 -0.07600948     0.12046915
-#> previous_number_relapses -0.05339112  0.06949513 -0.03062952     0.13592481
-#>                               negBin
-#> (Intercept)              -0.59232437
-#> age                      -0.01410487
-#> female                    0.59602219
-#> previous_treatmentdrugB   0.76032497
-#> previous_treatmentdrugC   0.13262969
-#> previous_cost            -0.13952096
-#> previous_number_relapses -0.05034136
-```
-
-We can define the estimated CATE scores for contrast regression like
-shown below. The user can use this information to study the influence of
-each covariate.
-``` math
- 
-\begin{aligned}
-\widehat{CATE} = -0.60 & - 0.04 \times \text{age} \\
-& + 0.77 \times \text{female (vs male)} \\ 
-& + 0.75 \times \text{previous treatment drug B (vs drug A)} \\
-& - 0.21 \times \text{previous treatment drug C (vs drug A)} \\
-& - 0.02 \times \text{previous medical costs} \\
-& + 0.04 \times \text{previous number of relapses} 
-\end{aligned} 
-```
-
-3.  `ate` contains estimated ATEs in each nested subgroup of high
-    responders to drug 1 defined by `prop.cutoff`. The subgroups are
-    defined based on the estimated CATE scores with the specified
-    scoring method. In this example, we show the estimated ATEs of
-    subgroups identified by CATE scores of contrast regression. For
-    example, the estimated ATE for the subgroup of subjects constructed
-    based on the 50% (“prop0.5”) lowest CATE scores estimated from
-    contrast regression is 0.58.
-
-``` r
-
-output_catefit$ate.contrastReg
-#>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
-#> 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579
-```
-
-### Visualize the distribution of CATE scores
-
-The distribution shows how much the estimated scores vary across
-patients and methods. Variation in predictions alone does not establish
-that treatment effects truly differ; validation is needed to assess
-whether the scores distinguish responder groups. Chapter 20 discusses
-score distributions alongside validation curves (Jiang et al. 2026).
-
 Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
-the estimated score distributions across methods. The scores are on the
-log rate-ratio scale, with zero indicating a rate ratio of 1.
+the fitted score distributions across methods. Scores are on the log
+rate-ratio scale, with zero indicating a rate ratio of 1.
 
 ``` r
 
-plot(output_catefit, type = "density")
+plot(fit_cate, type = "density")
 ```
 
 ![](Count-examples_files/figure-html/plot_score-1.png)
+
+Differences in the score distributions can reflect model flexibility,
+estimation noise or overfitting. The plot alone cannot distinguish these
+explanations. Internal validation assesses whether the scores
+distinguish subgroups in patients not used to fit them. Chapter 20
+discusses score distributions alongside validation curves (Jiang et al.
+2026).
+
+Use [`coef()`](https://rdrr.io/r/stats/coef.html) to extract available
+score coefficients and
+[`confint()`](https://rdrr.io/r/stats/confint.html) to obtain confidence
+intervals for contrast-regression coefficients. Boosting scores do not
+have linear coefficients. The coefficients describe the fitted log
+rate-ratio score and are not themselves a validation of that score.
+
+``` r
+
+coef(fit_cate, method = "contrastReg")
+#>              (Intercept)                      age                   female 
+#>              -0.60435660              -0.03586527               0.75637775 
+#>  previous_treatmentdrugB  previous_treatmentdrugC            previous_cost 
+#>               0.78891625              -0.15584596              -0.07600948 
+#> previous_number_relapses 
+#>              -0.03062952
+confint(fit_cate, method = "contrastReg")
+#>                                 2.5%        97.5%
+#> (Intercept)              -1.31191969  0.103206478
+#> age                      -0.06174761 -0.009982927
+#> female                    0.06291976  1.449835753
+#> previous_treatmentdrugB   0.15975848  1.418074015
+#> previous_treatmentdrugC  -0.62636705  0.314675140
+#> previous_cost            -0.31212467  0.160105703
+#> previous_number_relapses -0.29703725  0.235778207
+```
+
+Use
+[`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
+to inspect estimated rate ratios for nested subgroups ranked by the
+contrast-regression score. These estimates use the same data as the
+score fit; the validation section below assesses the score in held-out
+data.
+
+``` r
+
+subgroup_estimates(fit_cate, method = "contrastReg", measure = "rate_ratio")
+#>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
+#> 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579
+```
 
 ## Internally validate CATE scores
 
@@ -636,7 +615,7 @@ values of the remaining arguments.
 
 ``` r
 
-output_catecv <- catecv(
+fit_cv <- catecv(
   response = "count",
   data = countExample,
   score.method = c("poisson", "contrastReg", "negBin"),
@@ -656,7 +635,7 @@ output_catecv <- catecv(
 
 The output of
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-is an object of class “precmed” and here we named it `output_catecv`. It
+is an object of class “precmed” and here we named it `fit_cv`. It
 carries the relevant information to use in the next step of the workflow
 which selects the method (among those specified in the argument
 `score.method`) capturing the highest level of treatment effect
@@ -684,7 +663,7 @@ both `higher.y` and outcome type.
 
 ``` r
 
-output_catecv$ate.contrastReg$ate.est.train.high.cv
+fit_cv$ate.contrastReg$ate.est.train.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
 #> prop0.5 0.6125203 0.6352505 0.5639550 0.6292319 0.5745308
 #> prop0.6 0.6354691 0.6965326 0.6101321 0.6748155 0.6940573
@@ -692,7 +671,7 @@ output_catecv$ate.contrastReg$ate.est.train.high.cv
 #> prop0.8 0.7826935 0.8677195 0.8190230 0.8538577 0.7662717
 #> prop0.9 0.8857736 0.9977592 0.9484942 0.9689973 0.9385940
 #> prop1   1.0599740 1.0520675 1.0577453 1.0641114 1.0677619
-output_catecv$ate.contrastReg$ate.est.valid.high.cv
+fit_cv$ate.contrastReg$ate.est.valid.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
 #> prop0.5 0.7311677 0.6043823 0.7529942 0.5478392 0.6293874
 #> prop0.6 0.8000372 0.7004678 0.7960390 0.5956396 0.6547416
@@ -730,7 +709,7 @@ survival outcomes. The direction of CATE scores depends on both
 
 ``` r
 
-output_catecv$ate.contrastReg$ate.est.train.low.cv
+fit_cv$ate.contrastReg$ate.est.train.low.cv
 #>              cv1      cv2      cv3      cv4      cv5
 #> prop0.5 1.620139 1.602498 1.697586 1.567210 1.711755
 #> prop0.4 1.877926 1.629831 1.879557 1.629753 1.636678
@@ -760,12 +739,12 @@ validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
 
 ``` r
 
-output_catecv$ate.contrastReg$ate.est.train.group.cv
+fit_cv$ate.contrastReg$ate.est.train.group.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.33 1.8256926 1.6013361 1.8965411 1.6739862 1.6308308
 #> prop0.67 1.0603708 1.2529668 0.9926959 1.1134701 1.0786287
 #> prop1    0.4956232 0.4939226 0.4729564 0.5167835 0.5607068
-output_catecv$ate.contrastReg$ate.est.valid.group.cv
+fit_cv$ate.contrastReg$ate.est.valid.group.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.33 1.2906594 1.9702555 1.4029576 1.4667778 2.1290327
 #> prop0.67 1.3056454 0.8357763 0.9766351 0.9076750 0.9125326
@@ -799,7 +778,7 @@ not establish that the models fit well.
 
 ``` r
 
-diagnostics(output_catecv)
+diagnostics(fit_cv)
 #> [1] method    split     iteration group     subgroup  type      measure  
 #> [8] message  
 #> <0 rows> (or 0-length row.names)
@@ -812,7 +791,7 @@ support records for contrast regression with:
 
 ``` r
 
-head(subset(output_catecv$subgroup.support,
+head(subset(fit_cv$subgroup.support,
             split == "validation" & method == "contrastReg",
             select = c(iteration, group, subgroup, n0, n1, events0, events1)))
 #>    iteration group subgroup  n0  n1 events0 events1
@@ -827,7 +806,7 @@ head(subset(output_catecv$subgroup.support,
 The contrast-regression convergence vector indicates whether at least
 one cross-fitting repetition converged in each CV iteration. The
 individual repetition results are available in
-`output_catecv$ate.contrastReg$converge.repetitions.cv`.
+`fit_cv$ate.contrastReg$converge.repetitions.cv`.
 
 ## Compare scoring methods using the ABC statistic
 
@@ -836,7 +815,7 @@ The ABC statistics is calculated by
 for each scoring method specified in
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 and for each of the `cv.n` CV iterations using the output object
-`output_catecv` from
+`fit_cv` from
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
 
 Each validation curve summarizes estimated treatment effects in nested
@@ -852,7 +831,7 @@ section for a detailed illustration of the relationship between
 
 ``` r
 
-abc(output_catecv)
+abc(fit_cv)
 #>                    cv1       cv2        cv3        cv4       cv5
 #> poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204
 #> contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554
@@ -866,7 +845,7 @@ iterations to compare methods:
 
 ``` r
 
-abc(output_catecv, combine = "mean")
+abc(fit_cv, combine = "mean")
 #>     poisson contrastReg      negBin 
 #>   0.1314988   0.1241822   0.1375879
 ```
@@ -884,18 +863,16 @@ they do not, by themselves, establish calibration of the predicted CATEs
 or the clinical value of a treatment rule (Thao et al. 2026).
 
 The ATEs of nested subgroups of high responders to drug1 (e.g.,
-`output_catecv$ate.contrastReg$ate.est.train.high.cv` and
-`output_catecv$ate.contrastReg$ate.est.valid.high.cv` for contrast
-regression) can be visualized as a side-by-side line plot, with training
-results on the left and validation results on the right. The x-axis is
-determined by `prop.cutoff` and the y-axis is the estimated ATEs
-averaged over `cv.n` CV iterations as specified by `cv.i` = NULL. The
-estimated ATE is expressed as a RR of drug1 versus drug0 for our toy
-example. By default, the function retrieves the name of the treatment
-variable (`trt`) and the original labels (`drug0` and `drug1`) to
-specify a meaningful y-axis label. Otherwise, it is possible to
-customize the y-axis label via the `ylab`, for example, by using
-`Rate ratio of drug1 vs drug0 in each subgroup`.
+`fit_cv$ate.contrastReg$ate.est.train.high.cv` and
+`fit_cv$ate.contrastReg$ate.est.valid.high.cv` for contrast regression)
+can be visualized as a side-by-side line plot, with training results on
+the left and validation results on the right. The x-axis is determined
+by `prop.cutoff` and the y-axis is the estimated ATEs averaged over
+`cv.n` CV iterations as specified by `cv.i` = NULL. The estimated ATE is
+expressed as a RR of drug1 versus drug0 for our toy example. By default,
+the function retrieves the name of the treatment variable (`trt`) and
+the original labels (`drug0` and `drug1`) to specify a meaningful y-axis
+label.
 
 Steeper slopes indicate more treatment effect heterogeneity between
 drug1 and drug0. Because `higher.y` = FALSE in this example, the slopes
@@ -907,7 +884,7 @@ while generalizing well to unseen data.
 
 ``` r
 
-plot(output_catecv)
+plot(fit_cv)
 ```
 
 ![](Count-examples_files/figure-html/example_plot_lineplot1-1.png)
@@ -930,9 +907,7 @@ FALSE.
 
 ``` r
 
-plot(output_catecv, 
-     show.abc = FALSE, 
-     ylab = c("Rate ratio of drug1 vs drug0 in each subgroup"))
+plot(fit_cv, show.abc = FALSE)
 ```
 
 ![](Count-examples_files/figure-html/example_plot_lineplot1.1-1.png)
@@ -944,8 +919,7 @@ mark the corresponding overall treatment effects.
 
 ``` r
 
-plot(output_catecv, layout = "method", show.abc = FALSE,
-     ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+plot(fit_cv, layout = "method", show.abc = FALSE)
 ```
 
 ![](Count-examples_files/figure-html/example_plot_by_method-1.png)
@@ -971,19 +945,18 @@ compares these complementary responder diagnostics (Jiang et al. 2026).
 The ATEs of multi-category subgroups that are mutually exclusive can be
 visualized as box plots, with one box plot for each scoring method. Only
 validation results are visualized here. The x-axis is determined by
-`prop.multi` and the y-axis is the estimated ATEs in each subgroup. We
-specify the `ylab` argument accordingly. The subgroups correspond to
-each row of the `ate.est.valid.group.cv` result in `output_catecv`, so
-in this example the subgroups are patient with the 33% lowest (0-33%),
-middle 33% (33-66%), and highest 33% (66-100%) estimated CATE scores.
-The box plot shows the distribution of the ATEs over all `cv.n` CV
-iterations, instead of a summary statistics like mean or median in
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html).
+`prop.multi` and the y-axis is the estimated ATEs in each subgroup. The
+default y-axis label identifies the treatment contrast. The subgroups
+correspond to each row of the `ate.est.valid.group.cv` result in
+`fit_cv`, so in this example the subgroups are patient with the 33%
+lowest (0-33%), middle 33% (33-66%), and highest 33% (66-100%) estimated
+CATE scores. The box plot shows the distribution of the ATEs over all
+`cv.n` CV iterations, instead of a summary statistics like mean or
+median in [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 ``` r
 
-boxplot(output_catecv,
-        ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
+boxplot(fit_cv)
 ```
 
 ![](Count-examples_files/figure-html/example_plot_boxplot-1.png)
@@ -1008,6 +981,8 @@ the y-axis can have different scales for different scoring methods.
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Estimating and validating treatment effects for binary
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
 - [Estimating and validating treatment effects for survival

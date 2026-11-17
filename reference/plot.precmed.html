@@ -29,7 +29,8 @@ only after results of catecv() or catecvmean() have been obtained."><meta proper
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -158,9 +159,11 @@ hazard ratios require <code>hazard.type = "conditional"</code> or refitting.</p>
 <dt id="arg-measure">measure<a class="anchor" aria-label="anchor" href="#arg-measure"></a></dt>
 <dd><p>For survival outcomes, a vector of <code>"rmtl"</code> (default),
 <code>"cumulative_hr"</code> (cumulative hazard ratio), and <code>"conditional_hr"</code>
-(conditional Cox hazard ratio fitted through <code>tau0</code>). Multiple measures appear in separate panels.
+(conditional Cox hazard ratio fitted through <code>tau0</code>), <code>"risk_difference"</code> (risk under treatment 1 minus treatment 0), and <code>"absolute_risk_reduction"</code> (the opposite contrast), both at <code>tau0</code>. Multiple measures appear in separate panels.
 The earlier names <code>"chr"</code>, <code>"cph"</code>, <code>"cumulative_hazard_ratio"</code>,
-and <code>"conditional_hazard_ratio"</code> remain supported as aliases.</p></dd>
+and <code>"conditional_hazard_ratio"</code> remain supported as aliases; dotted forms
+<code>"cumulative.hr"</code>, <code>"conditional.hr"</code>, <code>"risk.difference"</code>,
+and <code>"absolute.risk.reduction"</code> are also supported.</p></dd>
 
 
 <dt id="arg-show-overall">show.overall<a class="anchor" aria-label="anchor" href="#arg-show-overall"></a></dt>

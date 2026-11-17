@@ -2,9 +2,10 @@
 
 Extract treatment effects from an `atefit` object on their native
 estimation scale: the risk difference for binary outcomes, the log rate
-ratio for count outcomes, or the log RMTL ratio and log cumulative
-hazard ratio for survival outcomes. Exponentiate the returned ratio
-estimates and interval limits to obtain ratios.
+ratio for count outcomes, or the log RMTL ratio, log cumulative hazard
+ratio, and risk difference at the horizon for survival outcomes.
+Exponentiate the returned ratio estimates and interval limits to obtain
+ratios.
 
 ## Usage
 

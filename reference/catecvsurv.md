@@ -362,6 +362,12 @@ Returns a list containing the following components saved as a
     `cv.n`. The ith element indicates whether the algorithm converged in
     the ith cross-validation iteration.
 
+- `rd.<method>`: Subgroup event risk differences at `tau0`, treatment 1
+  minus treatment 0, in training and validation sets. `overall.rd.train`
+  and `overall.rd.valid` contain the corresponding overall differences.
+  These estimates use the same censoring assumptions as the cumulative
+  hazard ratio.
+
 - `chr.<method>`: A list of subgroup marginal cumulative hazard ratios
   at `tau0`, with training and validation matrices for high, low and
   disjoint groups. Matrix names use the prefix `chr.est.`; undefined
@@ -552,33 +558,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 20:26:24 2026 
+#>    Tue Nov 17 08:57:57 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 20:26:27 2026 
+#>    Tue Nov 17 08:58:00 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 20:26:31 2026 
+#>    Tue Nov 17 08:58:03 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 20:26:35 2026 
+#>    Tue Nov 17 08:58:06 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Mon Nov 16 20:26:39 2026 
+#>    Tue Nov 17 08:58:10 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 18.44 secs 
+#> Total runtime : 16.5 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

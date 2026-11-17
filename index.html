@@ -48,7 +48,8 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+<li><a class="dropdown-item" href="articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -166,12 +167,12 @@
 </tr>
 <tr>
 <td>Survival</td>
-<td>Ratio of restricted mean time lost at a specified follow-up horizon; population-level cumulative hazard ratio (treatment 1 over treatment 0)</td>
+<td>At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0)</td>
 <td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival outcomes</a></td>
 </tr>
 </tbody>
 </table>
-<p>Count and survival ATE effect estimates and CATE scores are returned on the log-ratio scale; exponentiate them to obtain ratios. The ATE summarizes the population, while CATE scores describe effects conditional on observed characteristics.</p>
+<p>Count rate ratios and survival RMTL and cumulative hazard ratios from <code><a href="reference/atefit.html">atefit()</a></code> are returned on the log scale; exponentiate them to obtain ratios. Survival risk differences are returned on the difference scale. Count and survival CATE scores are log rate ratios and log RMTL ratios, respectively. The ATE summarizes the population, while CATE scores describe effects conditional on observed characteristics. Survival subgroup assessment also reports risk differences at the follow-up horizon.</p>
 <p>The main functions in the <strong>precmed</strong> package are:</p>
 <table class="table">
 <colgroup>
@@ -240,6 +241,7 @@
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
 <ul>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html">Understanding doubly robust methods</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">Binary outcome example</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">Count outcome example</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival outcome example</a></li>

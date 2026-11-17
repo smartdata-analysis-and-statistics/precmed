@@ -45,7 +45,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
-<li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+<li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -248,12 +249,12 @@ this fixed-horizon binary outcome.</p>
 <code class="sourceCode R"><span><span class="va">outcome_formula</span> <span class="op">&lt;-</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span></span>
 <span>  <span class="va">previous_number_relapses</span></span>
 <span><span class="va">ps_formula</span> <span class="op">&lt;-</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span></span>
-<span><span class="va">output_atefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
+<span><span class="va">fit_ate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">output_atefit</span></span>
+<span><span class="va">fit_ate</span></span>
 <span><span class="co">#&gt; Average treatment effect (risk difference):</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   estimate        SE   CI.lower    CI.upper       pvalue</span></span>
@@ -267,10 +268,10 @@ this fixed-horizon binary outcome.</p>
 <p>Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> to extract the
 risk difference and its confidence interval:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_ate</span><span class="op">)</span></span>
 <span><span class="co">#&gt; risk.difference </span></span>
 <span><span class="co">#&gt;      -0.1079285</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">output_atefit</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_ate</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                      2.5 %      97.5 %</span></span>
 <span><span class="co">#&gt; risk.difference -0.1465372 -0.06931972</span></span></code></pre></div>
 <p>The output reports estimated population-average relapse risks of
@@ -295,7 +296,7 @@ truncation. The outside-range count is the number of patients whose
 estimated score falls outside the observed range in the other treatment
 group; its percentage is within the patient’s own treatment group:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">output_atefit</span>, type <span class="op">=</span> <span class="st">"propensity"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">fit_ate</span>, type <span class="op">=</span> <span class="st">"propensity"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -352,7 +353,7 @@ unmeasured confounding. Use <code>layout = "arms"</code> for unrounded
 numeric results.</p>
 <p>Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to inspect the bootstrap estimates:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_atefit</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"risk0"</span>, <span class="st">"risk1"</span>, <span class="st">"risk.difference"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_ate</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"risk0"</span>, <span class="st">"risk1"</span>, <span class="st">"risk_difference"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Binary-examples_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="700"></p>
 <p>The plot shows bootstrap relapse risks for drug0 (<code>risk0</code>)
 and drug1 (<code>risk1</code>), followed by their risk difference. Red
@@ -472,57 +473,67 @@ optimistic. Chapter 17, “Introduction to methods for personalizing
 medicine,” discusses treatment effect heterogeneity and CATE prediction
 <span class="citation">(Hoogland et al. 2026)</span>.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">output_catefit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">fit_cate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
 <span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">100</span>, plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>, n.cores <span class="op">=</span> <span class="fl">1</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">output_catefit</span></span>
-<span><span class="co">#&gt; Estimated ATE in the nested subgroups:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;              prop0.5   prop0.75      prop1</span></span>
-<span><span class="co">#&gt; boosting -0.1957055 -0.1773050 -0.1079285</span></span>
-<span><span class="co">#&gt; twoReg   -0.1792806 -0.1474149 -0.1079285</span></span>
-<span><span class="co">#&gt; logistic -0.1885092 -0.1455664 -0.1079285</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                               twoReg</span></span>
-<span><span class="co">#&gt; (Intercept)              -0.16042803</span></span>
-<span><span class="co">#&gt; age                      -0.00747815</span></span>
-<span><span class="co">#&gt; female                    0.11779453</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugB   0.03065470</span></span>
-<span><span class="co">#&gt; previous_treatmentdrugC   0.02705082</span></span>
-<span><span class="co">#&gt; previous_cost            -0.01405964</span></span>
-<span><span class="co">#&gt; previous_number_relapses -0.06104685</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">output_catefit</span><span class="op">$</span><span class="va">score.twoReg</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="inspect-cate-scores-and-subgroup-estimates">Inspect CATE scores and subgroup estimates<a class="anchor" aria-label="anchor" href="#inspect-cate-scores-and-subgroup-estimates"></a>
+</h2>
+<p>The fitted scores estimate differences in relapse probability for
+patients with different baseline covariates. Use <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>
+to retrieve scores for the original analysis sample; prediction for new
+data is not currently supported. Below are the first 6 scores from the
+two-regression method.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"twoReg"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             1             2             3             4             5 </span></span>
 <span><span class="co">#&gt; -1.642382e-01  6.177954e-02 -5.741223e-02  5.561457e-05 -1.572941e-01 </span></span>
 <span><span class="co">#&gt;             6 </span></span>
-<span><span class="co">#&gt;  1.046504e-01</span></span>
-<span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.twoReg</span></span>
-<span><span class="co">#&gt;    prop0.5   prop0.75      prop1 </span></span>
-<span><span class="co">#&gt; -0.1792806 -0.1474149 -0.1079285</span></span>
-<span><span class="va">output_catefit</span><span class="op">$</span><span class="va">ate.boosting</span></span>
-<span><span class="co">#&gt;    prop0.5   prop0.75      prop1 </span></span>
-<span><span class="co">#&gt; -0.1957055 -0.1773050 -0.1079285</span></span></code></pre></div>
-<p>The printed coefficient table and <code>coef(output_catefit)</code>
-show the <code>twoReg</code> linear risk-difference score coefficients.
-Logistic coefficients are on the log-odds scale and are stored in
-<code>output_catefit$fit$logistic</code>; boosting has no linear score
-coefficient vector.</p>
-<p>For example, <code>prop0.5</code> is the estimated ATE in the half
-with the lowest scores, using a sample quantile cutoff; ties can make
-the subgroup larger. <code>higher.y = FALSE</code> selects lower risk
-differences as favorable because relapse is an adverse event. For a
-desirable binary outcome, use <code>higher.y = TRUE</code>.</p>
-<div class="section level3">
-<h3 id="visualize-the-distribution-of-cate-scores">Visualize the distribution of CATE scores<a class="anchor" aria-label="anchor" href="#visualize-the-distribution-of-cate-scores"></a>
-</h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">output_catefit</span>, methods <span class="op">=</span> <span class="st">"twoReg"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt;  1.046504e-01</span></span></code></pre></div>
+<p>Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to compare fitted score distributions. Scores
+are on the risk difference scale, with zero indicating no difference in
+relapse probability.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cate</span>, type <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Binary-examples_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="700"></p>
-</div>
+<p>Differences between the score distributions can reflect model
+flexibility, estimation noise or overfitting. The plot alone cannot
+establish that treatment effects differ or that scores will perform well
+in new patients.</p>
+<p>Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> to extract the available linear score
+coefficients. For <code>twoReg</code>, the coefficients describe a
+linear projection of the risk difference. The logistic model’s
+coefficients are on the log-odds scale, and boosting does not have a
+linear score coefficient vector. Confidence intervals for binary score
+coefficients are not currently available.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"twoReg"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              (Intercept)                      age                   female </span></span>
+<span><span class="co">#&gt;              -0.16042803              -0.00747815               0.11779453 </span></span>
+<span><span class="co">#&gt;  previous_treatmentdrugB  previous_treatmentdrugC            previous_cost </span></span>
+<span><span class="co">#&gt;               0.03065470               0.02705082              -0.01405964 </span></span>
+<span><span class="co">#&gt; previous_number_relapses </span></span>
+<span><span class="co">#&gt;              -0.06104685</span></span></code></pre></div>
+<p>Use <code><a href="../reference/subgroup_estimates.html">subgroup_estimates()</a></code> to inspect estimated risk
+differences in nested subgroups ranked by the two-regression score.
+These estimates use the same data as the score fit; the validation
+section below assesses the score in held-out data. The contrast is drug
+1 minus drug 0, so a negative value favors drug 1.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/subgroup_estimates.html">subgroup_estimates</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"twoReg"</span>, measure <span class="op">=</span> <span class="st">"risk_difference"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    prop0.5   prop0.75      prop1 </span></span>
+<span><span class="co">#&gt; -0.1792806 -0.1474149 -0.1079285</span></span></code></pre></div>
+<p>For example, <code>prop0.5</code> is the estimated treatment effect
+in the half with the lowest scores, using a sample quantile cutoff; ties
+can make the subgroup larger. <code>higher.y = FALSE</code> selects
+lower risk differences as favorable because relapse is an adverse event.
+For a desirable binary outcome, use <code>higher.y = TRUE</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="internally-validate-cate-scores">Internally validate CATE scores<a class="anchor" aria-label="anchor" href="#internally-validate-cate-scores"></a>
@@ -544,27 +555,27 @@ and the full set, and the mutually exclusive groups split each set in
 half. These larger subgroups avoid the rank-deficient fits observed with
 smaller groups in this example; check support and model fit when
 choosing cutoffs for other data.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">binary_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>, score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span><span class="op">)</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>, higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">102</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">binary_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Binary-examples_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">binary_cv</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Binary-examples_files/figure-html/unnamed-chunk-10-2.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">binary_cv</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 cv1        cv2        cv3         cv4        cv5        cv6</span></span>
 <span><span class="co">#&gt; logistic 0.02997601 0.01402678 0.03633474 0.004732452 0.01140305 0.01547006</span></span>
 <span><span class="co">#&gt; twoReg   0.02638229 0.01288020 0.03879525 0.007680507 0.01207716 0.01261662</span></span>
 <span><span class="co">#&gt;                 cv7        cv8        cv9       cv10</span></span>
 <span><span class="co">#&gt; logistic 0.01857408 0.01841614 0.02342370 0.01266026</span></span>
 <span><span class="co">#&gt; twoReg   0.01806718 0.01906034 0.02641335 0.01410169</span></span>
-<span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">binary_cv</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">fit_cv</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   logistic     twoReg </span></span>
 <span><span class="co">#&gt; 0.01850173 0.01880746</span></span></code></pre></div>
 <p>The plotted curves use the two requested subgroup proportions.
@@ -588,6 +599,8 @@ responder diagnostics and treatment-rule interpretation <span class="citation">(
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
 <ul>
+<li><a href="doubly-robust.html">Understanding doubly robust
+methods</a></li>
 <li><a href="Count-examples.html">Estimating and validating treatment
 effects for count outcomes</a></li>
 <li><a href="Survival-examples.html">Estimating and validating treatment

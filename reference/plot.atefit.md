@@ -51,12 +51,17 @@ plot(
 - metrics:
 
   Character vector of metrics to plot, in display order. For binary
-  fits, choose from `"risk0"`, `"risk1"`, and `"risk.difference"`. For
-  count fits, choose from `"rate0"`, `"rate1"`, and `"log.rate.ratio"`;
+  fits, choose from `"risk0"`, `"risk1"`, and `"risk_difference"`. For
+  count fits, choose from `"rate0"`, `"rate1"`, and `"log_rate_ratio"`;
   for survival fits, choose from `"rmst0"`, `"rmst1"`,
-  `"log.rmtl.ratio"`, and `"log.cumulative.hazard.ratio"`. Older
-  survival fits may instead contain `"log.hazard.ratio"`. The default
-  `NULL` plots all metrics available in the object.
+  `"log_rmtl_ratio"`, and `"log_cumulative_hazard_ratio"`, `"risk0"`,
+  `"risk1"`, and `"risk_difference"`. Older survival fits may instead
+  contain `"log_hazard_ratio"`. The default `NULL` plots all metrics
+  available in the object. Dotted spellings such as `"risk.difference"`
+  remain supported. Survival panels are arranged in up to three columns,
+  with RMST and log RMTL ratio first, risks and risk difference next,
+  and the log cumulative hazard ratio last. Explicit `metrics` are
+  plotted in supplied order.
 
 - ...:
 

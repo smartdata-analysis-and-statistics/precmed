@@ -10,6 +10,8 @@
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md):
 - [Estimating and validating treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md):
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md):
 - [Learning
   resources](https://smartdata-analysis-and-statistics.github.io/precmed/articles/learning-resources.md):
 - [Getting started with

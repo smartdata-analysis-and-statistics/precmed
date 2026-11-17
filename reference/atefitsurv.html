@@ -25,7 +25,8 @@ restricted mean time lost ratio for survival outcomes. Bootstrap is used for inf
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -196,8 +197,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
   censoring model; its treatment-model double robustness does not protect against
   censoring-model misspecification.
   Undefined estimates or bootstrap replicates yield unavailable inference.</p></li>
+<li><p><code>risk0</code>, <code>risk1</code>, <code>risk.difference</code>:  Population-average event risks by <code>tau0</code> under treatments 0 and 1, and risk under treatment 1 minus risk under treatment 0, with bootstrap inference. These use the same AIPTW survival estimates and censoring assumptions as the cumulative hazard ratio. Estimates outside [0, 1] are unavailable.</p></li>
 <li><p><code>trt.boot</code>:  Estimates of <code>rmst1</code>, <code>rmst0</code>,
-  <code>log.rmtl.ratio</code> and <code>log.cumulative.hazard.ratio</code> in each bootstrap sample.</p></li>
+  <code>log.rmtl.ratio</code>, <code>log.cumulative.hazard.ratio</code>, treatment-specific risks and risk difference in each bootstrap sample.</p></li>
 <li><p><code>treatment.labels</code>:  Original treatment labels corresponding to 0 and 1, in that order.</p></li>
 <li><p><code>warning</code>:  The informational treatment recoding message, if applicable.</p></li>
 </ul></div>
@@ -241,12 +243,20 @@ is unavailable rather than based on a subset of replicates. See also
 <span class="r-in"><span><span class="va">output</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average treatment effect:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                               estimate         SE     CI.lower  CI.upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.1330012</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.2302107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               estimate         SE     CI.lower   CI.upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.13300123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.23021067</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk.difference             0.00663013 0.02487538 -0.042124717 0.05538498</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 pvalue</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.02867542</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.79471688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk.difference             0.78982810</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Estimated event risks at tau0:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        estimate         SE  CI.lower  CI.upper pvalue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk1 0.8908200 0.01623662 0.8589968 0.9226432      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk0 0.8841899 0.01313583 0.8584441 0.9099356      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimated RMST:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

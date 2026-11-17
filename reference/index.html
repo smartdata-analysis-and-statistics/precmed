@@ -23,7 +23,8 @@
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -202,6 +203,13 @@
 
         </dt>
         <dd>Cross-validation of the conditional average treatment effect (CATE) score for survival outcomes</dd>
+
+        <dt>
+
+          <code><a href="catefit-extract.html">predict(<i>&lt;catefit&gt;</i>)</a></code> <code><a href="catefit-extract.html">coef(<i>&lt;catefit&gt;</i>)</a></code> <code><a href="catefit-extract.html">confint(<i>&lt;catefit&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract CATE scores and score coefficients</dd>
 
         <dt>
 
@@ -496,6 +504,13 @@
 
         </dt>
         <dd>Simulate an illustrative survival dataset</dd>
+
+        <dt>
+
+          <code><a href="subgroup_estimates.html">subgroup_estimates()</a></code>
+
+        </dt>
+        <dd>Extract estimates for score-defined subgroups</dd>
 
         <dt>
 

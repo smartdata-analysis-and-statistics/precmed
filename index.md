@@ -109,12 +109,17 @@ measures:
 |----|----|----|
 | Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [Binary outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) |
 | Count | Ratio of event rates (treatment 1 over treatment 0) | [Count outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) |
-| Survival | Ratio of restricted mean time lost at a specified follow-up horizon; population-level cumulative hazard ratio (treatment 1 over treatment 0) | [Survival outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) |
+| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [Survival outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) |
 
-Count and survival ATE effect estimates and CATE scores are returned on
-the log-ratio scale; exponentiate them to obtain ratios. The ATE
-summarizes the population, while CATE scores describe effects
-conditional on observed characteristics.
+Count rate ratios and survival RMTL and cumulative hazard ratios from
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+are returned on the log scale; exponentiate them to obtain ratios.
+Survival risk differences are returned on the difference scale. Count
+and survival CATE scores are log rate ratios and log RMTL ratios,
+respectively. The ATE summarizes the population, while CATE scores
+describe effects conditional on observed characteristics. Survival
+subgroup assessment also reports risk differences at the follow-up
+horizon.
 
 The main functions in the **precmed** package are:
 
@@ -175,6 +180,8 @@ the user from simple to more complex methods.
 
 ## Vignettes
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html)
 - [Binary outcome
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
 - [Count outcome

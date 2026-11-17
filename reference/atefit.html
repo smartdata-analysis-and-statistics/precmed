@@ -31,7 +31,8 @@ yet implemented."><meta property="og:image" content="https://smartdata-analysis-
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -288,12 +289,20 @@ binary endpoint. <em>Statistics in Medicine</em>, 40(26), 5961–5981.
 <span class="r-in"><span><span class="va">output2</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average treatment effect:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                               estimate         SE     CI.lower CI.upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.07015530 0.03420455  0.003115612 0.137195</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.02697948 0.11278450 -0.194074071 0.248033</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               estimate         SE     CI.lower   CI.upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.07015530 0.03420455  0.003115612 0.13719499</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.02697948 0.11278450 -0.194074071 0.24803303</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk.difference             0.00663013 0.02722418 -0.046728282 0.05998854</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                 pvalue</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log.rmtl.ratio              0.04026192</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> log.cumulative.hazard.ratio 0.81094068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk.difference             0.80758842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Estimated event risks at tau0:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        estimate         SE  CI.lower  CI.upper pvalue</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk1 0.8908200 0.01931669 0.8529600 0.9286800      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> risk0 0.8841899 0.01555998 0.8536929 0.9146869      0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Estimated RMST:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

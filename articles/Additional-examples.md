@@ -147,25 +147,28 @@ ATE results. Here is a recap:
 ``` r
 
 # An example of 11 nested binary subgroups and a 4-category mutually exclusive subgroup
-output_catecv2 <- catecv(response = "count",
-                         data = countExample,
-                         score.method = c("poisson", "contrastReg", "negBin"),
-                         cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-                         ps.model = trt ~ age + previous_treatment,
-                         higher.y = FALSE,
-                         prop.cutoff = seq(0.5, 1, length = 11), # NEW
-                         prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
-                         initial.predictor.method = "poisson", 
-                         cv.n = 5, 
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
+fit_cv_2 <- catecv(
+  response = "count",
+  data = countExample,
+  score.method = c("poisson", "contrastReg", "negBin"),
+  cate.model = y ~ age + female + previous_treatment +
+    previous_cost + previous_number_relapses + offset(log(years)),
+  ps.model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  prop.cutoff = seq(0.5, 1, length = 11), # NEW
+  prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
+  initial.predictor.method = "poisson",
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 ``` r
 
-print(output_catecv2$ate.contrastReg$ate.est.train.high.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.high.cv)
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.5  0.6125203 0.6352505 0.5639550 0.6292319 0.5745308
 #> prop0.55 0.6123425 0.6810730 0.6086757 0.6481483 0.6176396
@@ -188,7 +191,7 @@ we still use 5 CV iterations.
 
 ``` r
 
-plot(output_catecv2) 
+plot(fit_cv_2)
 ```
 
 ![](Additional-examples_files/figure-html/subgroup_proportion3_count-1.png)
@@ -205,7 +208,7 @@ section.
 
 ``` r
 
-print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.group.cv)
 #>                cv1       cv2       cv3      cv4       cv5
 #> prop0.25 2.0498142 1.7154503 1.8164594 1.778980 2.1789660
 #> prop0.5  1.1585604 1.4411747 1.5079571 1.278110 1.1951267
@@ -213,7 +216,7 @@ print(output_catecv2$ate.contrastReg$ate.est.train.group.cv)
 #> prop1    0.4665909 0.4106455 0.4141645 0.383163 0.4616615
 # Dimension is now 4 rows (multi-category mutually exclusive subgroups) by 5 columns (CV iterations)
 
-boxplot(output_catecv2)
+boxplot(fit_cv_2)
 ```
 
 ![](Additional-examples_files/figure-html/subgroup_proportion4_count-1.png)
@@ -231,26 +234,27 @@ to 0. Consequently, the scoring methods may run into some convergence
 issues because the first subgroup includes a small number of patients.
 This can lead to highly unstable ATE estimates, as shown in the first CV
 iteration of contrast regression in
-`output_catecv3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the
+`fit_cv_3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the
 validation curves become useless due to the extreme ATE estimates.
 
 ``` r
 
 # An example of very few nested binary subgroups
-output_catecv3 <- catecv(response = "count",
-                         data = countExample,
-                         score.method = c("poisson", "contrastReg", "negBin"),
-                         cate.model = y ~ age + female + previous_treatment
-                                      + previous_cost + previous_number_relapses 
-                                      + offset(log(years)),
-                         ps.model = trt ~ age + previous_treatment, 
-                         initial.predictor.method = "poisson", 
-                         higher.y = FALSE,
-                         prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
-                         cv.n = 5, 
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 1)
+fit_cv_3 <- catecv(
+  response = "count",
+  data = countExample,
+  score.method = c("poisson", "contrastReg", "negBin"),
+  cate.model = y ~ age + female + previous_treatment +
+    previous_cost + previous_number_relapses + offset(log(years)),
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "poisson",
+  higher.y = FALSE,
+  prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 1
+)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model =
 #> ps.model, : The first element of prop.cutoff cannot be 0 and has been removed.
@@ -266,14 +270,14 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 20:28:01 2026 
+#>    Tue Nov 17 08:59:24 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Mon Nov 16 20:28:04 2026 
+#>    Tue Nov 17 08:59:27 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +288,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 20:28:08 2026 
+#>    Tue Nov 17 08:59:29 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +299,7 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 20:28:11 2026 
+#>    Tue Nov 17 08:59:33 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,10 +312,10 @@ output_catecv3 <- catecv(response = "count",
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Mon Nov 16 20:28:16 2026 
+#>    Tue Nov 17 08:59:36 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 19.31 secs
-output_catecv3$ate.contrastReg$ate.est.valid.high.cv
+#> Total runtime : 15.53 secs
+fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
 #> prop0.3  0.5247199 0.61813014 0.6248190 6.234047e-01 0.5989032
@@ -321,7 +325,7 @@ output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 
 ``` r
 
-plot(output_catecv3) 
+plot(fit_cv_3)
 ```
 
 ![](Additional-examples_files/figure-html/subgroup_proportion_bad2_count-1.png)
@@ -481,31 +485,32 @@ reflected in the results.
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-output_catecv2 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("randomForest", "contrastReg"),
-                         
-                cate.model = survival::Surv(y, d) ~ age + female
-                                                        + previous_cost + previous_number_relapses,
-                ps.model = trt ~ age + previous_treatment,
-                initial.predictor.method = "logistic",
-                ipcw.model = NULL,
-                followup.time = NULL,
-                tau0 = tau0,
-                surv.min = 0.025,
-                higher.y = TRUE,
-                prop.cutoff = seq(0.6, 1, length = 9), # NEW
-                prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
-                cv.n = 5,
-                seed = 999,
-                plot.gbmperf = FALSE,
-                verbose = 0)
+fit_cv_2 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("randomForest", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 9), # NEW
+  prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
 ``` r
 
-print(output_catecv2$ate.contrastReg$ate.est.train.high.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.high.cv)
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.6  0.5286488 0.5344877 0.5325352 0.5246205 0.5338395
 #> prop0.65 0.5791944 0.5829187 0.6151744 0.5762170 0.5955160
@@ -525,7 +530,7 @@ changed accordingly while the number of columns remains to be 5.
 
 ``` r
 
-plot(output_catecv2) 
+plot(fit_cv_2)
 ```
 
 ![](Additional-examples_files/figure-html/subgroup_proportion3-1.png)
@@ -545,7 +550,7 @@ section.
 
 ``` r
 
-print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.group.cv)
 #>               cv1       cv2       cv3       cv4      cv5
 #> prop0.4 6.2068924 6.6101517 6.7424201 6.5030289 7.027033
 #> prop0.5 1.4458427 1.4142659 1.4728371 1.4372399 1.381593
@@ -553,7 +558,7 @@ print(output_catecv2$ate.contrastReg$ate.est.train.group.cv)
 #> prop1   0.3746892 0.4068091 0.3454113 0.3465889 0.377679
 # Dimension is now 4 (multi-category mutually exclusive subgroups) by 3 (CV iterations)
 
-boxplot(output_catecv2)
+boxplot(fit_cv_2)
 #> Warning: Removed 4 rows containing non-finite outside the scale range
 #> (`stat_boxplot()`).
 ```
@@ -573,29 +578,32 @@ Consequently, the scoring methods may run into some convergence issues
 because the first subgroup includes a small number of patients. This can
 lead to highly unstable ATE estimates, as shown in the first CV
 iteration of contrast regression in
-`output_catecv3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the
+`fit_cv_3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the
 validation curves become useless due to the extreme ATE estimates.
 
 ``` r
 
 # An example of very few nested binary subgroups
-output_catecv3 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = NULL,
-                         followup.time = NULL,
-                         tau0 = tau0,
-                         surv.min = 0.025,
-                         higher.y = TRUE,
-                         prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         cv.n = 5,
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 1)
+fit_cv_3 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 1
+)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
 #> = ps.model, : The first element of prop.cutoff cannot be 0 and has been
@@ -606,38 +614,38 @@ output_catecv3 <- catecv(response = "survival",
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 20:29:28 2026 
+#>    Tue Nov 17 09:00:41 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 20:29:31 2026 
+#>    Tue Nov 17 09:00:44 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 20:29:34 2026 
+#>    Tue Nov 17 09:00:47 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 20:29:37 2026 
+#>    Tue Nov 17 09:00:50 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Mon Nov 16 20:29:40 2026 
+#>    Tue Nov 17 09:00:53 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 15.69 secs
-output_catecv3$ate.contrastReg$ate.est.valid.high.cv
+#> Total runtime : 14.49 secs
+fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
 #> prop0.75 0.7251659 0.5735622 0.9376515 0.6359857 0.7093587
@@ -646,7 +654,7 @@ output_catecv3$ate.contrastReg$ate.est.valid.high.cv
 
 ``` r
 
-plot(output_catecv3) 
+plot(fit_cv_3)
 ```
 
 ![](Additional-examples_files/figure-html/subgroup_proportion_bad2-1.png)
@@ -693,24 +701,27 @@ the `survival` package was used to fit the AFT model.
 ``` r
 
 # An example of a different censoring model with different covariates from default
-output_catecv4 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("poisson", "contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
-                         ipcw.method = "aft (weibull)", # NEW
-                         followup.time = NULL,
-                         tau0 = tau0,
-                         surv.min = 0.025,
-                         higher.y = TRUE,
-                         prop.cutoff = seq(0.6, 1, length = 5), 
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         cv.n = 5,
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
+fit_cv_4 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("poisson", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
+  ipcw.method = "aft (weibull)", # NEW
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 ```
 
 ### Truncation and follow-up time
@@ -729,35 +740,40 @@ setting different values of the truncation time.
 ``` r
 
 # An example of a different censoring model with different covariates from default
-output_catecv5 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("poisson", "contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
-                         ipcw.method = "aft (weibull)",
-                         followup.time = NULL,
-                         tau0 = NULL, # NEW
-                         higher.y = TRUE,
-                         cv.n = 5,
-                         surv.min = 0.025,
-                         prop.cutoff = seq(0.6, 1, length = 5),
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
+fit_cv_5 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("poisson", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
+  ipcw.method = "aft (weibull)",
+  followup.time = NULL,
+  tau0 = NULL, # NEW
+  higher.y = TRUE,
+  cv.n = 5,
+  surv.min = 0.025,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
 #> = ps.model, : No value supplied for tau0. Default sets tau0 to the maximum
 #> survival time.
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-plot(output_catecv5)
+plot(fit_cv_5)
 ```
 
 ![](Additional-examples_files/figure-html/time-1.png)
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Estimating and validating treatment effects for binary
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
 - [Estimating and validating treatment effects for count

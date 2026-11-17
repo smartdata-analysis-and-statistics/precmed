@@ -180,12 +180,12 @@ this fixed-horizon binary outcome.
 outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
   previous_number_relapses
 ps_formula <- trt ~ age + previous_treatment
-output_atefit <- atefit(
+fit_ate <- atefit(
   response = "binary", data = binaryExample,
   cate.model = outcome_formula, ps.model = ps_formula,
   n.boot = 100, seed = 999
 )
-output_atefit
+fit_ate
 #> Average treatment effect (risk difference):
 #> 
 #>                   estimate        SE   CI.lower    CI.upper       pvalue
@@ -204,10 +204,10 @@ difference and its confidence interval:
 
 ``` r
 
-coef(output_atefit)
+coef(fit_ate)
 #> risk.difference 
 #>      -0.1079285
-confint(output_atefit)
+confint(fit_ate)
 #>                      2.5 %      97.5 %
 #> risk.difference -0.1465372 -0.06931972
 ```
@@ -237,7 +237,7 @@ patient’s own treatment group:
 
 ``` r
 
-diagnostics(output_atefit, type = "propensity")
+diagnostics(fit_ate, type = "propensity")
 ```
 
 | Diagnostic                         | drug0            | drug1            |
@@ -265,7 +265,7 @@ the bootstrap estimates:
 
 ``` r
 
-plot(output_atefit, metrics = c("risk0", "risk1", "risk.difference"))
+plot(fit_ate, metrics = c("risk0", "risk1", "risk_difference"))
 ```
 
 ![](Binary-examples_files/figure-html/unnamed-chunk-7-1.png)
@@ -337,62 +337,87 @@ and CATE prediction (Hoogland et al. 2026).
 
 ``` r
 
-output_catefit <- catefit(
+fit_cate <- catefit(
   response = "binary", data = binaryExample,
   score.method = c("logistic", "twoReg", "boosting"),
   cate.model = outcome_formula, ps.model = ps_formula,
   higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, plot.gbmperf = FALSE, n.cores = 1
 )
-output_catefit
-#> Estimated ATE in the nested subgroups:
-#> 
-#>              prop0.5   prop0.75      prop1
-#> boosting -0.1957055 -0.1773050 -0.1079285
-#> twoReg   -0.1792806 -0.1474149 -0.1079285
-#> logistic -0.1885092 -0.1455664 -0.1079285
-#> 
-#>                               twoReg
-#> (Intercept)              -0.16042803
-#> age                      -0.00747815
-#> female                    0.11779453
-#> previous_treatmentdrugB   0.03065470
-#> previous_treatmentdrugC   0.02705082
-#> previous_cost            -0.01405964
-#> previous_number_relapses -0.06104685
-head(output_catefit$score.twoReg)
+```
+
+## Inspect CATE scores and subgroup estimates
+
+The fitted scores estimate differences in relapse probability for
+patients with different baseline covariates. Use
+[`predict()`](https://rdrr.io/r/stats/predict.html) to retrieve scores
+for the original analysis sample; prediction for new data is not
+currently supported. Below are the first 6 scores from the
+two-regression method.
+
+``` r
+
+scores <- predict(fit_cate, method = "twoReg")
+head(scores)
 #>             1             2             3             4             5 
 #> -1.642382e-01  6.177954e-02 -5.741223e-02  5.561457e-05 -1.572941e-01 
 #>             6 
 #>  1.046504e-01
-output_catefit$ate.twoReg
-#>    prop0.5   prop0.75      prop1 
-#> -0.1792806 -0.1474149 -0.1079285
-output_catefit$ate.boosting
-#>    prop0.5   prop0.75      prop1 
-#> -0.1957055 -0.1773050 -0.1079285
 ```
 
-The printed coefficient table and `coef(output_catefit)` show the
-`twoReg` linear risk-difference score coefficients. Logistic
-coefficients are on the log-odds scale and are stored in
-`output_catefit$fit$logistic`; boosting has no linear score coefficient
-vector.
-
-For example, `prop0.5` is the estimated ATE in the half with the lowest
-scores, using a sample quantile cutoff; ties can make the subgroup
-larger. `higher.y = FALSE` selects lower risk differences as favorable
-because relapse is an adverse event. For a desirable binary outcome, use
-`higher.y = TRUE`.
-
-### Visualize the distribution of CATE scores
+Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
+fitted score distributions. Scores are on the risk difference scale,
+with zero indicating no difference in relapse probability.
 
 ``` r
 
-plot(output_catefit, methods = "twoReg")
+plot(fit_cate, type = "density")
 ```
 
 ![](Binary-examples_files/figure-html/unnamed-chunk-9-1.png)
+
+Differences between the score distributions can reflect model
+flexibility, estimation noise or overfitting. The plot alone cannot
+establish that treatment effects differ or that scores will perform well
+in new patients.
+
+Use [`coef()`](https://rdrr.io/r/stats/coef.html) to extract the
+available linear score coefficients. For `twoReg`, the coefficients
+describe a linear projection of the risk difference. The logistic
+model’s coefficients are on the log-odds scale, and boosting does not
+have a linear score coefficient vector. Confidence intervals for binary
+score coefficients are not currently available.
+
+``` r
+
+coef(fit_cate, method = "twoReg")
+#>              (Intercept)                      age                   female 
+#>              -0.16042803              -0.00747815               0.11779453 
+#>  previous_treatmentdrugB  previous_treatmentdrugC            previous_cost 
+#>               0.03065470               0.02705082              -0.01405964 
+#> previous_number_relapses 
+#>              -0.06104685
+```
+
+Use
+[`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
+to inspect estimated risk differences in nested subgroups ranked by the
+two-regression score. These estimates use the same data as the score
+fit; the validation section below assesses the score in held-out data.
+The contrast is drug 1 minus drug 0, so a negative value favors drug 1.
+
+``` r
+
+subgroup_estimates(fit_cate, method = "twoReg", measure = "risk_difference")
+#>    prop0.5   prop0.75      prop1 
+#> -0.1792806 -0.1474149 -0.1079285
+```
+
+For example, `prop0.5` is the estimated treatment effect in the half
+with the lowest scores, using a sample quantile cutoff; ties can make
+the subgroup larger. `higher.y = FALSE` selects lower risk differences
+as favorable because relapse is an adverse event. For a desirable binary
+outcome, use `higher.y = TRUE`.
 
 ## Internally validate CATE scores
 
@@ -416,34 +441,34 @@ check support and model fit when choosing cutoffs for other data.
 
 ``` r
 
-binary_cv <- catecv(
+fit_cv <- catecv(
   response = "binary", data = binaryExample, score.method = c("logistic", "twoReg"),
   cate.model = outcome_formula, ps.model = ps_formula, higher.y = FALSE,
   prop.cutoff = c(0.5, 1), prop.multi = c(0, 0.5, 1),
   cv.n = 10, B = 1, seed = 102
 )
-plot(binary_cv, show.abc = FALSE)
+plot(fit_cv, show.abc = FALSE)
 ```
 
 ![](Binary-examples_files/figure-html/unnamed-chunk-10-1.png)
 
 ``` r
 
-boxplot(binary_cv)
+boxplot(fit_cv)
 ```
 
 ![](Binary-examples_files/figure-html/unnamed-chunk-10-2.png)
 
 ``` r
 
-abc(binary_cv)
+abc(fit_cv)
 #>                 cv1        cv2        cv3         cv4        cv5        cv6
 #> logistic 0.02997601 0.01402678 0.03633474 0.004732452 0.01140305 0.01547006
 #> twoReg   0.02638229 0.01288020 0.03879525 0.007680507 0.01207716 0.01261662
 #>                 cv7        cv8        cv9       cv10
 #> logistic 0.01857408 0.01841614 0.02342370 0.01266026
 #> twoReg   0.01806718 0.01906034 0.02641335 0.01410169
-abc(binary_cv, combine = "mean")
+abc(fit_cv, combine = "mean")
 #>   logistic     twoReg 
 #> 0.01850173 0.01880746
 ```
@@ -471,6 +496,8 @@ interpretation (Jiang et al. 2026).
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Estimating and validating treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
 - [Estimating and validating treatment effects for survival

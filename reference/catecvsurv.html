@@ -33,7 +33,8 @@ Random forest, boosting, poisson regression, two regressions, and contrast regre
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -384,6 +385,7 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
     The ith element indicates whether the algorithm converged in the ith cross-validation
     iteration.</p></li>
 </ul></li>
+<li><p><code>rd.&lt;method&gt;</code>:  Subgroup event risk differences at <code>tau0</code>, treatment 1 minus treatment 0, in training and validation sets. <code>overall.rd.train</code> and <code>overall.rd.valid</code> contain the corresponding overall differences. These estimates use the same censoring assumptions as the cumulative hazard ratio.</p></li>
 <li><p><code>chr.&lt;method&gt;</code>:  A list of subgroup marginal cumulative hazard ratios at
  <code>tau0</code>, with training and validation matrices for high, low and disjoint groups.
  Matrix names use the prefix <code>chr.est.</code>; undefined estimates are <code>NA</code>.
@@ -521,33 +523,33 @@ observational data. Journal of the American Statistical Association, 1-18.</em>.
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Nov 16 20:26:24 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Tue Nov 17 08:57:57 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==============                                                        |  20%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Nov 16 20:26:27 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Tue Nov 17 08:58:00 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |============================                                          |  40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Nov 16 20:26:31 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Tue Nov 17 08:58:03 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==========================================                            |  60%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Nov 16 20:26:35 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Tue Nov 17 08:58:06 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |========================================================              |  80%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Mon Nov 16 20:26:39 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Tue Nov 17 08:58:10 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |======================================================================| 100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 18.44 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 16.5 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Try:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>

@@ -120,10 +120,14 @@ plot(
 
   For survival outcomes, a vector of `"rmtl"` (default),
   `"cumulative_hr"` (cumulative hazard ratio), and `"conditional_hr"`
-  (conditional Cox hazard ratio fitted through `tau0`). Multiple
-  measures appear in separate panels. The earlier names `"chr"`,
-  `"cph"`, `"cumulative_hazard_ratio"`, and `"conditional_hazard_ratio"`
-  remain supported as aliases.
+  (conditional Cox hazard ratio fitted through `tau0`),
+  `"risk_difference"` (risk under treatment 1 minus treatment 0), and
+  `"absolute_risk_reduction"` (the opposite contrast), both at `tau0`.
+  Multiple measures appear in separate panels. The earlier names
+  `"chr"`, `"cph"`, `"cumulative_hazard_ratio"`, and
+  `"conditional_hazard_ratio"` remain supported as aliases; dotted forms
+  `"cumulative.hr"`, `"conditional.hr"`, `"risk.difference"`, and
+  `"absolute.risk.reduction"` are also supported.
 
 - show.overall:
 

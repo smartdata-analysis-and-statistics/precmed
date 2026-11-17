@@ -72,6 +72,41 @@
 
 ### Minor changes
 
+- Added an introductory vignette explaining doubly robust estimation,
+  its assumptions, and its use in `precmed`.
+
+- Added
+  [`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
+  to extract nested binary, count and survival subgroup estimates by
+  scoring method and measure. Newly fitted survival
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  objects also retain subgroup treatment-specific risks and RMSTs and
+  risk differences.
+
+- Added [`predict()`](https://rdrr.io/r/stats/predict.html),
+  [`coef()`](https://rdrr.io/r/stats/coef.html) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html) methods for
+  `catefit` score extraction. Predictions return stored analysis-sample
+  scores; coefficient intervals require available contrast-regression
+  standard errors and are not available for survival fits.
+
+- Survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  bootstrap plots group RMST, risks and the cumulative hazard ratio by
+  row by default; `metrics` still controls selection and order and
+  accepts underscore spellings of dotted metric names.
+
+- Survival
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  now stores subgroup risk differences at `tau0`; validation plots
+  support `measure = "risk_difference"`; dotted measure names are
+  available as aliases.
+
+- Survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  now reports treatment-specific event risks and their difference at
+  `tau0`, with bootstrap inference and plot support.
+
 - `diagnostics(fit, type = "propensity")` now reports full-sample
   propensity score overlap, truncation, inverse treatment weights and
   effective sample sizes for newly fitted binary, count and survival
@@ -106,7 +141,11 @@
   of censoring weights.
 
 - Clarified binary, count and survival outcome support in the package
-  description, README, quick start and function documentation.
+  description, README, quick start and function documentation. The
+  README and introductory vignettes also describe survival risk
+  differences and distinguish their scale from survival CATE scores. The
+  quick start presents the estimated count rate ratio and confidence
+  interval in a concise table.
 
 - Added an ATE methods vignette covering binary, count and survival
   outcomes, assumptions and bootstrap inference; the CATE methods

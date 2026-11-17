@@ -181,10 +181,11 @@ contrast is the log RMTL ratio
 \log\!\left(\frac{\tau_0-\mu_1(\tau_0)}{\tau_0-\mu_0(\tau_0)}\right).
 ```
 
-The function also reports a population-level cumulative hazard ratio at
-the horizon, derived from the treatment-specific marginal survival
-probabilities. These summaries have different interpretations from a
-conditional Cox hazard ratio.
+The function also reports the population-average event risk difference
+(treatment 1 minus treatment 0) and a population-level cumulative hazard
+ratio at the horizon, derived from the treatment-specific marginal
+survival probabilities. These summaries have different interpretations
+from a conditional Cox hazard ratio.
 
 ### Outcome, treatment and censoring models
 
@@ -253,11 +254,11 @@ standard error for other confidence levels without repeating the
 bootstrap. Supplying `seed` makes the resampling reproducible.
 
 The effect scale depends on the outcome: bootstrap inference is on the
-risk difference for binary outcomes, the log rate ratio for counts, and
-the log RMTL ratio and log cumulative hazard ratio for survival.
-Exponentiate the log-ratio estimates and interval limits to obtain
-ratios. Treatment-specific bootstrap estimates are also retained and can
-be visualized with
+risk difference for binary outcomes, the log rate ratio for counts, and,
+for survival, the log RMTL ratio, log cumulative hazard ratio, and event
+risk difference at the horizon. Exponentiate the log-ratio estimates and
+interval limits to obtain ratios. Treatment-specific bootstrap estimates
+are also retained and can be visualized with
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
 Failed or non-finite bootstrap estimates are recorded in
@@ -284,6 +285,8 @@ not validation of a CATE score.
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Estimating and validating treatment effects for binary
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
 - [Estimating and validating treatment effects for count

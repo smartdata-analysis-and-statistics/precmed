@@ -472,6 +472,8 @@ is the ATE.
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Estimating and validating treatment effects for binary
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
 - [Estimating and validating treatment effects for count

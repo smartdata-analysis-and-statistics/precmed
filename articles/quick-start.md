@@ -56,7 +56,7 @@ using baseline characteristics.
 
 ``` r
 
-overall <- atefit(
+fit_ate <- atefit(
   response = "count",
   data = countExample,
   cate.model = y ~ age + female + previous_treatment +
@@ -66,37 +66,27 @@ overall <- atefit(
   seed = 999,
   verbose = 0
 )
-overall
-#> Average treatment effect:
-#> 
-#>                  estimate        SE   CI.lower  CI.upper    pvalue
-#> log.rate.ratio 0.06311746 0.1624482 -0.2552752 0.3815101 0.6976173
-#> 
-#> Estimated event rates:
-#> 
-#>        estimate
-#> rate1 0.2860635
-#> rate0 0.2685660
 ```
 
-The output reports the log rate ratio and bootstrap-based uncertainty.
-Exponentiate the estimate and confidence limits to obtain the rate ratio
-and its 95% confidence interval; a rate ratio below 1 indicates a lower
-estimated relapse rate with `drug1`. The confidence interval uses the
-bootstrap standard error. The estimator is doubly robust: under the
-required causal and other regularity assumptions, it is consistent if
-either the outcome model or the treatment model is correctly specified.
-The 50 bootstrap replicates used here keep the example short; use more
-for a substantive analysis.
+The fitted object contains the log rate ratio and bootstrap-based
+uncertainty. Exponentiate the estimate and confidence limits to obtain
+the rate ratio and its 95% confidence interval; a rate ratio below 1
+indicates a lower estimated relapse rate with `drug1`. The confidence
+interval uses the bootstrap standard error. The estimator is doubly
+robust: under the required causal and other regularity assumptions, it
+is consistent if either the outcome model or the treatment model is
+correctly specified. The 50 bootstrap replicates used here keep the
+example short; use more for a substantive analysis.
 
 ``` r
 
-unname(exp(coef(overall)))
-#> [1] 1.065152
-exp(confint(overall))[1, ]
-#>     2.5 %    97.5 % 
-#> 0.7747033 1.4644945
+rate_ratio <- exp(coef(fit_ate))
+rate_ratio_ci <- exp(confint(fit_ate))
 ```
+
+| Rate ratio | 95% CI lower | 95% CI upper |
+|-----------:|-------------:|-------------:|
+|       1.07 |         0.77 |         1.46 |
 
 The overall effect can mask differences across patients. Next, we
 explore treatment effect heterogeneity.
@@ -112,7 +102,7 @@ fewer relapses are better, we set `higher.y = FALSE`.
 
 ``` r
 
-fit <- catecv(
+fit_cv <- catecv(
   response = "count",
   data = countExample,
   score.method = "poisson",
@@ -129,7 +119,7 @@ fit <- catecv(
 
 ``` r
 
-plot(fit)
+plot(fit_cv)
 ```
 
 ![Training and validation curves for estimated treatment effects across
@@ -145,6 +135,9 @@ population.
 
 ## Next steps
 
+- Read [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
+  for an introduction to the estimator and its assumptions.
 - Follow the [binary outcome
   tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
   for fixed-horizon response and held-out subgroup validation.

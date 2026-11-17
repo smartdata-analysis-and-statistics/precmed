@@ -102,6 +102,11 @@
   : Cross-validation of the conditional average treatment effect (CATE)
   score for survival outcomes
 
+- [`predict(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)
+  [`coef(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)
+  [`confint(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)
+  : Extract CATE scores and score coefficients
+
 - [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
   : Estimate conditional treatment effect scores
 
@@ -269,6 +274,9 @@
 
 - [`simulate_survival()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/simulate_survival.md)
   : Simulate an illustrative survival dataset
+
+- [`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
+  : Extract estimates for score-defined subgroups
 
 - [`survCatch()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/survCatch.md)
   : Catch errors and warnings when estimating the ATEs in the nested

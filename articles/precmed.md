@@ -68,6 +68,15 @@ The **precmed** package contains functions to
   [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
   ([Zhao et al. 2013](#ref-zhao2013effectively))
 
+For survival outcomes,
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+reports the population-average event risk difference at the chosen
+follow-up horizon (treatment 1 minus treatment 0), alongside the
+restricted mean time lost ratio and cumulative hazard ratio. Survival
+CATE scores are on the log restricted mean time lost ratio scale;
+subgroup estimates and validation plots can also report risk differences
+at the horizon.
+
 ## Recommended workflow
 
 Chapter 19 discusses validation strategies and the assessment of
@@ -144,6 +153,8 @@ the user has to (at least) input:
 
 ## Overview of the vignettes
 
+- [Understanding doubly robust
+  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Binary outcome
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
 - [Count outcome

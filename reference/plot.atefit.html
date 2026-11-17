@@ -23,7 +23,8 @@
 <li class="nav-item"><a class="nav-link" href="../articles/quick-start.html">Quick start</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
@@ -100,13 +101,15 @@ supply, for example, <code><a href="https://ggplot2.tidyverse.org/reference/ggth
 <dt id="arg-metrics">metrics<a class="anchor" aria-label="anchor" href="#arg-metrics"></a></dt>
 <dd><p>Character vector of metrics to plot, in display order. For
 binary fits, choose from <code>"risk0"</code>, <code>"risk1"</code>, and
-<code>"risk.difference"</code>. For
+<code>"risk_difference"</code>. For
 count fits, choose from <code>"rate0"</code>, <code>"rate1"</code>, and
-<code>"log.rate.ratio"</code>; for survival fits, choose from <code>"rmst0"</code>,
-<code>"rmst1"</code>, <code>"log.rmtl.ratio"</code>, and
-<code>"log.cumulative.hazard.ratio"</code>. Older survival fits may instead
-contain <code>"log.hazard.ratio"</code>. The default <code>NULL</code> plots all
-metrics available in the object.</p></dd>
+<code>"log_rate_ratio"</code>; for survival fits, choose from <code>"rmst0"</code>,
+<code>"rmst1"</code>, <code>"log_rmtl_ratio"</code>, and
+<code>"log_cumulative_hazard_ratio"</code>, <code>"risk0"</code>, <code>"risk1"</code>, and <code>"risk_difference"</code>. Older survival fits may instead
+contain <code>"log_hazard_ratio"</code>. The default <code>NULL</code> plots all
+metrics available in the object. Dotted spellings such as <code>"risk.difference"</code> remain supported. Survival panels are arranged in up to three columns,
+with RMST and log RMTL ratio first, risks and risk difference next, and the
+log cumulative hazard ratio last. Explicit <code>metrics</code> are plotted in supplied order.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

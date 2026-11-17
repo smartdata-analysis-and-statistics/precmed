@@ -163,8 +163,15 @@ Return an object of class `atefit` including:
   censoring-model misspecification. Undefined estimates or bootstrap
   replicates yield unavailable inference.
 
-- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio` and
-  `log.cumulative.hazard.ratio` in each bootstrap sample.
+- `risk0`, `risk1`, `risk.difference`: Population-average event risks by
+  `tau0` under treatments 0 and 1, and risk under treatment 1 minus risk
+  under treatment 0, with bootstrap inference. These use the same AIPTW
+  survival estimates and censoring assumptions as the cumulative hazard
+  ratio. Estimates outside \[0, 1\] are unavailable.
+
+- `trt.boot`: Estimates of `rmst1`, `rmst0`, `log.rmtl.ratio`,
+  `log.cumulative.hazard.ratio`, treatment-specific risks and risk
+  difference in each bootstrap sample.
 
 - `treatment.labels`: Original treatment labels corresponding to 0 and
   1, in that order.
@@ -219,12 +226,20 @@ output <- atefitsurv(data = survivalExample,
 output
 #> Average treatment effect:
 #> 
-#>                               estimate         SE     CI.lower  CI.upper
-#> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.1330012
-#> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.2302107
+#>                               estimate         SE     CI.lower   CI.upper
+#> log.rmtl.ratio              0.07015530 0.03206484  0.007309376 0.13300123
+#> log.cumulative.hazard.ratio 0.02697948 0.10369129 -0.176251706 0.23021067
+#> risk.difference             0.00663013 0.02487538 -0.042124717 0.05538498
 #>                                 pvalue
 #> log.rmtl.ratio              0.02867542
 #> log.cumulative.hazard.ratio 0.79471688
+#> risk.difference             0.78982810
+#> 
+#> Estimated event risks at tau0:
+#> 
+#>        estimate         SE  CI.lower  CI.upper pvalue
+#> risk1 0.8908200 0.01623662 0.8589968 0.9226432      0
+#> risk0 0.8841899 0.01313583 0.8584441 0.9099356      0
 #> 
 #> Estimated RMST:
 #> 
