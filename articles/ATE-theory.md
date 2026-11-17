@@ -17,8 +17,8 @@ to account for censoring in survival analyses. For binary treatment, the
 treatment model estimates the probability of treatment 1, also called
 the **propensity score**. These terms reflect the roles of the models
 discussed in causal inference, including Hernán and Robins (2020). The
-argument names `ps.model` and `ipcw.model` refer to the treatment and
-censoring models, respectively.
+argument names `ps_model` and `censoring_model` refer to the treatment
+and censoring models, respectively.
 
 ## Average treatment effect for binary outcomes
 
@@ -63,8 +63,8 @@ resulting $`\hat m_0(\boldsymbol X_i)`$ and
 $`\hat m_1(\boldsymbol X_i)`$ predict response for every patient under
 each treatment.
 
-`ps.model` specifies treatment and covariates for the treatment model.
-The default `ps.method = "glm"` uses logistic regression; `"lasso"` uses
+`ps_model` specifies treatment and covariates for the treatment model.
+The default `ps_method = "glm"` uses logistic regression; `"lasso"` uses
 the package’s LASSO propensity procedure. Write the fitted treatment-1
 propensity as $`\hat\pi_i`$. It is truncated to `[minPS, maxPS]`, by
 default `[0.01, 0.99]`, before calculating the treatment weights. For a
@@ -196,11 +196,12 @@ appropriate. Each outcome model supplies predictions of each patient’s
 RMST and survival probability at $`\tau_0`$ under each treatment. A
 treatment model estimates treatment probabilities, and a censoring model
 provides inverse probability of censoring weights (IPCW). The censoring
-model is controlled by `ipcw.model`, `ipcw.method`, and `surv.min`; the
-treatment model and truncation use the same controls described above.
-Because censoring can leave the event time unobserved, causal
-interpretation requires appropriate censoring assumptions and sufficient
-follow-up in addition to the treatment identification assumptions.
+model is controlled by `censoring_model`, `censoring_method`, and
+`surv.min`; the treatment model and truncation use the same controls
+described above. Because censoring can leave the event time unobserved,
+causal interpretation requires appropriate censoring assumptions and
+sufficient follow-up in addition to the treatment identification
+assumptions.
 
 ### Augmented RMST and RMTL estimates
 
@@ -292,20 +293,20 @@ not validation of a CATE score.
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
 - [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 - [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
 - [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-- [Methods for developing and validating CATE
-  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

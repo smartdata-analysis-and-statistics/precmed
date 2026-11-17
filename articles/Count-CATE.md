@@ -13,14 +13,6 @@ fitting sample are not independent validation.
 
 library(precmed)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(ggplot2)
 data(countExample)
 countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
@@ -71,10 +63,10 @@ Because
 fits the scores using the full dataset, its results do not on their own
 establish performance in new patients.
 
-The mandatory arguments are: `response`, `data`, `score.method`,
-`cate.model`, and `ps.model`. The user can also specify the
-non-mandatory arguments to fit with the data and problem at hand. Please
-see the [Function
+The mandatory arguments are `response`, `data`, `benefit_method`,
+`outcome_method`, `outcome_model`, and `ps.model`. The user can also
+specify the non-mandatory arguments to fit with the data and problem at
+hand. Please see the [Function
 description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html)
 section for details.
 
@@ -90,11 +82,11 @@ and the `gbm.parallel` option is unset.
 fit_cate <- catefit(
   response = "count",
   data = countExample,
-  score.method = c(
-    "poisson", "boosting", "twoReg", "contrastReg", "negBin"
-  ),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression",
+                     "contrast_regression", "t_learner"),
   ps.model = trt ~ age + previous_treatment,
   initial.predictor.method = "poisson",
   higher.y = FALSE, 

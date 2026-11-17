@@ -165,7 +165,7 @@ effects (Nguyen et al. 2026).
 
 The outcome formula excludes treatment:
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-fits the outcome model separately in each treatment arm. `ps.model`
+fits the outcome model separately in each treatment arm. `ps_model`
 includes the treatment on the left. Treatment labels are ordered as
 drug0 and drug1. There is no follow-up offset for this fixed-horizon
 binary outcome. The default `outcome_method = "logistic"` is currently
@@ -178,7 +178,7 @@ outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
 ps_formula <- trt ~ age + previous_treatment
 fit_ate <- atefit(
   response = "binary", data = binaryExample,
-  outcome_model = outcome_formula, ps.model = ps_formula,
+  outcome_model = outcome_formula, ps_model = ps_formula,
   n.boot = 100, seed = 999
 )
 fit_ate

@@ -27,19 +27,19 @@ and the simulation parameters are illustrative.
 ## Estimate CATE scores
 
 CATE scores estimate the difference in relapse probability for patients
-with different baseline covariates. The `logistic` method fits one
-logistic model with treatment-covariate interactions; `twoReg`
-cross-fits separate logistic outcome models and a treatment model, then
-projects augmented outcomes for each arm onto the outcome-model design.
-The difference is a doubly robust linear projection of the risk
-difference if either the treatment model or both outcome models are
-correct, subject to identification, positivity and truncation. It need
-not lie between -1 and 1. The `boosting` method fits a Bernoulli
-gradient boosting model in each treatment arm and subtracts the
-predicted relapse probabilities. Five-fold cross-validation selects the
-number of trees in each arm; `tree.depth` and `n.trees.boosting` control
-the fitted trees. These scores are estimated on the training data; the
-subgroup ATEs shown by
+with different baseline covariates. The `logistic` method fits a
+separate logistic outcome model in each treatment arm and subtracts
+their predicted risks; `twoReg` cross-fits separate logistic outcome
+models and a treatment model, then projects augmented outcomes for each
+arm onto the outcome-model design. The difference is a doubly robust
+linear projection of the risk difference if either the treatment model
+or both outcome models are correct, subject to identification,
+positivity and truncation. It need not lie between -1 and 1. The
+`boosting` method fits a Bernoulli gradient boosting model in each
+treatment arm and subtracts the predicted relapse probabilities.
+Five-fold cross-validation selects the number of trees in each arm;
+`tree.depth` and `n.trees.boosting` control the fitted trees. These
+scores are estimated on the training data; the subgroup ATEs shown by
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
 use the doubly robust estimator and the same data used to build the
 scores, so they may be optimistic. Chapter 17, “Introduction to methods
@@ -50,8 +50,10 @@ and CATE prediction (Hoogland et al. 2026).
 
 fit_cate <- catefit(
   response = "binary", data = binaryExample,
-  score.method = c("logistic", "twoReg", "boosting"),
-  cate.model = outcome_formula, ps.model = ps_formula,
+  outcome_model = outcome_formula,
+  outcome_method = c("logistic", "logistic", "boosting"),
+  benefit_method = c("t_learner", "two_regression", "t_learner"),
+  ps.model = ps_formula,
   higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, n.cores = 1
 )
@@ -95,7 +97,7 @@ in new patients.
 Use [`coef()`](https://rdrr.io/r/stats/coef.html) to extract the
 available linear score coefficients. For `twoReg`, the coefficients
 describe a linear projection of the risk difference. The logistic
-model’s coefficients are on the log-odds scale, and boosting does not
+models’ coefficients are on the log-odds scale, and boosting does not
 have a linear score coefficient vector. Confidence intervals for binary
 score coefficients are not currently available.
 

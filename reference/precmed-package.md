@@ -136,7 +136,7 @@ Other contributors:
 dat <- simulate_binary(n = 400, seed = 2026)
 fit <- atefit(response = "binary", data = dat,
               outcome_model = y ~ age + previous_treatment,
-              ps.model = trt ~ age + previous_treatment,
+              ps_model = trt ~ age + previous_treatment,
               n.boot = 20, seed = 2026)
 coef(fit)
 #> risk.difference 

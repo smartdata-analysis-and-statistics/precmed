@@ -1,10 +1,10 @@
 # Estimate conditional treatment effect scores
 
 Estimate CATE scores for binary, count and survival outcomes. Binary
-scores include pooled logistic regression, doubly robust two-regression
-estimation and boosting. Count and survival methods include both
-outcome-regression and doubly robust scores. Continuous outcomes are not
-yet implemented.
+scores include arm-specific logistic regression, doubly robust
+two-regression estimation and boosting. Count and survival methods
+include both outcome-regression and doubly robust scores. Continuous
+outcomes are not yet implemented.
 
 ## Usage
 
@@ -12,8 +12,9 @@ yet implemented.
 catefit(
   response,
   data,
-  score.method,
-  cate.model,
+  outcome_model,
+  outcome_method = NULL,
+  benefit_method,
   ps.model,
   ps.method = "glm",
   init.model = NULL,
@@ -66,21 +67,34 @@ catefit(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'boosting'`, `'twoReg'`, `'contrastReg'`,
-  `'poisson'` (count and survival outcomes only), `'randomForest'`
-  (survival, continuous outcomes only), `negBin` (count outcomes only),
-  `'gam'` (continuous outcomes only), `'gaussian'` (continuous outcomes
-  only). For binary outcomes, use `'logistic'`, `'twoReg'`, or
-  `'boosting'`.
+  A formula describing the outcome and score covariates. The outcome
+  must appear on the left-hand side. For survival outcomes, a `Surv`
+  object must be used to describe the outcome.
 
-- cate.model:
+- outcome_method:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side. For survival outcomes, a `Surv` object
-  must be used to describe the outcome.
+  A character vector with one entry per `benefit_method`. For T-learners
+  the available methods are `"logistic"` or `"boosting"` for binary
+  outcomes, `"poisson"`, `"negative_binomial"`, or `"boosting"` for
+  count outcomes, and `"poisson"`, `"boosting"`, or `"random_forest"`
+  for survival outcomes. For two-regression or contrast regression it
+  selects the initial outcome models: binary supports only `"logistic"`,
+  count supports `"poisson"`, `"boosting"`, or `"gam"`, and survival
+  supports `"logistic"`, `"boosting"`, or `"random_forest"`. When both
+  doubly robust methods are requested, they must use the same initial
+  outcome method. An explicitly supplied `initial.predictor.method` must
+  agree with it. Repeated configurations that would produce the same
+  score name are not supported.
+
+- benefit_method:
+
+  A vector of score-construction methods: `"t_learner"`,
+  `"two_regression"`, or `"contrast_regression"`. Each is paired with
+  the corresponding entry in `outcome_method`. Contrast regression is
+  not available for binary outcomes. Continuous outcomes are not
+  implemented.
 
 - ps.model:
 
@@ -104,17 +118,17 @@ catefit(
 
   Optional formula for the initial treatment-specific outcome models
   used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
-  only). The outcome must match `cate.model`. The default `NULL` uses
-  `cate.model`. For count outcomes the exposure offset is taken from
-  `cate.model`; an offset in `init.model`, if supplied, must match it.
-  Other score methods do not use this argument. Continuous-outcome
+  only). The outcome must match `outcome_model`. The default `NULL` uses
+  `outcome_model`. For count outcomes the exposure offset is taken from
+  `outcome_model`; an offset in `init.model`, if supplied, must match
+  it. Other score methods do not use this argument. Continuous-outcome
   fitting and validation are not currently implemented.
 
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
   predictions conditional on the covariates specified in `init.model`
-  (or `cate.model` when omitted). Only applies when `score.method`
+  (or `outcome_model` when omitted). Only applies when `score.method`
   includes `'twoReg'` or `'contrastReg'`.Allowed values include one of
   `'randomForest'` (survival outcomes only), `'boosting'`, `'logistic'`
   (survival outcomes only, fast), `'poisson'` (count outcomes only,
@@ -129,7 +143,7 @@ catefit(
   of censoring weighting (IPCW). The left-hand side must be empty. Only
   applies for survival outcomes. Default is `NULL`, which uses a
   censoring model with the same covariates as the outcome model
-  `cate.model`, plus the treatment.
+  `outcome_model`, plus the treatment.
 
 - ipcw.method:
 
@@ -188,7 +202,7 @@ catefit(
 
   A vector of characters indicating the name of the variables used as
   the smooth terms if `score.method = 'gam'`. The variables must be
-  selected from the variables listed in `cate.model`.
+  selected from the variables listed in `outcome_model`.
 
 - xvar.smooth.init:
 
@@ -308,6 +322,9 @@ catefit(
 
   Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  The old named arguments `score.method` and `cate.model` are accepted
+  with deprecation warnings. Legacy score names and positional calls
+  remain supported when `outcome_method` is omitted.
 
 ## Value
 
@@ -363,25 +380,26 @@ For survival response, see details in
 
 ## Binary outcomes
 
-For `response = "binary"`, `score.method = "logistic"` fits a logistic
-model with treatment interactions. `"twoReg"` cross-fits separate
-logistic outcome models and a treatment model, then projects the
-augmented inverse-propensity outcomes for each arm onto the covariates
-in `cate.model` using linear regression. The score is the difference of
-these projections, averaged over `B` repetitions of `Kfold` folds. It
-estimates the linear projection of the conditional risk difference if
-either the treatment model or both outcome models are correct, under
-identification and positivity assumptions. Propensity score truncation
-can affect this property. The projection need not lie between -1 and 1
-and equals the conditional risk difference only if that difference is
-linear in the specified design. The difference between arm coefficients
-is returned in `coefficients$twoReg` and by
+For `response = "binary"`, `score.method = "logistic"` fits a separate
+logistic outcome model in each treatment arm and subtracts their
+predicted risks. `"twoReg"` cross-fits separate logistic outcome models
+and a treatment model, then projects the augmented inverse-propensity
+outcomes for each arm onto the covariates in `outcome_model` using
+linear regression. The score is the difference of these projections,
+averaged over `B` repetitions of `Kfold` folds. It estimates the linear
+projection of the conditional risk difference if either the treatment
+model or both outcome models are correct, under identification and
+positivity assumptions. Propensity score truncation can affect this
+property. The projection need not lie between -1 and 1 and equals the
+conditional risk difference only if that difference is linear in the
+specified design. The difference between arm coefficients is returned in
+`coefficients$twoReg` and by
 [`coef()`](https://rdrr.io/r/stats/coef.html); the separate arm
 coefficients are stored in `fit$twoReg$coefficients`. Logistic model
-coefficients are on the log-odds scale and are stored in `fit$logistic`;
-they are not linear risk-difference score coefficients. Boosting does
-not have a linear score coefficient vector. With neither `twoReg` nor
-another linear binary score,
+coefficients for each arm are on the log-odds scale and stored in
+`fit$logistic`; they are not linear risk-difference score coefficients.
+Boosting does not have a linear score coefficient vector. With neither
+`twoReg` nor another linear binary score,
 [`coef()`](https://rdrr.io/r/stats/coef.html) returns `NULL`.
 `"boosting"` fits separate Bernoulli gradient-boosting models in each
 treatment arm, with the number of trees selected by five-fold
@@ -431,10 +449,11 @@ Real-World Data* (Chapter 20, pp. 513–536). Chapman & Hall/CRC.
 # Count outcome
 fit_1 <- catefit(response = "count",
                  data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
+                 outcome_model = y ~ age + female + previous_treatment +
                                   previous_cost + previous_number_relapses +
                                   offset(log(years)),
+                 outcome_method = "poisson",
+                 benefit_method = "t_learner",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = TRUE,
                  seed = 999)
@@ -458,9 +477,10 @@ tau0 <- with(survivalExample,
 
 fit_2 <- catefit(response = "survival",
                  data = survivalExample,
-                 score.method = c("poisson", "boosting", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
+                 outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                            previous_number_relapses,
+                 outcome_method = c("poisson", "boosting", "random_forest"),
+                 benefit_method = rep("t_learner", 3),
                  ps.model = trt ~ age + previous_treatment,
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,

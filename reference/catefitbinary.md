@@ -43,9 +43,7 @@ catefitbinary(
 
 - cate.model:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side. For survival outcomes, a `Surv` object
-  must be used to describe the outcome.
+  A formula specifying the binary outcome and score covariates.
 
 - ps.model:
 
@@ -138,13 +136,8 @@ catefitbinary(
 
 - init.model:
 
-  Optional formula for the initial treatment-specific outcome models
-  used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
-  only). The outcome must match `cate.model`. The default `NULL` uses
-  `cate.model`. For count outcomes the exposure offset is taken from
-  `cate.model`; an offset in `init.model`, if supplied, must match it.
-  Other score methods do not use this argument. Continuous-outcome
-  fitting and validation are not currently implemented.
+  Optional formula for the initial logistic outcome models used by
+  `twoReg`; `NULL` uses `cate.model`.
 
 - ...:
 

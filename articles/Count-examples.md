@@ -145,7 +145,7 @@ to estimate a population-level rate ratio, combining outcome and
 treatment models. The treatment model estimates the propensity score,
 the probability of receiving treatment 1 given the covariates. The rate
 ratio estimator is doubly robust, meaning that the estimator is
-consistent if the treatment model (argument `ps.model`) or the outcome
+consistent if the treatment model (argument `ps_model`) or the outcome
 model (argument `outcome_model`) or both are correctly specified, under
 the required assumptions. The function also provides standard errors,
 confidence intervals and p-values based on bootstrap.
@@ -179,7 +179,7 @@ are:
 
 &nbsp;
 
-- `ps.model`: A formula describing the treatment model to be fitted. The
+- `ps_model`: A formula describing the treatment model to be fitted. The
   treatment must appear on the left-hand side and the covariates (age
   and previous treatment in this example) on the right-hand side. The
   variable `trt` must be supplied as a numeric variable taking only 2
@@ -190,7 +190,7 @@ are:
   values “drug0” and “drug1”) was transformed and an informational
   message is shown (see output below):
   `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the
-  data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The
+  data are from a RCT, it suffices to specify `ps_model` = trt ~ 1. The
   treatment model is used to estimate overall and subgroup average
   treatment effects. It is also used to fit the doubly robust
   two-regression and contrast-regression CATE scores; other scoring
@@ -208,7 +208,7 @@ fit_ate <- atefit(
   outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "poisson",
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   n.boot = 100,
   seed = 999,
   verbose = 0
@@ -334,20 +334,16 @@ fit_ate_negbin <- atefit(
   outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "negbin",
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   n.boot = 100,
   seed = 999,
   verbose = 0
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
-#> control$trace > : estimate truncated at zero
-#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
-#> control$trace > : iteration limit reached
-#> Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference
+#> Warning: 2 bootstrap replicate(s) failed or had undefined estimates; inference
 #> for affected measures is unavailable. Reasons by measure: rate0: missing value
-#> where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);
-#> log.rate.ratio: missing value where TRUE/FALSE needed (1). See
+#> where TRUE/FALSE needed (2); rate1: missing value where TRUE/FALSE needed (2);
+#> log.rate.ratio: missing value where TRUE/FALSE needed (2). See
 #> bootstrap.diagnostics for replicate details.
 ```
 

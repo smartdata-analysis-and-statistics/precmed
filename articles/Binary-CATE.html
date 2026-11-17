@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -110,28 +110,30 @@ and the simulation parameters are illustrative.</p>
 </h2>
 <p>CATE scores estimate the difference in relapse probability for
 patients with different baseline covariates. The <code>logistic</code>
-method fits one logistic model with treatment-covariate interactions;
-<code>twoReg</code> cross-fits separate logistic outcome models and a
-treatment model, then projects augmented outcomes for each arm onto the
-outcome-model design. The difference is a doubly robust linear
-projection of the risk difference if either the treatment model or both
-outcome models are correct, subject to identification, positivity and
-truncation. It need not lie between -1 and 1. The <code>boosting</code>
-method fits a Bernoulli gradient boosting model in each treatment arm
-and subtracts the predicted relapse probabilities. Five-fold
-cross-validation selects the number of trees in each arm;
-<code>tree.depth</code> and <code>n.trees.boosting</code> control the
-fitted trees. These scores are estimated on the training data; the
-subgroup ATEs shown by <code><a href="../reference/catefit.html">catefit()</a></code> use the doubly robust
-estimator and the same data used to build the scores, so they may be
-optimistic. Chapter 17, “Introduction to methods for personalizing
+method fits a separate logistic outcome model in each treatment arm and
+subtracts their predicted risks; <code>twoReg</code> cross-fits separate
+logistic outcome models and a treatment model, then projects augmented
+outcomes for each arm onto the outcome-model design. The difference is a
+doubly robust linear projection of the risk difference if either the
+treatment model or both outcome models are correct, subject to
+identification, positivity and truncation. It need not lie between -1
+and 1. The <code>boosting</code> method fits a Bernoulli gradient
+boosting model in each treatment arm and subtracts the predicted relapse
+probabilities. Five-fold cross-validation selects the number of trees in
+each arm; <code>tree.depth</code> and <code>n.trees.boosting</code>
+control the fitted trees. These scores are estimated on the training
+data; the subgroup ATEs shown by <code><a href="../reference/catefit.html">catefit()</a></code> use the doubly
+robust estimator and the same data used to build the scores, so they may
+be optimistic. Chapter 17, “Introduction to methods for personalizing
 medicine,” discusses treatment effect heterogeneity and CATE prediction
 <span class="citation">(Hoogland et al. 2026)</span>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"logistic"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps.model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">100</span>, n.cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -163,7 +165,7 @@ establish that treatment effects differ or that scores will perform well
 in new patients.</p>
 <p>Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> to extract the available linear score
 coefficients. For <code>twoReg</code>, the coefficients describe a
-linear projection of the risk difference. The logistic model’s
+linear projection of the risk difference. The logistic models’
 coefficients are on the log-odds scale, and boosting does not have a
 linear score coefficient vector. Confidence intervals for binary score
 coefficients are not currently available.</p>

@@ -9,8 +9,8 @@ implemented.
 atefitmean(
   data,
   outcome_model,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   n.boot = 500,
@@ -18,7 +18,7 @@ atefitmean(
   seed = NULL,
   verbose = 0,
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 ```
 
@@ -35,21 +35,21 @@ atefitmean(
   the left and baseline covariates on the right. Do not include
   treatment. Continuous-outcome fitting is not yet implemented.
 
-- ps.model:
+- ps_model:
 
   A formula describing the treatment model (propensity-score model) to
   be fitted. The treatment must appear on the left-hand side. The
   treatment must be a numeric vector coded as 0/1. If data are from a
-  RCT, specify `ps.model` as an intercept-only model.
+  RCT, specify `ps_model` as an intercept-only model.
 
-- ps.method:
+- ps_method:
 
   A character value for the method to estimate the propensity score.
   Allowed values include one of: `'glm'` for logistic regression with
   main effects only (default), or `'lasso'` for a logistic regression
   with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  (added to the model if interactions are not specified in `ps_model`).
+  Relevant only when `ps_model` has more than one variable.
 
 - minPS:
 
@@ -89,65 +89,26 @@ atefitmean(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
-- cate.model:
+- ...:
 
-  Deprecated alias for `outcome_model`. Supply only one.
+  Additional arguments. The deprecated named argument `cate.model` is
+  accepted as an alias for `outcome_model`, with a warning. Supply only
+  one of these arguments. The deprecated aliases `ps.model` and
+  `ps.method` are also accepted with warnings; use `ps_model` and
+  `ps_method` instead. Other arguments are currently unsupported.
 
 ## Value
 
-Return a list of 8 elements:
-
-- `log.rate.ratio`: A numeric value of the estimated log rate ratio.
-
-- `se.boot.log.rate.ratio`: A numeric value of the bootstrap standard
-  error of log rate ratio.
-
-- `rate.ratio`: A numeric value of the estimated rate ratio.
-
-- `rate.ratio0`: A numeric value of the estimated rate in the group
-  trt=0.
-
-- `rate.ratio1`: A numeric value of the estimated rate in the group
-  trt=1.
-
-- `rate.ratio.CIl`: A numeric value of the lower limit 95% bootstrap
-  confidence interval for estimated rate ratio.
-
-- `rate.ratio.CIu`: A numeric value of the upper limit 95% bootstrap
-  confidence interval for estimated rate ratio.
-
-- `pvalue`: A numeric value of the p-value derived from the bootstrapped
-  values based on a Chi-squared distribution.
-
-- `warning`: A warning message produced if the treatment variable was
-  not coded as 0/1. The key to map the original coding of the variable
-  to a 0/1 key is displayed in the warning to facilitate the
-  interpretation of the remaining of the output.
-
-- `plot`: If `plot.boot` is `TRUE`, a histogram displaying the
-  distribution of the bootstrapped log rate ratios. The red vertical
-  reference line in the histogram represents the estimated log rate
-  ratio.
+Continuous-outcome fitting is not implemented; this function stops with
+an error and does not return an object.
 
 ## Details
 
-This helper function estimates the average treatment effect (ATE)
-between two treatment groups in a given dataset specified by
-`y, trt, x.cate, x.ps, time`. The ATE is estimated with a doubly robust
-estimator that accounts for imbalances in covariate distributions
-between the two treatment groups with inverse probability treatment
-weighting. For count outcomes, the estimated ATE is the estimated rate
-ratio between treatment 1 versus treatment 0. Both original and
-log-transformed ATEs are returned, as well as the rate in either
-treatment group. If `inference = TRUE`, the variability of the estimated
-rate ratio is also calculated using bootstrap. Additional variability
-outputs include standard error of the log rate ratio, 95% confidence
-interval of the rate ratio, p-value, and a histogram of the log rate
-ratio.
+Continuous-outcome estimation is not currently available.
 
 ## Examples
 

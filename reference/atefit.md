@@ -14,10 +14,10 @@ atefit(
   data,
   outcome_model,
   outcome_method = NULL,
-  ps.model,
-  ps.method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -28,7 +28,7 @@ atefit(
   verbose = 0,
   rmst.control = list(),
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 ```
 
@@ -54,7 +54,7 @@ atefit(
 - outcome_model:
 
   A formula specifying the outcome and baseline covariates for the
-  outcome model. Supply treatment in `ps.model`, rather than in this
+  outcome model. Supply treatment in `ps_model`, rather than in this
   formula. See
   [`atefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md),
   [`atefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md),
@@ -71,25 +71,25 @@ atefit(
   `"log_normal"` (alias `"lognormal"`). Other methods are not currently
   available. See the outcome-specific help pages for details.
 
-- ps.model:
+- ps_model:
 
   A formula describing the treatment model (propensity-score model) to
   be fitted. The treatment must appear on the left-hand side. For binary
   outcomes, logical treatment values `FALSE` and `TRUE` are mapped to 0
   and 1, respectively. Numeric 0/1 values or two distinct treatment
   labels are also accepted. If data are from a randomized controlled
-  trial, specify `ps.model = trt ~ 1` as an intercept-only model.
+  trial, specify `ps_model = trt ~ 1` as an intercept-only model.
 
-- ps.method:
+- ps_method:
 
   A character value for the method to estimate the propensity score.
   Allowed values include one of: `'glm'` for logistic regression with
   main effects only (default), or `'lasso'` for a logistic regression
   with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  (added to the model if interactions are not specified in `ps_model`).
+  Relevant only when `ps_model` has more than one variable.
 
-- ipcw.model:
+- censoring_model:
 
   A formula describing the censoring model used for inverse probability
   of censoring weighting (IPCW). The left-hand side must be empty. Only
@@ -97,7 +97,7 @@ atefit(
   censoring model with the same covariates as the outcome model
   `outcome_model`, plus the treatment.
 
-- ipcw.method:
+- censoring_method:
 
   A character value for the censoring model. Only applies for survival
   outcomes. Allowed values are: `'breslow'` (Cox regression with Breslow
@@ -171,22 +171,44 @@ atefit(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
-- cate.model:
+- ...:
 
-  Deprecated alias for `outcome_model`. Supply only one.
+  Additional arguments passed to the outcome-specific function. Also
+  accepts the deprecated named argument `cate.model` as an alias for
+  `outcome_model`, with a warning. Supply only one of these arguments.
+  The deprecated aliases `ps.model` and `ps.method` are also accepted
+  with warnings; use `ps_model` and `ps_method` instead. The deprecated
+  survival arguments `ipcw.model` and `ipcw.method` are accepted with
+  warnings as aliases for `censoring_model` and `censoring_method`,
+  respectively.
 
 ## Value
 
-For binary response, see
-[`atefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md).
-For count response, see description of outputs in
-[`atefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md).
-For survival response, see description of outputs in
-[`atefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md).
+An object of class `atefit`. The result contains outcome-specific
+estimates and bootstrap results. For binary outcomes, `risk.difference`
+is the treatment 1 minus treatment 0 risk difference, and `risk0` and
+`risk1` are the treatment-specific risks. For count outcomes,
+`log.rate.ratio` is the log rate ratio (treatment 1 over treatment 0),
+and `rate0` and `rate1` are the estimated rates. For survival outcomes
+at `tau0`, `rmst0` and `rmst1` are restricted mean survival times;
+`log.rmtl.ratio`, `log.cumulative.hazard.ratio`, `risk0`, `risk1`, and
+`risk.difference` report the population-average treatment contrasts and
+risks at the horizon. Ratios compare treatment 1 with treatment 0 and
+the risk difference is treatment 1 minus treatment 0. Estimates are
+stored in data frames; effect estimates include bootstrap standard
+errors, Wald 95% confidence intervals and p-values. Survival
+treatment-specific estimates also include inference, whereas binary
+risks and count rates contain point estimates only.
+
+The object also contains `n.boot`, `trt.boot` (bootstrap estimates),
+`risk.boot` for binary outcomes or `rate.boot` for count outcomes,
+`treatment.labels`, `bootstrap.diagnostics`, and `overlap.diagnostics`.
+Count and survival results may also contain a `warning` with the
+treatment-recoding message.
 
 ## Details
 
@@ -204,6 +226,26 @@ measure is unavailable rather than based on a subset of replicates. See
 also
 [`diagnostics()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md)
 to inspect these records.
+
+## Working with atefit objects
+
+- `print(fit)` displays estimates and treatment-specific outcomes.
+
+- `coef(fit)` extracts treatment effects on their estimation scale;
+  `confint(fit, level = 0.95)` computes Wald confidence intervals using
+  stored bootstrap standard errors. Exponentiate log-ratio estimates and
+  interval limits to obtain ratios; risk differences remain on their
+  original scale. See
+  [`atefit-extract`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit-extract.md).
+
+- `plot(fit)` displays bootstrap distributions; see
+  [`plot.atefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/plot.atefit.md)
+  for options.
+
+- `diagnostics(fit)` reports recorded messages and bootstrap failures;
+  `diagnostics(fit, type = "propensity")` summarizes treatment-model
+  overlap and weights. See
+  [`diagnostics`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/diagnostics.md).
 
 ## References
 
@@ -228,7 +270,7 @@ output <- atefit(response = "count",
                  outcome_model = y ~ age + female + previous_treatment +
                               previous_cost + previous_number_relapses +
                               offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  n.boot = 50,
                  seed = 999)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -259,7 +301,7 @@ output2 <- atefit(response = "survival",
                   data = survivalExample,
                   outcome_model = survival::Surv(y, d) ~ age + female +
                         previous_cost + previous_number_relapses,
-                        ps.model = trt ~ age + previous_treatment,
+                        ps_model = trt ~ age + previous_treatment,
                   tau0 = tau0,
                   seed = 999)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.

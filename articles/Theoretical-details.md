@@ -4,13 +4,69 @@
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-This vignette describes CATE score development and validation methods
-for count and survival outcomes. A treatment model estimates the
-propensity score, and a censoring model provides probabilities for
-inverse probability of censoring weighting (IPCW). For average treatment
-effect estimation across binary, count and survival outcomes, see
-[Methods for estimating average treatment
+This vignette introduces conditional average treatment effects and CATE
+scores for binary, count and survival outcomes. The detailed derivations
+below focus on count and survival outcomes; the [binary CATE
+example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+illustrates binary score fitting and validation. For population-average
+effects, see [Methods for estimating average treatment
 effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
+
+## What is a CATE score?
+
+A conditional average treatment effect (CATE) compares outcomes under
+two treatments among patients with the same measured baseline
+covariates. For a binary outcome, `precmed` uses the conditional risk
+difference: predicted risk under treatment 1 minus predicted risk under
+treatment 0. For a count outcome, the score is a conditional log rate
+ratio. For survival, it is a conditional log ratio of restricted mean
+time lost up to the chosen horizon. Ratios compare treatment 1 with
+treatment 0. These are averages conditional on measured characteristics,
+not the unobservable effect for an individual patient.
+
+A CATE *score* is an estimate of such a conditional contrast. It can be
+used to rank patients, with the favorable direction depending on the
+outcome and the treatment contrast. A causal interpretation requires
+assumptions such as consistency, no unmeasured treatment–outcome
+confounding given the measured covariates, and adequate treatment
+overlap, as well as the assumptions of the chosen estimator. Survival
+analyses also require appropriate censoring assumptions and support at
+the selected horizon.
+
+## How are the scores fitted?
+
+A **T-learner** fits an outcome model separately in each treatment arm
+and contrasts their predictions. For example, separate logistic outcome
+models can predict binary risks under each treatment; their difference
+is a fitted risk-difference score. An **S-learner**, by contrast, fits a
+single outcome model that includes treatment as a predictor, and
+compares predictions under the two treatment values. The S-learner is
+described here for context; it is not a selectable CATE score method in
+the current `precmed` interface.
+
+The package also implements **two-regression** and
+**contrast-regression** scores. These use cross-fitted initial outcome
+predictions and a treatment model that estimates propensity scores,
+followed by different procedures for estimating the score. Their doubly
+robust properties depend on the estimator’s assumptions and are not the
+same as a guarantee for a direct T-learner score. For survival outcomes,
+the censoring model supplies probabilities used for IPCW;
+treatment-model double robustness does not protect against a
+misspecified censoring model. The count and survival sections below
+describe the methods in more detail.
+
+## Why validate a score?
+
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+fits scores and estimates effects in score-defined subgroups using the
+same data. Those subgroup estimates are useful for exploring a fit, but
+they do not independently validate it.
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+fits scores on training splits and evaluates score-defined groups on
+held-out splits, providing an internal assessment. Comparing or
+selecting methods using those results still benefits from an independent
+assessment. See the validation section below and the binary, count and
+survival CATE examples for the available procedures.
 
 ## Background and further reading
 
@@ -474,22 +530,22 @@ is the ATE.
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 - [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 - [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
 - [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-- [Methods for estimating average treatment
-  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 
 ## References
 

@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -238,7 +238,7 @@ defining causal effects,” discusses marginal and conditional causal
 effects <span class="citation">(Nguyen et al. 2026)</span>.</p>
 <p>The outcome formula excludes treatment: <code><a href="../reference/atefit.html">atefit()</a></code> fits
 the outcome model separately in each treatment arm.
-<code>ps.model</code> includes the treatment on the left. Treatment
+<code>ps_model</code> includes the treatment on the left. Treatment
 labels are ordered as drug0 and drug1. There is no follow-up offset for
 this fixed-horizon binary outcome. The default
 <code>outcome_method = "logistic"</code> is currently the only available
@@ -249,7 +249,7 @@ binary outcome method.</p>
 <span><span class="va">ps_formula</span> <span class="op">&lt;-</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span></span>
 <span><span class="va">fit_ate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
-<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>, ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">fit_ate</span></span>

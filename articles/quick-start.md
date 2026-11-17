@@ -61,7 +61,7 @@ fit_ate <- atefit(
   data = countExample,
   outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   outcome_method = "poisson",
   n.boot = 100,
   seed = 999,

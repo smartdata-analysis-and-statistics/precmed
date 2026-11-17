@@ -28,15 +28,15 @@ provides a standard error, confidence interval, and p-value."><meta property="og
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -67,15 +67,15 @@ provides a standard error, confidence interval, and p-value.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">outcome_model</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"logistic"</span>,</span>
-<span>  <span class="va">ps.model</span>,</span>
-<span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
+<span>  <span class="va">ps_model</span>,</span>
+<span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,7 +99,7 @@ are not supported.</p></dd>
 <dd><p>Outcome-model method; only <code>"logistic"</code> (default) is supported.</p></dd>
 
 
-<dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
+<dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
 <dd><p>A formula with treatment on the left and treatment-model
 covariates on the right. The model estimates the propensity score. Both treatment groups must be present. Numeric
 0/1 or logical FALSE/TRUE map to treatment 0/1; other two-valued labels are
@@ -107,7 +107,7 @@ sorted and mapped to 0/1 in that order. Use <code>trt ~ 1</code> for an
 intercept-only model.</p></dd>
 
 
-<dt id="arg-ps-method">ps.method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
+<dt id="arg-ps-method">ps_method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
 <dd><p>Propensity score method: <code>"glm"</code> (default) or
 <code>"lasso"</code>, using the package's propensity-score LASSO procedure.</p></dd>
 
@@ -137,23 +137,19 @@ the binary implementation does not currently display progress messages.</p></dd>
 screening. Supported entry: <code>solver = "C"</code> (default) or <code>"R"</code>.</p></dd>
 
 
-<dt id="arg-cate-model">cate.model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
-<dd><p>Deprecated alias for <code>outcome_model</code>. Supply only one.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments. The deprecated named argument <code>cate.model</code>
+is accepted as an alias for <code>outcome_model</code>, with a warning. Supply only
+one of these arguments. The deprecated aliases <code>ps.model</code> and
+<code>ps.method</code> are also accepted with warnings; use <code>ps_model</code> and
+<code>ps_method</code> instead. Other arguments are currently unsupported.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class <code>atefit</code> containing:</p><ul><li><p><code>risk.difference</code>: A data frame with the estimate for treatment
-  1 minus treatment 0, bootstrap standard error, 95% Wald confidence limits,
-  and two-sided Wald p-value.</p></li>
-<li><p><code>risk0</code>, <code>risk1</code>: Data frames with estimated
-  treatment-specific response probabilities.</p></li>
-<li><p><code>trt.boot</code>: Bootstrap risk differences; <code>risk.boot</code>:
-  bootstrap treatment-specific risks; <code>n.boot</code>: number of replicates.</p></li>
-<li><p><code>treatment.labels</code>: Original treatment labels in 0/1 order.</p></li>
-<li><p><code>bootstrap.diagnostics</code>: A data frame containing the replicate
-  number, affected measure and reason for each failed or non-finite estimate.</p></li>
-</ul></div>
+    <p>An object of class <code>atefit</code>. See <code><a href="atefit.html">atefit</a></code>
+for available methods and the contents of the fitted object.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The estimator combines predicted risks from logistic outcome models
@@ -193,7 +189,7 @@ binary endpoint. <em>Statistics in Medicine</em>, 40(26), 5961–5981.
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_binary.html">simulate_binary</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">500</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">atefitbinary</span><span class="op">(</span><span class="va">d</span>, outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span>,</span></span>
-<span class="r-in"><span>                    ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span>, outcome_method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
+<span class="r-in"><span>                    ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span>, outcome_method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
 <span class="r-in"><span>                    n.boot <span class="op">=</span> <span class="fl">10</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> risk.difference </span>

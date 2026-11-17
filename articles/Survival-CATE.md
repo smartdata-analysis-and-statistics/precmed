@@ -13,14 +13,6 @@ fitting sample are not independent validation.
 
 library(precmed)
 library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
 library(ggplot2)
 library(survival)
 survival_data <- simulate_survival(n = 4000, seed = 20261114)
@@ -61,9 +53,9 @@ are:
 
 - `data`: the name of the data set. (survival_data)
 
-- `score.method`: argument specifies the precision medicine (PM) methods
-  to be used to calculate the CATE scores. There are a total of 5
-  scoring methods implemented:
+- `benefit_method` and `outcome_method` specify paired
+  score-construction and outcome-model methods. The following existing
+  score labels are returned:
 
   - `poisson` fits a Poisson model separately by treatment group.
 
@@ -78,14 +70,14 @@ are:
   - `contrastReg` implements the doubly robust contrast regression
     estimator from (Yadlowsky et al. 2021).
 
-- `cate.model`: A formula describing the outcome model to be fitted. The
-  outcome must appear on the left-hand side. In the example, we choose
-  to specify to outcome model as a linear combination of the following
-  covariates: age, sex, medical costs in the year prior to treatment
-  initiation, and number of relapses in the year prior to treatment
-  initiation. Non-linear or interaction terms could also be included.
-  Note that the treatment variable is not supplied in `cate.model` since
-  this is an outcome model.
+- `outcome_model`: A formula describing the outcome model to be fitted.
+  The outcome must appear on the left-hand side. In the example, we
+  choose to specify to outcome model as a linear combination of the
+  following covariates: age, sex, medical costs in the year prior to
+  treatment initiation, and number of relapses in the year prior to
+  treatment initiation. Non-linear or interaction terms could also be
+  included. Note that the treatment variable is not supplied in
+  `outcome_model` since this is an outcome model.
 
 - `ps.model`: A formula describing the treatment model to be fitted. The
   treatment must appear on the left-hand side and the covariates (age
@@ -148,9 +140,10 @@ arguments. For this toy example we selected `randomForest` and
 fit_cate <- catefit(
   response = "survival",
   data = survival_data,
-  score.method = c("randomForest", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
+  outcome_method = c("random_forest", "logistic"),
+  benefit_method = c("t_learner", "contrast_regression"),
   ps.model = trt ~ age + previous_treatment,
   initial.predictor.method = "logistic",
   tau0 = tau0,

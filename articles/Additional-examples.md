@@ -266,14 +266,14 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:36:44 2026 
+#>    Tue Nov 17 21:50:16 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Tue Nov 17 14:36:46 2026 
+#>    Tue Nov 17 21:50:19 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +284,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:36:50 2026 
+#>    Tue Nov 17 21:50:24 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +295,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:36:53 2026 
+#>    Tue Nov 17 21:50:29 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,9 +308,9 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:36:57 2026 
+#>    Tue Nov 17 21:50:35 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.46 secs
+#> Total runtime : 25.29 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -606,37 +606,37 @@ fit_cv_3 <- catecv(
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:38:02 2026 
+#>    Tue Nov 17 21:52:06 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:38:05 2026 
+#>    Tue Nov 17 21:52:11 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:38:08 2026 
+#>    Tue Nov 17 21:52:15 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:38:11 2026 
+#>    Tue Nov 17 21:52:19 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:38:14 2026 
+#>    Tue Nov 17 21:52:24 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 14.39 secs
+#> Total runtime : 21.32 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -764,22 +764,22 @@ plot(fit_cv_5)
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
-- [Binary ATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
-- [Count ATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
-- [Survival ATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Methods for estimating average treatment
   effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
+- [Binary ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+- [Count ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+- [Survival ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
 - [Methods for developing and validating CATE
   scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 
 ## References
 

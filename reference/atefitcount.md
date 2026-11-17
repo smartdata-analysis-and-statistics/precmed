@@ -11,15 +11,15 @@ atefitcount(
   data,
   outcome_model,
   outcome_method = "poisson",
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 ```
 
@@ -46,22 +46,22 @@ atefitcount(
   dispersion separately by treatment arm. The method is refitted in each
   bootstrap sample. Failed fits are recorded in bootstrap diagnostics.
 
-- ps.model:
+- ps_model:
 
   A formula describing the treatment model (propensity-score model) to
   be fitted. The treatment must appear on the left-hand side. The
   treatment must be a numeric vector coded as 0 or 1. If data are from a
-  randomized controlled trial, specify `ps.model = ~1` as an
+  randomized controlled trial, specify `ps_model = trt ~ 1` as an
   intercept-only model.
 
-- ps.method:
+- ps_method:
 
   A character value for the method to estimate the propensity score.
   Allowed values include one of: `'glm'` for logistic regression with
   main effects only (default), or `'lasso'` for a logistic regression
   with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  (added to the model if interactions are not specified in `ps_model`).
+  Relevant only when `ps_model` has more than one variable.
 
 - minPS:
 
@@ -94,39 +94,23 @@ atefitcount(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
-- cate.model:
+- ...:
 
-  Deprecated alias for `outcome_model`. Supply only one.
+  Additional arguments. The deprecated named argument `cate.model` is
+  accepted as an alias for `outcome_model`, with a warning. Supply only
+  one of these arguments. The deprecated aliases `ps.model` and
+  `ps.method` are also accepted with warnings; use `ps_model` and
+  `ps_method` instead. Other arguments are currently unsupported.
 
 ## Value
 
-Return an item of the class `atefit` with the following elements:
-
-- `log.rate.ratio`: A vector of numeric values of the estimated ATE
-  (expressed as a log rate ratio of `trt=1` over `trt=0`), the bootstrap
-  standard error, the lower and upper limits of 95% confidence interval,
-  and the p-value.
-
-- `rate0`: A numeric value of the estimated rate in the group `trt=0`.
-
-- `rate1`: A numeric value of the estimated rate in the group `trt=1`.
-
-- `trt.boot`: Estimated log rate ratios in each bootstrap sample.
-
-- `rate.boot`: A data frame of treatment-specific rate estimates in each
-  bootstrap sample, with columns `rate0` and `rate1`.
-
-- `treatment.labels`: Original treatment labels corresponding to 0 and
-  1.
-
-- `warning`: A warning message produced if the treatment variable was
-  not coded as 0 or 1. The key to map the original coding of the
-  variable to a 0-1 coding is displayed in the warning to facilitate the
-  interpretation of the remaining of the output.
+An object of class `atefit`. See
+[`atefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+for available methods and the contents of the fitted object.
 
 ## Details
 
@@ -152,7 +136,7 @@ output <- atefitcount(data = countExample,
                       outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
-                      ps.model = trt ~ age + previous_treatment,
+                      ps_model = trt ~ age + previous_treatment,
                       verbose = 1, n.boot = 50, seed = 999)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |=                                                                     |   2%  |                                                                              |===                                                                   |   4%  |                                                                              |====                                                                  |   6%  |                                                                              |======                                                                |   8%  |                                                                              |=======                                                               |  10%  |                                                                              |=========                                                             |  12%  |                                                                              |==========                                                            |  14%  |                                                                              |===========                                                           |  16%  |                                                                              |=============                                                         |  18%  |                                                                              |==============                                                        |  20%  |                                                                              |================                                                      |  22%  |                                                                              |=================                                                     |  24%  |                                                                              |===================                                                   |  27%  |                                                                              |====================                                                  |  29%  |                                                                              |=====================                                                 |  31%  |                                                                              |=======================                                               |  33%  |                                                                              |========================                                              |  35%  |                                                                              |==========================                                            |  37%  |                                                                              |===========================                                           |  39%  |                                                                              |=============================                                         |  41%  |                                                                              |==============================                                        |  43%  |                                                                              |===============================                                       |  45%  |                                                                              |=================================                                     |  47%  |                                                                              |==================================                                    |  49%  |                                                                              |====================================                                  |  51%  |                                                                              |=====================================                                 |  53%  |                                                                              |=======================================                               |  55%  |                                                                              |========================================                              |  57%  |                                                                              |=========================================                             |  59%  |                                                                              |===========================================                           |  61%  |                                                                              |============================================                          |  63%  |                                                                              |==============================================                        |  65%  |                                                                              |===============================================                       |  67%  |                                                                              |=================================================                     |  69%  |                                                                              |==================================================                    |  71%  |                                                                              |===================================================                   |  73%  |                                                                              |=====================================================                 |  76%  |                                                                              |======================================================                |  78%  |                                                                              |========================================================              |  80%  |                                                                              |=========================================================             |  82%  |                                                                              |===========================================================           |  84%  |                                                                              |============================================================          |  86%  |                                                                              |=============================================================         |  88%  |                                                                              |===============================================================       |  90%  |                                                                              |================================================================      |  92%  |                                                                              |==================================================================    |  94%  |                                                                              |===================================================================   |  96%  |                                                                              |===================================================================== |  98%  |                                                                              |======================================================================| 100%

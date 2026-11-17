@@ -26,15 +26,15 @@ subgroups. This is the binary-outcome interface used by catefit."><meta property
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -97,9 +97,7 @@ and censoring models (if specified); a data frame with <code>n</code> rows (1 ro
 
 
 <dt id="arg-cate-model">cate.model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
-<dd><p>A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a <code>Surv</code> object
-must be used to describe the outcome.</p></dd>
+<dd><p>A formula specifying the binary outcome and score covariates.</p></dd>
 
 
 <dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
@@ -188,13 +186,8 @@ or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</c
 
 
 <dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
-<dd><p>Optional formula for the initial treatment-specific outcome models
-used by <code>twoReg</code> and <code>contrastReg</code> (binary outcomes support
-<code>twoReg</code> only). The outcome must match <code>cate.model</code>. The default
-<code>NULL</code> uses <code>cate.model</code>. For count outcomes the exposure offset
-is taken from <code>cate.model</code>; an offset in <code>init.model</code>, if supplied,
-must match it. Other score methods do not use this argument. Continuous-outcome
-fitting and validation are not currently implemented.</p></dd>
+<dd><p>Optional formula for the initial logistic outcome models
+used by <code>twoReg</code>; <code>NULL</code> uses <code>cate.model</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

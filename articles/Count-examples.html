@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -492,7 +492,7 @@ ratio, combining outcome and treatment models. The treatment model
 estimates the propensity score, the probability of receiving treatment 1
 given the covariates. The rate ratio estimator is doubly robust, meaning
 that the estimator is consistent if the treatment model (argument
-<code>ps.model</code>) or the outcome model (argument
+<code>ps_model</code>) or the outcome model (argument
 <code>outcome_model</code>) or both are correctly specified, under the
 required assumptions. The function also provides standard errors,
 confidence intervals and p-values based on bootstrap.</p>
@@ -522,7 +522,7 @@ across patients. Note that the treatment variable is not supplied in
 <!-- * We use all 6 variables in the outcome CATE model and specify the offset as `log(years)`. It is recommended to log-transform the exposure variable.
 * --><ul>
 <li>
-<code>ps.model</code>: A formula describing the treatment model to
+<code>ps_model</code>: A formula describing the treatment model to
 be fitted. The treatment must appear on the left-hand side and the
 covariates (age and previous treatment in this example) on the
 right-hand side. The variable <code>trt</code> must be supplied as a
@@ -534,7 +534,7 @@ this example, <code>trt</code> (a factor variable taking values “drug0”
 and “drug1”) was transformed and an informational message is shown (see
 output below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
-If the data are from a RCT, it suffices to specify <code>ps.model</code>
+If the data are from a RCT, it suffices to specify <code>ps_model</code>
 = trt ~ 1. The treatment model is used to estimate overall and subgroup
 average treatment effects. It is also used to fit the doubly robust
 two-regression and contrast-regression CATE scores; other scoring
@@ -550,7 +550,7 @@ outcome model that contains all variables and a treatment model with
 <span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
@@ -692,20 +692,16 @@ treatment models are refitted in each bootstrap sample.</p>
 <span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"negbin"</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
-<span><span class="co">#&gt; control$trace &gt; : estimate truncated at zero</span></span>
-<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
-<span><span class="co">#&gt; control$trace &gt; : iteration limit reached</span></span>
-<span><span class="co">#&gt; Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference</span></span>
+<span><span class="co">#&gt; Warning: 2 bootstrap replicate(s) failed or had undefined estimates; inference</span></span>
 <span><span class="co">#&gt; for affected measures is unavailable. Reasons by measure: rate0: missing value</span></span>
-<span><span class="co">#&gt; where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);</span></span>
-<span><span class="co">#&gt; log.rate.ratio: missing value where TRUE/FALSE needed (1). See</span></span>
+<span><span class="co">#&gt; where TRUE/FALSE needed (2); rate1: missing value where TRUE/FALSE needed (2);</span></span>
+<span><span class="co">#&gt; log.rate.ratio: missing value where TRUE/FALSE needed (2). See</span></span>
 <span><span class="co">#&gt; bootstrap.diagnostics for replicate details.</span></span></code></pre></div>
 <p>The table below compares the ATE estimated using a Poisson and a
 negative binomial outcome model. The estimates can differ because the

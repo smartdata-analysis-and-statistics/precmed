@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -236,13 +236,13 @@ approaches below.</p>
 <p>Now fit the doubly robust AIPW estimator with <code><a href="../reference/atefit.html">atefit()</a></code>.
 <code>outcome_model</code> specifies the outcome and covariates; by
 default, <code><a href="../reference/atefit.html">atefit()</a></code> fits a separate logistic outcome model
-for each treatment arm. <code>ps.model</code> specifies the treatment
+for each treatment arm. <code>ps_model</code> specifies the treatment
 model. The 100 bootstrap replicates keep this example quick; use more
 for a substantive analysis and examine bootstrap diagnostics.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">dat</span>,</span>
 <span>              outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>              ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>              ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>              outcome_method <span class="op">=</span> <span class="st">"logistic"</span>, n.boot <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>outcome_standardization <span class="op">=</span> <span class="va">standardized</span>, ipw <span class="op">=</span> <span class="va">ipw</span>,</span>
 <span>  doubly_robust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">risk.difference</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span></span>
@@ -305,21 +305,18 @@ effects</a> for these qualifications and the survival estimands.</p>
 <h2 id="other-precmed-vignettes-in-this-series">Other <code>precmed</code> vignettes in this series<a class="anchor" aria-label="anchor" href="#other-precmed-vignettes-in-this-series"></a>
 </h2>
 <ul>
-<li>
-<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
-</li>
-<li>
-<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
-</li>
-<li>
-<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
-</li>
-<li><a href="Additional-examples.html">Customizing CATE models and
-validation</a></li>
 <li><a href="ATE-theory.html">Methods for estimating average treatment
 effects</a></li>
+<li><a href="Binary-examples.html">Binary ATE example</a></li>
+<li><a href="Count-examples.html">Count ATE example</a></li>
+<li><a href="Survival-examples.html">Survival ATE example</a></li>
 <li><a href="Theoretical-details.html">Methods for developing and
 validating CATE scores</a></li>
+<li><a href="Binary-CATE.html">Binary CATE example</a></li>
+<li><a href="Count-CATE.html">Count CATE example</a></li>
+<li><a href="Survival-CATE.html">Survival CATE example</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
 </ul>
 </div>
 <div class="section level2 unnumbered">

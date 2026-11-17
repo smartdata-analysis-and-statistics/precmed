@@ -130,7 +130,7 @@ Now fit the doubly robust AIPW estimator with
 `outcome_model` specifies the outcome and covariates; by default,
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 fits a separate logistic outcome model for each treatment arm.
-`ps.model` specifies the treatment model. The 100 bootstrap replicates
+`ps_model` specifies the treatment model. The 100 bootstrap replicates
 keep this example quick; use more for a substantive analysis and examine
 bootstrap diagnostics.
 
@@ -138,7 +138,7 @@ bootstrap diagnostics.
 
 fit <- atefit(response = "binary", data = dat,
               outcome_model = y ~ age + previous_treatment,
-              ps.model = trt ~ age + previous_treatment,
+              ps_model = trt ~ age + previous_treatment,
               outcome_method = "logistic", n.boot = 100, seed = 999)
 c(outcome_standardization = standardized, ipw = ipw,
   doubly_robust = unname(fit$risk.difference$estimate))
@@ -206,24 +206,24 @@ for these qualifications and the survival estimands.
 
 ## Other `precmed` vignettes in this series
 
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 - [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 - [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
 - [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-- [Methods for estimating average treatment
-  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
-- [Methods for developing and validating CATE
-  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## References
 

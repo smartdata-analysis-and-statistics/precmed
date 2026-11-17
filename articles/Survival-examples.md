@@ -293,7 +293,7 @@ are:
 
 - The argument `data` indicates the data frame in which the outcome,
   treatment and covariates specified in either `outcome_model` or
-  `ps.model` should be fetched.
+  `ps_model` should be fetched.
 
 - The argument `outcome_model` specifies the outcome model as a formula,
   with the survival object from the `survival` package, `Surv(y, d)`,
@@ -306,7 +306,7 @@ are:
   treatment variable is not supplied in `outcome_model` since this is an
   outcome model.
 
-- The `ps.model` argument specifies the treatment model as a formula,
+- The `ps_model` argument specifies the treatment model as a formula,
   with the treatment variable `trt` on the left-hand side and the
   covariates (age and previous treatment in this example) on the
   right-hand side. The variable `trt` must be supplied as a numeric
@@ -318,12 +318,18 @@ are:
   example, `trt` (a factor variable taking values “drug0” and “drug1”)
   was transformed and an informational message is shown (see output
   below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`.
-  If the data are from a RCT, it suffices to specify `ps.model` = trt
+  If the data are from a RCT, it suffices to specify `ps_model` = trt
   ~ 1. The treatment model is used in the doubly robust RMTL estimation.
 
 We can estimate the ATE as follows, using an outcome model with age,
 sex, previous cost and previous relapses, and a treatment model with
 `age` and `previous_treatment`:
+
+For censoring, `censoring_model` optionally supplies a one-sided
+covariate formula; by default it uses the outcome-model covariates and
+treatment. `censoring_method` selects the censoring-model method, with
+`"breslow"` as the default. These are separate from the survival outcome
+model and supply probabilities for IPCW.
 
 ``` r
 
@@ -332,7 +338,7 @@ fit_ate <- atefit(
   data = survival_data,
   outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   tau0 = tau0,
   n.boot = 100,
   seed = 999
@@ -494,7 +500,7 @@ fit_ate_weibull <- atefit(
   outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   outcome_method = "weibull",
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   tau0 = tau0,
   n.boot = 100,
   seed = 999

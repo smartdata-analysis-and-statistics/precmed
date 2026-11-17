@@ -83,6 +83,49 @@
 
 ### Minor changes
 
+- Reordered the vignette navigation to introduce ATE methods and
+  examples before CATE methods and examples. The CATE methods vignette
+  now begins with a cross-outcome introduction to CATE scores,
+  T-learners, and validation.
+
+- [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  accepts paired `benefit_method` and `outcome_method` vectors, with
+  `outcome_model` for the common outcome formula. The previous named
+  `score.method` and `cate.model` arguments remain available through
+  `...` with warnings, and earlier positional calls remain supported.
+  The new arguments follow `response` and `data` in the order
+  `outcome_model`, `outcome_method`, and `benefit_method`. The two
+  doubly robust procedures continue to share one initial outcome-model
+  method in a call.
+
+- Binary
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  and
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  now fit separate logistic outcome models by treatment arm for
+  `score.method = "logistic"`. Stored fits contain one model per arm;
+  fitted scores and validation results can change, including when an
+  arm-specific design is rank deficient.
+
+- Survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  and
+  [`atefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md)
+  now use `censoring_model` and `censoring_method`. The former
+  `ipcw.model` and `ipcw.method` names remain available through `...`
+  with deprecation warnings; supplying an old and new name together is
+  an error. Positional argument order is unchanged.
+
+- Consolidated guidance on `atefit` result fields and methods in
+  [`?atefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
+  with outcome-specific help pages linking to it.
+
+- [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  and its outcome-specific functions now use `ps_model` and `ps_method`
+  for the treatment model and its fitting method. The former `ps.model`
+  and `ps.method` names remain available through `...` with deprecation
+  warnings; supplying an old and new name together is an error.
+
 - Split the binary, count and survival worked examples into separate ATE
   and CATE vignettes. Existing example URLs continue to lead to the ATE
   guides; the README and vignette navigation link to both guides for
@@ -95,8 +138,8 @@
   Arm-specific accelerated failure time models supply RMST and horizon
   survival predictions. The Weibull model allows different shapes by
   arm; the log-normal model does not impose proportional hazards.
-  Censoring models remain controlled separately by `ipcw.method` and
-  `ipcw.model`.
+  Censoring models remain controlled separately by `censoring_method`
+  and `censoring_model`.
 
 - [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   now accepts `outcome_method`: count outcomes use `"poisson"` by
@@ -112,9 +155,10 @@
   and outcome-specific ATE functions now use `outcome_model` for the
   outcome formula. The former named argument `cate.model` remains a
   deprecated alias and emits a warning; supplying both arguments is an
-  error. The help describes how the outcome models handle treatment. See
-  the major change above for the removal of `interactions` and its
-  positional impact.
+  error. The alias is accepted through `...` rather than listed as a
+  formal argument. The help describes how the outcome models handle
+  treatment. See the major change above for the removal of
+  `interactions` and its positional impact.
 
 - `init.model` can specify separate initial outcome-model covariates for
   `twoReg` and `contrastReg` across supported outcome types in fitting

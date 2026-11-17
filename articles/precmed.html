@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -106,8 +106,9 @@ real-world data (RWD) from a non-randomized study <span class="citation">(<a hre
 al. 2021</a>)</span>.</p>
 <p>The treatment model estimates propensity scores, and the censoring
 model provides probabilities used for inverse probability of censoring
-weighting (IPCW). The corresponding arguments are <code>ps.model</code>
-and <code>ipcw.model</code>.</p>
+weighting (IPCW). In <code><a href="../reference/atefit.html">atefit()</a></code>, the corresponding arguments
+are <code>ps_model</code> and <code>censoring_model</code>; CATE
+functions use <code>ps.model</code> and <code>ipcw.model</code>.</p>
 <p>For background on marginal and conditional treatment effects, see
 Chapter 5 <span class="citation">(<a href="#ref-nguyen2026causaleffects">Nguyen et al. 2026</a>)</span>.
 Chapter 17 introduces CATE prediction and model development <span class="citation">(<a href="#ref-hoogland2026introduction">Hoogland et
@@ -201,30 +202,32 @@ expose the user from simple to more complex methods.</p>
 <div class="section level3">
 <h3 id="specify-model-inputs">Specify model inputs<a class="anchor" aria-label="anchor" href="#specify-model-inputs"></a>
 </h3>
-<p>When applying <code><a href="../reference/catefit.html">catefit()</a></code> or <code><a href="../reference/catecv.html">catecv()</a></code>, the
-user has to (at least) input:</p>
+<p>When applying <code><a href="../reference/catefit.html">catefit()</a></code>, the user has to (at least)
+input:</p>
 <ul>
 <li>
 <code>response</code>: <code>binary</code>, <code>count</code>, or
-<code>survival</code> for <code><a href="../reference/catefit.html">catefit()</a></code>; <code><a href="../reference/catecv.html">catecv()</a></code>
-currently supports <code>count</code> and <code>survival</code><br>
+<code>survival</code>
 </li>
 <li>
-<code>data</code>: a data frame with individual patient data<br>
-</li>
+<code>data</code>: a data frame with individual patient data</li>
 <li>
-<code>score.method</code>: methods to estimate the CATE (e.g.,
-<code>boosting</code>, <code>poisson</code>, <code>twoReg</code>,
-<code>contrastReg</code>)<br>
-</li>
+<code>outcome_model</code>: a formula describing the outcome and
+score covariates (e.g., outcome ~ age + gender +
+previous_treatment)</li>
 <li>
-<code>cate.model</code>: a formula describing the outcome model
-(e.g., outcome ~ age + gender + previous_treatment)<br>
+<code>outcome_method</code>: outcome-model fitting methods</li>
+<li>
+<code>benefit_method</code>: score-construction methods paired with
+<code>outcome_method</code>
 </li>
 <li>
 <code>ps.model</code>: a formula describing the treatment model to
 adjust for confounding (e.g., treatment ~ age + previous_treatment)</li>
 </ul>
+<p>For cross-validation, <code><a href="../reference/catecv.html">catecv()</a></code> currently uses
+<code>score.method</code> and <code>cate.model</code> for its
+corresponding score methods and formula.</p>
 </div>
 </div>
 <div class="section level2">
@@ -233,20 +236,18 @@ adjust for confounding (e.g., treatment ~ age + previous_treatment)</li>
 <ul>
 <li><a href="doubly-robust.html">Understanding doubly robust
 methods</a></li>
-<li>
-<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
-</li>
-<li>
-<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
-</li>
-<li>
-<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
-</li>
+<li><a href="ATE-theory.html">Methods for estimating average treatment
+effects</a></li>
+<li><a href="Binary-examples.html">Binary ATE example</a></li>
+<li><a href="Count-examples.html">Count ATE example</a></li>
+<li><a href="Survival-examples.html">Survival ATE example</a></li>
+<li><a href="Theoretical-details.html">Methods for developing and
+validating CATE scores</a></li>
+<li><a href="Binary-CATE.html">Binary CATE example</a></li>
+<li><a href="Count-CATE.html">Count CATE example</a></li>
+<li><a href="Survival-CATE.html">Survival CATE example</a></li>
 <li><a href="Additional-examples.html">Customizing CATE models and
 validation</a></li>
-<li><a href="ATE-theory.html">ATE methods</a></li>
-<li><a href="Theoretical-details.html">CATE development and validation
-methods</a></li>
 </ul>
 </div>
 <div class="section level2">

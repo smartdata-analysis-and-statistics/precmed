@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -618,7 +618,7 @@ This informs the function of the necessary arguments and methods to
 use.</p></li>
 <li><p>The argument <code>data</code> indicates the data frame in which
 the outcome, treatment and covariates specified in either
-<code>outcome_model</code> or <code>ps.model</code> should be
+<code>outcome_model</code> or <code>ps_model</code> should be
 fetched.</p></li>
 <li><p>The argument <code>outcome_model</code> specifies the outcome
 model as a formula, with the survival object from the
@@ -630,7 +630,7 @@ in the year prior to treatment initiation, and number of relapses in the
 year prior to treatment initiation. Non-linear or interaction terms
 could also be included. Note that the treatment variable is not supplied
 in <code>outcome_model</code> since this is an outcome model.</p></li>
-<li><p>The <code>ps.model</code> argument specifies the treatment model
+<li><p>The <code>ps_model</code> argument specifies the treatment model
 as a formula, with the treatment variable <code>trt</code> on the
 left-hand side and the covariates (age and previous treatment in this
 example) on the right-hand side. The variable <code>trt</code> must be
@@ -643,20 +643,26 @@ more than 2 distinct values or will automatically transform
 was transformed and an informational message is shown (see output
 below):
 <code>Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1</code>.
-If the data are from a RCT, it suffices to specify <code>ps.model</code>
+If the data are from a RCT, it suffices to specify <code>ps_model</code>
 = trt ~ 1. The treatment model is used in the doubly robust RMTL
 estimation.</p></li>
 </ul>
 <p>We can estimate the ATE as follows, using an outcome model with age,
 sex, previous cost and previous relapses, and a treatment model with
 <code>age</code> and <code>previous_treatment</code>:</p>
+<p>For censoring, <code>censoring_model</code> optionally supplies a
+one-sided covariate formula; by default it uses the outcome-model
+covariates and treatment. <code>censoring_method</code> selects the
+censoring-model method, with <code>"breslow"</code> as the default.
+These are separate from the survival outcome model and supply
+probabilities for IPCW.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_ate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">survival_data</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span></span>
@@ -831,7 +837,7 @@ model, censoring model and horizon remain the same:</p>
 <span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"weibull"</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span></span>

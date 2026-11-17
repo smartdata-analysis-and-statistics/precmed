@@ -40,24 +40,24 @@ analyses with **precmed** and related methods.
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 - [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 - [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
 - [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-- [Methods for estimating average treatment
-  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
-- [Methods for developing and validating CATE
-  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## Methodological references
 

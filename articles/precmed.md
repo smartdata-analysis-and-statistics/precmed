@@ -23,8 +23,10 @@ non-randomized study ([Yadlowsky et al.
 
 The treatment model estimates propensity scores, and the censoring model
 provides probabilities used for inverse probability of censoring
-weighting (IPCW). The corresponding arguments are `ps.model` and
-`ipcw.model`.
+weighting (IPCW). In
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
+the corresponding arguments are `ps_model` and `censoring_model`; CATE
+functions use `ps.model` and `ipcw.model`.
 
 For background on marginal and conditional treatment effects, see
 Chapter 5 ([Nguyen et al. 2026](#ref-nguyen2026causaleffects)). Chapter
@@ -134,45 +136,46 @@ the user from simple to more complex methods.
 ### Specify model inputs
 
 When applying
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-or
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
 the user has to (at least) input:
 
-- `response`: `binary`, `count`, or `survival` for
-  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md);
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-  currently supports `count` and `survival`  
-- `data`: a data frame with individual patient data  
-- `score.method`: methods to estimate the CATE (e.g., `boosting`,
-  `poisson`, `twoReg`, `contrastReg`)  
-- `cate.model`: a formula describing the outcome model (e.g., outcome ~
-  age + gender + previous_treatment)  
+- `response`: `binary`, `count`, or `survival`
+- `data`: a data frame with individual patient data
+- `outcome_model`: a formula describing the outcome and score covariates
+  (e.g., outcome ~ age + gender + previous_treatment)
+- `outcome_method`: outcome-model fitting methods
+- `benefit_method`: score-construction methods paired with
+  `outcome_method`
 - `ps.model`: a formula describing the treatment model to adjust for
   confounding (e.g., treatment ~ age + previous_treatment)
+
+For cross-validation,
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+currently uses `score.method` and `cate.model` for its corresponding
+score methods and formula.
 
 ## Overview of the vignettes
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
+- [Methods for estimating average treatment
+  effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 - [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  and [Binary CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 - [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  and [Count CATE
-  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
 - [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
-  and [Survival CATE
+- [Methods for developing and validating CATE
+  scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival CATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
-- [ATE
-  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
-- [CATE development and validation
-  methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md)
 
 ## Abbreviations
 

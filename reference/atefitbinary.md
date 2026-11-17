@@ -11,15 +11,15 @@ atefitbinary(
   data,
   outcome_model,
   outcome_method = "logistic",
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 ```
 
@@ -41,7 +41,7 @@ atefitbinary(
 
   Outcome-model method; only `"logistic"` (default) is supported.
 
-- ps.model:
+- ps_model:
 
   A formula with treatment on the left and treatment-model covariates on
   the right. The model estimates the propensity score. Both treatment
@@ -49,7 +49,7 @@ atefitbinary(
   treatment 0/1; other two-valued labels are sorted and mapped to 0/1 in
   that order. Use `trt ~ 1` for an intercept-only model.
 
-- ps.method:
+- ps_method:
 
   Propensity score method: `"glm"` (default) or `"lasso"`, using the
   package's propensity-score LASSO procedure.
@@ -78,28 +78,19 @@ atefitbinary(
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `"R"`.
 
-- cate.model:
+- ...:
 
-  Deprecated alias for `outcome_model`. Supply only one.
+  Additional arguments. The deprecated named argument `cate.model` is
+  accepted as an alias for `outcome_model`, with a warning. Supply only
+  one of these arguments. The deprecated aliases `ps.model` and
+  `ps.method` are also accepted with warnings; use `ps_model` and
+  `ps_method` instead. Other arguments are currently unsupported.
 
 ## Value
 
-An object of class `atefit` containing:
-
-- `risk.difference`: A data frame with the estimate for treatment 1
-  minus treatment 0, bootstrap standard error, 95% Wald confidence
-  limits, and two-sided Wald p-value.
-
-- `risk0`, `risk1`: Data frames with estimated treatment-specific
-  response probabilities.
-
-- `trt.boot`: Bootstrap risk differences; `risk.boot`: bootstrap
-  treatment-specific risks; `n.boot`: number of replicates.
-
-- `treatment.labels`: Original treatment labels in 0/1 order.
-
-- `bootstrap.diagnostics`: A data frame containing the replicate number,
-  affected measure and reason for each failed or non-finite estimate.
+An object of class `atefit`. See
+[`atefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+for available methods and the contents of the fitted object.
 
 ## Details
 
@@ -146,7 +137,7 @@ Thomas Debray <tdebray@fromdatatowisdom.com>
 ``` r
 d <- simulate_binary(n = 500, seed = 42)
 fit <- atefitbinary(d, outcome_model = y ~ age + female,
-                    ps.model = trt ~ age, outcome_method = "logistic",
+                    ps_model = trt ~ age, outcome_method = "logistic",
                     n.boot = 10, seed = 42)
 coef(fit)
 #> risk.difference 

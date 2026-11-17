@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -101,9 +101,9 @@ analyses. For binary treatment, the treatment model estimates the
 probability of treatment 1, also called the <strong>propensity
 score</strong>. These terms reflect the roles of the models discussed in
 causal inference, including <span class="citation">Hernán and Robins
-(2020)</span>. The argument names <code>ps.model</code> and
-<code>ipcw.model</code> refer to the treatment and censoring models,
-respectively.</p>
+(2020)</span>. The argument names <code>ps_model</code> and
+<code>censoring_model</code> refer to the treatment and censoring
+models, respectively.</p>
 <div class="section level2">
 <h2 id="average-treatment-effect-for-binary-outcomes">Average treatment effect for binary outcomes<a class="anchor" aria-label="anchor" href="#average-treatment-effect-for-binary-outcomes"></a>
 </h2>
@@ -158,8 +158,8 @@ arm. The resulting
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>m</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝐗</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat m_1(\boldsymbol X_i)</annotation></semantics></math>
 predict response for every patient under each treatment.</p>
-<p><code>ps.model</code> specifies treatment and covariates for the
-treatment model. The default <code>ps.method = "glm"</code> uses
+<p><code>ps_model</code> specifies treatment and covariates for the
+treatment model. The default <code>ps_method = "glm"</code> uses
 logistic regression; <code>"lasso"</code> uses the package’s LASSO
 propensity procedure. Write the fitted treatment-1 propensity as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>π</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><annotation encoding="application/x-tex">\hat\pi_i</annotation></semantics></math>.
@@ -311,7 +311,7 @@ patient’s RMST and survival probability at
 under each treatment. A treatment model estimates treatment
 probabilities, and a censoring model provides inverse probability of
 censoring weights (IPCW). The censoring model is controlled by
-<code>ipcw.model</code>, <code>ipcw.method</code>, and
+<code>censoring_model</code>, <code>censoring_method</code>, and
 <code>surv.min</code>; the treatment model and truncation use the same
 controls described above. Because censoring can leave the event time
 unobserved, causal interpretation requires appropriate censoring
@@ -412,19 +412,16 @@ not validation of a CATE score.</p>
 <ul>
 <li><a href="doubly-robust.html">Understanding doubly robust
 methods</a></li>
-<li>
-<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
-</li>
-<li>
-<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
-</li>
-<li>
-<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
-</li>
-<li><a href="Additional-examples.html">Customizing CATE models and
-validation</a></li>
+<li><a href="Binary-examples.html">Binary ATE example</a></li>
+<li><a href="Count-examples.html">Count ATE example</a></li>
+<li><a href="Survival-examples.html">Survival ATE example</a></li>
 <li><a href="Theoretical-details.html">Methods for developing and
 validating CATE scores</a></li>
+<li><a href="Binary-CATE.html">Binary CATE example</a></li>
+<li><a href="Count-CATE.html">Count CATE example</a></li>
+<li><a href="Survival-CATE.html">Survival CATE example</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
 </ul>
 </div>
 <div class="section level2 unnumbered">

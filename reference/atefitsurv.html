@@ -26,15 +26,15 @@ restricted mean time lost ratio for survival outcomes. Bootstrap is used for inf
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
@@ -64,10 +64,10 @@ restricted mean time lost ratio for survival outcomes. Bootstrap is used for inf
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">outcome_model</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"coxph"</span>,</span>
-<span>  <span class="va">ps.model</span>,</span>
-<span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
+<span>  <span class="va">ps_model</span>,</span>
+<span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  censoring_method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -78,7 +78,7 @@ restricted mean time lost ratio for survival outcomes. Bootstrap is used for inf
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -106,32 +106,32 @@ across covariates within an arm but can have non-proportional hazards between
 arms if their shapes differ. Log-normal models do not impose proportional
 hazards. Both assume their specified event-time distribution and require
 positive observed times and an event in each arm. The censoring model is
-specified separately by <code>ipcw.method</code> and <code>ipcw.model</code>.</p></dd>
+specified separately by <code>censoring_method</code> and <code>censoring_model</code>.</p></dd>
 
 
-<dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
+<dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
 <dd><p>A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify <code>ps.model = ~1</code> as an intercept-only model.</p></dd>
+If data are from a randomized controlled trial, specify <code>ps_model = trt ~ 1</code> as an intercept-only model.</p></dd>
 
 
-<dt id="arg-ps-method">ps.method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
+<dt id="arg-ps-method">ps_method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
 <dd><p>A character value for the method to estimate the propensity score.
 Allowed values include one of:
 <code>'glm'</code> for logistic regression with main effects only (default), or
 <code>'lasso'</code> for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in <code>ps.model</code>).
-Relevant only when <code>ps.model</code> has more than one variable.</p></dd>
+two-way interactions (added to the model if interactions are not specified in <code>ps_model</code>).
+Relevant only when <code>ps_model</code> has more than one variable.</p></dd>
 
 
-<dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
+<dt id="arg-censoring-model">censoring_model<a class="anchor" aria-label="anchor" href="#arg-censoring-model"></a></dt>
 <dd><p>A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 Default is <code>NULL</code>, which uses a censoring model with the same covariates
 as the outcome model <code>outcome_model</code>, plus the treatment.</p></dd>
 
 
-<dt id="arg-ipcw-method">ipcw.method<a class="anchor" aria-label="anchor" href="#arg-ipcw-method"></a></dt>
+<dt id="arg-censoring-method">censoring_method<a class="anchor" aria-label="anchor" href="#arg-censoring-method"></a></dt>
 <dd><p>A character value for the censoring model. Only applies for survival
 outcomes. Allowed values are: <code>'breslow'</code> (Cox regression with Breslow estimator of t
 he baseline survivor function), <code>'aft (exponential)'</code>, <code>'aft (weibull)'</code>,
@@ -192,37 +192,27 @@ Cox outcome models only; parametric models use closed-form integration.</p></dd>
 <dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
 <dd><p>Named options for LASSO propensity-score interaction screening.
 Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
-Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+Only affects screening when <code>ps_method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
 
 
-<dt id="arg-cate-model">cate.model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
-<dd><p>Deprecated alias for <code>outcome_model</code>. Supply only one.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments. The deprecated named argument <code>cate.model</code>
+is accepted as an alias for <code>outcome_model</code>, with a warning. Supply only
+one of these arguments. The deprecated aliases <code>ps.model</code> and
+<code>ps.method</code> are also accepted with warnings; use <code>ps_model</code> and
+<code>ps_method</code> instead. The deprecated arguments <code>ipcw.model</code> and
+<code>ipcw.method</code> are accepted with warnings as aliases for
+<code>censoring_model</code> and <code>censoring_method</code>, respectively.
+Other arguments are currently unsupported.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Return an object of class <code>atefit</code> including:</p><ul><li><p><code>rmst1</code>:  A vector of numeric values of the estimated RMST, bootstrap standard error,
-  lower and upper limits of 95% confidence interval, and the p-value in the group <code>trt=1</code>.</p></li>
-<li><p><code>rmst0</code>:  A vector of numeric values of the estimated RMST, bootstrap standard error,
-  lower and upper limits of 95% confidence interval, and the p-value in the group <code>trt=0</code>.</p></li>
-<li><p><code>log.rmtl.ratio</code>:  A vector of numeric values of the estimated log RMTL ratio of
-  <code>trt=1</code> over <code>trt=0</code>, bootstrap standard error, lower and upper limits of 95% confidence
-  interval, and the p-value.</p></li>
-<li><p><code>log.cumulative.hazard.ratio</code>:  The log ratio of marginal cumulative hazards at
-  <code>tau0</code>, estimated from augmented inverse probability of treatment weighted
-  (AIPTW) survival probabilities, with bootstrap inference. Event times are not discretized.
-  The estimator requires appropriate censoring assumptions and a correctly specified
-  censoring model; its treatment-model double robustness does not protect against
-  censoring-model misspecification.
-  Undefined estimates or bootstrap replicates yield unavailable inference.</p></li>
-<li><p><code>risk0</code>, <code>risk1</code>, <code>risk.difference</code>:  Population-average event risks by <code>tau0</code> under treatments 0 and 1, and risk under treatment 1 minus risk under treatment 0, with bootstrap inference. These use the same AIPTW survival estimates and censoring assumptions as the cumulative hazard ratio. Estimates outside [0, 1] are unavailable.</p></li>
-<li><p><code>trt.boot</code>:  Estimates of <code>rmst1</code>, <code>rmst0</code>,
-  <code>log.rmtl.ratio</code>, <code>log.cumulative.hazard.ratio</code>, treatment-specific risks and risk difference in each bootstrap sample.</p></li>
-<li><p><code>treatment.labels</code>:  Original treatment labels corresponding to 0 and 1, in that order.</p></li>
-<li><p><code>warning</code>:  The informational treatment recoding message, if applicable.</p></li>
-</ul></div>
+    <p>An object of class <code>atefit</code>. See <code><a href="atefit.html">atefit</a></code>
+for available methods and the contents of the fitted object.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This helper function estimates the average treatment effect (ATE) for survival data between two
@@ -233,6 +223,13 @@ censoring weighting. For survival outcomes, the estimated ATE is the estimated b
 as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95% confidence interval,
 p-value, and a histogram of the bootstrap estimates.
+The cumulative hazard ratio and event risks use augmented inverse probability
+of treatment weighted survival probabilities without discretizing event times.
+These estimates require appropriate censoring assumptions and a correctly
+specified censoring model; treatment-model double robustness does not protect
+against censoring-model misspecification. Event risks outside [0, 1] are
+unavailable. Undefined estimates or bootstrap replicates yield unavailable
+inference for the affected measure.
 If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
 outcome-model estimate is substituted and a warning is issued. That fallback
 does not retain the doubly robust guarantee.</p>
@@ -253,7 +250,7 @@ is unavailable rather than based on a subset of replicates. See also
 <span class="r-in"><span><span class="va">output</span> <span class="op">&lt;-</span> <span class="fu">atefitsurv</span><span class="op">(</span>data <span class="op">=</span> <span class="va">survivalExample</span>,</span></span>
 <span class="r-in"><span>                     outcome_model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>                                  <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span></span>
-<span class="r-in"><span>                     ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                     ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                     tau0 <span class="op">=</span> <span class="va">tau0</span>,</span></span>
 <span class="r-in"><span>                     n.boot <span class="op">=</span> <span class="fl">50</span>,</span></span>
 <span class="r-in"><span>                     seed <span class="op">=</span> <span class="fl">999</span>,</span></span>

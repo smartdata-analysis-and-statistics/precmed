@@ -46,15 +46,15 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
+    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../articles/learning-resources.html">Learning resources</a></li>
@@ -88,12 +88,69 @@
     
 <!-- badges: start -->
 <p><a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://www.r-pkg.org/badges/version/precmed" alt="CRAN_Status_Badge"></a> <a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/last-month/precmed" alt="metacran downloads"></a> <!-- badges: end --></p>
-<p>This vignette describes CATE score development and validation methods
-for count and survival outcomes. A treatment model estimates the
-propensity score, and a censoring model provides probabilities for
-inverse probability of censoring weighting (IPCW). For average treatment
-effect estimation across binary, count and survival outcomes, see <a href="ATE-theory.html">Methods for estimating average treatment
+<p>This vignette introduces conditional average treatment effects and
+CATE scores for binary, count and survival outcomes. The detailed
+derivations below focus on count and survival outcomes; the <a href="Binary-CATE.html">binary CATE example</a> illustrates binary score
+fitting and validation. For population-average effects, see <a href="ATE-theory.html">Methods for estimating average treatment
 effects</a>.</p>
+<div class="section level2">
+<h2 id="what-is-a-cate-score">What is a CATE score?<a class="anchor" aria-label="anchor" href="#what-is-a-cate-score"></a>
+</h2>
+<p>A conditional average treatment effect (CATE) compares outcomes under
+two treatments among patients with the same measured baseline
+covariates. For a binary outcome, <code>precmed</code> uses the
+conditional risk difference: predicted risk under treatment 1 minus
+predicted risk under treatment 0. For a count outcome, the score is a
+conditional log rate ratio. For survival, it is a conditional log ratio
+of restricted mean time lost up to the chosen horizon. Ratios compare
+treatment 1 with treatment 0. These are averages conditional on measured
+characteristics, not the unobservable effect for an individual
+patient.</p>
+<p>A CATE <em>score</em> is an estimate of such a conditional contrast.
+It can be used to rank patients, with the favorable direction depending
+on the outcome and the treatment contrast. A causal interpretation
+requires assumptions such as consistency, no unmeasured
+treatment–outcome confounding given the measured covariates, and
+adequate treatment overlap, as well as the assumptions of the chosen
+estimator. Survival analyses also require appropriate censoring
+assumptions and support at the selected horizon.</p>
+</div>
+<div class="section level2">
+<h2 id="how-are-the-scores-fitted">How are the scores fitted?<a class="anchor" aria-label="anchor" href="#how-are-the-scores-fitted"></a>
+</h2>
+<p>A <strong>T-learner</strong> fits an outcome model separately in each
+treatment arm and contrasts their predictions. For example, separate
+logistic outcome models can predict binary risks under each treatment;
+their difference is a fitted risk-difference score. An
+<strong>S-learner</strong>, by contrast, fits a single outcome model
+that includes treatment as a predictor, and compares predictions under
+the two treatment values. The S-learner is described here for context;
+it is not a selectable CATE score method in the current
+<code>precmed</code> interface.</p>
+<p>The package also implements <strong>two-regression</strong> and
+<strong>contrast-regression</strong> scores. These use cross-fitted
+initial outcome predictions and a treatment model that estimates
+propensity scores, followed by different procedures for estimating the
+score. Their doubly robust properties depend on the estimator’s
+assumptions and are not the same as a guarantee for a direct T-learner
+score. For survival outcomes, the censoring model supplies probabilities
+used for IPCW; treatment-model double robustness does not protect
+against a misspecified censoring model. The count and survival sections
+below describe the methods in more detail.</p>
+</div>
+<div class="section level2">
+<h2 id="why-validate-a-score">Why validate a score?<a class="anchor" aria-label="anchor" href="#why-validate-a-score"></a>
+</h2>
+<p><code><a href="../reference/catefit.html">catefit()</a></code> fits scores and estimates effects in
+score-defined subgroups using the same data. Those subgroup estimates
+are useful for exploring a fit, but they do not independently validate
+it. <code><a href="../reference/catecv.html">catecv()</a></code> fits scores on training splits and evaluates
+score-defined groups on held-out splits, providing an internal
+assessment. Comparing or selecting methods using those results still
+benefits from an independent assessment. See the validation section
+below and the binary, count and survival CATE examples for the available
+procedures.</p>
+</div>
 <div class="section level2">
 <h2 id="background-and-further-reading">Background and further reading<a class="anchor" aria-label="anchor" href="#background-and-further-reading"></a>
 </h2>
@@ -637,19 +694,16 @@ ATE.</p>
 <ul>
 <li><a href="doubly-robust.html">Understanding doubly robust
 methods</a></li>
-<li>
-<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
-</li>
-<li>
-<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
-</li>
-<li>
-<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
-</li>
-<li><a href="Additional-examples.html">Customizing CATE models and
-validation</a></li>
 <li><a href="ATE-theory.html">Methods for estimating average treatment
 effects</a></li>
+<li><a href="Binary-examples.html">Binary ATE example</a></li>
+<li><a href="Count-examples.html">Count ATE example</a></li>
+<li><a href="Survival-examples.html">Survival ATE example</a></li>
+<li><a href="Binary-CATE.html">Binary CATE example</a></li>
+<li><a href="Count-CATE.html">Count CATE example</a></li>
+<li><a href="Survival-CATE.html">Survival CATE example</a></li>
+<li><a href="Additional-examples.html">Customizing CATE models and
+validation</a></li>
 </ul>
 </div>
 <div class="section level2 unnumbered">
