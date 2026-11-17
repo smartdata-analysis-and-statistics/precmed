@@ -105,11 +105,11 @@ non-sensitive data.
 The package compares two treatments using outcome-specific effect
 measures:
 
-| Outcome | Effect measure | ATE example | CATE example |
-|----|----|----|----|
-| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html) |
-| Count | Ratio of event rates (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html) |
-| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html) |
+| Outcome | Effect measure | Examples |
+|----|----|----|
+| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html), [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html) |
+| Count | Ratio of event rates (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html), [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html) |
+| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html), [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html) |
 
 Count rate ratios and survival RMTL and cumulative hazard ratios from
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)

@@ -63,7 +63,7 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   ps.model = trt ~ age + previous_treatment,
   outcome_method = "poisson",
-  n.boot = 50,
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
@@ -76,7 +76,7 @@ indicates a lower estimated relapse rate with `drug1`. The confidence
 interval uses the bootstrap standard error. The estimator is doubly
 robust: under the required causal and other regularity assumptions, it
 is consistent if either the outcome model or the treatment model is
-correctly specified. The 50 bootstrap replicates used here keep the
+correctly specified. The 100 bootstrap replicates used here keep the
 example short; use more for a substantive analysis.
 
 ``` r
@@ -87,7 +87,7 @@ rate_ratio_ci <- exp(confint(fit_ate))
 
 | Rate ratio | 95% CI lower | 95% CI upper |
 |-----------:|-------------:|-------------:|
-|       1.07 |         0.77 |         1.46 |
+|       1.07 |         0.79 |         1.44 |
 
 The overall effect can mask differences across patients. Next, we
 explore treatment effect heterogeneity.

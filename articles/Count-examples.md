@@ -46,13 +46,11 @@ variable `trt` identifies drug0 or drug1.
 For convenience, `age` is centered at 48 years and `previous_cost` is
 centered at 13,824 USD and divided by 20,172 USD.
 
-## Estimate the average treatment effect
-
 For the estimators and their assumptions, see [Methods for estimating
 average treatment
 effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
 
-### Unadjusted treatment comparison
+## Unadjusted treatment comparison
 
 We first compare relapse rates between treatment groups using a Poisson
 model with treatment as the only predictor. The log follow-up time is
@@ -90,7 +88,7 @@ The estimated rate ratio for drug 1 versus drug 0 is 1.08. A ratio below
 1 corresponds to a lower relapse rate under drug 1. This association
 does not by itself establish a causal treatment effect.
 
-### Covariate-adjusted treatment comparison
+## Covariate-adjusted treatment comparison
 
 Treatment assignment may differ according to baseline characteristics.
 To account for measured differences, we fit a Poisson model that adjusts
@@ -139,7 +137,7 @@ does not necessarily represent a causal average treatment effect. A
 causal interpretation requires, among other assumptions, adequate
 treatment overlap and no unmeasured confounding.
 
-### Population-level treatment comparison using `atefit()`
+## Population-average treatment effects using `atefit()`
 
 We now use
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -211,7 +209,7 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "poisson",
   ps.model = trt ~ age + previous_treatment,
-  n.boot = 50, 
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
@@ -225,8 +223,8 @@ When `verbose` = 1, the function outputs a progress bar in the console.
 fit_ate
 #> Average treatment effect:
 #> 
-#>                  estimate        SE   CI.lower  CI.upper    pvalue
-#> log.rate.ratio 0.06311746 0.1624482 -0.2552752 0.3815101 0.6976173
+#>                  estimate        SE   CI.lower  CI.upper   pvalue
+#> log.rate.ratio 0.06311746 0.1549953 -0.2406677 0.3669026 0.683845
 #> 
 #> Estimated event rates:
 #> 
@@ -235,6 +233,8 @@ fit_ate
 #> rate0 0.2685660
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
+
+### Diagnostics
 
 A causal interpretation also requires assumptions including consistency,
 conditional exchangeability and positivity; Chapter 5 discusses these
@@ -275,7 +275,7 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
 (“pvalue”) for the log rate ratio (`$log.rate.ratio`) as well as the
 point estimate for the rate in the 2 treatment groups (`$rate0` and
 `$rate1`). For example, the log rate ratio of 0.06 and the 95%
-confidence interval of (-0.26, 0.38) are displayed in the output. Use
+confidence interval of (-0.24, 0.37) are displayed in the output. Use
 [`coef()`](https://rdrr.io/r/stats/coef.html) and
 [`confint()`](https://rdrr.io/r/stats/confint.html) to extract the log
 rate ratio and its confidence interval, then exponentiate them to obtain
@@ -292,13 +292,13 @@ rate_ratio
 rate_ratio_ci <- exp(confint(fit_ate, level = 0.95))
 rate_ratio_ci
 #>                    2.5 %   97.5 %
-#> log.rate.ratio 0.7747033 1.464495
+#> log.rate.ratio 0.7861028 1.443257
 ```
 
-The rate ratio of 1.07 along with the 95% confidence interval of (0.77,
-1.46) indicate a higher estimated relapse rate under drug 1 than drug 0.
+The rate ratio of 1.07 along with the 95% confidence interval of (0.79,
+1.44) indicate a higher estimated relapse rate under drug 1 than drug 0.
 However, the confidence interval includes 1, so there is insufficient
-evidence of a treatment difference, consistent with the p-value of 0.7
+evidence of a treatment difference, consistent with the p-value of 0.68
 in the output (`$log.rate.ratio$pvalue`).
 
 We can plot the distribution of bootstrap estimates using
@@ -315,6 +315,8 @@ plot(fit_ate, metrics = c("rate0", "rate1", "log_rate_ratio"))
 ```
 
 ![](Count-examples_files/figure-html/plot_atefit_bootstrap-1.png)
+
+### Alternative outcome model
 
 In the calculations above, we used a Poisson outcome model. To assess
 how the outcome-model choice influences the estimated population-average
@@ -333,23 +335,32 @@ fit_ate_negbin <- atefit(
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "negbin",
   ps.model = trt ~ age + previous_treatment,
-  n.boot = 50,
+  n.boot = 100,
   seed = 999,
   verbose = 0
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
+#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+#> control$trace > : estimate truncated at zero
+#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+#> control$trace > : iteration limit reached
+#> Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference
+#> for affected measures is unavailable. Reasons by measure: rate0: missing value
+#> where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);
+#> log.rate.ratio: missing value where TRUE/FALSE needed (1). See
+#> bootstrap.diagnostics for replicate details.
 ```
 
 The table below compares the ATE estimated using a Poisson and a
 negative binomial outcome model. The estimates can differ because the
 outcome models are fitted differently; neither comparison establishes
 which model is correct. The intervals use the bootstrap standard errors,
-based on 50 replicates.
+based on 100 replicates.
 
 |                   | Rate ratio | 95% CI lower | 95% CI upper |
 |:------------------|-----------:|-------------:|-------------:|
-| Poisson           |      1.065 |        0.775 |        1.464 |
-| Negative binomial |      1.066 |        0.775 |        1.465 |
+| Poisson           |      1.065 |        0.786 |        1.443 |
+| Negative binomial |      1.066 |           NA |           NA |
 
 ## Related vignettes
 

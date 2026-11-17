@@ -130,7 +130,7 @@ Now fit the doubly robust AIPW estimator with
 `outcome_model` specifies the outcome and covariates; by default,
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 fits a separate logistic outcome model for each treatment arm.
-`ps.model` specifies the treatment model. The 50 bootstrap replicates
+`ps.model` specifies the treatment model. The 100 bootstrap replicates
 keep this example quick; use more for a substantive analysis and examine
 bootstrap diagnostics.
 
@@ -139,14 +139,14 @@ bootstrap diagnostics.
 fit <- atefit(response = "binary", data = dat,
               outcome_model = y ~ age + previous_treatment,
               ps.model = trt ~ age + previous_treatment,
-              outcome_method = "logistic", n.boot = 50, seed = 999)
+              outcome_method = "logistic", n.boot = 100, seed = 999)
 c(outcome_standardization = standardized, ipw = ipw,
   doubly_robust = unname(fit$risk.difference$estimate))
 #> outcome_standardization                     ipw           doubly_robust 
 #>             -0.10298071             -0.09978176             -0.10762720
 confint(fit)
 #>                      2.5 %      97.5 %
-#> risk.difference -0.1421899 -0.07306452
+#> risk.difference -0.1464453 -0.06880907
 ```
 
 The estimates need not agree in a finite sample, even when the necessary

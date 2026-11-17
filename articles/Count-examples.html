@@ -46,12 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -61,7 +61,6 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -400,15 +399,12 @@ treatment variable <code>trt</code> identifies drug0 or drug1.</p>
 <p>For convenience, <code>age</code> is centered at 48 years and
 <code>previous_cost</code> is centered at 13,824 USD and divided by
 20,172 USD.</p>
-</div>
-<div class="section level2">
-<h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
-</h2>
 <p>For the estimators and their assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
 effects</a>.</p>
-<div class="section level3">
-<h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
+</h2>
 <p>We first compare relapse rates between treatment groups using a
 Poisson model with treatment as the only predictor. The log follow-up
 time is included as an offset to account for differences in exposure.
@@ -441,9 +437,9 @@ characteristics.</p>
 below 1 corresponds to a lower relapse rate under drug 1. This
 association does not by itself establish a causal treatment effect.</p>
 </div>
-<div class="section level3">
-<h3 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
-</h3>
+<div class="section level2">
+<h2 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
+</h2>
 <p>Treatment assignment may differ according to baseline
 characteristics. To account for measured differences, we fit a Poisson
 model that adjusts for age, sex, previous treatment, previous medical
@@ -487,10 +483,10 @@ does not necessarily represent a causal average treatment effect. A
 causal interpretation requires, among other assumptions, adequate
 treatment overlap and no unmeasured confounding.</p>
 </div>
-<div class="section level3">
-<h3 id="population-level-treatment-comparison-using-atefit">Population-level treatment comparison using
-<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-using-atefit"></a>
-</h3>
+<div class="section level2">
+<h2 id="population-average-treatment-effects-using-atefit">Population-average treatment effects using
+<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-average-treatment-effects-using-atefit"></a>
+</h2>
 <p>We now use <code><a href="../reference/atefit.html">atefit()</a></code> to estimate a population-level rate
 ratio, combining outcome and treatment models. The treatment model
 estimates the propensity score, the probability of receiving treatment 1
@@ -555,7 +551,7 @@ outcome model that contains all variables and a treatment model with
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  n.boot <span class="op">=</span> <span class="fl">50</span>, </span>
+<span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
@@ -566,8 +562,8 @@ the console.</p>
 <code class="sourceCode R"><span><span class="va">fit_ate</span></span>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;                  estimate        SE   CI.lower  CI.upper    pvalue</span></span>
-<span><span class="co">#&gt; log.rate.ratio 0.06311746 0.1624482 -0.2552752 0.3815101 0.6976173</span></span>
+<span><span class="co">#&gt;                  estimate        SE   CI.lower  CI.upper   pvalue</span></span>
+<span><span class="co">#&gt; log.rate.ratio 0.06311746 0.1549953 -0.2406677 0.3669026 0.683845</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated event rates:</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -575,6 +571,9 @@ the console.</p>
 <span><span class="co">#&gt; rate1 0.2860635</span></span>
 <span><span class="co">#&gt; rate0 0.2685660</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
+</h3>
 <p>A causal interpretation also requires assumptions including
 consistency, conditional exchangeability and positivity; Chapter 5
 discusses these assumptions <span class="citation">(Nguyen et al.
@@ -644,7 +643,7 @@ of the 95% confidence interval, and the p-value (“pvalue”) for the log
 rate ratio (<code>$log.rate.ratio</code>) as well as the point estimate
 for the rate in the 2 treatment groups (<code>$rate0</code> and
 <code>$rate1</code>). For example, the log rate ratio of 0.06 and the
-95% confidence interval of (-0.26, 0.38) are displayed in the output.
+95% confidence interval of (-0.24, 0.37) are displayed in the output.
 Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> to extract the log
 rate ratio and its confidence interval, then exponentiate them to obtain
 the rate ratio and its interval. The default confidence level is 95%;
@@ -658,12 +657,12 @@ already stored in the fitted object:</p>
 <span><span class="va">rate_ratio_ci</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_ate</span>, level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rate_ratio_ci</span></span>
 <span><span class="co">#&gt;                    2.5 %   97.5 %</span></span>
-<span><span class="co">#&gt; log.rate.ratio 0.7747033 1.464495</span></span></code></pre></div>
+<span><span class="co">#&gt; log.rate.ratio 0.7861028 1.443257</span></span></code></pre></div>
 <p>The rate ratio of 1.07 along with the 95% confidence interval of
-(0.77, 1.46) indicate a higher estimated relapse rate under drug 1 than
+(0.79, 1.44) indicate a higher estimated relapse rate under drug 1 than
 drug 0. However, the confidence interval includes 1, so there is
 insufficient evidence of a treatment difference, consistent with the
-p-value of 0.7 in the output (<code>$log.rate.ratio$pvalue</code>).</p>
+p-value of 0.68 in the output (<code>$log.rate.ratio$pvalue</code>).</p>
 <p>We can plot the distribution of bootstrap estimates using
 <code>plot(fit_ate)</code>; by default it displays estimates of the rate
 for each treatment and the log rate ratio. The <code>metrics</code>
@@ -675,6 +674,10 @@ full-sample estimates, and the dashed black line marks the null value of
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_ate</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rate0"</span>, <span class="st">"rate1"</span>, <span class="st">"log_rate_ratio"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-examples_files/figure-html/plot_atefit_bootstrap-1.png" class="r-plt" alt="" width="960"></p>
+</div>
+<div class="section level3">
+<h3 id="alternative-outcome-model">Alternative outcome model<a class="anchor" aria-label="anchor" href="#alternative-outcome-model"></a>
+</h3>
 <p>In the calculations above, we used a Poisson outcome model. To assess
 how the outcome-model choice influences the estimated population-average
 rate ratio, we can instead fit a negative binomial outcome model with
@@ -690,16 +693,25 @@ treatment models are refitted in each bootstrap sample.</p>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="st">"negbin"</span>,</span>
 <span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  n.boot <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
+<span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
+<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
+<span><span class="co">#&gt; control$trace &gt; : estimate truncated at zero</span></span>
+<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
+<span><span class="co">#&gt; control$trace &gt; : iteration limit reached</span></span>
+<span><span class="co">#&gt; Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference</span></span>
+<span><span class="co">#&gt; for affected measures is unavailable. Reasons by measure: rate0: missing value</span></span>
+<span><span class="co">#&gt; where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);</span></span>
+<span><span class="co">#&gt; log.rate.ratio: missing value where TRUE/FALSE needed (1). See</span></span>
+<span><span class="co">#&gt; bootstrap.diagnostics for replicate details.</span></span></code></pre></div>
 <p>The table below compares the ATE estimated using a Poisson and a
 negative binomial outcome model. The estimates can differ because the
 outcome models are fitted differently; neither comparison establishes
 which model is correct. The intervals use the bootstrap standard errors,
-based on 50 replicates.</p>
+based on 100 replicates.</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -711,14 +723,14 @@ based on 50 replicates.</p>
 <tr class="odd">
 <td align="left">Poisson</td>
 <td align="right">1.065</td>
-<td align="right">0.775</td>
-<td align="right">1.464</td>
+<td align="right">0.786</td>
+<td align="right">1.443</td>
 </tr>
 <tr class="even">
 <td align="left">Negative binomial</td>
 <td align="right">1.066</td>
-<td align="right">0.775</td>
-<td align="right">1.465</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
 </tr>
 </tbody>
 </table>

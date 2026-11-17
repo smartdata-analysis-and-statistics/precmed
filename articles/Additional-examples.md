@@ -266,14 +266,14 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:13:55 2026 
+#>    Tue Nov 17 14:36:44 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Tue Nov 17 14:13:58 2026 
+#>    Tue Nov 17 14:36:46 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +284,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:14:01 2026 
+#>    Tue Nov 17 14:36:50 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +295,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:14:04 2026 
+#>    Tue Nov 17 14:36:53 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,9 +308,9 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 14:14:07 2026 
+#>    Tue Nov 17 14:36:57 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 15.43 secs
+#> Total runtime : 16.46 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -606,37 +606,37 @@ fit_cv_3 <- catecv(
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:15:12 2026 
+#>    Tue Nov 17 14:38:02 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:15:15 2026 
+#>    Tue Nov 17 14:38:05 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:15:18 2026 
+#>    Tue Nov 17 14:38:08 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:15:21 2026 
+#>    Tue Nov 17 14:38:11 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 14:15:24 2026 
+#>    Tue Nov 17 14:38:14 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 14.22 secs
+#> Total runtime : 14.39 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA

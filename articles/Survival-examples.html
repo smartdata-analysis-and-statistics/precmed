@@ -46,12 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -61,7 +61,6 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -431,15 +430,12 @@ as treatment effects.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomleft"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"drug0"</span>, <span class="st">"drug1"</span><span class="op">)</span>,</span>
 <span>       col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"steelblue"</span>, <span class="st">"darkorange3"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, lwd <span class="op">=</span> <span class="fl">2</span>, bty <span class="op">=</span> <span class="st">"n"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Survival-examples_files/figure-html/km_by_treatment-1.png" class="r-plt" alt="" width="672"></p>
-</div>
-<div class="section level2">
-<h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
-</h2>
 <p>For the estimators and their assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
 effects</a>.</p>
-<div class="section level3">
-<h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
+</h2>
 <p>We first compare time to first relapse between treatment groups using
 a Cox model with treatment as the only predictor. This unadjusted,
 marginal association does not account for differences in patient
@@ -489,9 +485,9 @@ large p-value does not prove that the HR is constant. Later follow-up is
 less informative when fewer patients remain at risk, as reflected in the
 wider uncertainty bands.</p>
 </div>
-<div class="section level3">
-<h3 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
-</h3>
+<div class="section level2">
+<h2 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
+</h2>
 <p>In this synthetic dataset, treatment assignment depends on baseline
 characteristics rather than being randomized. To account for measured
 baseline differences, we first consider a Cox model that adjusts for
@@ -542,9 +538,10 @@ the model covariates jointly, so evidence of non-proportional hazards
 may arise from covariates other than treatment. A large p-value does not
 establish that the proportional-hazards assumption holds.</p>
 </div>
-<div class="section level3">
-<h3 id="population-level-treatment-comparison-over-a-fixed-horizon">Population-level treatment comparison over a fixed horizon<a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-over-a-fixed-horizon"></a>
-</h3>
+<div class="section level2">
+<h2 id="population-average-treatment-effects-using-atefit">Population-average treatment effects using
+<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-average-treatment-effects-using-atefit"></a>
+</h2>
 <p>The unadjusted Cox model compares treatment groups without accounting
 for differences in their characteristics. The adjusted Cox model
 accounts for the selected covariates, but its HR is conditional on those
@@ -661,6 +658,7 @@ sex, previous cost and previous relapses, and a treatment model with
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
 <span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
+<span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
@@ -671,25 +669,25 @@ regression for the propensity model.</p>
 <span><span class="co">#&gt; Average treatment effect:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                                estimate         SE   CI.lower    CI.upper</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio              -0.12798969 0.04568911 -0.2175387 -0.03844067</span></span>
-<span><span class="co">#&gt; log.cumulative.hazard.ratio -0.26396371 0.09846880 -0.4569590 -0.07096841</span></span>
-<span><span class="co">#&gt; risk.difference             -0.09210868 0.03436143 -0.1594558 -0.02476151</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              -0.12798969 0.05115112 -0.2282440 -0.02773534</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio -0.26396371 0.10228852 -0.4644455 -0.06348190</span></span>
+<span><span class="co">#&gt; risk.difference             -0.09210868 0.03585365 -0.1623805 -0.02183682</span></span>
 <span><span class="co">#&gt;                                  pvalue</span></span>
-<span><span class="co">#&gt; log.rmtl.ratio              0.005089449</span></span>
-<span><span class="co">#&gt; log.cumulative.hazard.ratio 0.007347192</span></span>
-<span><span class="co">#&gt; risk.difference             0.007349398</span></span>
+<span><span class="co">#&gt; log.rmtl.ratio              0.012342853</span></span>
+<span><span class="co">#&gt; log.cumulative.hazard.ratio 0.009863447</span></span>
+<span><span class="co">#&gt; risk.difference             0.010198706</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated event risks at tau0:</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;        estimate         SE  CI.lower  CI.upper pvalue</span></span>
-<span><span class="co">#&gt; risk1 0.6930348 0.02602991 0.6420171 0.7440524      0</span></span>
-<span><span class="co">#&gt; risk0 0.7851434 0.01813145 0.7496064 0.8206804      0</span></span>
+<span><span class="co">#&gt; risk1 0.6930348 0.02780136 0.6385451 0.7475244      0</span></span>
+<span><span class="co">#&gt; risk0 0.7851434 0.01753849 0.7507686 0.8195182      0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Estimated RMST:</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;       estimate        SE CI.lower CI.upper pvalue</span></span>
-<span><span class="co">#&gt; rmst1 467.9432 10.432618 447.4956 488.3908      0</span></span>
-<span><span class="co">#&gt; rmst0 425.5458  9.302363 407.3135 443.7781      0</span></span>
+<span><span class="co">#&gt;       estimate       SE CI.lower CI.upper pvalue</span></span>
+<span><span class="co">#&gt; rmst1 467.9432 10.88991 446.5994 489.2870      0</span></span>
+<span><span class="co">#&gt; rmst0 425.5458 10.17076 405.6115 445.4801      0</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The output of <code><a href="../reference/atefit.html">atefit()</a></code> shows the point estimate,
 standard error (“SE”), lower (“CI.lower”) and upper (“CI.upper”) bound
@@ -708,15 +706,15 @@ under drug 0 and drug 1 (<code>$risk0</code> and <code>$risk1</code>),
 and their difference, drug 1 minus drug 0.</p></li>
 </ul>
 <p>For example, the log RMTL ratio of -0.13 and the 95% confidence
-interval of (-0.22, -0.04) are displayed in the output. The estimated
+interval of (-0.23, -0.03) are displayed in the output. The estimated
 ratio and its interval can be obtained by exponentiating these log-scale
 values. A ratio above 1 indicates more time lost before
 <code>tau0</code> under drug 1; the interval describes uncertainty in
 that comparison. The RMST estimates provide the corresponding event-free
 times up to <code>tau0</code>.</p>
-<div class="section level4">
-<h4 id="treatment-and-overlap-diagnostics">Treatment and overlap diagnostics<a class="anchor" aria-label="anchor" href="#treatment-and-overlap-diagnostics"></a>
-</h4>
+<div class="section level3">
+<h3 id="treatment-and-overlap-diagnostics">Treatment and overlap diagnostics<a class="anchor" aria-label="anchor" href="#treatment-and-overlap-diagnostics"></a>
+</h3>
 <p>The RMTL and cumulative hazard ratios compare the treatment coded as
 1 with the treatment coded as 0; their log ratios are reported in the
 output. Here, <code>trt</code> is a factor, so <code><a href="../reference/atefit.html">atefit()</a></code>
@@ -799,9 +797,9 @@ unmeasured confounding.</p>
 <p>For survival outcomes these are treatment weights only; they do not
 summarize censoring weights or follow-up near the horizon.</p>
 </div>
-<div class="section level4">
-<h4 id="inspecting-bootstrap-estimates">Inspecting bootstrap estimates<a class="anchor" aria-label="anchor" href="#inspecting-bootstrap-estimates"></a>
-</h4>
+<div class="section level3">
+<h3 id="inspecting-bootstrap-estimates">Inspecting bootstrap estimates<a class="anchor" aria-label="anchor" href="#inspecting-bootstrap-estimates"></a>
+</h3>
 <p><code>plot(fit_ate)</code> displays the bootstrap estimates for the
 reported quantities. By default, the first row shows treatment-specific
 RMST and the log RMTL ratio, the second shows treatment-specific risks
@@ -818,9 +816,9 @@ The treatment-specific RMST and risk panels have no null line. Use
 <p><img src="Survival-examples_files/figure-html/plot_atefit_bootstrap-1.png" class="r-plt" alt="" width="768"></p>
 <p>Histograms of bootstrap estimates for the reported quantities.</p>
 </div>
-<div class="section level4">
-<h4 id="comparing-outcome-models">Comparing outcome models<a class="anchor" aria-label="anchor" href="#comparing-outcome-models"></a>
-</h4>
+<div class="section level3">
+<h3 id="alternative-outcome-model">Alternative outcome model<a class="anchor" aria-label="anchor" href="#alternative-outcome-model"></a>
+</h3>
 <p>As an alternative, we can fit a Weibull outcome model separately in
 each treatment arm. The Weibull models assume proportional hazards
 across covariates within an arm, but different arm-specific shapes allow
@@ -835,12 +833,13 @@ model, censoring model and horizon remain the same:</p>
 <span>  outcome_method <span class="op">=</span> <span class="st">"weibull"</span>,</span>
 <span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
+<span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
 <p>The table compares the estimated population-average RMTL ratio for
 drug 1 versus drug 0 at <code>tau0</code>, with 95% confidence
-intervals. Both fits use 500 bootstrap samples and estimate the same
+intervals. Both fits use 100 bootstrap samples and estimate the same
 quantity; their estimates can differ because of their outcome-model
 assumptions. The intervals use the bootstrap standard errors.</p>
 <table class="table">
@@ -854,18 +853,17 @@ assumptions. The intervals use the bootstrap standard errors.</p>
 <tr class="odd">
 <td align="left">Cox</td>
 <td align="right">0.88</td>
-<td align="right">0.804</td>
-<td align="right">0.962</td>
+<td align="right">0.796</td>
+<td align="right">0.973</td>
 </tr>
 <tr class="even">
 <td align="left">Weibull</td>
 <td align="right">0.88</td>
-<td align="right">0.804</td>
-<td align="right">0.962</td>
+<td align="right">0.796</td>
+<td align="right">0.973</td>
 </tr>
 </tbody>
 </table>
-</div>
 </div>
 </div>
 <div class="section level2">

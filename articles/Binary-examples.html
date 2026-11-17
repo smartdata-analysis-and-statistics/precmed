@@ -46,12 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -61,7 +61,6 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -145,15 +144,12 @@ centered at 48 years and previous cost is centered at 13,824 USD and
 divided by 20,172 USD. The simulation coefficients are illustrative and
 are not clinical estimates. Unlike a count rate ratio, the relapse risk
 difference depends on the selected threshold and follow-up period.</p>
-</div>
-<div class="section level2">
-<h2 id="estimate-the-average-treatment-effect">Estimate the average treatment effect<a class="anchor" aria-label="anchor" href="#estimate-the-average-treatment-effect"></a>
-</h2>
 <p>For the estimators and their assumptions, see <a href="ATE-theory.html">Methods for estimating average treatment
 effects</a>.</p>
-<div class="section level3">
-<h3 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="unadjusted-treatment-comparison">Unadjusted treatment comparison<a class="anchor" aria-label="anchor" href="#unadjusted-treatment-comparison"></a>
+</h2>
 <p>We first compare the observed relapse proportions under drug1 and
 drug0.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -171,9 +167,9 @@ effect.</p>
 <p>The 95% confidence interval is -0.085 to -0.024, based on a normal
 approximation for two independent proportions.</p>
 </div>
-<div class="section level3">
-<h3 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
-</h3>
+<div class="section level2">
+<h2 id="covariate-adjusted-treatment-comparison">Covariate-adjusted treatment comparison<a class="anchor" aria-label="anchor" href="#covariate-adjusted-treatment-comparison"></a>
+</h2>
 <p>Treatment assignment may differ according to baseline
 characteristics. We fit a multivariable binomial model adjusting for
 age, sex, previous treatment, previous medical cost, and previous
@@ -222,10 +218,10 @@ difference averaged over the study population. A causal interpretation
 requires, among other assumptions, a correctly specified outcome model,
 no unmeasured confounding, and adequate treatment overlap.</p>
 </div>
-<div class="section level3">
-<h3 id="population-level-treatment-comparison-using-atefit">Population-level treatment comparison using
-<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-level-treatment-comparison-using-atefit"></a>
-</h3>
+<div class="section level2">
+<h2 id="population-average-treatment-effects-using-atefit">Population-average treatment effects using
+<code>atefit()</code><a class="anchor" aria-label="anchor" href="#population-average-treatment-effects-using-atefit"></a>
+</h2>
 <p><code>atefit(response = "binary")</code> estimates the difference in
 relapse probability under drug1 and drug0. Negative values favor drug1
 because relapse is an adverse outcome. The estimator combines a logistic
@@ -285,6 +281,9 @@ negative difference favors drug1. The output also reports the bootstrap
 standard error, a 95% Wald confidence interval of -0.147 to -0.069, and
 a two-sided Wald p-value for the risk difference. The causal
 interpretation depends on the assumptions described above.</p>
+<div class="section level3">
+<h3 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a>
+</h3>
 <p>A causal interpretation of this estimate relies on several
 assumptions, including consistency and the stable unit treatment value
 assumption, conditional exchangeability, and positivity; Chapter 5
@@ -368,9 +367,10 @@ model fails, the package reports unavailable inference rather than
 silently dropping it. Augmented estimates of risk are not constrained to
 lie within 0 and 1.</p>
 </div>
-<div class="section level3">
-<h3 id="compare-risk-differences">Compare risk differences<a class="anchor" aria-label="anchor" href="#compare-risk-differences"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="compare-risk-differences">Compare risk differences<a class="anchor" aria-label="anchor" href="#compare-risk-differences"></a>
+</h2>
 <p>All three estimates compare drug1 with drug0 on the same absolute
 probability scale. The unadjusted comparison describes the observed
 treatment groups. The identity-link binomial estimate uses the outcome
@@ -452,7 +452,6 @@ described above.</p>
 patients with a relapse under drug1. The intervals describe uncertainty
 around each estimate; they do not test whether the methods differ from
 one another.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="related-vignettes">Related vignettes<a class="anchor" aria-label="anchor" href="#related-vignettes"></a>

@@ -28,12 +28,12 @@ average treatment effect (CATE) score via cross-validation (CV)."><meta property
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -42,7 +42,6 @@ average treatment effect (CATE) score via cross-validation (CV)."><meta property
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
       </ul></div>
 
@@ -478,7 +477,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 7.39 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 7.25 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cate_1</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="catecv-1.png" alt="" width="700" height="433"></span>

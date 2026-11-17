@@ -66,13 +66,11 @@ USD. The simulation coefficients are illustrative and are not clinical
 estimates. Unlike a count rate ratio, the relapse risk difference
 depends on the selected threshold and follow-up period.
 
-## Estimate the average treatment effect
-
 For the estimators and their assumptions, see [Methods for estimating
 average treatment
 effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
 
-### Unadjusted treatment comparison
+## Unadjusted treatment comparison
 
 We first compare the observed relapse proportions under drug1 and drug0.
 
@@ -95,7 +93,7 @@ effect.
 The 95% confidence interval is -0.085 to -0.024, based on a normal
 approximation for two independent proportions.
 
-### Covariate-adjusted treatment comparison
+## Covariate-adjusted treatment comparison
 
 Treatment assignment may differ according to baseline characteristics.
 We fit a multivariable binomial model adjusting for age, sex, previous
@@ -148,7 +146,7 @@ over the study population. A causal interpretation requires, among other
 assumptions, a correctly specified outcome model, no unmeasured
 confounding, and adequate treatment overlap.
 
-### Population-level treatment comparison using `atefit()`
+## Population-average treatment effects using `atefit()`
 
 `atefit(response = "binary")` estimates the difference in relapse
 probability under drug1 and drug0. Negative values favor drug1 because
@@ -221,6 +219,8 @@ error, a 95% Wald confidence interval of -0.147 to -0.069, and a
 two-sided Wald p-value for the risk difference. The causal
 interpretation depends on the assumptions described above.
 
+### Diagnostics
+
 A causal interpretation of this estimate relies on several assumptions,
 including consistency and the stable unit treatment value assumption,
 conditional exchangeability, and positivity; Chapter 5 discusses these
@@ -279,7 +279,7 @@ vignette fast; use more for an analysis. If a bootstrap model fails, the
 package reports unavailable inference rather than silently dropping it.
 Augmented estimates of risk are not constrained to lie within 0 and 1.
 
-### Compare risk differences
+## Compare risk differences
 
 All three estimates compare drug1 with drug0 on the same absolute
 probability scale. The unadjusted comparison describes the observed

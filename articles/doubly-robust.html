@@ -46,12 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">ATE estimation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">CATE score development and validation for binary outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">ATE estimation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">CATE score development and validation for count outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">ATE estimation for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">CATE score development and validation for survival outcomes</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -61,7 +61,6 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Functions</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
 <li class="nav-item"><a class="nav-link" href="../authors.html#citation">Citation</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed/issues">Support</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="external-link nav-link" href="https://github.com/smartdata-analysis-and-statistics/precmed" aria-label="Source code"><span class="fa fa-github"></span></a></li>
@@ -238,20 +237,20 @@ approaches below.</p>
 <code>outcome_model</code> specifies the outcome and covariates; by
 default, <code><a href="../reference/atefit.html">atefit()</a></code> fits a separate logistic outcome model
 for each treatment arm. <code>ps.model</code> specifies the treatment
-model. The 50 bootstrap replicates keep this example quick; use more for
-a substantive analysis and examine bootstrap diagnostics.</p>
+model. The 100 bootstrap replicates keep this example quick; use more
+for a substantive analysis and examine bootstrap diagnostics.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">dat</span>,</span>
 <span>              outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>              ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>              outcome_method <span class="op">=</span> <span class="st">"logistic"</span>, n.boot <span class="op">=</span> <span class="fl">50</span>, seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
+<span>              outcome_method <span class="op">=</span> <span class="st">"logistic"</span>, n.boot <span class="op">=</span> <span class="fl">100</span>, seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>outcome_standardization <span class="op">=</span> <span class="va">standardized</span>, ipw <span class="op">=</span> <span class="va">ipw</span>,</span>
 <span>  doubly_robust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">risk.difference</span><span class="op">$</span><span class="va">estimate</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; outcome_standardization                     ipw           doubly_robust </span></span>
 <span><span class="co">#&gt;             -0.10298071             -0.09978176             -0.10762720</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                      2.5 %      97.5 %</span></span>
-<span><span class="co">#&gt; risk.difference -0.1421899 -0.07306452</span></span></code></pre></div>
+<span><span class="co">#&gt; risk.difference -0.1464453 -0.06880907</span></span></code></pre></div>
 <p>The estimates need not agree in a finite sample, even when the
 necessary assumptions hold. The displayed confidence interval applies to
 the <code><a href="../reference/atefit.html">atefit()</a></code> estimate, not the two illustrative

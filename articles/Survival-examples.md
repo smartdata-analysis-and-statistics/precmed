@@ -79,13 +79,11 @@ legend("bottomleft", legend = c("drug0", "drug1"),
 
 ![](Survival-examples_files/figure-html/km_by_treatment-1.png)
 
-## Estimate the average treatment effect
-
 For the estimators and their assumptions, see [Methods for estimating
 average treatment
 effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md).
 
-### Unadjusted treatment comparison
+## Unadjusted treatment comparison
 
 We first compare time to first relapse between treatment groups using a
 Cox model with treatment as the only predictor. This unadjusted,
@@ -146,7 +144,7 @@ large p-value does not prove that the HR is constant. Later follow-up is
 less informative when fewer patients remain at risk, as reflected in the
 wider uncertainty bands.
 
-### Covariate-adjusted treatment comparison
+## Covariate-adjusted treatment comparison
 
 In this synthetic dataset, treatment assignment depends on baseline
 characteristics rather than being randomized. To account for measured
@@ -203,7 +201,7 @@ the model covariates jointly, so evidence of non-proportional hazards
 may arise from covariates other than treatment. A large p-value does not
 establish that the proportional-hazards assumption holds.
 
-### Population-level treatment comparison over a fixed horizon
+## Population-average treatment effects using `atefit()`
 
 The unadjusted Cox model compares treatment groups without accounting
 for differences in their characteristics. The adjusted Cox model
@@ -336,6 +334,7 @@ fit_ate <- atefit(
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
   tau0 = tau0,
+  n.boot = 100,
   seed = 999
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -350,25 +349,25 @@ fit_ate
 #> Average treatment effect:
 #> 
 #>                                estimate         SE   CI.lower    CI.upper
-#> log.rmtl.ratio              -0.12798969 0.04568911 -0.2175387 -0.03844067
-#> log.cumulative.hazard.ratio -0.26396371 0.09846880 -0.4569590 -0.07096841
-#> risk.difference             -0.09210868 0.03436143 -0.1594558 -0.02476151
+#> log.rmtl.ratio              -0.12798969 0.05115112 -0.2282440 -0.02773534
+#> log.cumulative.hazard.ratio -0.26396371 0.10228852 -0.4644455 -0.06348190
+#> risk.difference             -0.09210868 0.03585365 -0.1623805 -0.02183682
 #>                                  pvalue
-#> log.rmtl.ratio              0.005089449
-#> log.cumulative.hazard.ratio 0.007347192
-#> risk.difference             0.007349398
+#> log.rmtl.ratio              0.012342853
+#> log.cumulative.hazard.ratio 0.009863447
+#> risk.difference             0.010198706
 #> 
 #> Estimated event risks at tau0:
 #> 
 #>        estimate         SE  CI.lower  CI.upper pvalue
-#> risk1 0.6930348 0.02602991 0.6420171 0.7440524      0
-#> risk0 0.7851434 0.01813145 0.7496064 0.8206804      0
+#> risk1 0.6930348 0.02780136 0.6385451 0.7475244      0
+#> risk0 0.7851434 0.01753849 0.7507686 0.8195182      0
 #> 
 #> Estimated RMST:
 #> 
-#>       estimate        SE CI.lower CI.upper pvalue
-#> rmst1 467.9432 10.432618 447.4956 488.3908      0
-#> rmst0 425.5458  9.302363 407.3135 443.7781      0
+#>       estimate       SE CI.lower CI.upper pvalue
+#> rmst1 467.9432 10.88991 446.5994 489.2870      0
+#> rmst0 425.5458 10.17076 405.6115 445.4801      0
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
 
@@ -392,13 +391,13 @@ upper (“CI.upper”) bound of the 95% confidence interval, and the p-value
   drug 0.
 
 For example, the log RMTL ratio of -0.13 and the 95% confidence interval
-of (-0.22, -0.04) are displayed in the output. The estimated ratio and
+of (-0.23, -0.03) are displayed in the output. The estimated ratio and
 its interval can be obtained by exponentiating these log-scale values. A
 ratio above 1 indicates more time lost before `tau0` under drug 1; the
 interval describes uncertainty in that comparison. The RMST estimates
 provide the corresponding event-free times up to `tau0`.
 
-#### Treatment and overlap diagnostics
+### Treatment and overlap diagnostics
 
 The RMTL and cumulative hazard ratios compare the treatment coded as 1
 with the treatment coded as 0; their log ratios are reported in the
@@ -457,7 +456,7 @@ confounding.
 For survival outcomes these are treatment weights only; they do not
 summarize censoring weights or follow-up near the horizon.
 
-#### Inspecting bootstrap estimates
+### Inspecting bootstrap estimates
 
 `plot(fit_ate)` displays the bootstrap estimates for the reported
 quantities. By default, the first row shows treatment-specific RMST and
@@ -479,7 +478,7 @@ plot(fit_ate)
 
 Histograms of bootstrap estimates for the reported quantities.
 
-#### Comparing outcome models
+### Alternative outcome model
 
 As an alternative, we can fit a Weibull outcome model separately in each
 treatment arm. The Weibull models assume proportional hazards across
@@ -497,6 +496,7 @@ fit_ate_weibull <- atefit(
   outcome_method = "weibull",
   ps.model = trt ~ age + previous_treatment,
   tau0 = tau0,
+  n.boot = 100,
   seed = 999
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -504,14 +504,14 @@ fit_ate_weibull <- atefit(
 
 The table compares the estimated population-average RMTL ratio for drug
 1 versus drug 0 at `tau0`, with 95% confidence intervals. Both fits use
-500 bootstrap samples and estimate the same quantity; their estimates
+100 bootstrap samples and estimate the same quantity; their estimates
 can differ because of their outcome-model assumptions. The intervals use
 the bootstrap standard errors.
 
 |         | RMTL ratio | 95% CI lower | 95% CI upper |
 |:--------|-----------:|-------------:|-------------:|
-| Cox     |       0.88 |        0.804 |        0.962 |
-| Weibull |       0.88 |        0.804 |        0.962 |
+| Cox     |       0.88 |        0.796 |        0.973 |
+| Weibull |       0.88 |        0.796 |        0.973 |
 
 ## Related vignettes
 
