@@ -54,7 +54,7 @@ Binary scores are risk differences, count scores are log rate ratios,
 \examples{
 \donttest{
 d <- simulate_binary(n = 300, seed = 1)
-fit <- catefit("binary", d, "twoReg", y ~ age, trt ~ age,
+fit <- catefit("binary", d, y ~ age, "logistic", "two_regression", trt ~ age,
                prop.cutoff = 1, B = 1, Kfold = 2, seed = 1, higher.y = FALSE)
 plot(fit)
 }

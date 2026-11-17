@@ -3,23 +3,22 @@
 #'
 #' Continuous-outcome average treatment effect estimation is not yet implemented.
 #'
-#' @param outcome_model A formula specifying the outcome model, with the
-#' continuous outcome on the left and baseline covariates on the right. Do not
-#' include treatment. Continuous-outcome fitting is not yet implemented.
-#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
-#' The treatment must appear on the left-hand side. The treatment must be a
-#' numeric vector coded as 0/1. If data are from a RCT, specify \code{ps.model}
-#' as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and
 #' treatment models; a data frame with \code{n} rows (1 row per
 #' observation).
-#' @param ps.method A character value for the method to estimate the propensity
+#' @param outcome_model A formula specifying the outcome model, with the
+#' continuous outcome on the left and baseline covariates on the right. Do not
+#' include treatment. Continuous-outcome fitting is not yet implemented.
+#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted.
+#' The treatment must appear on the left-hand side. The treatment must be a
+#' numeric vector coded as 0/1. If data are from a RCT, specify \code{ps_model}
+#' as an intercept-only model.
+#' @param ps_method A character value for the method to estimate the propensity
 #' score. Allowed values include one of: \code{'glm'} for logistic regression
 #' with main effects only (default), or \code{'lasso'} for a logistic regression
 #' with main effects and LASSO penalization on two-way interactions (added to
-#' the model if interactions are not specified in \code{ps.model}). Relevant
-#' only when \code{ps.model} has more than one variable.
+#' the model if interactions are not specified in \code{ps_model}). Relevant
+#' only when \code{ps_model} has more than one variable.
 #' @param minPS A numerical value between 0 and 1 below which estimated
 #' propensity scores should be truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value between 0 and 1 above which estimated
@@ -27,9 +26,6 @@
 #' \code{minPS}. Default is \code{0.99}.
 #' @param n.boot A numeric value indicating the number of bootstrap samples
 #' used. Default is \code{500}.
-#' @param verbose An integer value indicating whether intermediate progress
-#' messages and histograms should be printed. \code{1} indicates messages are
-#' printed and \code{0} otherwise. Default is \code{0}.
 #' @param plot.boot A logical value indicating whether histograms of the
 #' bootstrapped treatment effect estimates should be produced at every
 #' \code{n.boot/10}-th iteration and whether the final histogram should be
@@ -37,63 +33,49 @@
 #' @param seed An optional integer specifying an initial randomization seed for
 #' reproducibility. Default is \code{NULL}, corresponding to no seed.
 #'
-#' @return Return a list of 8 elements:
-#' \itemize{
-#'   \item{\code{log.rate.ratio}: } A numeric value of the estimated log rate ratio.
-#'   \item{\code{se.boot.log.rate.ratio}: } A numeric value of the bootstrap standard error of log rate ratio.
-#'   \item{\code{rate.ratio}: } A numeric value of the estimated rate ratio.
-#'   \item{\code{rate.ratio0}: } A numeric value of the estimated rate in the group trt=0.
-#'   \item{\code{rate.ratio1}: } A numeric value of the estimated rate in the group trt=1.
-#'   \item{\code{rate.ratio.CIl}: } A numeric value of the lower limit 95\% bootstrap confidence interval
-#'     for estimated rate ratio.
-#'   \item{\code{rate.ratio.CIu}: } A numeric value of the upper limit 95\% bootstrap confidence interval
-#'     for estimated rate ratio.
-#'   \item{\code{pvalue}: } A numeric value of the p-value derived from the bootstrapped values
-#'     based on a Chi-squared distribution.
-#'   \item{\code{warning}: } A warning message produced if the treatment variable was not coded as 0/1. The key
-#'   to map the original coding of the variable to a 0/1 key is displayed in the warning to facilitate the
-#'   interpretation of the remaining of the output.
-#'   \item{\code{plot}: } If \code{plot.boot} is \code{TRUE}, a histogram displaying the distribution of the bootstrapped log rate ratios.
-#'   The red vertical reference line in the histogram represents the estimated log rate ratio.
-#' }
+#' @param verbose An integer value indicating whether intermediate progress
+#' messages and histograms should be printed. \code{1} indicates messages are
+#' printed and \code{0} otherwise. Default is \code{0}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param ... Additional arguments. The deprecated named argument \code{cate.model}
+#' is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+#' one of these arguments. The deprecated aliases \code{ps.model} and
+#' \code{ps.method} are also accepted with warnings; use \code{ps_model} and
+#' \code{ps_method} instead. Other arguments are currently unsupported.
+#' @return Continuous-outcome fitting is not implemented; this function stops
+#' with an error and does not return an object.
 #'
-#' @details This helper function estimates the average treatment effect (ATE) between two
-#'  treatment groups in a given dataset specified by \code{y, trt, x.cate, x.ps, time}. The ATE is
-#'  estimated with a doubly robust estimator that accounts for imbalances in covariate distributions
-#'  between the two treatment groups with inverse probability treatment weighting.
-#'  For count outcomes, the estimated ATE is the estimated
-#'  rate ratio between treatment 1 versus treatment 0. Both original and log-transformed ATEs are
-#'  returned, as well as the rate in either treatment group.
-#'  If \code{inference = TRUE}, the variability of the estimated rate ratio is also calculated
-#'  using bootstrap. Additional variability outputs include standard error of the log rate ratio,
-#'  95\% confidence interval of the rate ratio, p-value, and a histogram of the log rate ratio.
+#' @details Continuous-outcome estimation is not currently available.
 #'
 #' @examples
 #' # This module is not implemented yet!
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @importFrom dplyr mutate
 
 atefitmean <- function(data,
                        outcome_model,
-                       ps.model,
-                       ps.method = "glm",
+                       ps_model,
+                       ps_method = "glm",
                        minPS = 0.01,
                        maxPS = 0.99,
                        n.boot = 500,
                        plot.boot = FALSE,
                        seed = NULL,
-                       verbose = 0, ps.control = list(), cate.model = NULL) {
-  if (!missing(cate.model)) {
-    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
-    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
-    outcome_model <- cate.model
-  }
+                       verbose = 0, ps.control = list(), ...) {
+  .args <- as.list(match.call())[-1L]
+  aliases <- intersect(names(.args), c("cate.model", "ps.model", "ps.method"))
+  .args <- resolve_ate_aliases(.args, reject_unknown = TRUE,
+                               allowed = names(formals(sys.function())))
+  if ("cate.model" %in% aliases) outcome_model <- eval(.args$outcome_model, parent.frame())
+  if ("ps.model" %in% aliases) ps_model <- eval(.args$ps_model, parent.frame())
+  if ("ps.method" %in% aliases) ps_method <- eval(.args$ps_method, parent.frame())
+  if (!missing(ps_model)) ps.model <- ps_model
+  ps.method <- ps_method
   if (missing(outcome_model)) stop("outcome_model must be supplied.")
   cate.model <- outcome_model
 

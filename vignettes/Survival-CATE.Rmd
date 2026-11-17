@@ -30,7 +30,7 @@ This vignette fits and internally validates conditional treatment-effect scores 
 
 ## Prepare the data
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(precmed)
 library(dplyr)
 library(ggplot2)
@@ -55,7 +55,7 @@ The mandatory arguments in `catefit()` are:
 
 * `data`: the name of the data set. (survival_data)
 
-* `score.method`: argument specifies the precision medicine (PM) methods to be used to calculate the CATE scores. There are a total of 5 scoring methods implemented:
+* `benefit_method` and `outcome_method` specify paired score-construction and outcome-model methods. The following existing score labels are returned:
 
     *   `poisson` fits a Poisson model separately by treatment group.
 
@@ -67,7 +67,7 @@ The mandatory arguments in `catefit()` are:
 
     *   `contrastReg` implements the doubly robust contrast regression estimator from [@yadlowsky2020estimation].
 
-* `cate.model`: A formula describing the outcome model to be fitted. The outcome must appear on the left-hand side. In the example, we choose to specify to outcome model as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in `cate.model` since this is an outcome model.
+* `outcome_model`: A formula describing the outcome model to be fitted. The outcome must appear on the left-hand side. In the example, we choose to specify to outcome model as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in `outcome_model` since this is an outcome model.
 
 * `ps.model`: A formula describing the treatment model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and an informational message is shown (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The treatment model is used to estimate overall and subgroup average treatment effects. It is also used to fit the doubly robust two-regression and contrast-regression CATE scores; other scoring methods need not use it to construct their scores.  
 
@@ -91,9 +91,10 @@ For this toy example we selected `randomForest` and `contrastReg` to limit run t
 fit_cate <- catefit(
   response = "survival",
   data = survival_data,
-  score.method = c("randomForest", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
+  outcome_method = c("random_forest", "logistic"),
+  benefit_method = c("t_learner", "contrast_regression"),
   ps.model = trt ~ age + previous_treatment,
   initial.predictor.method = "logistic",
   tau0 = tau0,

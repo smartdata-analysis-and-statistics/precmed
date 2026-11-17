@@ -22,24 +22,24 @@ navbar:
     menu:
     - text: Understanding doubly robust methods
       href: articles/doubly-robust.html
+    - text: Methods for estimating average treatment effects
+      href: articles/ATE-theory.html
     - text: ATE estimation for binary outcomes
       href: articles/Binary-examples.html
-    - text: CATE score development and validation for binary outcomes
-      href: articles/Binary-CATE.html
     - text: ATE estimation for count outcomes
       href: articles/Count-examples.html
-    - text: CATE score development and validation for count outcomes
-      href: articles/Count-CATE.html
     - text: ATE estimation for survival outcomes
       href: articles/Survival-examples.html
+    - text: Methods for developing and validating CATE scores
+      href: articles/Theoretical-details.html
+    - text: CATE score development and validation for binary outcomes
+      href: articles/Binary-CATE.html
+    - text: CATE score development and validation for count outcomes
+      href: articles/Count-CATE.html
     - text: CATE score development and validation for survival outcomes
       href: articles/Survival-CATE.html
     - text: Customizing CATE models and validation
       href: articles/Additional-examples.html
-    - text: Methods for estimating average treatment effects
-      href: articles/ATE-theory.html
-    - text: Methods for developing and validating CATE scores
-      href: articles/Theoretical-details.html
     href: articles/index.html
   - text: Learning resources
     href: articles/learning-resources.html
@@ -53,4 +53,23 @@ navbar:
   - icon: fa-github
     aria-label: Source code
     href: https://github.com/smartdata-analysis-and-statistics/precmed
+
+articles:
+- title: Vignettes
+  contents:
+  - doubly-robust
+  - ATE-theory
+  - Binary-examples
+  - Count-examples
+  - Survival-examples
+  - Theoretical-details
+  - Binary-CATE
+  - Count-CATE
+  - Survival-CATE
+  - Additional-examples
+- title: Getting started and learning resources
+  contents:
+  - quick-start
+  - precmed
+  - learning-resources
 

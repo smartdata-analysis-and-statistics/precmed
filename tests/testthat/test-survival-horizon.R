@@ -8,7 +8,7 @@ test_that("survival horizon preserves events and removes the conditional HR from
   expect_message(fit <- atefitsurv(
     data = dat,
     outcome_model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-    ps.model = trt ~ age + previous_treatment,
+    ps_model = trt ~ age + previous_treatment,
     tau0 = tau, n.boot = 2, seed = 123, rmst.control = list(solver = "R")
   ), "recoded to 0/1")
   expect_equal(sum(diagnostics(fit, "propensity", "arms")$n), nrow(dat))

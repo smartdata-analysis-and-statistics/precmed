@@ -5,6 +5,9 @@
 #' treatments, which is the rate ratio for count outcomes. Bootstrap is used for
 #' inference.
 #'
+#' @param data A data frame containing the variables in the outcome, treatment
+#' and censoring models (if specified); a data
+#' frame with \code{n} rows (1 row per observation).
 #' @param outcome_model A formula specifying the count outcome model, fitted
 #' separately in each treatment arm by default. Put the count outcome on the
 #' left and baseline covariates on the right; do not include treatment. Include
@@ -14,20 +17,16 @@
 #' \code{"negative_binomial"} (also accepted as \code{"negbin"}). Negative
 #' binomial models estimate dispersion separately by treatment arm. The method is refitted
 #' in each bootstrap sample. Failed fits are recorded in bootstrap diagnostics.
-#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
-#' @param ps.model A formula describing the treatment model (propensity-score
+#' @param ps_model A formula describing the treatment model (propensity-score
 #' model) to be fitted. The treatment must appear on the left-hand side. The treatment must
 #' be a numeric vector coded as 0 or 1. If data are from a randomized controlled
-#' trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, treatment
-#' and censoring models (if specified); a data
-#' frame with \code{n} rows (1 row per observation).
-#' @param ps.method A character value for the method to estimate the propensity
+#' trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.
+#' @param ps_method A character value for the method to estimate the propensity
 #' score. Allowed values include one of: \code{'glm'} for logistic regression
 #' with main effects only (default), or \code{'lasso'} for a logistic regression
 #' with main effects and LASSO penalization on two-way interactions (added to
-#' the model if interactions are not specified in \code{ps.model}). Relevant
-#' only when \code{ps.model} has more than one variable.
+#' the model if interactions are not specified in \code{ps_model}). Relevant
+#' only when \code{ps_model} has more than one variable.
 #' @param minPS A numerical value between 0 and 1 below which estimated
 #' propensity scores should be truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value between 0 and 1 above which estimated
@@ -41,27 +40,18 @@
 #' messages should be printed. \code{1} indicates messages are printed and
 #' \code{0} otherwise. Default is \code{0}.
 #'
-#' @return Return an item of the class \code{atefit} with the following
-#' elements:
-#' \itemize{
-#'   \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
-#'   ATE (expressed as a log rate ratio of \code{trt=1} over \code{trt=0}),
-#'   the bootstrap standard error, the lower and upper limits of 95\% confidence
-#'   interval, and the p-value.
-#'   \item{\code{rate0}: } A numeric value of the estimated rate in the group
-#'   \code{trt=0}.
-#'   \item{\code{rate1}: } A numeric value of the estimated rate in the group
-#'   \code{trt=1}.
-#'   \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
-#'   sample.
-#'   \item{\code{rate.boot}: } A data frame of treatment-specific rate estimates
-#'   in each bootstrap sample, with columns \code{rate0} and \code{rate1}.
-#'   \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1.
-#'   \item{\code{warning}: } A warning message produced if the treatment
-#'   variable was not coded as 0 or 1. The key to map the original coding of the
-#'   variable to a 0-1 coding is displayed in the warning to facilitate the
-#'   interpretation of the remaining of the output.
-#' }
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param ... Additional arguments. The deprecated named argument \code{cate.model}
+#' is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+#' one of these arguments. The deprecated aliases \code{ps.model} and
+#' \code{ps.method} are also accepted with warnings; use \code{ps_model} and
+#' \code{ps_method} instead. Other arguments are currently unsupported.
+#' @return An object of class \code{atefit}. See \code{\link{atefit}}
+#' for available methods and the contents of the fitted object.
 #'
 #' @details This helper function estimates the average treatment effect (ATE)
 #' between two treatment groups in a given dataset. The ATE is estimated with a
@@ -81,30 +71,25 @@
 #'                       outcome_model = y ~ age + female + previous_treatment +
 #'                                    previous_cost + previous_number_relapses +
 #'                                    offset(log(years)),
-#'                       ps.model = trt ~ age + previous_treatment,
+#'                       ps_model = trt ~ age + previous_treatment,
 #'                       verbose = 1, n.boot = 50, seed = 999)
 #' output
 #' plot(output)
 #' @export
 #'
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @importFrom dplyr mutate
 #'
 
 atefitcount <- function(data,
                         outcome_model,
                         outcome_method = "poisson",
-                        ps.model,
-                        ps.method = "glm",
+                        ps_model,
+                        ps_method = "glm",
                         minPS = 0.01,
                         maxPS = 0.99,
                         n.boot = 500,
                         seed = NULL,
-                        verbose = 0, ps.control = list(), cate.model = NULL) {
+                        verbose = 0, ps.control = list(), ...) {
   call_names <- names(as.list(sys.call()))
   named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
   if (!missing(outcome_method) && !named_method &&
@@ -113,11 +98,15 @@ atefitcount <- function(data,
         !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
     return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
 
-  if (!missing(cate.model)) {
-    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
-    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
-    outcome_model <- cate.model
-  }
+  .args <- as.list(match.call())[-1L]
+  aliases <- intersect(names(.args), c("cate.model", "ps.model", "ps.method"))
+  .args <- resolve_ate_aliases(.args, reject_unknown = TRUE,
+                               allowed = names(formals(sys.function())))
+  if ("cate.model" %in% aliases) outcome_model <- eval(.args$outcome_model, parent.frame())
+  if ("ps.model" %in% aliases) ps_model <- eval(.args$ps_model, parent.frame())
+  if ("ps.method" %in% aliases) ps_method <- eval(.args$ps_method, parent.frame())
+  if (!missing(ps_model)) ps.model <- ps_model
+  ps.method <- ps_method
   if (missing(outcome_model)) stop("outcome_model must be supplied.")
   cate.model <- outcome_model
 

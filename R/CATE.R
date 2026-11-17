@@ -1,7 +1,7 @@
 #' Estimate conditional treatment effect scores
 #'
 #' Estimate CATE scores for binary, count and survival outcomes. Binary scores
-#' include pooled logistic regression, doubly robust two-regression estimation and
+#' include arm-specific logistic regression, doubly robust two-regression estimation and
 #' boosting. Count and survival methods include both outcome-regression and
 #' doubly robust scores. Continuous outcomes are not yet implemented.
 #'
@@ -9,14 +9,25 @@
 #' "binary", "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
 #' @param data A data frame containing the variables in the outcome, treatment,
 #' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
-#' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-#' \code{'gaussian'} (continuous outcomes only). For binary outcomes, use
-#' \code{'logistic'}, \code{'twoReg'}, or \code{'boosting'}.
-#' @param cate.model A formula describing the outcome model to be fitted.
+#' @param outcome_model A formula describing the outcome and score covariates.
 #' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 #' must be used to describe the outcome.
+#' @param outcome_method A character vector with one entry per \code{benefit_method}.
+#' For T-learners the available methods are \code{"logistic"} or \code{"boosting"}
+#' for binary outcomes, \code{"poisson"}, \code{"negative_binomial"}, or
+#' \code{"boosting"} for count outcomes, and \code{"poisson"}, \code{"boosting"},
+#' or \code{"random_forest"} for survival outcomes. For two-regression or contrast
+#' regression it selects the initial outcome models: binary supports only
+#' \code{"logistic"}, count supports \code{"poisson"}, \code{"boosting"}, or
+#' \code{"gam"}, and survival supports \code{"logistic"}, \code{"boosting"},
+#' or \code{"random_forest"}. When both doubly robust methods are requested,
+#' they must use the same initial outcome method. An explicitly supplied
+#' \code{initial.predictor.method} must agree with it. Repeated configurations
+#' that would produce the same score name are not supported.
+#' @param benefit_method A vector of score-construction methods: \code{"t_learner"},
+#' \code{"two_regression"}, or \code{"contrast_regression"}. Each is paired
+#' with the corresponding entry in \code{outcome_method}. Contrast regression
+#' is not available for binary outcomes. Continuous outcomes are not implemented.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. For binary outcomes, logical treatment values
 #' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
@@ -30,13 +41,13 @@
 #' Relevant only when \code{ps.model} has more than one variable.
 #' @param init.model Optional formula for the initial treatment-specific outcome models
 #' used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-#' \code{twoReg} only). The outcome must match \code{cate.model}. The default
-#' \code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
-#' is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
+#' \code{twoReg} only). The outcome must match \code{outcome_model}. The default
+#' \code{NULL} uses \code{outcome_model}. For count outcomes the exposure offset
+#' is taken from \code{outcome_model}; an offset in \code{init.model}, if supplied,
 #' must match it. Other score methods do not use this argument. Continuous-outcome
 #' fitting and validation are not currently implemented.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
+#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{outcome_model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
 #' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
@@ -45,7 +56,7 @@
 #' @param ipcw.model A formula describing the censoring model used for inverse
 #' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which uses a censoring model with the same covariates
-#' as the outcome model \code{cate.model}, plus the treatment.
+#' as the outcome model \code{outcome_model}, plus the treatment.
 #' @param ipcw.method A character value for the censoring model. Only applies for survival
 #' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
 #' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
@@ -74,7 +85,7 @@
 #' outcomes. Default is \code{0.025}.
 #' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
+#' from the variables listed in \code{outcome_model}.
 #' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
 #' from the variables listed in \code{init.model}.
@@ -117,13 +128,17 @@
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
+#' The old named arguments \code{score.method} and \code{cate.model} are
+#' accepted with deprecation warnings. Legacy score names and positional calls
+#' remain supported when \code{outcome_method} is omitted.
 #'
 #' @section Binary outcomes:
 #' For \code{response = "binary"}, \code{score.method = "logistic"}
-#' fits a logistic model with treatment interactions. \code{"twoReg"} cross-fits
+#' fits a separate logistic outcome model in each treatment arm and subtracts
+#' their predicted risks. \code{"twoReg"} cross-fits
 #' separate logistic outcome models and a treatment model, then projects the
 #' augmented inverse-propensity outcomes for each arm onto the covariates in
-#' \code{cate.model} using linear regression. The score is the difference of
+#' \code{outcome_model} using linear regression. The score is the difference of
 #' these projections, averaged over \code{B} repetitions of \code{Kfold} folds.
 #' It estimates the linear projection of the conditional risk difference if
 #' either the treatment model or both outcome models are correct, under
@@ -132,8 +147,8 @@
 #' equals the conditional risk difference only if that difference is linear in
 #' the specified design. The difference between arm coefficients is returned in
 #' \code{coefficients$twoReg} and by \code{coef()}; the separate arm coefficients
-#' are stored in \code{fit$twoReg$coefficients}. Logistic model coefficients are
-#' on the log-odds scale and are stored in \code{fit$logistic}; they are not
+#' are stored in \code{fit$twoReg$coefficients}. Logistic model coefficients
+#' for each arm are on the log-odds scale and stored in \code{fit$logistic}; they are not
 #' linear risk-difference score coefficients. Boosting does not have a linear
 #' score coefficient vector. With neither \code{twoReg} nor another linear
 #' binary score, \code{coef()} returns \code{NULL}.
@@ -217,10 +232,11 @@
 #' # Count outcome
 #' fit_1 <- catefit(response = "count",
 #'                  data = countExample,
-#'                  score.method = "poisson",
-#'                  cate.model = y ~ age + female + previous_treatment +
+#'                  outcome_model = y ~ age + female + previous_treatment +
 #'                                   previous_cost + previous_number_relapses +
 #'                                   offset(log(years)),
+#'                  outcome_method = "poisson",
+#'                  benefit_method = "t_learner",
 #'                  ps.model = trt ~ age + previous_treatment,
 #'                  higher.y = TRUE,
 #'                  seed = 999)
@@ -235,9 +251,10 @@
 #'
 #' fit_2 <- catefit(response = "survival",
 #'                  data = survivalExample,
-#'                  score.method = c("poisson", "boosting", "randomForest"),
-#'                  cate.model = Surv(y, d) ~ age + female + previous_cost +
+#'                  outcome_model = Surv(y, d) ~ age + female + previous_cost +
 #'                                            previous_number_relapses,
+#'                  outcome_method = c("poisson", "boosting", "random_forest"),
+#'                  benefit_method = rep("t_learner", 3),
 #'                  ps.model = trt ~ age + previous_treatment,
 #'                  initial.predictor.method = "logistic",
 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
@@ -267,8 +284,9 @@
 
 catefit <- function(response,
                     data,
-                    score.method,
-                    cate.model,
+                    outcome_model,
+                    outcome_method = NULL,
+                    benefit_method,
                     ps.model,
                     ps.method = "glm",
                     init.model = NULL,
@@ -298,7 +316,70 @@ catefit <- function(response,
                     contrast.control = list(),
                     rmst.control = list(), ps.control = list(), rf.control = list(), ...) {
   check_response(response)
-  check_score_method(response, score.method)
+  call_names <- names(as.list(sys.call()))
+  matched <- as.list(match.call())[-1]
+  candidate <- if ("outcome_model" %in% names(matched) &&
+                   (is.null(call_names) || !"outcome_model" %in% call_names))
+    tryCatch(eval(matched$outcome_model, parent.frame()), error = function(e) NULL) else NULL
+  old_positional <- is.character(candidate) && length(candidate) > 0L &&
+    all(candidate %in% c("logistic", "boosting", "poisson", "twoReg", "contrastReg",
+                         "negBin", "randomForest", "gam", "gaussian",
+                         "t_learner", "two_regression", "contrast_regression"))
+  old_named <- !is.null(call_names) && any(call_names %in% c("score.method", "cate.model")) &&
+    !any(call_names %in% c("benefit_method", "outcome_model"))
+  if (old_positional || old_named) {
+    old_formals <- as.list(formals(sys.function()))
+    old_formals <- old_formals[c("response", "data", "benefit_method", "outcome_model",
+                                 setdiff(names(old_formals), c("response", "data", "benefit_method",
+                                                               "outcome_model", "outcome_method", "...")),
+                                 "outcome_method", "...")]
+    names(old_formals)[names(old_formals) == "benefit_method"] <- "score.method"
+    names(old_formals)[names(old_formals) == "outcome_model"] <- "cate.model"
+    old_signature <- eval(call("function", as.pairlist(old_formals), quote(NULL)))
+    .args <- as.list(match.call(definition = old_signature, call = sys.call()))[-1]
+    for (alias in c("score.method", "cate.model")) {
+      if (alias %in% names(.args)) {
+        replacement <- if (alias == "score.method") "benefit_method" else "outcome_model"
+        if (!is.null(call_names) && alias %in% call_names)
+          warning(alias, " is deprecated for catefit(); use ", replacement, " instead.", call. = FALSE)
+        names(.args)[names(.args) == alias] <- replacement
+      }
+    }
+    return(do.call(sys.function(), .args, envir = parent.frame()))
+  } else {
+    .args <- matched
+  }
+  for (alias in c("score.method", "cate.model")) {
+    if (alias %in% names(.args)) {
+      replacement <- if (alias == "score.method") "benefit_method" else "outcome_model"
+      if (replacement %in% names(.args)) stop("Specify only ", replacement, "; ", alias, " is deprecated.", call. = FALSE)
+      warning(alias, " is deprecated for catefit(); use ", replacement, " instead.", call. = FALSE)
+      names(.args)[names(.args) == alias] <- replacement
+    }
+  }
+  if (!"benefit_method" %in% names(.args)) stop("benefit_method must be supplied.", call. = FALSE)
+  methods <- eval(.args$benefit_method, parent.frame())
+  legacy <- is.null(outcome_method)
+  if (legacy) {
+    if (is.character(methods) && any(methods %in% c("t_learner", "two_regression", "contrast_regression")))
+      stop("outcome_method must be supplied for the selected benefit_method.", call. = FALSE)
+    check_score_method(response, methods)
+  } else {
+    config <- resolve_benefit_config(response, methods, outcome_method)
+    methods <- config$scores
+    if (!is.null(config$initial)) {
+      if (!is.null(initial.predictor.method) && !identical(initial.predictor.method, config$initial))
+        stop("initial.predictor.method must agree with the outcome_method for two_regression and contrast_regression.", call. = FALSE)
+      if (response == "binary") .args$initial.predictor.method <- NULL
+      else .args$initial.predictor.method <- config$initial
+    }
+  }
+  .args$benefit_method <- NULL
+  .args$outcome_method <- NULL
+  .args$score.method <- methods
+  if ("outcome_model" %in% names(.args)) {
+    names(.args)[names(.args) == "outcome_model"] <- "cate.model"
+  }
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
   if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
@@ -308,7 +389,6 @@ catefit <- function(response,
     stop("contrast.control is supported only for count or survival outcomes.")
   if (length(rmst.control) && response != "survival")
     stop("rmst.control is currently supported only for survival outcomes.")
-  .args <- as.list(match.call())[-1]
   .args$response <- NULL
   if (response == "count") .args$rf.control <- NULL
   if (response != "survival") .args$rmst.control <- NULL
@@ -318,13 +398,13 @@ catefit <- function(response,
            fitout <- do.call(catefitbinary, .args, envir = parent.frame())
          },
          count = {
-           fitout <- do.call(catefitcount, .args)
+           fitout <- do.call(catefitcount, .args, envir = parent.frame())
          },
          survival = {
-           fitout <- do.call(catefitsurv, .args)
+           fitout <- do.call(catefitsurv, .args, envir = parent.frame())
          },
          continuous = {
-           fitout <- do.call(catefitmean, .args)
+           fitout <- do.call(catefitmean, .args, envir = parent.frame())
          }
   )
   return(fitout)

@@ -56,6 +56,36 @@
 
 ## Minor changes
 
+* Reordered the vignette navigation to introduce ATE methods and examples
+  before CATE methods and examples. The CATE methods vignette now begins with
+  a cross-outcome introduction to CATE scores, T-learners, and validation.
+
+* `catefit()` accepts paired `benefit_method` and `outcome_method` vectors,
+  with `outcome_model` for the common outcome formula. The previous named
+  `score.method` and `cate.model` arguments remain available through `...` with
+  warnings, and earlier positional calls remain supported. The new arguments
+  follow `response` and `data` in the order `outcome_model`, `outcome_method`,
+  and `benefit_method`. The two doubly robust
+  procedures continue to share one initial outcome-model method in a call.
+
+* Binary `catefit()` and `catecv()` now fit separate logistic outcome models
+  by treatment arm for `score.method = "logistic"`. Stored fits contain one
+  model per arm; fitted scores and validation results can change, including
+  when an arm-specific design is rank deficient.
+
+* Survival `atefit()` and `atefitsurv()` now use `censoring_model` and
+  `censoring_method`. The former `ipcw.model` and `ipcw.method` names remain
+  available through `...` with deprecation warnings; supplying an old and new
+  name together is an error. Positional argument order is unchanged.
+
+* Consolidated guidance on `atefit` result fields and methods in `?atefit`,
+  with outcome-specific help pages linking to it.
+
+* `atefit()` and its outcome-specific functions now use `ps_model` and
+  `ps_method` for the treatment model and its fitting method. The former
+  `ps.model` and `ps.method` names remain available through `...` with
+  deprecation warnings; supplying an old and new name together is an error.
+
 * Split the binary, count and survival worked examples into separate ATE and
   CATE vignettes. Existing example URLs continue to lead to the ATE guides;
   the README and vignette navigation link to both guides for each outcome.
@@ -65,7 +95,7 @@
   model. Arm-specific accelerated failure time models supply RMST and horizon
   survival predictions. The Weibull model allows different shapes by arm;
   the log-normal model does not impose proportional hazards. Censoring models
-  remain controlled separately by `ipcw.method` and `ipcw.model`.
+  remain controlled separately by `censoring_method` and `censoring_model`.
 
 * `atefit()` now accepts `outcome_method`: count outcomes use `"poisson"` by
   default and also support `"negative_binomial"` (alias `"negbin"`). Binary
@@ -78,6 +108,7 @@
 * `atefit()` and outcome-specific ATE functions now use `outcome_model` for
   the outcome formula. The former named argument `cate.model` remains a
   deprecated alias and emits a warning; supplying both arguments is an error.
+  The alias is accepted through `...` rather than listed as a formal argument.
   The help describes how the outcome models handle treatment. See the major
   change above for the removal of `interactions` and its positional impact.
 

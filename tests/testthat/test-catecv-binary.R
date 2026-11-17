@@ -12,10 +12,11 @@ test_that("binary CV scores held-out data with the training model", {
   for (i in 1:2) {
     train <- fit$splits[[i]]$train; valid <- fit$splits[[i]]$valid
     expect_length(intersect(train, valid), 0)
-    outcome <- glm(y ~ trt*x, data = d[train, ], family = binomial())
+    outcome0 <- glm(y ~ x, data = d[train, ], subset = trt == 0, family = binomial())
+    outcome1 <- glm(y ~ x, data = d[train, ], subset = trt == 1, family = binomial())
     validdata <- d[valid, ]
-    score <- predict(outcome, transform(validdata, trt = 1), type = "response") -
-      predict(outcome, transform(validdata, trt = 0), type = "response")
+    score <- predict(outcome1, validdata, type = "response") -
+      predict(outcome0, validdata, type = "response")
     selected <- score >= quantile(score, .5)
     sub <- precmed:::binary_data(validdata[selected, ], y ~ x, trt ~ x)
     expected <- unname(precmed:::binary_effect(sub, "glm", .01, .99, list())[3])
@@ -29,9 +30,10 @@ test_that("binary CV scores held-out data with the training model", {
   args$higher.y <- FALSE
   reversed <- do.call(catecv, args)
   train <- reversed$splits[[1]]$train; validdata <- d[reversed$splits[[1]]$valid, ]
-  outcome <- glm(y ~ trt*x, data = d[train, ], family = binomial())
-  score <- predict(outcome, transform(validdata, trt = 1), type = "response") -
-    predict(outcome, transform(validdata, trt = 0), type = "response")
+  outcome0 <- glm(y ~ x, data = d[train, ], subset = trt == 0, family = binomial())
+  outcome1 <- glm(y ~ x, data = d[train, ], subset = trt == 1, family = binomial())
+  score <- predict(outcome1, validdata, type = "response") -
+    predict(outcome0, validdata, type = "response")
   sub <- precmed:::binary_data(validdata[score <= quantile(score, .5), ], y ~ x, trt ~ x)
   expect_equal(unname(reversed$ate.logistic$ate.est.valid.high.cv[1, 1]),
                unname(precmed:::binary_effect(sub, "glm", .01, .99, list())[3]))

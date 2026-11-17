@@ -32,9 +32,7 @@ and censoring models (if specified); a data frame with \code{n} rows (1 row per 
 \item{score.method}{One or more of \code{"logistic"}, \code{"twoReg"}, and
 \code{"boosting"}.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-must be used to describe the outcome.}
+\item{cate.model}{A formula specifying the binary outcome and score covariates.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
@@ -95,13 +93,8 @@ if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoRe
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
-\item{init.model}{Optional formula for the initial treatment-specific outcome models
-used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-\code{twoReg} only). The outcome must match \code{cate.model}. The default
-\code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
-is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
-must match it. Other score methods do not use this argument. Continuous-outcome
-fitting and validation are not currently implemented.}
+\item{init.model}{Optional formula for the initial logistic outcome models
+used by \code{twoReg}; \code{NULL} uses \code{cate.model}.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

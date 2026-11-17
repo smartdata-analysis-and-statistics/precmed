@@ -15,7 +15,7 @@ test_that("negative binomial outcome model agrees with MASS and preserves exposu
     expect_equal(actual, unname(coef(reference)), tolerance = 1e-6)
   }
   args <- list(response = "count", data = d, outcome_model = y ~ x + offset(log(years)),
-               ps.model = trt ~ x, n.boot = 5, seed = 222)
+               ps_model = trt ~ x, n.boot = 5, seed = 222)
   fit <- do.call(atefit, c(args, list(outcome_method = "negative_binomial")))
   alias <- do.call(atefit, c(args, list(outcome_method = "negbin")))
   expect_equal(fit$log.rate.ratio, alias$log.rate.ratio)
@@ -34,7 +34,7 @@ test_that("negative binomial outcome model agrees with MASS and preserves exposu
 
 test_that("outcome methods are validated for each response", {
   d <- simulate_binary(n = 250, seed = 223)
-  args <- list(data = d, outcome_model = y ~ age, ps.model = trt ~ age, n.boot = 2, seed = 1)
+  args <- list(data = d, outcome_model = y ~ age, ps_model = trt ~ age, n.boot = 2, seed = 1)
   expect_error(do.call(atefit, c(list(response = "binary"), args, list(outcome_method = "negbin"))), "logistic")
   expect_error(do.call(atefitbinary, c(args, list(outcome_method = NA_character_))), "logistic")
   dc <- simulate_count(n = 250, seed = 224)
@@ -65,11 +65,11 @@ test_that("negative binomial fitting errors are recorded for bootstrap samples",
 test_that("explicit logistic and Cox methods match the defaults", {
   b <- simulate_binary(n = 300, seed = 228)
   args <- list(response = "binary", data = b, outcome_model = y ~ age,
-               ps.model = trt ~ age, n.boot = 3, seed = 229)
+               ps_model = trt ~ age, n.boot = 3, seed = 229)
   expect_equal(do.call(atefit, args), do.call(atefit, c(args, list(outcome_method = "logistic"))))
   d <- simulate_survival(n = 350, seed = 230)
   args <- list(response = "survival", data = d, outcome_model = survival::Surv(y, d) ~ age,
-               ps.model = trt ~ age, tau0 = median(d$y) * 1.1, n.boot = 3, seed = 231)
+               ps_model = trt ~ age, tau0 = median(d$y) * 1.1, n.boot = 3, seed = 231)
   implicit <- suppressWarnings(do.call(atefit, args))
   explicit <- suppressWarnings(do.call(atefit, c(args, list(outcome_method = "coxph"))))
   expect_equal(implicit, explicit)

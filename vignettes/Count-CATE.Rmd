@@ -30,7 +30,7 @@ This vignette fits and internally validates conditional treatment-effect scores 
 
 ## Prepare the data
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(precmed)
 library(dplyr)
 library(ggplot2)
@@ -60,7 +60,7 @@ We can use `catefit()` to compare these scoring methods using the outcome and tr
 
 The score represents an estimated conditional log rate ratio: exponentiating it gives the estimated rate ratio for patients with those covariates. Lower scores therefore indicate greater estimated benefit from drug 1 in this example. Chapter 17 describes treatment effect heterogeneity and methods for CATE prediction [@hoogland2026introduction]. Because `catefit()` fits the scores using the full dataset, its results do not on their own establish performance in new patients.
 
-The mandatory arguments are: `response`, `data`, `score.method`, `cate.model`, and `ps.model`. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html) section for details. 
+The mandatory arguments are `response`, `data`, `benefit_method`, `outcome_method`, `outcome_model`, and `ps.model`. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html) section for details.
 
 If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. We set `n.cores = 1` to run boosting with one thread. `precmed` translates this argument to the GBM3 parallel settings; one thread is also the fallback when neither `n.cores` nor `par.details` is supplied and the `gbm.parallel` option is unset.
 
@@ -68,11 +68,11 @@ If you run into errors or warnings with your data, it might be helpful to go ove
 fit_cate <- catefit(
   response = "count",
   data = countExample,
-  score.method = c(
-    "poisson", "boosting", "twoReg", "contrastReg", "negBin"
-  ),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression",
+                     "contrast_regression", "t_learner"),
   ps.model = trt ~ age + previous_treatment,
   initial.predictor.method = "poisson",
   higher.y = FALSE, 

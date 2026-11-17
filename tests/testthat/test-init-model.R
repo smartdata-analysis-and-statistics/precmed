@@ -11,8 +11,8 @@ test_that("initial outcome models default to the CATE model for each outcome", {
          init.model = survival::Surv(y, d) ~ age, initial = "logistic")
   )
   for (case in cases) {
-    args <- list(response = case$response, data = case$data, score.method = "twoReg",
-                 cate.model = case$cate.model, ps.model = trt ~ age,
+    args <- list(response = case$response, data = case$data, benefit_method = "twoReg",
+                 outcome_model = case$cate.model, ps.model = trt ~ age,
                  prop.cutoff = c(0.5, 1), B = 1, Kfold = 2, seed = 56)
     if (!is.null(case$initial)) args$initial.predictor.method <- case$initial
     if (case$response == "survival") args$tau0 <- median(surv$y) * 1.1

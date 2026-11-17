@@ -407,11 +407,14 @@ plot(fit_cv_5)
 ## Other `precmed` vignettes in this series
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
-- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
-- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
 - [Methods for estimating average treatment effects](ATE-theory.html)
+- [Binary ATE example](Binary-examples.html)
+- [Count ATE example](Count-examples.html)
+- [Survival ATE example](Survival-examples.html)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)
+- [Binary CATE example](Binary-CATE.html)
+- [Count CATE example](Count-CATE.html)
+- [Survival CATE example](Survival-CATE.html)
 
 ## References
 

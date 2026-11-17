@@ -29,7 +29,7 @@ covariates, and **censoring model** for the model used to account for censoring
 in survival analyses. For binary treatment, the treatment model estimates the
 probability of treatment 1, also called the **propensity score**. These terms
 reflect the roles of the models discussed in causal inference, including
-@hernan2020whatif. The argument names `ps.model` and `ipcw.model` refer to the
+@hernan2020whatif. The argument names `ps_model` and `censoring_model` refer to the
 treatment and censoring models, respectively.
 
 ## Average treatment effect for binary outcomes
@@ -69,8 +69,8 @@ fitted separately in each treatment arm. The resulting
 $\hat m_0(\boldsymbol X_i)$ and $\hat m_1(\boldsymbol X_i)$ predict
 response for every patient under each treatment.
 
-`ps.model` specifies treatment and covariates for the treatment model. The
-default `ps.method = "glm"` uses logistic regression; `"lasso"` uses the
+`ps_model` specifies treatment and covariates for the treatment model. The
+default `ps_method = "glm"` uses logistic regression; `"lasso"` uses the
 package's LASSO propensity procedure. Write the fitted treatment-1 propensity
 as $\hat\pi_i$. It is truncated to `[minPS, maxPS]`, by default `[0.01, 0.99]`,
 before calculating the treatment weights. For a randomized trial an
@@ -185,8 +185,8 @@ event-time distributions to be appropriate. Each outcome model supplies
 predictions of each patient's RMST and survival probability at
 $\tau_0$ under each treatment. A treatment model estimates treatment
 probabilities, and a censoring model provides inverse probability of censoring
-weights (IPCW). The censoring model is controlled by `ipcw.model`,
-`ipcw.method`, and `surv.min`; the treatment model and truncation use the same
+weights (IPCW). The censoring model is controlled by `censoring_model`,
+`censoring_method`, and `surv.min`; the treatment model and truncation use the same
 controls described above. Because censoring can leave the event time unobserved,
 causal interpretation requires appropriate censoring assumptions and sufficient
 follow-up in addition to the treatment identification assumptions.
@@ -261,10 +261,13 @@ about unmeasured confounding or model misspecification. Bootstrap inference for 
 ## Other `precmed` vignettes in this series
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
-- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
-- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
-- [Customizing CATE models and validation](Additional-examples.html)
+- [Binary ATE example](Binary-examples.html)
+- [Count ATE example](Count-examples.html)
+- [Survival ATE example](Survival-examples.html)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)
+- [Binary CATE example](Binary-CATE.html)
+- [Count CATE example](Count-CATE.html)
+- [Survival CATE example](Survival-CATE.html)
+- [Customizing CATE models and validation](Additional-examples.html)
 
 ## References

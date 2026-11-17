@@ -29,7 +29,7 @@ test_that("ATE survival parametric methods fit and bootstrap arm-specific models
   tau <- unname(quantile(d$y, .7))
   args <- list(response = "survival", data = d,
                outcome_model = survival::Surv(y, d) ~ age + female,
-               ps.model = trt ~ age, tau0 = tau, n.boot = 4, seed = 403)
+               ps_model = trt ~ age, tau0 = tau, n.boot = 4, seed = 403)
   for (method in c("weibull", "log_normal")) {
     fit <- suppressMessages(do.call(atefit, c(args, list(outcome_method = method))))
     expect_true(all(is.finite(fit$trt.boot)), info = method)

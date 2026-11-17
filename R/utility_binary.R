@@ -27,7 +27,7 @@ binary_predictions <- function(y, trt, x, method = "twoReg", interactions = TRUE
     if (!fit$converged || fit$rank < ncol(design)) stop("Binary outcome model failed to converge or is rank deficient.")
     list(pred = stats::plogis(drop(new %*% fit$coefficients)), fit = fit)
   }
-  if (method == "twoReg") {
+  if (method %in% c("twoReg", "logistic_arms")) {
     f0 <- predict_fit(x, trt == 0, x); f1 <- predict_fit(x, trt == 1, x)
   } else {
     design <- cbind(x, trt = trt, if (interactions && ncol(x) > 1L) x[, -1, drop = FALSE] * trt)

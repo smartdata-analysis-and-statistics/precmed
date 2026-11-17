@@ -240,7 +240,7 @@ test_that("count ATE plots show treatment-specific bootstrap rates", {
 test_that("count ATE retains bootstrap rates and original treatment labels", {
   data(countExample, package = "precmed")
   fit <- atefit(response = "count", data = countExample,
-                outcome_model = y ~ age + offset(log(years)), ps.model = trt ~ age,
+                outcome_model = y ~ age + offset(log(years)), ps_model = trt ~ age,
                 n.boot = 3, seed = 123, verbose = 0)
   expect_equal(fit$treatment.labels, c("drug0", "drug1"))
   expect_equal(nrow(fit$rate.boot), 3L)

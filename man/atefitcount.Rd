@@ -9,15 +9,15 @@ atefitcount(
   data,
   outcome_model,
   outcome_method = "poisson",
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 }
 \arguments{
@@ -36,17 +36,17 @@ model family.}
 binomial models estimate dispersion separately by treatment arm. The method is refitted
 in each bootstrap sample. Failed fits are recorded in bootstrap diagnostics.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score
+\item{ps_model}{A formula describing the treatment model (propensity-score
 model) to be fitted. The treatment must appear on the left-hand side. The treatment must
 be a numeric vector coded as 0 or 1. If data are from a randomized controlled
-trial, specify \code{ps.model = ~1} as an intercept-only model.}
+trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity
+\item{ps_method}{A character value for the method to estimate the propensity
 score. Allowed values include one of: \code{'glm'} for logistic regression
 with main effects only (default), or \code{'lasso'} for a logistic regression
 with main effects and LASSO penalization on two-way interactions (added to
-the model if interactions are not specified in \code{ps.model}). Relevant
-only when \code{ps.model} has more than one variable.}
+the model if interactions are not specified in \code{ps_model}). Relevant
+only when \code{ps_model} has more than one variable.}
 
 \item{minPS}{A numerical value between 0 and 1 below which estimated
 propensity scores should be truncated. Default is \code{0.01}.}
@@ -67,34 +67,19 @@ messages should be printed. \code{1} indicates messages are printed and
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
-\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
+\item{...}{Additional arguments. The deprecated named argument \code{cate.model}
+is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+one of these arguments. The deprecated aliases \code{ps.model} and
+\code{ps.method} are also accepted with warnings; use \code{ps_model} and
+\code{ps_method} instead. Other arguments are currently unsupported.}
 }
 \value{
-Return an item of the class \code{atefit} with the following
-elements:
-\itemize{
-  \item{\code{log.rate.ratio}: } A vector of numeric values of the estimated
-  ATE (expressed as a log rate ratio of \code{trt=1} over \code{trt=0}),
-  the bootstrap standard error, the lower and upper limits of 95\% confidence
-  interval, and the p-value.
-  \item{\code{rate0}: } A numeric value of the estimated rate in the group
-  \code{trt=0}.
-  \item{\code{rate1}: } A numeric value of the estimated rate in the group
-  \code{trt=1}.
-  \item{\code{trt.boot}: } Estimated log rate ratios in each bootstrap
-  sample.
-  \item{\code{rate.boot}: } A data frame of treatment-specific rate estimates
-  in each bootstrap sample, with columns \code{rate0} and \code{rate1}.
-  \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1.
-  \item{\code{warning}: } A warning message produced if the treatment
-  variable was not coded as 0 or 1. The key to map the original coding of the
-  variable to a 0-1 coding is displayed in the warning to facilitate the
-  interpretation of the remaining of the output.
-}
+An object of class \code{atefit}. See \code{\link{atefit}}
+for available methods and the contents of the fitted object.
 }
 \description{
 Doubly robust estimator of the average treatment effect between two
@@ -120,7 +105,7 @@ output <- atefitcount(data = countExample,
                       outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
-                      ps.model = trt ~ age + previous_treatment,
+                      ps_model = trt ~ age + previous_treatment,
                       verbose = 1, n.boot = 50, seed = 999)
 output
 plot(output)

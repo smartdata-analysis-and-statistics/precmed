@@ -6,10 +6,8 @@ binary_score_new <- function(fit, x, method) {
     return(drop(x %*% (beta[, 2] - beta[, 1])))
   }
   if (method == "logistic") {
-    base <- cbind(x, trt = 0, if (ncol(x) > 1L) x[, -1, drop = FALSE] * 0)
-    treated <- cbind(x, trt = 1, if (ncol(x) > 1L) x[, -1, drop = FALSE])
-    beta <- fit$control$coefficients
-    return(stats::plogis(drop(treated %*% beta)) - stats::plogis(drop(base %*% beta)))
+    return(stats::plogis(drop(x %*% fit$treated$coefficients)) -
+             stats::plogis(drop(x %*% fit$control$coefficients)))
   }
   predictors <- as.data.frame(x[, -1, drop = FALSE])
   names(predictors) <- paste0("x", seq_len(ncol(predictors)))
@@ -134,7 +132,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
     for (method in score.method) {
       fitted <- tryCatch({
         tr <- parts$train
-        if (method == "twoReg") binary_tworeg_dr(tr, ps.method, minPS, maxPS, ps.control, B, Kfold)$fit else if (method == "logistic") binary_predictions(tr$y, tr$trt, tr$x, "logistic")$fit else binary_boosting(tr, tree.depth, n.trees.boosting, plot.gbmperf)$fit
+        if (method == "twoReg") binary_tworeg_dr(tr, ps.method, minPS, maxPS, ps.control, B, Kfold)$fit else if (method == "logistic") binary_predictions(tr$y, tr$trt, tr$x, "logistic_arms")$fit else binary_boosting(tr, tree.depth, n.trees.boosting, plot.gbmperf)$fit
       }, error = function(e) {
         msg <- paste0(method, ", training iteration ", i, ": score fitting failed: ", conditionMessage(e))
         record(method, "train", i, "score", NA_character_, "error", msg)

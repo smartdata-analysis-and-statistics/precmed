@@ -8,15 +8,15 @@ atefitbinary(
   data,
   outcome_model,
   outcome_method = "logistic",
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 }
 \arguments{
@@ -30,13 +30,13 @@ are not supported.}
 
 \item{outcome_method}{Outcome-model method; only \code{"logistic"} (default) is supported.}
 
-\item{ps.model}{A formula with treatment on the left and treatment-model
+\item{ps_model}{A formula with treatment on the left and treatment-model
 covariates on the right. The model estimates the propensity score. Both treatment groups must be present. Numeric
 0/1 or logical FALSE/TRUE map to treatment 0/1; other two-valued labels are
 sorted and mapped to 0/1 in that order. Use \code{trt ~ 1} for an
 intercept-only model.}
 
-\item{ps.method}{Propensity score method: \code{"glm"} (default) or
+\item{ps_method}{Propensity score method: \code{"glm"} (default) or
 \code{"lasso"}, using the package's propensity-score LASSO procedure.}
 
 \item{minPS, maxPS}{Lower and upper truncation limits for propensity scores.
@@ -54,22 +54,15 @@ the binary implementation does not currently display progress messages.}
 \item{ps.control}{Named options for LASSO propensity-score interaction
 screening. Supported entry: \code{solver = "C"} (default) or \code{"R"}.}
 
-\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
+\item{...}{Additional arguments. The deprecated named argument \code{cate.model}
+is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+one of these arguments. The deprecated aliases \code{ps.model} and
+\code{ps.method} are also accepted with warnings; use \code{ps_model} and
+\code{ps_method} instead. Other arguments are currently unsupported.}
 }
 \value{
-An object of class \code{atefit} containing:
-\itemize{
-  \item \code{risk.difference}: A data frame with the estimate for treatment
-  1 minus treatment 0, bootstrap standard error, 95\% Wald confidence limits,
-  and two-sided Wald p-value.
-  \item \code{risk0}, \code{risk1}: Data frames with estimated
-  treatment-specific response probabilities.
-  \item \code{trt.boot}: Bootstrap risk differences; \code{risk.boot}:
-  bootstrap treatment-specific risks; \code{n.boot}: number of replicates.
-  \item \code{treatment.labels}: Original treatment labels in 0/1 order.
-  \item \code{bootstrap.diagnostics}: A data frame containing the replicate
-  number, affected measure and reason for each failed or non-finite estimate.
-}
+An object of class \code{atefit}. See \code{\link{atefit}}
+for available methods and the contents of the fitted object.
 }
 \description{
 Estimate the population-average risk difference between two treatments
@@ -97,7 +90,7 @@ object; \code{confint()} calculates Wald intervals at a requested level.
 \examples{
 d <- simulate_binary(n = 500, seed = 42)
 fit <- atefitbinary(d, outcome_model = y ~ age + female,
-                    ps.model = trt ~ age, outcome_method = "logistic",
+                    ps_model = trt ~ age, outcome_method = "logistic",
                     n.boot = 10, seed = 42)
 coef(fit)
 confint(fit)

@@ -3,7 +3,7 @@ test_that("binary ATE uses separate outcome models", {
   dat <- precmed:::binary_data(d, y ~ age + female, trt ~ age)
   separate <- precmed:::binary_predictions(dat$y, dat$trt, dat$x, "twoReg")
   args <- list(response = "binary", data = d, outcome_model = y ~ age + female,
-               ps.model = trt ~ age, n.boot = 5, seed = 102)
+               ps_model = trt ~ age, n.boot = 5, seed = 102)
   fit <- do.call(atefit, args)
   p <- precmed:::glm.simplereg.ps(dat$trt, dat$z, minPS = .01, maxPS = .99)
   r0 <- mean(separate$mu0 + (1 - dat$trt) * (dat$y - separate$mu0) / (1 - p))

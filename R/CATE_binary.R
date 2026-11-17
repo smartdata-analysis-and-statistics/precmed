@@ -39,6 +39,10 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' @inheritParams catefit
 #' @param score.method One or more of \code{"logistic"}, \code{"twoReg"}, and
 #'   \code{"boosting"}.
+#' @param cate.model A formula specifying the binary outcome and score covariates.
+#' @param init.model Optional formula for the initial logistic outcome models
+#' used by \code{twoReg}; \code{NULL} uses \code{cate.model}.
+#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #' @return A \code{catefit} object containing treatment labels, fitted models,
 #'   predicted risk-difference scores and nested subgroup risk differences for
 #'   each requested method. Linear \code{twoReg} score coefficients are stored
@@ -69,7 +73,7 @@ catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = 
   prop <- sort(prop.cutoff); out <- list(response = "binary", score.method = score.method, fit = list(), coefficients = NULL, treatment.labels = d$labels)
   for (method in score.method) {
     pred <- if (method == "twoReg") binary_tworeg_dr(d, ps.method, minPS, maxPS, ps.control, B, Kfold) else if (method == "boosting") binary_boosting(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) else
-      binary_predictions(d$y, d$trt, d$x, method)
+      binary_predictions(d$y, d$trt, d$x, "logistic_arms")
     score <- if (method == "twoReg") pred$score else pred$mu1 - pred$mu0
     out[[paste0("score.", method)]] <- score
     out$fit[[method]] <- pred$fit

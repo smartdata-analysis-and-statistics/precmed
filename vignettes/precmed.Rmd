@@ -27,7 +27,7 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 
 **precmed** was developed to help researchers with the implementation of precision medicine in R. A key objective of precision medicine is to determine the optimal treatment separately for each patient instead of applying a common treatment to all patients. Personalizing treatment decisions becomes particularly relevant when treatment response differs across patients, or when patients have different preferences about benefits and harms. This package offers statistical methods to develop and validate prediction models for estimating individualized treatment effects. These treatment effects are also known as the conditional average treatment effects (CATEs) and describe how different subgroups of patients respond to the same treatment. Presently, **precmed** focuses on the  personalization of two competitive treatments  using randomized data from a clinical trial [@zhao2013effectively] or using real-world data (RWD) from a non-randomized study [@yadlowsky2020estimation].
 
-The treatment model estimates propensity scores, and the censoring model provides probabilities used for inverse probability of censoring weighting (IPCW). The corresponding arguments are `ps.model` and `ipcw.model`.
+The treatment model estimates propensity scores, and the censoring model provides probabilities used for inverse probability of censoring weighting (IPCW). In `atefit()`, the corresponding arguments are `ps_model` and `censoring_model`; CATE functions use `ps.model` and `ipcw.model`.
 
 For background on marginal and conditional treatment effects, see Chapter 5 [@nguyen2026causaleffects]. Chapter 17 introduces CATE prediction and model development [@hoogland2026introduction].
 
@@ -78,24 +78,31 @@ In the vignettes, we will adopt a different workflow to gradually expose the use
 
 ### Specify model inputs
 
-When applying `catefit()` or `catecv()`, the user has to (at least) input:
+When applying `catefit()`, the user has to (at least) input:
 
-- `response`: `binary`, `count`, or `survival` for `catefit()`; `catecv()` currently supports `count` and `survival`  
-- `data`: a data frame with individual patient data  
-- `score.method`: methods to estimate the CATE (e.g., `boosting`, `poisson`, `twoReg`, `contrastReg`)  
-- `cate.model`: a formula describing the outcome model (e.g., outcome ~ age + gender + previous_treatment)  
-- `ps.model`: a formula describing the treatment model to adjust for confounding (e.g., treatment ~ age + previous_treatment) 
+- `response`: `binary`, `count`, or `survival`
+- `data`: a data frame with individual patient data
+- `outcome_model`: a formula describing the outcome and score covariates (e.g., outcome ~ age + gender + previous_treatment)
+- `outcome_method`: outcome-model fitting methods
+- `benefit_method`: score-construction methods paired with `outcome_method`
+- `ps.model`: a formula describing the treatment model to adjust for confounding (e.g., treatment ~ age + previous_treatment)
+
+For cross-validation, `catecv()` currently uses `score.method` and `cate.model`
+for its corresponding score methods and formula.
 
 
 ## Overview of the vignettes
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
-- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
-- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
+- [Methods for estimating average treatment effects](ATE-theory.html)
+- [Binary ATE example](Binary-examples.html)
+- [Count ATE example](Count-examples.html)
+- [Survival ATE example](Survival-examples.html)
+- [Methods for developing and validating CATE scores](Theoretical-details.html)
+- [Binary CATE example](Binary-CATE.html)
+- [Count CATE example](Count-CATE.html)
+- [Survival CATE example](Survival-CATE.html)
 - [Customizing CATE models and validation](Additional-examples.html)
-- [ATE methods](ATE-theory.html)
-- [CATE development and validation methods](Theoretical-details.html)
 
 ## Abbreviations
 

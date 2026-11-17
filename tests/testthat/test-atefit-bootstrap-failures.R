@@ -24,7 +24,7 @@ test_that("count undefined and failed bootstraps never yield partial inference",
     list(log.rate.ratio = .1, rate0 = 1, rate1 = exp(.1))
   }, .package = "precmed")
   expect_warning(fit <- atefitcount(data = countExample, outcome_model = y ~ age + offset(log(years)),
-    ps.model = trt ~ age, n.boot = 3, seed = 42), "2 bootstrap replicate")
+    ps_model = trt ~ age, n.boot = 3, seed = 42), "2 bootstrap replicate")
   expect_true(is.na(fit$log.rate.ratio$SE))
   expect_true(all(is.na(confint(fit))))
   issues <- fit$bootstrap.diagnostics

@@ -7,8 +7,9 @@
 catefit(
   response,
   data,
-  score.method,
-  cate.model,
+  outcome_model,
+  outcome_method = NULL,
+  benefit_method,
   ps.model,
   ps.method = "glm",
   init.model = NULL,
@@ -49,15 +50,27 @@ catefit(
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
-\code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-\code{'gaussian'} (continuous outcomes only). For binary outcomes, use
-\code{'logistic'}, \code{'twoReg'}, or \code{'boosting'}.}
-
-\item{cate.model}{A formula describing the outcome model to be fitted.
+\item{outcome_model}{A formula describing the outcome and score covariates.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 must be used to describe the outcome.}
+
+\item{outcome_method}{A character vector with one entry per \code{benefit_method}.
+For T-learners the available methods are \code{"logistic"} or \code{"boosting"}
+for binary outcomes, \code{"poisson"}, \code{"negative_binomial"}, or
+\code{"boosting"} for count outcomes, and \code{"poisson"}, \code{"boosting"},
+or \code{"random_forest"} for survival outcomes. For two-regression or contrast
+regression it selects the initial outcome models: binary supports only
+\code{"logistic"}, count supports \code{"poisson"}, \code{"boosting"}, or
+\code{"gam"}, and survival supports \code{"logistic"}, \code{"boosting"},
+or \code{"random_forest"}. When both doubly robust methods are requested,
+they must use the same initial outcome method. An explicitly supplied
+\code{initial.predictor.method} must agree with it. Repeated configurations
+that would produce the same score name are not supported.}
+
+\item{benefit_method}{A vector of score-construction methods: \code{"t_learner"},
+\code{"two_regression"}, or \code{"contrast_regression"}. Each is paired
+with the corresponding entry in \code{outcome_method}. Contrast regression
+is not available for binary outcomes. Continuous outcomes are not implemented.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
@@ -74,14 +87,14 @@ Relevant only when \code{ps.model} has more than one variable.}
 
 \item{init.model}{Optional formula for the initial treatment-specific outcome models
 used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-\code{twoReg} only). The outcome must match \code{cate.model}. The default
-\code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
-is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
+\code{twoReg} only). The outcome must match \code{outcome_model}. The default
+\code{NULL} uses \code{outcome_model}. For count outcomes the exposure offset
+is taken from \code{outcome_model}; an offset in \code{init.model}, if supplied,
 must match it. Other score methods do not use this argument. Continuous-outcome
 fitting and validation are not currently implemented.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
+outcome predictions conditional on the covariates specified in \code{init.model} (or \code{outcome_model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
 \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
 (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
@@ -91,7 +104,7 @@ for count outcomes and \code{'randomForest'} for survival outcomes.}
 \item{ipcw.model}{A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 Default is \code{NULL}, which uses a censoring model with the same covariates
-as the outcome model \code{cate.model}, plus the treatment.}
+as the outcome model \code{outcome_model}, plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Only applies for survival
 outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
@@ -129,7 +142,7 @@ outcomes. Default is \code{0.025}.}
 
 \item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-from the variables listed in \code{cate.model}.}
+from the variables listed in \code{outcome_model}.}
 
 \item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
@@ -205,7 +218,10 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.
+The old named arguments \code{score.method} and \code{cate.model} are
+accepted with deprecation warnings. Legacy score names and positional calls
+remain supported when \code{outcome_method} is omitted.}
 }
 \value{
 Fitted objects retain \code{treatment.labels} in treatment 0/1 order
@@ -215,7 +231,7 @@ For survival response, see description of outputs in \code{\link{catefitsurv}()}
 }
 \description{
 Estimate CATE scores for binary, count and survival outcomes. Binary scores
-include pooled logistic regression, doubly robust two-regression estimation and
+include arm-specific logistic regression, doubly robust two-regression estimation and
 boosting. Count and survival methods include both outcome-regression and
 doubly robust scores. Continuous outcomes are not yet implemented.
 }
@@ -258,10 +274,11 @@ For survival response, see details in \code{\link{catefitsurv}()}.
 \section{Binary outcomes}{
 
 For \code{response = "binary"}, \code{score.method = "logistic"}
-fits a logistic model with treatment interactions. \code{"twoReg"} cross-fits
+fits a separate logistic outcome model in each treatment arm and subtracts
+their predicted risks. \code{"twoReg"} cross-fits
 separate logistic outcome models and a treatment model, then projects the
 augmented inverse-propensity outcomes for each arm onto the covariates in
-\code{cate.model} using linear regression. The score is the difference of
+\code{outcome_model} using linear regression. The score is the difference of
 these projections, averaged over \code{B} repetitions of \code{Kfold} folds.
 It estimates the linear projection of the conditional risk difference if
 either the treatment model or both outcome models are correct, under
@@ -270,8 +287,8 @@ affect this property. The projection need not lie between -1 and 1 and
 equals the conditional risk difference only if that difference is linear in
 the specified design. The difference between arm coefficients is returned in
 \code{coefficients$twoReg} and by \code{coef()}; the separate arm coefficients
-are stored in \code{fit$twoReg$coefficients}. Logistic model coefficients are
-on the log-odds scale and are stored in \code{fit$logistic}; they are not
+are stored in \code{fit$twoReg$coefficients}. Logistic model coefficients
+for each arm are on the log-odds scale and stored in \code{fit$logistic}; they are not
 linear risk-difference score coefficients. Boosting does not have a linear
 score coefficient vector. With neither \code{twoReg} nor another linear
 binary score, \code{coef()} returns \code{NULL}.
@@ -291,10 +308,11 @@ Subgroup fits without both arms or with rank-deficient models return NA.
 # Count outcome
 fit_1 <- catefit(response = "count",
                  data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
+                 outcome_model = y ~ age + female + previous_treatment +
                                   previous_cost + previous_number_relapses +
                                   offset(log(years)),
+                 outcome_method = "poisson",
+                 benefit_method = "t_learner",
                  ps.model = trt ~ age + previous_treatment,
                  higher.y = TRUE,
                  seed = 999)
@@ -309,9 +327,10 @@ tau0 <- with(survivalExample,
 
 fit_2 <- catefit(response = "survival",
                  data = survivalExample,
-                 score.method = c("poisson", "boosting", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
+                 outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                            previous_number_relapses,
+                 outcome_method = c("poisson", "boosting", "random_forest"),
+                 benefit_method = rep("t_learner", 3),
                  ps.model = trt ~ age + previous_treatment,
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,

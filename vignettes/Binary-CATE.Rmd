@@ -16,7 +16,7 @@ This vignette fits and internally validates conditional treatment-effect scores 
 
 ## Prepare the data
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(precmed)
 binaryExample <- simulate_binary(n = 4000, seed = 2026,
                                  followup = 1, threshold = 0)
@@ -30,8 +30,9 @@ The binary outcome indicates at least one relapse within one year; treatment ass
 ## Estimate CATE scores
 
 CATE scores estimate the difference in relapse probability for patients with
-different baseline covariates. The `logistic` method fits one logistic model
-with treatment-covariate interactions; `twoReg` cross-fits separate logistic
+different baseline covariates. The `logistic` method fits a separate logistic
+outcome model in each treatment arm and subtracts their predicted risks;
+`twoReg` cross-fits separate logistic
 outcome models and a treatment model, then projects augmented outcomes for each
 arm onto the outcome-model design. The difference is a doubly robust linear
 projection of the risk difference if either the treatment model or both outcome
@@ -49,8 +50,10 @@ prediction [@hoogland2026introduction].
 ```{r}
 fit_cate <- catefit(
   response = "binary", data = binaryExample,
-  score.method = c("logistic", "twoReg", "boosting"),
-  cate.model = outcome_formula, ps.model = ps_formula,
+  outcome_model = outcome_formula,
+  outcome_method = c("logistic", "logistic", "boosting"),
+  benefit_method = c("t_learner", "two_regression", "t_learner"),
+  ps.model = ps_formula,
   higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, n.cores = 1
 )
@@ -81,7 +84,7 @@ effects differ or that scores will perform well in new patients.
 
 Use `coef()` to extract the available linear score coefficients. For `twoReg`,
 the coefficients describe a linear projection of the risk difference. The
-logistic model's coefficients are on the log-odds scale, and boosting does not
+logistic models' coefficients are on the log-odds scale, and boosting does not
 have a linear score coefficient vector. Confidence intervals for binary score
 coefficients are not currently available.
 

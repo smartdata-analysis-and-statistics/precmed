@@ -135,7 +135,7 @@ The adjusted rate ratio is `r round(exp(coef(output_poisson_adjusted)["trtdrug1"
 
 ## Population-average treatment effects using `atefit()`
 
-We now use `atefit()` to estimate a population-level rate ratio, combining outcome and treatment models. The treatment model estimates the propensity score, the probability of receiving treatment 1 given the covariates. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the treatment model (argument `ps.model`) or the outcome model (argument `outcome_model`) or both are correctly specified, under the required assumptions. The function also provides standard errors, confidence intervals and p-values based on bootstrap.
+We now use `atefit()` to estimate a population-level rate ratio, combining outcome and treatment models. The treatment model estimates the propensity score, the probability of receiving treatment 1 given the covariates. The rate ratio estimator is doubly robust, meaning that the estimator is consistent if the treatment model (argument `ps_model`) or the outcome model (argument `outcome_model`) or both are correctly specified, under the required assumptions. The function also provides standard errors, confidence intervals and p-values based on bootstrap.
 
 In this example, the rate ratio compares the relapse rate under drug 1 with that under drug 0; a rate ratio below 1 favors drug 1. A causal interpretation requires appropriate assumptions, including no unmeasured confounding, adequate overlap in treatment assignment, and well-defined treatments. Chapter 5 introduces marginal and conditional treatment effects [@nguyen2026causaleffects].
 
@@ -150,7 +150,7 @@ The mandatory arguments for `atefit()` are:
 <!-- * We use all 6 variables in the outcome CATE model and specify the offset as `log(years)`. It is recommended to log-transform the exposure variable.
 * -->
 
-* `ps.model`: A formula describing the treatment model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and an informational message is shown (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The treatment model is used to estimate overall and subgroup average treatment effects. It is also used to fit the doubly robust two-regression and contrast-regression CATE scores; other scoring methods need not use it to construct their scores.  
+* `ps_model`: A formula describing the treatment model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and an informational message is shown (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps_model` = trt ~ 1. The treatment model is used to estimate overall and subgroup average treatment effects. It is also used to fit the doubly robust two-regression and contrast-regression CATE scores; other scoring methods need not use it to construct their scores.
 
 Let's calculate the ATE for the effect of treatment on y and build an outcome model that contains all variables and a treatment model with `age` and `previous_treatment`. 
 ```{r run_atefit, eval = T, echo = T, cache = doc.cache, cache.extra = list(knitr::opts_chunk$get("cache.extra"), "overlap-v1")}
@@ -160,7 +160,7 @@ fit_ate <- atefit(
   outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "poisson",
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   n.boot = 100,
   seed = 999,
   verbose = 0
@@ -228,7 +228,7 @@ fit_ate_negbin <- atefit(
   outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   outcome_method = "negbin",
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = trt ~ age + previous_treatment,
   n.boot = 100,
   seed = 999,
   verbose = 0

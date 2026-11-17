@@ -11,13 +11,12 @@
 #'   outcome must be numeric or logical and coded 0/1. Missing values and offsets
 #'   are not supported.
 #' @param outcome_method Outcome-model method; only \code{"logistic"} (default) is supported.
-#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
-#' @param ps.model A formula with treatment on the left and treatment-model
+#' @param ps_model A formula with treatment on the left and treatment-model
 #'   covariates on the right. The model estimates the propensity score. Both treatment groups must be present. Numeric
 #'   0/1 or logical FALSE/TRUE map to treatment 0/1; other two-valued labels are
 #'   sorted and mapped to 0/1 in that order. Use \code{trt ~ 1} for an
 #'   intercept-only model.
-#' @param ps.method Propensity score method: \code{"glm"} (default) or
+#' @param ps_method Propensity score method: \code{"glm"} (default) or
 #'   \code{"lasso"}, using the package's propensity-score LASSO procedure.
 #' @param minPS,maxPS Lower and upper truncation limits for propensity scores.
 #'   Defaults are 0.01 and 0.99; \code{minPS} must be smaller than \code{maxPS}.
@@ -30,19 +29,13 @@
 #' @param ps.control Named options for LASSO propensity-score interaction
 #'   screening. Supported entry: \code{solver = "C"} (default) or \code{"R"}.
 #'
-#' @return An object of class \code{atefit} containing:
-#' \itemize{
-#'   \item \code{risk.difference}: A data frame with the estimate for treatment
-#'   1 minus treatment 0, bootstrap standard error, 95\% Wald confidence limits,
-#'   and two-sided Wald p-value.
-#'   \item \code{risk0}, \code{risk1}: Data frames with estimated
-#'   treatment-specific response probabilities.
-#'   \item \code{trt.boot}: Bootstrap risk differences; \code{risk.boot}:
-#'   bootstrap treatment-specific risks; \code{n.boot}: number of replicates.
-#'   \item \code{treatment.labels}: Original treatment labels in 0/1 order.
-#'   \item \code{bootstrap.diagnostics}: A data frame containing the replicate
-#'   number, affected measure and reason for each failed or non-finite estimate.
-#' }
+#' @param ... Additional arguments. The deprecated named argument \code{cate.model}
+#' is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+#' one of these arguments. The deprecated aliases \code{ps.model} and
+#' \code{ps.method} are also accepted with warnings; use \code{ps_model} and
+#' \code{ps_method} instead. Other arguments are currently unsupported.
+#' @return An object of class \code{atefit}. See \code{\link{atefit}}
+#' for available methods and the contents of the fitted object.
 #'
 #' @details The estimator combines predicted risks from logistic outcome models
 #' with inverse-propensity-weighted residual corrections. Under appropriate
@@ -71,14 +64,15 @@
 #' @examples
 #' d <- simulate_binary(n = 500, seed = 42)
 #' fit <- atefitbinary(d, outcome_model = y ~ age + female,
-#'                     ps.model = trt ~ age, outcome_method = "logistic",
+#'                     ps_model = trt ~ age, outcome_method = "logistic",
 #'                     n.boot = 10, seed = 42)
 #' coef(fit)
 #' confint(fit)
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-atefitbinary <- function(data, outcome_model, outcome_method = "logistic", ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, n.boot = 500, seed = NULL, verbose = 0, ps.control = list(), cate.model = NULL) {
+
+atefitbinary <- function(data, outcome_model, outcome_method = "logistic", ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, n.boot = 500, seed = NULL, verbose = 0, ps.control = list(), ...) {
   call_names <- names(as.list(sys.call()))
   named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
   if (!missing(outcome_method) && !named_method &&
@@ -87,11 +81,15 @@ atefitbinary <- function(data, outcome_model, outcome_method = "logistic", ps.mo
         !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
     return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
 
-  if (!missing(cate.model)) {
-    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
-    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
-    outcome_model <- cate.model
-  }
+  .args <- as.list(match.call())[-1L]
+  aliases <- intersect(names(.args), c("cate.model", "ps.model", "ps.method"))
+  .args <- resolve_ate_aliases(.args, reject_unknown = TRUE,
+                               allowed = names(formals(sys.function())))
+  if ("cate.model" %in% aliases) outcome_model <- eval(.args$outcome_model, parent.frame())
+  if ("ps.model" %in% aliases) ps_model <- eval(.args$ps_model, parent.frame())
+  if ("ps.method" %in% aliases) ps_method <- eval(.args$ps_method, parent.frame())
+  if (!missing(ps_model)) ps.model <- ps_model
+  ps.method <- ps_method
   if (missing(outcome_model)) stop("outcome_model must be supplied.")
   cate.model <- outcome_model
 

@@ -8,10 +8,10 @@ atefitsurv(
   data,
   outcome_model,
   outcome_method = "coxph",
-  ps.model,
-  ps.method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -22,7 +22,7 @@ atefitsurv(
   verbose = 0,
   rmst.control = list(),
   ps.control = list(),
-  cate.model = NULL
+  ...
 )
 }
 \arguments{
@@ -41,25 +41,25 @@ across covariates within an arm but can have non-proportional hazards between
 arms if their shapes differ. Log-normal models do not impose proportional
 hazards. Both assume their specified event-time distribution and require
 positive observed times and an event in each arm. The censoring model is
-specified separately by \code{ipcw.method} and \code{ipcw.model}.}
+specified separately by \code{censoring_method} and \code{censoring_model}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+If data are from a randomized controlled trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+Relevant only when \code{ps_model} has more than one variable.}
 
-\item{ipcw.model}{A formula describing the censoring model used for inverse
+\item{censoring_model}{A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 Default is \code{NULL}, which uses a censoring model with the same covariates
 as the outcome model \code{outcome_model}, plus the treatment.}
 
-\item{ipcw.method}{A character value for the censoring model. Only applies for survival
+\item{censoring_method}{A character value for the censoring model. Only applies for survival
 outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
 he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
 \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
@@ -99,35 +99,22 @@ Cox outcome models only; parametric models use closed-form integration.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
-\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
+\item{...}{Additional arguments. The deprecated named argument \code{cate.model}
+is accepted as an alias for \code{outcome_model}, with a warning. Supply only
+one of these arguments. The deprecated aliases \code{ps.model} and
+\code{ps.method} are also accepted with warnings; use \code{ps_model} and
+\code{ps_method} instead. The deprecated arguments \code{ipcw.model} and
+\code{ipcw.method} are accepted with warnings as aliases for
+\code{censoring_model} and \code{censoring_method}, respectively.
+Other arguments are currently unsupported.}
 }
 \value{
-Return an object of class \code{atefit} including:
-\itemize{
-  \item{\code{rmst1}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
-  lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=1}.
-  \item{\code{rmst0}: } A vector of numeric values of the estimated RMST, bootstrap standard error,
-  lower and upper limits of 95\% confidence interval, and the p-value in the group \code{trt=0}.
-  \item{\code{log.rmtl.ratio}: } A vector of numeric values of the estimated log RMTL ratio of
-  \code{trt=1} over \code{trt=0}, bootstrap standard error, lower and upper limits of 95\% confidence
-  interval, and the p-value.
-  \item{\code{log.cumulative.hazard.ratio}: } The log ratio of marginal cumulative hazards at
-  \code{tau0}, estimated from augmented inverse probability of treatment weighted
-  (AIPTW) survival probabilities, with bootstrap inference. Event times are not discretized.
-  The estimator requires appropriate censoring assumptions and a correctly specified
-  censoring model; its treatment-model double robustness does not protect against
-  censoring-model misspecification.
-  Undefined estimates or bootstrap replicates yield unavailable inference.
-  \item{\code{risk0}, \code{risk1}, \code{risk.difference}: } Population-average event risks by \code{tau0} under treatments 0 and 1, and risk under treatment 1 minus risk under treatment 0, with bootstrap inference. These use the same AIPTW survival estimates and censoring assumptions as the cumulative hazard ratio. Estimates outside [0, 1] are unavailable.
-  \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-  \code{log.rmtl.ratio}, \code{log.cumulative.hazard.ratio}, treatment-specific risks and risk difference in each bootstrap sample.
-  \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1, in that order.
-  \item{\code{warning}: } The informational treatment recoding message, if applicable.
-}
+An object of class \code{atefit}. See \code{\link{atefit}}
+for available methods and the contents of the fitted object.
 }
 \description{
 Doubly robust estimator of the average treatment effect between two treatments, which is the
@@ -142,6 +129,13 @@ censoring weighting. For survival outcomes, the estimated ATE is the estimated b
 as the estimated RMST in either treatment group. The variability of the estimated RMTL ratio is calculated
 using bootstrap. Additional outputs include standard error of the log RMTL ratio, 95\% confidence interval,
 p-value, and a histogram of the bootstrap estimates.
+The cumulative hazard ratio and event risks use augmented inverse probability
+of treatment weighted survival probabilities without discretizing event times.
+These estimates require appropriate censoring assumptions and a correctly
+specified censoring model; treatment-model double robustness does not protect
+against censoring-model misspecification. Event risks outside [0, 1] are
+unavailable. Undefined estimates or bootstrap replicates yield unavailable
+inference for the affected measure.
 If a doubly robust RMST estimate falls outside [0, tau0], the corresponding
 outcome-model estimate is substituted and a warning is issued. That fallback
 does not retain the doubly robust guarantee.
@@ -161,7 +155,7 @@ tau0 <- with(survivalExample,
 output <- atefitsurv(data = survivalExample,
                      outcome_model = Surv(y, d) ~ age + female +
                                   previous_cost + previous_number_relapses,
-                     ps.model = trt ~ age + previous_treatment,
+                     ps_model = trt ~ age + previous_treatment,
                      tau0 = tau0,
                      n.boot = 50,
                      seed = 999,

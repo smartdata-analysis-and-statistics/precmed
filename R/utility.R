@@ -333,6 +333,40 @@ check_score_method <- function(response, score.method) {
          paste(shQuote(allowed), collapse = ", "), ".", call. = FALSE)
 }
 
+# Author: Thomas Debray
+resolve_benefit_config <- function(response, benefit_method, outcome_method) {
+  if (!is.character(benefit_method) || !length(benefit_method) || anyNA(benefit_method) ||
+      any(!benefit_method %in% c("t_learner", "two_regression", "contrast_regression")))
+    stop("benefit_method must contain t_learner, two_regression, or contrast_regression.", call. = FALSE)
+  if (!is.character(outcome_method) || length(outcome_method) != length(benefit_method) || anyNA(outcome_method))
+    stop("outcome_method must have one non-missing value per benefit_method.", call. = FALSE)
+  direct <- switch(response, binary = c(logistic = "logistic", boosting = "boosting"),
+                   count = c(poisson = "poisson", negative_binomial = "negBin", boosting = "boosting"),
+                   survival = c(poisson = "poisson", boosting = "boosting", random_forest = "randomForest"),
+                   continuous = character())
+  initial <- switch(response, binary = "logistic", count = c("poisson", "boosting", "gam"),
+                    survival = c("logistic", "boosting", "random_forest"), continuous = character())
+  scores <- character(length(benefit_method))
+  for (i in seq_along(scores)) {
+    method <- benefit_method[i]; outcome <- outcome_method[i]
+    if (method == "t_learner") {
+      if (!outcome %in% names(direct)) stop("outcome_method '", outcome, "' is not supported for t_learner with ", response, " outcomes.", call. = FALSE)
+      scores[i] <- direct[[outcome]]
+    } else {
+      if (method == "contrast_regression" && response == "binary")
+        stop("contrast_regression is not supported for binary outcomes.", call. = FALSE)
+      if (!outcome %in% initial) stop("outcome_method '", outcome, "' is not supported for ", method, " with ", response, " outcomes.", call. = FALSE)
+      scores[i] <- if (method == "two_regression") "twoReg" else "contrastReg"
+    }
+  }
+  if (anyDuplicated(scores)) stop("Repeated configurations producing the same score are not supported.", call. = FALSE)
+  nuisance <- unique(outcome_method[benefit_method != "t_learner"])
+  if (length(nuisance) > 1L) stop("two_regression and contrast_regression must use the same outcome_method; separate initial models are not supported in one call.", call. = FALSE)
+  list(scores = scores, initial = if (length(nuisance)) {
+    if (nuisance == "random_forest") "randomForest" else nuisance
+  } else NULL)
+}
+
 #' Data preprocessing
 #' Apply at the beginning of \code{pmcount()} and \code{cvcount()}, after \code{arg.checks()}
 #'
@@ -600,6 +634,27 @@ resolve_ate_outcome_method <- function(outcome_method, response) {
     stop("outcome_method for ", response, " outcomes must be ",
          paste(sprintf('"%s"', allowed), collapse = ", "), ".", call. = FALSE)
   if (outcome_method == "negbin") "negative_binomial" else if (outcome_method == "lognormal") "log_normal" else outcome_method
+}
+
+# Author: Thomas Debray
+resolve_ate_aliases <- function(args, reject_unknown = FALSE, allowed = NULL) {
+  aliases <- c(cate.model = "outcome_model", ps.model = "ps_model", ps.method = "ps_method",
+               ipcw.model = "censoring_model", ipcw.method = "censoring_method")
+  arg_names <- names(args)
+  if (is.null(arg_names)) arg_names <- rep("", length(args))
+  for (old in names(aliases)) {
+    indices <- which(arg_names == old)
+    if (!length(indices)) next
+    new <- aliases[[old]]
+    if (length(indices) > 1L || new %in% arg_names)
+      stop("Specify only ", new, "; ", old, " is deprecated.", call. = FALSE)
+    warning(old, " is deprecated for atefit(); use ", new, " instead.", call. = FALSE)
+    arg_names[indices] <- new
+  }
+  if (reject_unknown && any(!nzchar(arg_names) | !arg_names %in% allowed))
+    stop("unused argument(s) in ...", call. = FALSE)
+  names(args) <- arg_names
+  args
 }
 
 # Reconstruct calls made with the earlier positional ATE argument order.

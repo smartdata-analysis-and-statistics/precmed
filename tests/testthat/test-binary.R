@@ -39,6 +39,20 @@ test_that("public binary CATE interface matches catefit and validates methods", 
                                       "logistic", y ~ age, trt ~ 1))
 })
 
+test_that("binary logistic CATE uses separate arm-specific outcome models", {
+  d <- simulate_binary(n = 500, seed = 442)
+  fit <- catefit("binary", d, "logistic", y ~ age, trt ~ age, prop.cutoff = 1)
+  control <- glm(y ~ age, data = d, subset = trt == levels(trt)[1], family = binomial())
+  treated <- glm(y ~ age, data = d, subset = trt == levels(trt)[2], family = binomial())
+  expected <- predict(treated, d, type = "response") - predict(control, d, type = "response")
+  expect_equal(unname(fit$score.logistic), unname(expected), tolerance = 1e-8)
+  expect_equal(unname(fit$fit$logistic$control$coefficients), unname(coef(control)), tolerance = 1e-8)
+  expect_equal(unname(fit$fit$logistic$treated$coefficients), unname(coef(treated)), tolerance = 1e-8)
+  bad <- d
+  bad$age[bad$trt == levels(bad$trt)[1]] <- 1
+  expect_error(catefit("binary", bad, "logistic", y ~ age, trt ~ 1), "rank deficient")
+})
+
 test_that("binary fits without linear score coefficients omit NULL when printed", {
   d <- simulate_binary(n = 200, seed = 24)
   fit <- catefit("binary", d, "logistic", y ~ age, trt ~ 1, prop.cutoff = 1)

@@ -17,7 +17,7 @@
 #' @examples
 #' \dontrun{
 #' fit <- atefitcount(data = countExample,
-#'   cate.model = y ~ age + offset(log(years)), ps.model = trt ~ age)
+#'   outcome_model = y ~ age + offset(log(years)), ps_model = trt ~ age)
 #' exp(coef(fit))
 #' exp(confint(fit))
 #' exp(confint(fit, level = 0.90))

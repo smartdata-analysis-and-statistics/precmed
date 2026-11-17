@@ -16,8 +16,8 @@ test_that("boosting plots are opt-in across fitting and validation", {
       original(object, method, plot.it = FALSE)
     }, .package = "precmed")
   d <- simulate_binary(n = 300, seed = 42)
-  args <- list(response = "binary", data = d, score.method = "boosting",
-               cate.model = y ~ age, ps.model = trt ~ 1, prop.cutoff = 1,
+  args <- list(response = "binary", data = d, benefit_method = "boosting",
+               outcome_model = y ~ age, ps.model = trt ~ 1, prop.cutoff = 1,
                n.trees.boosting = 10, n.minobsinnode = 5, n.cores = 1, seed = 42)
   do.call(catefit, args)
   expect_identical(seen, c(FALSE, FALSE))

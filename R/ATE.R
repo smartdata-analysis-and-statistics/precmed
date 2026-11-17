@@ -10,8 +10,10 @@
 #' "binary" (see \code{\link{atefitbinary}}), "count" (see
 #' \code{\link{atefitcount}}), and "survival" (see
 #' \code{\link{atefitsurv}}). Continuous outcomes are not yet implemented.
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
 #' @param outcome_model A formula specifying the outcome and baseline
-#' covariates for the outcome model. Supply treatment in \code{ps.model},
+#' covariates for the outcome model. Supply treatment in \code{ps_model},
 #' rather than in this formula. See \code{\link{atefitbinary}},
 #' \code{\link{atefitcount}}, or \code{\link{atefitsurv}} for the
 #' outcome-specific model and formula requirements.
@@ -21,18 +23,30 @@
 #' \code{"negative_binomial"} (alias \code{"negbin"}); survival outcomes
 #' also support \code{"weibull"} and \code{"log_normal"} (alias
 #' \code{"lognormal"}). Other methods are not currently available. See the outcome-specific help pages for details.
-#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. For binary outcomes, logical treatment values
 #' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
 #' Numeric 0/1 values or two distinct treatment labels are also accepted.
-#' If data are from a randomized controlled trial, specify \code{ps.model = trt ~ 1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, treatment,
-#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param ipcw.model A formula describing the censoring model used for inverse
+#' If data are from a randomized controlled trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.
+#' @param ps_method A character value for the method to estimate the propensity score.
+#' Allowed values include one of:
+#' \code{'glm'} for logistic regression with main effects only (default), or
+#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+#' two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+#' Relevant only when \code{ps_model} has more than one variable.
+#' @param censoring_model A formula describing the censoring model used for inverse
 #' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which uses a censoring model with the same covariates
 #' as the outcome model \code{outcome_model}, plus the treatment.
+#' @param censoring_method A character value for the censoring model. Only applies for survival
+#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
+#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
+#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
+#' with different distributions for y variable). Default is \code{'breslow'}.
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to unknown potential censoring time.
@@ -42,21 +56,6 @@
 #' @param surv.min Lower truncation limit for the probability of being censored.
 #' It must be a positive value and should be chosen close to 0. Only applies for survival
 #' outcomes. Default is \code{0.025}.
-#' @param ipcw.method A character value for the censoring model. Only applies for survival
-#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-#' with different distributions for y variable). Default is \code{'breslow'}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param n.boot A numeric value indicating the number of bootstrap samples used. Default is \code{500}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
@@ -67,9 +66,62 @@
 #' risk difference (treatment 1 minus treatment 0) with logistic outcome models.
 #' The result includes \code{risk.difference}, \code{risk0}, \code{risk1}, and
 #' bootstrap estimates. If any bootstrap fit fails, inference is unavailable.
-#' @return For binary response, see \code{\link{atefitbinary}()}.
-#' For count response, see description of outputs in \code{\link{atefitcount}()}.
-#' For survival response, see description of outputs in \code{\link{atefitsurv}()}.
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Applies only
+#' to Cox survival outcome models; parametric outcome models use closed-form
+#' integration. Independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param ... Additional arguments passed to the outcome-specific function.
+#' Also accepts the deprecated named argument \code{cate.model} as an alias for
+#' \code{outcome_model}, with a warning. Supply only one of these arguments.
+#' The deprecated aliases \code{ps.model} and \code{ps.method} are also
+#' accepted with warnings; use \code{ps_model} and \code{ps_method} instead.
+#' The deprecated survival arguments \code{ipcw.model} and \code{ipcw.method}
+#' are accepted with warnings as aliases for \code{censoring_model} and
+#' \code{censoring_method}, respectively.
+#' @return An object of class \code{atefit}. The result contains
+#' outcome-specific estimates and bootstrap results. For binary outcomes,
+#' \code{risk.difference} is the treatment 1 minus treatment 0 risk difference,
+#' and \code{risk0} and \code{risk1} are the treatment-specific risks. For
+#' count outcomes, \code{log.rate.ratio} is the log rate ratio (treatment 1
+#' over treatment 0), and \code{rate0} and \code{rate1} are the estimated
+#' rates. For survival outcomes at \code{tau0}, \code{rmst0} and
+#' \code{rmst1} are restricted mean survival times; \code{log.rmtl.ratio},
+#' \code{log.cumulative.hazard.ratio}, \code{risk0}, \code{risk1}, and
+#' \code{risk.difference} report the population-average treatment contrasts
+#' and risks at the horizon. Ratios compare treatment 1 with treatment 0 and
+#' the risk difference is treatment 1 minus treatment 0. Estimates are stored
+#' in data frames; effect estimates include bootstrap standard errors, Wald
+#' 95\% confidence intervals and p-values. Survival treatment-specific estimates
+#' also include inference, whereas binary risks and count rates contain point
+#' estimates only.
+#'
+#' The object also contains \code{n.boot}, \code{trt.boot} (bootstrap
+#' estimates), \code{risk.boot} for binary outcomes or \code{rate.boot} for
+#' count outcomes, \code{treatment.labels}, \code{bootstrap.diagnostics}, and
+#' \code{overlap.diagnostics}. Count and survival results may also contain a
+#' \code{warning} with the treatment-recoding message.
+#'
+#' @section Working with atefit objects:
+#' \itemize{
+#'   \item \code{print(fit)} displays estimates and treatment-specific outcomes.
+#'   \item \code{coef(fit)} extracts treatment effects on their estimation
+#'   scale; \code{confint(fit, level = 0.95)} computes Wald confidence
+#'   intervals using stored bootstrap standard errors. Exponentiate log-ratio
+#'   estimates and interval limits to obtain ratios; risk differences remain on
+#'   their original scale. See \code{\link{atefit-extract}}.
+#'   \item \code{plot(fit)} displays bootstrap distributions; see
+#'   \code{\link{plot.atefit}} for options.
+#'   \item \code{diagnostics(fit)} reports recorded messages and bootstrap
+#'   failures; \code{diagnostics(fit, type = "propensity")} summarizes
+#'   treatment-model overlap and weights. See \code{\link{diagnostics}}.
+#' }
 #'
 #' @details For binary response, see \code{\link{atefitbinary}()}.
 #' For count response, see details in \code{\link{atefitcount}()}.
@@ -95,7 +147,7 @@
 #'                  outcome_model = y ~ age + female + previous_treatment +
 #'                               previous_cost + previous_number_relapses +
 #'                               offset(log(years)),
-#'                  ps.model = trt ~ age + previous_treatment,
+#'                  ps_model = trt ~ age + previous_treatment,
 #'                  n.boot = 50,
 #'                  seed = 999)
 #' output
@@ -111,7 +163,7 @@
 #'                   data = survivalExample,
 #'                   outcome_model = survival::Surv(y, d) ~ age + female +
 #'                         previous_cost + previous_number_relapses,
-#'                         ps.model = trt ~ age + previous_treatment,
+#'                         ps_model = trt ~ age + previous_treatment,
 #'                   tau0 = tau0,
 #'                   seed = 999)
 #' output2
@@ -124,27 +176,16 @@
 #'
 #' @importFrom ggplot2 ggplot geom_histogram geom_vline
 #' @importFrom dplyr mutate
-#' @param rmst.control Named options for Cox restricted mean survival integration.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Applies only
-#' to Cox survival outcome models; parametric outcome models use closed-form
-#' integration. Independent of \code{contrast.control}.
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @importFrom tidyr gather
 
 atefit <- function(response,
                    data,
                    outcome_model,
                    outcome_method = NULL,
-                   ps.model,
-                   ps.method = "glm",
-                   ipcw.model = NULL,
-                   ipcw.method = "breslow",
+                   ps_model,
+                   ps_method = "glm",
+                   censoring_model = NULL,
+                   censoring_method = "breslow",
                    minPS = 0.01,
                    maxPS = 0.99,
                    followup.time = NULL,
@@ -152,7 +193,7 @@ atefit <- function(response,
                    surv.min = 0.025,
                    n.boot = 500,
                    seed = NULL,
-                   verbose = 0, rmst.control = list(), ps.control = list(), cate.model = NULL) {
+                   verbose = 0, rmst.control = list(), ps.control = list(), ...) {
   call_names <- names(as.list(sys.call()))
   named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
   if (!missing(outcome_method) && !named_method &&
@@ -169,6 +210,7 @@ atefit <- function(response,
     stop("rmst.control is currently supported only for survival outcomes.")
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
+  .args <- resolve_ate_aliases(.args)
   if (response != "survival") .args$rmst.control <- NULL
   switch(response,
          binary = {

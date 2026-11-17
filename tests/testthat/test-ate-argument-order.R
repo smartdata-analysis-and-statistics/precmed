@@ -32,5 +32,5 @@ test_that("new and previous positional ATE calls agree", {
 
 test_that("an explicitly named invalid outcome method is not treated as a treatment formula", {
   d <- simulate_binary(n = 100, seed = 517)
-  expect_error(atefitbinary(d, y ~ age, ps.model = trt ~ age, outcome_method = y ~ age), "outcome_method")
+  expect_error(atefitbinary(d, y ~ age, ps_model = trt ~ age, outcome_method = y ~ age), "outcome_method")
 })

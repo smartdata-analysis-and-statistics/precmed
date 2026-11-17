@@ -2,7 +2,7 @@ test_that("count ATE fits separate outcome models", {
   d <- simulate_count(n = 800, seed = 104)
   args <- list(response = "count", data = d,
                outcome_model = y ~ age + female + offset(log(years)),
-               ps.model = trt ~ age, n.boot = 5, seed = 105)
+               ps_model = trt ~ age, n.boot = 5, seed = 105)
   default <- suppressMessages(do.call(atefit, args))
   arm <- as.numeric(d$trt == "drug1")
   design <- model.matrix(~ age + female, d)
