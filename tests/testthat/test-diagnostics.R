@@ -108,7 +108,7 @@ test_that("metric layout preserves values and treatment labels", {
 
 test_that("formatted overlap is compact and uses within-arm percentages", {
   p <- c(.1, .4, .6, .9)
-  attr(p, "raw") <- c(.01, .4, .6, .99)
+  attr(p, "raw") <- c(.02, .4, .6, .99)
   raw <- precmed:::treatment_overlap(c(0, 0, 1, 1), p, .1, .9)
   fit <- structure(list(response = "binary", overlap.diagnostics = raw,
     treatment.labels = c("usual care", "new drug")), class = "atefit")
@@ -117,7 +117,7 @@ test_that("formatted overlap is compact and uses within-arm percentages", {
   expect_identical(diagnostics(fit, "overlap", "arms"), diagnostics(fit, "propensity", "arms"))
   expect_named(formatted, c("Diagnostic", "usual care", "new drug"))
   expect_equal(nrow(formatted), 6L)
-  expect_equal(formatted[[2]][2], "0.21 (0.01-0.40)")
+  expect_equal(formatted[[2]][2], "0.21 (0.02-0.40)")
   expect_equal(formatted[[2]][3], "2 (100.0%)")
   expect_equal(formatted[[2]][4], "1 / 0")
   expect_type(formatted[[2]], "character")

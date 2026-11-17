@@ -20,6 +20,8 @@ navbar:
     href: articles/quick-start.html
   - text: Vignettes
     menu:
+    - text: Understanding doubly robust methods
+      href: articles/doubly-robust.html
     - text: Estimating and validating treatment effects for binary outcomes
       href: articles/Binary-examples.html
     - text: Estimating and validating treatment effects for count outcomes

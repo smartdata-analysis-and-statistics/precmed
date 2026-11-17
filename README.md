@@ -207,6 +207,7 @@ the user from simple to more complex methods.
 
 ## Vignettes
 
+- [Understanding doubly robust methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html)
 - [Binary outcome
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
 - [Count outcome

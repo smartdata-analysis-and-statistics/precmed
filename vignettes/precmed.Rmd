@@ -87,6 +87,7 @@ When applying `catefit()` or `catecv()`, the user has to (at least) input:
 
 ## Overview of the vignettes
 
+- [Understanding doubly robust methods](doubly-robust.html)
 - [Binary outcome example](Binary-examples.html)
 - [Count outcome example](Count-examples.html)
 - [Survival outcome example](Survival-examples.html)

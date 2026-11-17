@@ -202,13 +202,15 @@ precmed_plot_theme <- function() {
 #' 0 (no risk difference or a ratio of 1); use \code{NULL} or \code{NA} to omit the null line.
 #' @param metrics Character vector of metrics to plot, in display order. For
 #' binary fits, choose from \code{"risk0"}, \code{"risk1"}, and
-#' \code{"risk.difference"}. For
+#' \code{"risk_difference"}. For
 #' count fits, choose from \code{"rate0"}, \code{"rate1"}, and
-#' \code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
-#' \code{"rmst1"}, \code{"log.rmtl.ratio"}, and
-#' \code{"log.cumulative.hazard.ratio"}. Older survival fits may instead
-#' contain \code{"log.hazard.ratio"}. The default \code{NULL} plots all
-#' metrics available in the object.
+#' \code{"log_rate_ratio"}; for survival fits, choose from \code{"rmst0"},
+#' \code{"rmst1"}, \code{"log_rmtl_ratio"}, and
+#' \code{"log_cumulative_hazard_ratio"}, \code{"risk0"}, \code{"risk1"}, and \code{"risk_difference"}. Older survival fits may instead
+#' contain \code{"log_hazard_ratio"}. The default \code{NULL} plots all
+#' metrics available in the object. Dotted spellings such as \code{"risk.difference"} remain supported. Survival panels are arranged in up to three columns,
+#' with RMST and log RMTL ratio first, risks and risk difference next, and the
+#' log cumulative hazard ratio last. Explicit \code{metrics} are plotted in supplied order.
 #' @param ... Other parameters
 #'
 #' @return A plot of the class \code{ggplot}, displaying the estimated ATE across
@@ -240,6 +242,15 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
 
   if (missing(bins)) {
     bins <- max(1, min(50, floor(x$n.boot/10))) # need at least one bin
+  }
+
+  # Accept underscore spellings for the existing dotted metric names.
+  if (is.character(metrics)) {
+    aliases <- c(risk_difference = "risk.difference", log_rate_ratio = "log.rate.ratio",
+                 log_rmtl_ratio = "log.rmtl.ratio", log_hazard_ratio = "log.hazard.ratio",
+                 log_cumulative_hazard_ratio = "log.cumulative.hazard.ratio")
+    matched <- match(metrics, names(aliases), nomatch = 0L)
+    metrics[matched > 0L] <- unname(aliases[matched[matched > 0L]])
   }
 
   if (identical(x$response, "binary")) {
@@ -290,8 +301,8 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
   available <- if (x$response == "count") {
     c(if (!is.null(x$rate.boot)) c("rate0", "rate1"), "log.rate.ratio")
   } else if (x$response == "survival") {
-    intersect(intersect(c("rmst1", "rmst0", "log.rmtl.ratio", "log.hazard.ratio",
-                          "log.cumulative.hazard.ratio"), colnames(x$trt.boot)), names(x))
+    intersect(intersect(c("rmst1", "rmst0", "log.rmtl.ratio", "risk0", "risk1",
+                          "risk.difference", "log.cumulative.hazard.ratio", "log.hazard.ratio"), colnames(x$trt.boot)), names(x))
   } else character()
   if (is.null(metrics)) metrics <- available
   if (!is.character(metrics) || !length(metrics) || anyNA(metrics) ||
@@ -349,7 +360,10 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
                       rmst0 = paste0("RMST (", treatment.labels[1], ")"),
                       log.rmtl.ratio = "Log RMTL ratio",
                       log.cumulative.hazard.ratio = "Log cumulative hazard ratio",
-                      log.hazard.ratio = "Log hazard ratio")
+                      log.hazard.ratio = "Log hazard ratio",
+                      risk0 = paste0("Risk (", treatment.labels[1], ")"),
+                      risk1 = paste0("Risk (", treatment.labels[2], ")"),
+                      risk.difference = "Risk difference")
     est.df <- data.frame(key = character(), value = numeric())
     est.df <- est.df %>% add_row(key = "rmst1", value = x$rmst1$estimate)
     est.df <- est.df %>% add_row(key = "rmst0", value = x$rmst0$estimate)
@@ -360,6 +374,8 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
     if (!is.null(x$log.cumulative.hazard.ratio))
       est.df <- est.df %>% add_row(key = "log.cumulative.hazard.ratio", value = x$log.cumulative.hazard.ratio$estimate)
 
+    for (key in c("risk0", "risk1", "risk.difference"))
+      if (!is.null(x[[key]])) est.df <- est.df %>% add_row(key = key, value = x[[key]]$estimate)
     est.df <- est.df[match(metrics, est.df$key), , drop = FALSE]
     est.df$key <- factor(est.df$key, levels = metrics)
 
@@ -368,13 +384,13 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
       dplyr::filter(.data$key %in% metrics) %>%
       mutate(key = factor(.data$key, levels = metrics)) %>%
       ggplot(aes(x = .data$value)) + geom_histogram(bins = bins, alpha = alpha, fill = "#7293AD", color = "white", linewidth = 0.3) +
-      facet_wrap(. ~ .data$key, scales = "free", labeller = ggplot2::as_labeller(facet.labels)) +
+      facet_wrap(. ~ .data$key, ncol = 3, scales = "free", labeller = ggplot2::as_labeller(facet.labels)) +
       geom_vline(data = est.df, aes(xintercept = .data$value), linetype = 1, color = "#B43B35", linewidth = 0.8) +
       theme +
       labs(x = "Bootstrap estimate", y = "Frequency", title = title,
-           caption = if (show.null && any(grepl("^log\\.", metrics))) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
-    if (show.null && any(grepl("^log\\.", metrics))) {
-      null.df <- data.frame(key = factor(metrics[grepl("^log\\.", metrics)], levels = metrics), value = null.value)
+           caption = if (show.null && any((grepl("^log\\.", metrics) | metrics == "risk.difference"))) "Red: full-sample estimate   |   Dashed: null value" else "Red: full-sample estimate")
+    if (show.null && any((grepl("^log\\.", metrics) | metrics == "risk.difference"))) {
+      null.df <- data.frame(key = factor(metrics[(grepl("^log\\.", metrics) | metrics == "risk.difference")], levels = metrics), value = null.value)
       p <- p + geom_vline(data = null.df, aes(xintercept = .data$value),
                           linetype = 2, color = "#303030", linewidth = 0.7)
     }
@@ -389,7 +405,7 @@ plot.atefit <- function(x, bins, alpha = 1, title = waiver(),
 #' @param ... Other parameters
 #'
 #' @details Display the estimated treatment effects for survival outcomes (log
-#' restricted mean time lost ratio and log cumulative hazard ratio) and count outcomes
+#' restricted mean time lost ratio, log cumulative hazard ratio and risk difference) and count outcomes
 #' (the log rate ratio).
 #'
 #' @return No return value
@@ -417,7 +433,12 @@ print.atefit <- function(x, ...) {
     effects <- x$log.rmtl.ratio
     if (!is.null(x$log.hazard.ratio)) effects <- rbind(effects, x$log.hazard.ratio)
     if (!is.null(x$log.cumulative.hazard.ratio)) effects <- rbind(effects, x$log.cumulative.hazard.ratio)
+    if (!is.null(x$risk.difference)) effects <- rbind(effects, x$risk.difference)
     print(effects)
+    if (!is.null(x$risk0) && !is.null(x$risk1)) {
+      cat("\nEstimated event risks at tau0:\n\n")
+      print(rbind(x$risk1, x$risk0))
+    }
     cat(paste0("\nEstimated RMST:\n\n"))
     print(rbind(x$rmst1,x$rmst0))
   }

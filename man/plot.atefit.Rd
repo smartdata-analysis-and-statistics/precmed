@@ -32,13 +32,15 @@ supply, for example, \code{ggplot2::theme_classic()} to use another theme.}
 
 \item{metrics}{Character vector of metrics to plot, in display order. For
 binary fits, choose from \code{"risk0"}, \code{"risk1"}, and
-\code{"risk.difference"}. For
+\code{"risk_difference"}. For
 count fits, choose from \code{"rate0"}, \code{"rate1"}, and
-\code{"log.rate.ratio"}; for survival fits, choose from \code{"rmst0"},
-\code{"rmst1"}, \code{"log.rmtl.ratio"}, and
-\code{"log.cumulative.hazard.ratio"}. Older survival fits may instead
-contain \code{"log.hazard.ratio"}. The default \code{NULL} plots all
-metrics available in the object.}
+\code{"log_rate_ratio"}; for survival fits, choose from \code{"rmst0"},
+\code{"rmst1"}, \code{"log_rmtl_ratio"}, and
+\code{"log_cumulative_hazard_ratio"}, \code{"risk0"}, \code{"risk1"}, and \code{"risk_difference"}. Older survival fits may instead
+contain \code{"log_hazard_ratio"}. The default \code{NULL} plots all
+metrics available in the object. Dotted spellings such as \code{"risk.difference"} remain supported. Survival panels are arranged in up to three columns,
+with RMST and log RMTL ratio first, risks and risk difference next, and the
+log cumulative hazard ratio last. Explicit \code{metrics} are plotted in supplied order.}
 
 \item{...}{Other parameters}
 }

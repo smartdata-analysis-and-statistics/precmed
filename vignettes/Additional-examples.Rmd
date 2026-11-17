@@ -104,23 +104,26 @@ Now we show more examples of different cutoffs and how they are reflected in the
 
 ```{r subgroup_proportion_count, eval = T, echo = T, cache = doc.cache}
 # An example of 11 nested binary subgroups and a 4-category mutually exclusive subgroup
-output_catecv2 <- catecv(response = "count",
-                         data = countExample,
-                         score.method = c("poisson", "contrastReg", "negBin"),
-                         cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-                         ps.model = trt ~ age + previous_treatment,
-                         higher.y = FALSE,
-                         prop.cutoff = seq(0.5, 1, length = 11), # NEW
-                         prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
-                         initial.predictor.method = "poisson", 
-                         cv.n = 5, 
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
+fit_cv_2 <- catecv(
+  response = "count",
+  data = countExample,
+  score.method = c("poisson", "contrastReg", "negBin"),
+  cate.model = y ~ age + female + previous_treatment +
+    previous_cost + previous_number_relapses + offset(log(years)),
+  ps.model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  prop.cutoff = seq(0.5, 1, length = 11), # NEW
+  prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
+  initial.predictor.method = "poisson",
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 ```
 
 ```{r subgroup_proportion2_count, eval = T, echo = T}
-print(output_catecv2$ate.contrastReg$ate.est.train.high.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.high.cv)
 # Dimension is now 11 rows (nested binary subgroups) by 5 columns (CV iterations)
 ```
 
@@ -128,17 +131,17 @@ Because we have new `prop.cutoff` with 11 values as opposed to only 6 in the ori
 
 
 ```{r subgroup_proportion3_count, eval = T, echo = T}
-plot(output_catecv2) 
+plot(fit_cv_2)
 ```
 
 The validation curves use the 11 nested subgroup cutoffs specified above, so they contain more line segments than the main example. The ABC statistic is not affected by the change in `prop.cutoff` because the calculation of ABC statistics depends on the minimum and maximum of the `prop.cutoff` vector and is always calculated based on 100 evenly-spaced cutoffs created from this range. See more theoretical details on ABC calculation in the [Methods for developing and validating CATE scores](Theoretical-details.html) section. 
 
 
 ```{r subgroup_proportion4_count, eval = T, echo = T}
-print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.group.cv)
 # Dimension is now 4 rows (multi-category mutually exclusive subgroups) by 5 columns (CV iterations)
 
-boxplot(output_catecv2)
+boxplot(fit_cv_2)
 ```
 
 For results on the mutually exclusive subgroups, the number of rows in the ATE results increases from 3 to 4 in comparison with the original example because `prop.multi` now defines 4 mutually exclusive subgroups. For each method, the box plot now has 4 boxes for 4 mutually exclusive subgroups.
@@ -146,29 +149,30 @@ For results on the mutually exclusive subgroups, the number of rows in the ATE r
 
 **Examples that we do not recommend**
 
-In this next example, `prop.cutoff` includes 0.01, which is very close to 0. Consequently, the scoring methods may run into some convergence issues because the first subgroup includes a small number of patients. This can lead to highly unstable ATE estimates, as shown in the first CV iteration of contrast regression in `output_catecv3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the validation curves become useless due to the extreme ATE estimates.
+In this next example, `prop.cutoff` includes 0.01, which is very close to 0. Consequently, the scoring methods may run into some convergence issues because the first subgroup includes a small number of patients. This can lead to highly unstable ATE estimates, as shown in the first CV iteration of contrast regression in `fit_cv_3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the validation curves become useless due to the extreme ATE estimates.
 
 ```{r subgroup_proportion_bad_count, eval = T, echo = T, cache = doc.cache}
 # An example of very few nested binary subgroups
-output_catecv3 <- catecv(response = "count",
-                         data = countExample,
-                         score.method = c("poisson", "contrastReg", "negBin"),
-                         cate.model = y ~ age + female + previous_treatment
-                                      + previous_cost + previous_number_relapses 
-                                      + offset(log(years)),
-                         ps.model = trt ~ age + previous_treatment, 
-                         initial.predictor.method = "poisson", 
-                         higher.y = FALSE,
-                         prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
-                         cv.n = 5, 
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 1)
-output_catecv3$ate.contrastReg$ate.est.valid.high.cv
+fit_cv_3 <- catecv(
+  response = "count",
+  data = countExample,
+  score.method = c("poisson", "contrastReg", "negBin"),
+  cate.model = y ~ age + female + previous_treatment +
+    previous_cost + previous_number_relapses + offset(log(years)),
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "poisson",
+  higher.y = FALSE,
+  prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 1
+)
+fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 ```
 
 ```{r subgroup_proportion_bad2_count, eval = T, echo = T, warning=FALSE, message=FALSE}
-plot(output_catecv3) 
+plot(fit_cv_3)
 ```
 
 Below are some general recommendations on the choice of `prop.cutoff` and `prop.multi`:
@@ -263,79 +267,83 @@ Now we show more examples of different cutoffs and how they are reflected in the
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-output_catecv2 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("randomForest", "contrastReg"),
-                         
-                cate.model = survival::Surv(y, d) ~ age + female
-                                                        + previous_cost + previous_number_relapses,
-                ps.model = trt ~ age + previous_treatment,
-                initial.predictor.method = "logistic",
-                ipcw.model = NULL,
-                followup.time = NULL,
-                tau0 = tau0,
-                surv.min = 0.025,
-                higher.y = TRUE,
-                prop.cutoff = seq(0.6, 1, length = 9), # NEW
-                prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
-                cv.n = 5,
-                seed = 999,
-                plot.gbmperf = FALSE,
-                verbose = 0)
+fit_cv_2 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("randomForest", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 9), # NEW
+  prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 ```
 
 ```{r subgroup_proportion2, eval = T, echo = T}
-print(output_catecv2$ate.contrastReg$ate.est.train.high.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.high.cv)
 # Dimension is 9 (nested binary subgroups) by 5 (CV iterations)
 ```
 
 Because we have new `prop.cutoff` with 9 values as opposed to only 5 in the original example, the number of rows in the ATE results will be changed accordingly while the number of columns remains to be 5.
 
 ```{r subgroup_proportion3, eval = T, echo = T}
-plot(output_catecv2) 
+plot(fit_cv_2)
 ```
 
 The validation curves depend on `prop.cutoff` and have more line segments than the one presented in the main example because they contain 9 sets of subgroups instead of 5 sets (although it is not so obvious here in this example). The ABC statistic is not affected by this because the calculation of ABC statistics depends on the minimum and maximum of
 the `prop.cutoff` vector and 100 evenly-spaced subgroup cutoffs are created from this range. The highest proportion cutoff that is not 1 in the main example was 0.9 and it is now 0.95. See more theoretical details on ABC calculation in the [Methods for developing and validating CATE scores](Theoretical-details.html) section.
 
 ```{r subgroup_proportion4, eval = T, echo = T}
-print(output_catecv2$ate.contrastReg$ate.est.train.group.cv) 
+print(fit_cv_2$ate.contrastReg$ate.est.train.group.cv)
 # Dimension is now 4 (multi-category mutually exclusive subgroups) by 3 (CV iterations)
 
-boxplot(output_catecv2)
+boxplot(fit_cv_2)
 ```
 
 For results on the mutually exclusive subgroups, the number of rows in the ATE results increases from 3 to 4 in comparison with the original example because `prop.multi` now defines 4 mutually exclusive subgroups. For each methods, the box plot now has 4 boxes for 4 mutually exclusive subgroups.
 
 **Examples that we do not recommend**
 
-In this example, `prop.cutoff` includes 0.01, which is very close to 0. Consequently, the scoring methods may run into some convergence issues because the first subgroup includes a small number of patients. This can lead to highly unstable ATE estimates, as shown in the first CV iteration of contrast regression in `output_catecv3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the validation curves become useless due to the extreme ATE estimates.
+In this example, `prop.cutoff` includes 0.01, which is very close to 0. Consequently, the scoring methods may run into some convergence issues because the first subgroup includes a small number of patients. This can lead to highly unstable ATE estimates, as shown in the first CV iteration of contrast regression in `fit_cv_3$ate.contrastReg$ate.est.valid.high.cv`. Moreover, the validation curves become useless due to the extreme ATE estimates.
 
 ```{r subgroup_proportion_bad, eval = T, echo = T, error = T, cache = doc.cache}
 # An example of very few nested binary subgroups
-output_catecv3 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = NULL,
-                         followup.time = NULL,
-                         tau0 = tau0,
-                         surv.min = 0.025,
-                         higher.y = TRUE,
-                         prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         cv.n = 5,
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 1)
-output_catecv3$ate.contrastReg$ate.est.valid.high.cv
+fit_cv_3 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 1
+)
+fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 
 ```
 
 ```{r subgroup_proportion_bad2, eval = T, echo = T, warning=FALSE, message=FALSE}
-plot(output_catecv3) 
+plot(fit_cv_3)
 ```
 
 Below are some general recommendations on the choice of `prop.cutoff` and `prop.multi`:
@@ -350,24 +358,27 @@ The censoring model estimates the probabilities used for inverse probability of 
 
 ```{r ipcw, eval = F, echo = T, cache = doc.cache}
 # An example of a different censoring model with different covariates from default
-output_catecv4 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("poisson", "contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
-                         ipcw.method = "aft (weibull)", # NEW
-                         followup.time = NULL,
-                         tau0 = tau0,
-                         surv.min = 0.025,
-                         higher.y = TRUE,
-                         prop.cutoff = seq(0.6, 1, length = 5), 
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         cv.n = 5,
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
+fit_cv_4 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("poisson", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
+  ipcw.method = "aft (weibull)", # NEW
+  followup.time = NULL,
+  tau0 = tau0,
+  surv.min = 0.025,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
 ```
 
 ### Truncation and follow-up time
@@ -378,30 +389,34 @@ In the main example, we used the minimum of the 95th percentile of survival time
 
 ```{r time, eval = T, echo = T, cache = doc.cache}
 # An example of a different censoring model with different covariates from default
-output_catecv5 <- catecv(response = "survival",
-                         data = survivalExample,
-                         score.method = c("poisson", "contrastReg"),
-                         cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-                         ps.model = trt ~ age + previous_treatment,
-                         initial.predictor.method = "logistic",
-                         ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
-                         ipcw.method = "aft (weibull)",
-                         followup.time = NULL,
-                         tau0 = NULL, # NEW
-                         higher.y = TRUE,
-                         cv.n = 5,
-                         surv.min = 0.025,
-                         prop.cutoff = seq(0.6, 1, length = 5),
-                         prop.multi = c(0, 0.5, 0.6, 1),
-                         seed = 999,
-                         plot.gbmperf = FALSE,
-                         verbose = 0)
-plot(output_catecv5)
+fit_cv_5 <- catecv(
+  response = "survival",
+  data = survivalExample,
+  score.method = c("poisson", "contrastReg"),
+  cate.model = survival::Surv(y, d) ~ age + female +
+    previous_cost + previous_number_relapses,
+  ps.model = trt ~ age + previous_treatment,
+  initial.predictor.method = "logistic",
+  ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
+  ipcw.method = "aft (weibull)",
+  followup.time = NULL,
+  tau0 = NULL, # NEW
+  higher.y = TRUE,
+  cv.n = 5,
+  surv.min = 0.025,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  seed = 999,
+  plot.gbmperf = FALSE,
+  verbose = 0
+)
+plot(fit_cv_5)
 ```
 
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust methods](doubly-robust.html)
 - [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
 - [Estimating and validating treatment effects for count outcomes](Count-examples.html)
 - [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
@@ -409,4 +424,4 @@ plot(output_catecv5)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)
 
 ## References
-    
+

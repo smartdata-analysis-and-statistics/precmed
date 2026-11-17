@@ -48,6 +48,29 @@
 
 ## Minor changes
 
+* Added an introductory vignette explaining doubly robust estimation, its
+  assumptions, and its use in `precmed`.
+
+* Added `subgroup_estimates()` to extract nested binary, count and survival subgroup estimates by
+  scoring method and measure. Newly fitted survival `catefit()` objects also
+  retain subgroup treatment-specific risks and RMSTs and risk differences.
+
+* Added `predict()`, `coef()` and `confint()` methods for `catefit` score
+  extraction. Predictions return stored analysis-sample scores; coefficient
+  intervals require available contrast-regression standard errors and are not
+  available for survival fits.
+
+* Survival `atefit()` bootstrap plots group RMST, risks and the cumulative
+  hazard ratio by row by default; `metrics` still controls selection and order
+  and accepts underscore spellings of dotted metric names.
+
+* Survival `catecv()` now stores subgroup risk differences at `tau0`; validation
+  plots support `measure = "risk_difference"`; dotted measure names are
+  available as aliases.
+
+* Survival `atefit()` now reports treatment-specific event risks and their
+  difference at `tau0`, with bootstrap inference and plot support.
+
 * `diagnostics(fit, type = "propensity")` now reports full-sample propensity
   score overlap, truncation, inverse treatment weights and effective sample
   sizes for newly fitted binary, count and survival `atefit()` results. The

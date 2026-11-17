@@ -243,6 +243,7 @@ ABC calculation examples in relation with `higher.y` argument in `catecv()` and 
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust methods](doubly-robust.html)
 - [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
 - [Estimating and validating treatment effects for count outcomes](Count-examples.html)
 - [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)

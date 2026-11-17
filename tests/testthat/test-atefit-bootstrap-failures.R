@@ -39,7 +39,8 @@ test_that("survival failures are tracked per measure and preserve unaffected inf
     calls <<- calls + 1L
     list(rmst1 = 5 + calls / 10, rmst0 = 4 + calls / 10,
          log.rmtl.ratio = .2 + calls / 100,
-         log.cumulative.hazard.ratio = if (calls == 2L) NA_real_ else .1 + calls / 100)
+         log.cumulative.hazard.ratio = if (calls == 2L) NA_real_ else .1 + calls / 100,
+         risk0 = .3, risk1 = .4, risk.difference = .1)
   }, .package = "precmed")
   d <- simulate_survival(n = 200, seed = 55)
   expect_message(expect_warning(fit <- atefitsurv(d, survival::Surv(y, d) ~ age,
@@ -64,12 +65,12 @@ test_that("survival fitting errors invalidate each affected measure", {
     calls <<- calls + 1L
     if (calls == 2L) stop("test survival model failure")
     list(rmst1 = 5, rmst0 = 4, log.rmtl.ratio = .2,
-         log.cumulative.hazard.ratio = .1)
+         log.cumulative.hazard.ratio = .1, risk0 = .3, risk1 = .4, risk.difference = .1)
   }, .package = "precmed")
   d <- simulate_survival(n = 200, seed = 55)
   expect_message(expect_warning(fit <- atefitsurv(d, survival::Surv(y, d) ~ age,
     trt ~ age, tau0 = 500, n.boot = 3, seed = 1), "test survival model failure"), "recoded")
-  expect_equal(nrow(fit$bootstrap.diagnostics), 4L)
+  expect_equal(nrow(fit$bootstrap.diagnostics), 7L)
   expect_true(all(fit$bootstrap.diagnostics$reason == "test survival model failure"))
   expect_true(all(is.na(confint(fit))))
   expect_true(is.na(fit$rmst0$SE))

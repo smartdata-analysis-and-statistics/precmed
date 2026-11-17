@@ -18,6 +18,7 @@ test_that("subgroup cumulative hazard uses the same estimator as the overall fit
                               prop = 1, onlyhigh = TRUE)))
   expect_equal(sub$chr.high, exp(overall$log.cumulative.hazard.ratio))
   expect_equal(sub$hr.high, exp(overall$log.hazard.ratio))
+  expect_equal(sub$rd.high, overall$risk.difference)
   expect_true(is.finite(sub$chr.high))
 })
 
@@ -25,5 +26,17 @@ test_that("subgroup fitting failures preserve all result fields", {
   out <- survCatch(stop("deliberate failure"))
   expect_true(is.na(out$log.cumulative.hazard.ratio))
   expect_true(is.na(out$log.hazard.ratio))
+  expect_true(is.na(out$risk.difference))
   expect_match(out$errors, "deliberate failure")
+})
+
+test_that("survival cross-validation stores risk differences for the full subgroup", {
+  d <- simulate_survival(n = 600, seed = 81)
+  expect_message(fit <- catecvsurv(data = d, score.method = "poisson",
+    cate.model = survival::Surv(y, d) ~ age, ps.model = trt ~ age,
+    tau0 = 300, prop.cutoff = c(.5, 1), prop.multi = c(0, .5, 1),
+    cv.n = 2, abc = FALSE, seed = 12, verbose = 0), "recoded")
+  expect_equal(as.numeric(fit$rd.poisson$rd.est.valid.high.cv[2, ]), fit$overall.rd.valid)
+  expect_equal(as.numeric(fit$rd.poisson$rd.est.train.high.cv[2, ]), fit$overall.rd.train)
+  expect_true(all(is.finite(fit$overall.rd.valid)))
 })

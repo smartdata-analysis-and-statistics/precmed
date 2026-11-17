@@ -243,12 +243,12 @@ Returns an object of the class \code{catefit} containing the following component
  }
  \item{\code{coefficients}: }A data frame with the coefficients of the estimated log-CATE
  score by \code{score.method}. The data frame has number of rows equal to the number of
- covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
- If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
- column containing the standard errors of the coefficients estimated with contrast regression.
+ design columns in \code{cate.model}, including the intercept, and one column per
+ available linear scoring method. Standard errors are not calculated for survival scores.
  \code{'randomForest'} and \code{'boosting'} do not have coefficient results because
  tree-based methods typically do not express the log-CATE as a linear combination of coefficients
  and covariates.
+ \item{\code{risk0.<method>}, \code{risk1.<method>}, \code{rd.<method>}, \code{rmst0.<method>}, \code{rmst1.<method>}: } Subgroup event risks, risk differences (treatment 1 minus 0), and treatment-specific RMST at \code{tau0}. See \code{\link{subgroup_estimates}} for extraction.
  \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
  calculation of ATE. Errors and warnings are organized by \code{score.method}.
 }
@@ -266,10 +266,9 @@ or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020
 to the entire data set.
 
 \code{\link{catefitsurv}()} provides the coefficients of the CATE score for each scoring method requested
-through \code{score.method}. Currently, contrast regression is the only method which allows
-for inference of the CATE coefficients by providing standard errors of the coefficients.
-The coefficients can be used to learn the effect size of each variable and predict the
-CATE score for a new observation.
+through \code{score.method} for supported linear scoring methods. The coefficients
+describe the fitted log-RMTL score; coefficient standard errors and confidence
+intervals are not currently calculated for survival fits.
 
 \code{\link{catefitsurv}()} also provides the predicted CATE score of each observation in the data set,
 for each scoring method. The predictions allow ranking the observations from potentially

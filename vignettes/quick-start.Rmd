@@ -47,7 +47,7 @@ The data contain 4,000 patients. `y` is the number of relapses, `years` is follo
 Start with `atefit()` to estimate the average treatment effect across the study population. For count outcomes, it estimates a relapse rate ratio comparing `drug1` with `drug0`. The outcome model includes a log follow-up offset, and the treatment model (propensity-score model) describes treatment assignment using baseline characteristics.
 
 ```{r ate, message=FALSE, warning=FALSE}
-overall <- atefit(
+fit_ate <- atefit(
   response = "count",
   data = countExample,
   cate.model = y ~ age + female + previous_treatment +
@@ -57,14 +57,14 @@ overall <- atefit(
   seed = 999,
   verbose = 0
 )
-overall
+fit_ate
 ```
 
 The output reports the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
 
 ```{r rate-ratio}
-unname(exp(coef(overall)))
-exp(confint(overall))[1, ]
+unname(exp(coef(fit_ate)))
+exp(confint(fit_ate))
 ```
 
 The overall effect can mask differences across patients. Next, we explore treatment effect heterogeneity.
@@ -74,7 +74,7 @@ The overall effect can mask differences across patients. Next, we explore treatm
 `catecv()` fits a conditional average treatment effect (CATE) scoring model and evaluates it with cross-validation. Here, the outcome model includes a log follow-up offset to model relapse rates. The treatment model describes treatment assignment using age and previous treatment. Because fewer relapses are better, we set `higher.y = FALSE`.
 
 ```{r fit, message=FALSE, warning=FALSE}
-fit <- catecv(
+fit_cv <- catecv(
   response = "count",
   data = countExample,
   score.method = "poisson",
@@ -90,7 +90,7 @@ fit <- catecv(
 ## Inspect the validation curves
 
 ```{r plot, fig.alt="Training and validation curves for estimated treatment effects across nested patient subgroups."}
-plot(fit)
+plot(fit_cv)
 ```
 
 The curves summarize estimated treatment effects in nested subgroups ranked by the model's predicted treatment effect. Compare the training and validation panels: a pattern that persists in validation provides more support for the model's ability to distinguish subgroups than one seen only in training. These results are illustrative, and internal cross-validation alone does not establish performance in a new population.

@@ -142,32 +142,32 @@ is no follow-up offset for this fixed-horizon binary outcome.
 outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
   previous_number_relapses
 ps_formula <- trt ~ age + previous_treatment
-output_atefit <- atefit(
+fit_ate <- atefit(
   response = "binary", data = binaryExample,
   cate.model = outcome_formula, ps.model = ps_formula,
   n.boot = 100, seed = 999
 )
-output_atefit
+fit_ate
 ```
 
 Use `coef()` and `confint()` to extract the risk difference and its confidence
 interval:
 
 ```{r}
-coef(output_atefit)
-confint(output_atefit)
+coef(fit_ate)
+confint(fit_ate)
 ```
 
 The output reports estimated population-average relapse risks of
-`r sprintf("%.3f", output_atefit$risk1$estimate)` under drug1 and
-`r sprintf("%.3f", output_atefit$risk0$estimate)` under drug0, shown in that
+`r sprintf("%.3f", fit_ate$risk1$estimate)` under drug1 and
+`r sprintf("%.3f", fit_ate$risk0$estimate)` under drug0, shown in that
 order. Their difference (drug1 minus drug0) is
-`r sprintf("%.3f", output_atefit$risk.difference$estimate)`, or
-`r sprintf("%.1f", 100 * output_atefit$risk.difference$estimate)` percentage
+`r sprintf("%.3f", fit_ate$risk.difference$estimate)`, or
+`r sprintf("%.1f", 100 * fit_ate$risk.difference$estimate)` percentage
 points. A negative difference favors drug1. The output also reports the
 bootstrap standard error, a 95% Wald confidence interval of
-`r sprintf("%.3f", output_atefit$risk.difference$CI.lower)` to
-`r sprintf("%.3f", output_atefit$risk.difference$CI.upper)`, and a two-sided
+`r sprintf("%.3f", fit_ate$risk.difference$CI.lower)` to
+`r sprintf("%.3f", fit_ate$risk.difference$CI.upper)`, and a two-sided
 Wald p-value for the risk difference. The causal interpretation depends on the
 assumptions described above.
 
@@ -186,16 +186,16 @@ range in the other treatment group; its percentage is within the patient's own
 treatment group:
 
 ```{r overlap_atefit_call, eval=FALSE}
-diagnostics(output_atefit, type = "propensity")
+diagnostics(fit_ate, type = "propensity")
 ```
 
 ```{r overlap_atefit, echo=FALSE}
-knitr::kable(diagnostics(output_atefit, type = "propensity"),
+knitr::kable(diagnostics(fit_ate, type = "propensity"),
              digits = 2, row.names = FALSE)
 ```
 
 ```{r overlap_atefit_values, include=FALSE}
-overlap <- diagnostics(output_atefit, type = "propensity", layout = "arms")
+overlap <- diagnostics(fit_ate, type = "propensity", layout = "arms")
 ```
 
 In this example, `r overlap$outside.other.range[1]` patients receiving drug0 and
@@ -213,7 +213,7 @@ results.
 Use `plot()` to inspect the bootstrap estimates:
 
 ```{r}
-plot(output_atefit, metrics = c("risk0", "risk1", "risk.difference"))
+plot(fit_ate, metrics = c("risk0", "risk1", "risk_difference"))
 ```
 
 The plot shows bootstrap relapse risks for drug0 (`risk0`) and drug1 (`risk1`),
@@ -243,13 +243,13 @@ rd_comparison <- data.frame(
                      "Conditional; also marginal under the constant-difference model",
                      "Marginal population-average difference"),
   `Risk difference` = c(unadjusted_rd, adjusted_rd,
-                        output_atefit$risk.difference$estimate),
+                        fit_ate$risk.difference$estimate),
   check.names = FALSE
 )
 rd_comparison$`95% CI` <- sprintf(
   "%.3f to %.3f",
-  c(unadjusted_ci[1], adjusted_ci[1], output_atefit$risk.difference$CI.lower),
-  c(unadjusted_ci[2], adjusted_ci[2], output_atefit$risk.difference$CI.upper)
+  c(unadjusted_ci[1], adjusted_ci[1], fit_ate$risk.difference$CI.lower),
+  c(unadjusted_ci[2], adjusted_ci[2], fit_ate$risk.difference$CI.upper)
 )
 knitr::kable(rd_comparison, format = "html", digits = 3, row.names = FALSE,
              table.attr = 'class="table table-striped" style="width: auto;"')
@@ -287,34 +287,61 @@ personalizing medicine," discusses treatment effect heterogeneity and CATE
 prediction [@hoogland2026introduction].
 
 ```{r}
-output_catefit <- catefit(
+fit_cate <- catefit(
   response = "binary", data = binaryExample,
   score.method = c("logistic", "twoReg", "boosting"),
   cate.model = outcome_formula, ps.model = ps_formula,
   higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, plot.gbmperf = FALSE, n.cores = 1
 )
-output_catefit
-head(output_catefit$score.twoReg)
-output_catefit$ate.twoReg
-output_catefit$ate.boosting
 ```
 
-The printed coefficient table and `coef(output_catefit)` show the `twoReg`
-linear risk-difference score coefficients. Logistic coefficients are on the
-log-odds scale and are stored in `output_catefit$fit$logistic`; boosting has no
-linear score coefficient vector.
+## Inspect CATE scores and subgroup estimates
 
-For example, `prop0.5` is the estimated ATE in the half with the lowest
-scores, using a sample quantile cutoff; ties can make the subgroup larger.
-`higher.y = FALSE` selects lower risk differences as favorable because relapse
-is an adverse event. For a desirable binary outcome, use `higher.y = TRUE`.
+The fitted scores estimate differences in relapse probability for patients with
+different baseline covariates. Use `predict()` to retrieve scores for the
+original analysis sample; prediction for new data is not currently supported.
+Below are the first 6 scores from the two-regression method.
 
-### Visualize the distribution of CATE scores
+```{r inspect_catefit}
+scores <- predict(fit_cate, method = "twoReg")
+head(scores)
+```
+
+Use `plot()` to compare fitted score distributions. Scores are on the risk
+difference scale, with zero indicating no difference in relapse probability.
 
 ```{r}
-plot(output_catefit, methods = "twoReg")
+plot(fit_cate, type = "density")
 ```
+
+Differences between the score distributions can reflect model flexibility,
+estimation noise or overfitting. The plot alone cannot establish that treatment
+effects differ or that scores will perform well in new patients.
+
+Use `coef()` to extract the available linear score coefficients. For `twoReg`,
+the coefficients describe a linear projection of the risk difference. The
+logistic model's coefficients are on the log-odds scale, and boosting does not
+have a linear score coefficient vector. Confidence intervals for binary score
+coefficients are not currently available.
+
+```{r inspect_catefit_coefficients}
+coef(fit_cate, method = "twoReg")
+```
+
+Use `subgroup_estimates()` to inspect estimated risk differences in nested
+subgroups ranked by the two-regression score. These estimates use the same data
+as the score fit; the validation section below assesses the score in held-out
+data. The contrast is drug 1 minus drug 0, so a negative value favors drug 1.
+
+```{r inspect_catefit_subgroups}
+subgroup_estimates(fit_cate, method = "twoReg", measure = "risk_difference")
+```
+
+For example, `prop0.5` is the estimated treatment effect in the half with the
+lowest scores, using a sample quantile cutoff; ties can make the subgroup larger.
+`higher.y = FALSE` selects lower risk differences as favorable because relapse
+is an adverse event. For a desirable binary outcome, use `higher.y = TRUE`.
 
 ## Internally validate CATE scores
 
@@ -334,16 +361,16 @@ the rank-deficient fits observed with smaller groups in this example; check
 support and model fit when choosing cutoffs for other data.
 
 ```{r}
-binary_cv <- catecv(
+fit_cv <- catecv(
   response = "binary", data = binaryExample, score.method = c("logistic", "twoReg"),
   cate.model = outcome_formula, ps.model = ps_formula, higher.y = FALSE,
   prop.cutoff = c(0.5, 1), prop.multi = c(0, 0.5, 1),
   cv.n = 10, B = 1, seed = 102
 )
-plot(binary_cv, show.abc = FALSE)
-boxplot(binary_cv)
-abc(binary_cv)
-abc(binary_cv, combine = "mean")
+plot(fit_cv, show.abc = FALSE)
+boxplot(fit_cv)
+abc(fit_cv)
+abc(fit_cv, combine = "mean")
 ```
 
 The plotted curves use the two requested subgroup proportions. `abc()` uses
@@ -351,9 +378,9 @@ The plotted curves use the two requested subgroup proportions. `abc()` uses
 summarize a finer curve; the plot omits its separate, coarser ABC annotation.
 
 In this example, the mean validation ABC is
-`r sprintf("%.4f", abc(binary_cv, combine = "mean")["logistic"])` for
+`r sprintf("%.4f", abc(fit_cv, combine = "mean")["logistic"])` for
 `logistic` and
-`r sprintf("%.4f", abc(binary_cv, combine = "mean")["twoReg"])` for
+`r sprintf("%.4f", abc(fit_cv, combine = "mean")["twoReg"])` for
 `twoReg`. These similar values suggest comparable ranking performance in these
 splits. The ABC varies across iterations, and this comparison does not establish
 that the methods are equivalent in this population or in other data.
@@ -368,6 +395,7 @@ and treatment-rule interpretation [@jiang2026visualization].
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust methods](doubly-robust.html)
 - [Estimating and validating treatment effects for count outcomes](Count-examples.html)
 - [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
 - [Customizing CATE models and validation](Additional-examples.html)

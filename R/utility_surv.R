@@ -95,10 +95,14 @@ survCatch <- function(fun) {
 
   out <- c()
   out$log.rmtl.ratio <- fit$log.rmtl.ratio
+  for (field in c("risk0", "risk1", "rmst0", "rmst1", "risk.difference"))
+    out[[field]] <- if (is.null(fit[[field]])) NA_real_ else fit[[field]]
   out$log.hazard.ratio <- fit$log.hazard.ratio
   out$log.cumulative.hazard.ratio <- fit$log.cumulative.hazard.ratio
   if (!is.null(fit$log.cumulative.hazard.ratio) && !is.finite(fit$log.cumulative.hazard.ratio) && is.null(errors))
     warnings <- c(warnings, "Cumulative hazard ratio is undefined because an estimated survival probability is outside (0, 1).")
+  if (!is.null(fit$risk.difference) && !is.finite(fit$risk.difference) && is.null(errors))
+    warnings <- c(warnings, "Risk difference is undefined because an estimated survival probability is outside [0, 1].")
   out$warnings <- warnings
   out$errors <- errors
   return(out)

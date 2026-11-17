@@ -125,6 +125,7 @@ In the vignettes, we will adopt a different workflow to gradually expose the use
 
 ## Vignettes
 
+- [Understanding doubly robust methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html)
 - [Binary outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
 - [Count outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
 - [Survival outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)

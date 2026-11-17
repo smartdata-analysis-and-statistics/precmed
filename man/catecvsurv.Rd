@@ -248,6 +248,7 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     The ith element indicates whether the algorithm converged in the ith cross-validation
     iteration.
  }
+ \item{\code{rd.<method>}: } Subgroup event risk differences at \code{tau0}, treatment 1 minus treatment 0, in training and validation sets. \code{overall.rd.train} and \code{overall.rd.valid} contain the corresponding overall differences. These estimates use the same censoring assumptions as the cumulative hazard ratio.
  \item{\code{chr.<method>}: } A list of subgroup marginal cumulative hazard ratios at
  \code{tau0}, with training and validation matrices for high, low and disjoint groups.
  Matrix names use the prefix \code{chr.est.}; undefined estimates are \code{NA}.

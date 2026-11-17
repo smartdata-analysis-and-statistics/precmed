@@ -64,7 +64,19 @@ test_that("hazard plots default to cumulative ratios and retain explicit Cox plo
   expect_match(boxplot(fit, measure = "cumulative_hazard_ratio")$labels$y, "Cumulative hazard ratio")
   expect_true(all(plot(fit, measure = "conditional_hr")$data$ate.cv == 3))
   expect_true(all(plot(fit, measure = "cumulative_hr")$data$ate.cv == 2))
-  expect_match(boxplot(fit, measure = "conditional_hr")$labels$y, "Conditional Cox")
+  expect_match(boxplot(fit, measure = "conditional.hr")$labels$y, "Conditional Cox")
+  expect_error(plot(fit, measure = "risk_difference"), "refit")
+  fit$overall.rd.train <- fit$overall.rd.valid <- c(-.1, -.1)
+  fit$rd.poisson <- list(rd.est.train.high.cv = m(c(-.2, -.1)),
+                         rd.est.valid.high.cv = m(c(-.2, -.1)))
+  rd <- plot(fit, measure = "risk.difference")
+  expect_equal(rd$data$ate.cv, plot(fit, measure = "risk_difference")$data$ate.cv)
+  expect_true(all(rd$data$ate.cv < 0))
+  arr <- plot(fit, measure = "absolute_risk_reduction")
+  expect_equal(arr$data$ate.cv, -rd$data$ate.cv)
+  expect_equal(arr$layers[[2]]$data$yintercept, -rd$layers[[2]]$data$yintercept)
+  combined <- plot(fit, measure = c("cumulative.hr", "risk.difference"))
+  expect_equal(nrow(ggplot2::ggplot_build(combined)$layout$layout), 4L)
   both <- plot(fit, measure = c("rmtl", "cumulative_hr"))
   method <- plot(fit, measure = c("rmtl", "cumulative_hr"), layout = "method")
   expect_equal(nrow(ggplot2::ggplot_build(method)$layout$layout), 2)
@@ -158,6 +170,21 @@ test_that("ATE bootstrap null lines use the log-ratio panels", {
   expect_equal(as.integer(tail(selected$data, 1)[[1]]$PANEL), 1L)
 })
 
+
+test_that("survival ATE facets group related quantities and honor metric order", {
+  keys <- c("rmst1", "rmst0", "log.rmtl.ratio", "risk0", "risk1",
+            "risk.difference", "log.cumulative.hazard.ratio")
+  fit <- structure(c(list(response = "survival", n.boot = 2),
+    setNames(lapply(seq_along(keys), function(i) data.frame(estimate = i / 10)), keys),
+    list(trt.boot = as.data.frame(setNames(lapply(seq_along(keys), function(i) c(i / 10, i / 10 + .01)), keys)))),
+    class = "atefit")
+  layout <- ggplot2::ggplot_build(plot(fit))$layout$layout
+  expect_equal(as.character(layout$key), keys)
+  expect_equal(layout$ROW, c(1L, 1L, 1L, 2L, 2L, 2L, 3L))
+  selected <- ggplot2::ggplot_build(plot(fit, metrics = c("risk_difference", "rmst0")))$layout$layout
+  expect_equal(as.character(selected$key), c("risk.difference", "rmst0"))
+})
+
 test_that("binary ATE plots select treatment risks and risk differences", {
   fit <- structure(list(response = "binary", n.boot = 3,
     treatment.labels = c("control", "new drug"),
@@ -177,6 +204,7 @@ test_that("binary ATE plots select treatment risks and risk differences", {
   expect_length(plot(fit, metrics = "risk1")$layers, 2L)
   expect_length(plot(fit, null.value = NULL)$layers, 2L)
   expect_error(plot(fit, metrics = c("risk0", "risk0")), "distinct")
+  expect_equal(plot(fit, metrics = "risk_difference")$data, plot(fit, metrics = "risk.difference")$data)
   expect_error(plot(fit, metrics = "p0"), "available metric")
   fit$treatment.labels <- NULL
   expect_equal(unname(unlist(plot(fit)$facet$params$labeller(data.frame(key = c("risk0", "risk1"))))),

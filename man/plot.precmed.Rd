@@ -69,9 +69,11 @@ hazard ratios require \code{hazard.type = "conditional"} or refitting.}
 
 \item{measure}{For survival outcomes, a vector of \code{"rmtl"} (default),
 \code{"cumulative_hr"} (cumulative hazard ratio), and \code{"conditional_hr"}
-(conditional Cox hazard ratio fitted through \code{tau0}). Multiple measures appear in separate panels.
+(conditional Cox hazard ratio fitted through \code{tau0}), \code{"risk_difference"} (risk under treatment 1 minus treatment 0), and \code{"absolute_risk_reduction"} (the opposite contrast), both at \code{tau0}. Multiple measures appear in separate panels.
 The earlier names \code{"chr"}, \code{"cph"}, \code{"cumulative_hazard_ratio"},
-and \code{"conditional_hazard_ratio"} remain supported as aliases.}
+and \code{"conditional_hazard_ratio"} remain supported as aliases; dotted forms
+\code{"cumulative.hr"}, \code{"conditional.hr"}, \code{"risk.difference"},
+and \code{"absolute.risk.reduction"} are also supported.}
 
 \item{show.overall}{Whether to show the dashed overall treatment effect
 reference line in each set. Defaults to \code{TRUE}.}

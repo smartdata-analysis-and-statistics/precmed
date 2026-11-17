@@ -490,6 +490,7 @@ catecv <- function(response,
 #'     The ith element indicates whether the algorithm converged in the ith cross-validation
 #'     iteration.
 #'  }
+#'  \item{\code{rd.<method>}: } Subgroup event risk differences at \code{tau0}, treatment 1 minus treatment 0, in training and validation sets. \code{overall.rd.train} and \code{overall.rd.valid} contain the corresponding overall differences. These estimates use the same censoring assumptions as the cumulative hazard ratio.
 #'  \item{\code{chr.<method>}: } A list of subgroup marginal cumulative hazard ratios at
 #'  \code{tau0}, with training and validation matrices for high, low and disjoint groups.
 #'  Matrix names use the prefix \code{chr.est.}; undefined estimates are \code{NA}.
@@ -749,9 +750,9 @@ catecvsurv <- function(data,
   n.subgroup.bi <- length(prop.bi)
   n.subgroup.multi <- length(prop.multi) - 1
 
-  result <- vector("list", 3 * length(score.method) + 1)
-  names(result) <- c(paste0("ate.", score.method), paste0("hr.", score.method), paste0("chr.", score.method), "props")
-  for (name in c(paste0("ate.", score.method), paste0("hr.", score.method), paste0("chr.", score.method))) {
+  result <- vector("list", 4 * length(score.method) + 1)
+  names(result) <- c(paste0("ate.", score.method), paste0("hr.", score.method), paste0("chr.", score.method), paste0("rd.", score.method), "props")
+  for (name in c(paste0("ate.", score.method), paste0("hr.", score.method), paste0("chr.", score.method), paste0("rd.", score.method))) {
     name1 <- gsub("\\..*", ".", name)
     result[[name]] <- vector("list", 6)
     names(result[[name]]) <- paste0(name1, c("est.train.high.cv", "est.train.low.cv",
@@ -781,6 +782,7 @@ catecvsurv <- function(data,
 
   result$props <- vector("list", 3)
   names(result$props) <- c("prop.onlyhigh", "prop.bi", "prop.multi")
+  result$overall.rd.train <- result$overall.rd.valid <- rep(NA_real_, cv.n)
   result$overall.chr.train <- result$overall.chr.valid <- rep(NA_real_, cv.n)
   result$overall.ate.train <- result$overall.hr.train <-
     result$overall.ate.valid <- result$overall.hr.valid <- rep(NA, cv.n)
@@ -850,6 +852,7 @@ catecvsurv <- function(data,
     result$overall.ate.train[cv.i] <- exp(overall.train$log.rmtl.ratio)
     result$overall.hr.train[cv.i] <- exp(overall.train$log.hazard.ratio)
     result$overall.chr.train[cv.i] <- exp(overall.train$log.cumulative.hazard.ratio)
+    result$overall.rd.train[cv.i] <- overall.train$risk.difference
 
     overall.valid <- drsurv(y = y.valid, d = d.valid, x.cate = x.cate.valid, x.ps = x.ps.valid,
                             x.ipcw = x.ipcw.valid, trt = trt.valid, yf = yf.valid, tau0 = tau0, surv.min = surv.min,
@@ -857,6 +860,7 @@ catecvsurv <- function(data,
     result$overall.ate.valid[cv.i] <- exp(overall.valid$log.rmtl.ratio)
     result$overall.hr.valid[cv.i] <- exp(overall.valid$log.hazard.ratio)
     result$overall.chr.valid[cv.i] <- exp(overall.valid$log.cumulative.hazard.ratio)
+    result$overall.rd.valid[cv.i] <- overall.valid$risk.difference
     if (!is.finite(result$overall.chr.train[cv.i]) || !is.finite(result$overall.chr.valid[cv.i]))
       warning("Cumulative hazard ratio is undefined in a training or validation fold; see overall.chr outputs.", call. = FALSE)
 
@@ -903,6 +907,7 @@ catecvsurv <- function(data,
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
       est.prop1$chr.high <- exp(est.prop1$log.cumulative.hazard.ratio)
+      est.prop1$rd.high <- est.prop1$risk.difference
     } else {
       est.prop1 <- NULL
     }
@@ -923,6 +928,8 @@ catecvsurv <- function(data,
       result[[str_replace(name, "score", "chr")]]$chr.est.train.high.cv[, cv.i] <- c(est.bi$chr.high, est.prop1$chr.high)
       result[[str_replace(name, "score", "hr")]]$hr.est.train.low.cv[, cv.i] <- est.bi$hr.low
       result[[str_replace(name, "score", "chr")]]$chr.est.train.low.cv[, cv.i] <- est.bi$chr.low
+      result[[str_replace(name, "score", "rd")]]$rd.est.train.high.cv[, cv.i] <- c(est.bi$rd.high, est.prop1$rd.high)
+      result[[str_replace(name, "score", "rd")]]$rd.est.train.low.cv[, cv.i] <- est.bi$rd.low
 
       est.bi$err.high$`prop 1.0` <- est.prop1$errors
       err.bi.high <- est.bi$err.high[!sapply(est.bi$err.high, is.null)]
@@ -949,6 +956,7 @@ catecvsurv <- function(data,
       result[[str_replace(name, "score", "ate")]]$ate.est.train.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.train.group.cv[, cv.i] <- est.multi$hr
       result[[str_replace(name, "score", "chr")]]$chr.est.train.group.cv[, cv.i] <- est.multi$chr
+      result[[str_replace(name, "score", "rd")]]$rd.est.train.group.cv[, cv.i] <- est.multi$rd
 
       err.multi <- est.multi$err[!sapply(est.multi$err, is.null)]
       warn.multi <- est.multi$warn[!sapply(est.multi$warn, is.null)]
@@ -988,6 +996,7 @@ catecvsurv <- function(data,
       est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
       est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
       est.prop1$chr.high <- exp(est.prop1$log.cumulative.hazard.ratio)
+      est.prop1$rd.high <- est.prop1$risk.difference
     } else {
       est.prop1 <- NULL
     }
@@ -1008,6 +1017,8 @@ catecvsurv <- function(data,
       result[[str_replace(name, "score", "chr")]]$chr.est.valid.high.cv[, cv.i] <- c(est.bi$chr.high, est.prop1$chr.high)
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.low.cv[, cv.i] <- est.bi$hr.low
       result[[str_replace(name, "score", "chr")]]$chr.est.valid.low.cv[, cv.i] <- est.bi$chr.low
+      result[[str_replace(name, "score", "rd")]]$rd.est.valid.high.cv[, cv.i] <- c(est.bi$rd.high, est.prop1$rd.high)
+      result[[str_replace(name, "score", "rd")]]$rd.est.valid.low.cv[, cv.i] <- est.bi$rd.low
 
 
       est.bi$err.high$`prop 1.0` <- est.prop1$errors
@@ -1036,6 +1047,7 @@ catecvsurv <- function(data,
       result[[str_replace(name, "score", "ate")]]$ate.est.valid.group.cv[, cv.i] <- est.multi$ate.rmtl
       result[[str_replace(name, "score", "hr")]]$hr.est.valid.group.cv[, cv.i] <- est.multi$hr
       result[[str_replace(name, "score", "chr")]]$chr.est.valid.group.cv[, cv.i] <- est.multi$chr
+      result[[str_replace(name, "score", "rd")]]$rd.est.valid.group.cv[, cv.i] <- est.multi$rd
 
       err.multi <- est.multi$err[!sapply(est.multi$err, is.null)]
       warn.multi <- est.multi$warn[!sapply(est.multi$warn, is.null)]
@@ -2436,9 +2448,11 @@ catecvmean <- function(data,
 #' sets are plotted side-by-side (\code{FALSE}). Default is \code{FALSE}.
 #' @param measure For survival outcomes, a vector of \code{"rmtl"} (default),
 #' \code{"cumulative_hr"} (cumulative hazard ratio), and \code{"conditional_hr"}
-#' (conditional Cox hazard ratio fitted through \code{tau0}). Multiple measures appear in separate panels.
+#' (conditional Cox hazard ratio fitted through \code{tau0}), \code{"risk_difference"} (risk under treatment 1 minus treatment 0), and \code{"absolute_risk_reduction"} (the opposite contrast), both at \code{tau0}. Multiple measures appear in separate panels.
 #' The earlier names \code{"chr"}, \code{"cph"}, \code{"cumulative_hazard_ratio"},
-#' and \code{"conditional_hazard_ratio"} remain supported as aliases.
+#' and \code{"conditional_hazard_ratio"} remain supported as aliases; dotted forms
+#' \code{"cumulative.hr"}, \code{"conditional.hr"}, \code{"risk.difference"},
+#' and \code{"absolute.risk.reduction"} are also supported.
 #' @param plot.hr Deprecated; use \code{measure} instead. Whether to plot a hazard-based ratio for survival outcomes instead of the RMTL ratio.
 #' When \code{TRUE}, the default is the marginal cumulative hazard ratio.
 #' @param hazard.type Deprecated; use \code{measure} instead. Select \code{"cumulative"} (default) or the supplementary
@@ -2517,25 +2531,30 @@ plot.precmed <- function(x,
   if (!is.character(layout) || length(layout) != 1L || is.na(layout) || !layout %in% c("set", "method"))
     stop("layout must be 'set' or 'method'.")
 
+  risk.measure <- FALSE
   legacy <- !missing(plot.hr) || !missing(hazard.type)
   if (legacy && !missing(measure))
     stop("Use measure or the deprecated plot.hr and hazard.type arguments, not both.")
   if (legacy) {
     warning("plot.hr and hazard.type are deprecated; use measure instead.", call. = FALSE)
   } else if (x$response == "survival") {
-    aliases <- c(rmtl = "rmtl", cumulative_hr = "chr", conditional_hr = "conditional_hazard_ratio",
+    aliases <- c(rmtl = "rmtl", cumulative.hr = "chr", conditional.hr = "conditional_hazard_ratio",
+                 cumulative_hr = "chr", conditional_hr = "conditional_hazard_ratio",
+                 risk.difference = "risk_difference", absolute.risk.reduction = "absolute_risk_reduction",
+                 risk_difference = "risk_difference", absolute_risk_reduction = "absolute_risk_reduction",
                  chr = "chr", cph = "chr", cumulative_hazard_ratio = "chr",
                  conditional_hazard_ratio = "conditional_hazard_ratio")
     if (identical(measure, "both")) measure <- c("rmtl", "chr")
     if (!is.character(measure) || !length(measure) || anyNA(measure) || any(!measure %in% names(aliases)))
-      stop("measure must contain 'rmtl', 'cumulative_hr', or 'conditional_hr'.")
+      stop("measure must contain 'rmtl', 'cumulative_hr', 'conditional_hr', 'risk_difference', or 'absolute_risk_reduction'.")
     measure <- unname(aliases[measure])
     if (anyDuplicated(measure)) stop("measure must not contain duplicates.")
     if (length(measure) > 1L) {
       if (!missing(show.abc) && isTRUE(show.abc))
         warning("ABC is not shown in the combined plot; it applies to the RMTL ratio.", call. = FALSE)
       labels <- c(rmtl = "RMTL ratio", chr = "Cumulative hazard ratio",
-                  conditional_hazard_ratio = "Conditional Cox hazard ratio")
+                  conditional_hazard_ratio = "Conditional Cox hazard ratio", risk_difference = "Risk difference",
+                  absolute_risk_reduction = "Absolute risk reduction")
       panels <- lapply(measure, function(which.measure) {
         p <- plot.precmed(x, cv.i = cv.i, combine = combine, show.abc = FALSE,
                           valid.only = valid.only, ylab = ylab, legend.position = legend.position,
@@ -2572,6 +2591,7 @@ plot.precmed <- function(x,
                labs(y = if (is.null(ylab)) "Treatment effect" else ylab)
       return(result)
     }
+    risk.measure <- measure %in% c("risk_difference", "absolute_risk_reduction")
     plot.hr <- measure != "rmtl"
     if (plot.hr && missing(show.abc)) show.abc <- FALSE
     hazard.type <- if (measure == "conditional_hazard_ratio") "conditional" else "cumulative"
@@ -2595,10 +2615,11 @@ plot.precmed <- function(x,
   if (plot.hr == TRUE & x$response != "survival") stop("Hazard ratio plot is only available for precmed object with x$response equals to 'survival'.")
   if (!(plot.hr %in% c(TRUE, FALSE))) stop("plot.hr has to be boolean.")
   hazard.type <- match.arg(hazard.type)
-  hazard.prefix <- if (hazard.type == "cumulative") "chr." else "hr."
-  if (plot.hr && hazard.type == "cumulative" && is.null(x$overall.chr.valid))
+  hazard.prefix <- if (risk.measure) "rd." else if (hazard.type == "cumulative") "chr." else "hr."
+  if (risk.measure && is.null(x$overall.rd.valid)) stop("This object has no subgroup risk differences; refit it.")
+  if (plot.hr && !risk.measure && hazard.type == "cumulative" && is.null(x$overall.chr.valid))
     stop("This object has no cumulative hazard ratios; refit it or use measure = 'conditional_hr' for the existing Cox HRs.")
-  if (plot.hr && hazard.type == "cumulative" &&
+  if (plot.hr && !risk.measure && hazard.type == "cumulative" &&
       (anyNA(x$overall.chr.train) || anyNA(x$overall.chr.valid)))
     warning("Some overall cumulative hazard ratios are undefined; summary reference lines use available folds.", call. = FALSE)
 
@@ -2632,7 +2653,9 @@ plot.precmed <- function(x,
     if (x$response == "count") {
       plot.ratio <- "Rate ratio"
     } else if (x$response == "survival") {
-      if (plot.hr) {
+      if (risk.measure) {
+        plot.ratio <- if (measure == "absolute_risk_reduction") "Absolute risk reduction (treatment 0 minus 1)" else "Risk difference (treatment 1 minus 0)"
+      } else if (plot.hr) {
         plot.ratio <- if (hazard.type == "cumulative") "Cumulative hazard ratio" else "Conditional Cox hazard ratio"
       } else {
         plot.ratio <- "RMTL ratio"
@@ -2652,6 +2675,10 @@ plot.precmed <- function(x,
       ylab <- paste0(plot.ratio, " ", trt, "=", x$formulas$trt_labels[2], if (x$response %in% c("continuous", "binary")) " - " else " vs ", trt, "=", x$formulas$trt_labels[1], "\nin each subgroup")
     }
   }
+
+  if (risk.measure && missing(ylab)) ylab <- if (measure == "absolute_risk_reduction")
+    "Absolute risk reduction at tau0 (treatment 0 minus treatment 1)" else
+    "Risk difference at tau0 (treatment 1 minus treatment 0)"
 
   # Define x-axis label
   if ((x$higher.y == TRUE & x$response == "survival") | (x$higher.y == FALSE & x$response == "count") | (x$higher.y == FALSE & x$response %in% c("continuous", "binary"))) {
@@ -2673,7 +2700,7 @@ plot.precmed <- function(x,
   score.method <- str_extract(names(x), "(?<=^ate\\.).*$")
   score.method <- score.method[!is.na(score.method)]
   m <- length(score.method)
-  if (plot.hr && hazard.type == "cumulative") {
+  if (plot.hr && !risk.measure && hazard.type == "cumulative") {
     missing.subgroups <- any(vapply(score.method, function(method) {
       entry <- x[[paste0("chr.", method)]]
       if (is.null(entry)) stop("This object has incomplete cumulative hazard ratios; refit it.")
@@ -2695,8 +2722,8 @@ plot.precmed <- function(x,
       overall.hline.valid <- x$overall.ate.valid[cv.i]
     }
   } else { # hazard-based comparison
-    overall.train <- if (hazard.type == "cumulative") x$overall.chr.train else x$overall.hr.train
-    overall.valid <- if (hazard.type == "cumulative") x$overall.chr.valid else x$overall.hr.valid
+    overall.train <- if (risk.measure) x$overall.rd.train else if (hazard.type == "cumulative") x$overall.chr.train else x$overall.hr.train
+    overall.valid <- if (risk.measure) x$overall.rd.valid else if (hazard.type == "cumulative") x$overall.chr.valid else x$overall.hr.valid
     if (is.null(cv.i) == TRUE & combine == "mean") {
       overall.hline.train <- mean(overall.train, na.rm = TRUE)
       overall.hline.valid <- mean(overall.valid, na.rm = TRUE)
@@ -2767,6 +2794,12 @@ plot.precmed <- function(x,
     }
   }
 
+  if (risk.measure && measure == "absolute_risk_reduction") {
+    results <- -results
+    overall.hline.train <- -overall.hline.train
+    overall.hline.valid <- -overall.hline.valid
+  }
+
   # Gather data to be plotted
   mapped.method <- map[score.method]
   if (x$response == "count") abc.gray.value <- ifelse(sprintf('%.3f', abc) == "NA", "", paste(as.character(mapped.method), "ABC:", sprintf('%.3f', abc)))
@@ -2796,7 +2829,7 @@ plot.precmed <- function(x,
   }
 
   plot.values <- c(dat$ate.cv, overall.hline.train, overall.hline.valid)
-  if (plot.hr && hazard.type == "cumulative" && any(!is.finite(plot.values)))
+  if (plot.hr && !risk.measure && hazard.type == "cumulative" && any(!is.finite(plot.values)))
     warning("Some cumulative hazard ratios are undefined and are omitted from the plot.", call. = FALSE)
   plot.values <- plot.values[is.finite(plot.values)]
   if (!length(plot.values)) stop("No finite estimates are available to plot.")
@@ -2950,7 +2983,8 @@ boxplot.precmed <- function(x, ylab = NULL,
   if (legacy) {
     warning("plot.hr and hazard.type are deprecated; use measure instead.", call. = FALSE)
   } else if (x$response == "survival") {
-    aliases <- c(rmtl = "rmtl", cumulative_hr = "chr", conditional_hr = "conditional_hazard_ratio",
+    aliases <- c(rmtl = "rmtl", cumulative.hr = "chr", conditional.hr = "conditional_hazard_ratio",
+                 cumulative_hr = "chr", conditional_hr = "conditional_hazard_ratio",
                  chr = "chr", cph = "chr", cumulative_hazard_ratio = "chr",
                  conditional_hazard_ratio = "conditional_hazard_ratio")
     if (!is.character(measure) || length(measure) != 1L || is.na(measure) || !measure %in% names(aliases))

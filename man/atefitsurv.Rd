@@ -108,8 +108,9 @@ Return an object of class \code{atefit} including:
   censoring model; its treatment-model double robustness does not protect against
   censoring-model misspecification.
   Undefined estimates or bootstrap replicates yield unavailable inference.
+  \item{\code{risk0}, \code{risk1}, \code{risk.difference}: } Population-average event risks by \code{tau0} under treatments 0 and 1, and risk under treatment 1 minus risk under treatment 0, with bootstrap inference. These use the same AIPTW survival estimates and censoring assumptions as the cumulative hazard ratio. Estimates outside [0, 1] are unavailable.
   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-  \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
+  \code{log.rmtl.ratio}, \code{log.cumulative.hazard.ratio}, treatment-specific risks and risk difference in each bootstrap sample.
   \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1, in that order.
   \item{\code{warning}: } The informational treatment recoding message, if applicable.
 }

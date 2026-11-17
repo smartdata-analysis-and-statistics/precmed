@@ -31,6 +31,7 @@ These free courses can help you build the knowledge and practical skills needed 
 
 ## Other `precmed` vignettes in this series
 
+- [Understanding doubly robust methods](doubly-robust.html)
 - [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
 - [Estimating and validating treatment effects for count outcomes](Count-examples.html)
 - [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)

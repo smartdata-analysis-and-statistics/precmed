@@ -62,8 +62,9 @@
 #'   censoring model; its treatment-model double robustness does not protect against
 #'   censoring-model misspecification.
 #'   Undefined estimates or bootstrap replicates yield unavailable inference.
+#'   \item{\code{risk0}, \code{risk1}, \code{risk.difference}: } Population-average event risks by \code{tau0} under treatments 0 and 1, and risk under treatment 1 minus risk under treatment 0, with bootstrap inference. These use the same AIPTW survival estimates and censoring assumptions as the cumulative hazard ratio. Estimates outside [0, 1] are unavailable.
 #'   \item{\code{trt.boot}: } Estimates of \code{rmst1}, \code{rmst0},
-#'   \code{log.rmtl.ratio} and \code{log.cumulative.hazard.ratio} in each bootstrap sample.
+#'   \code{log.rmtl.ratio}, \code{log.cumulative.hazard.ratio}, treatment-specific risks and risk difference in each bootstrap sample.
 #'   \item{\code{treatment.labels}: } Original treatment labels corresponding to 0 and 1, in that order.
 #'   \item{\code{warning}: } The informational treatment recoding message, if applicable.
 #' }
@@ -178,7 +179,7 @@ atefitsurv <- function(data,
 
   overlap.diagnostics <- est$overlap.diagnostics
   est$overlap.diagnostics <- NULL
-  effect.names <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.cumulative.hazard.ratio")
+  effect.names <- c("rmst1", "rmst0", "log.rmtl.ratio", "log.cumulative.hazard.ratio", "risk0", "risk1", "risk.difference")
   est <- unlist(est)[effect.names]
 
   # Apply bootstrap
@@ -247,6 +248,9 @@ atefitsurv <- function(data,
   out$rmst0 <- data.frame(est.all[2, ])
   out$log.rmtl.ratio <- data.frame(est.all[3, ])
   out$log.cumulative.hazard.ratio <- data.frame(est.all[4, ])
+  out$risk0 <- data.frame(est.all["risk0", ])
+  out$risk1 <- data.frame(est.all["risk1", ])
+  out$risk.difference <- data.frame(est.all["risk.difference", ])
   out$n.boot <- n.boot # Number of  bootstrap samples
   out$trt.boot <- save.boot
   out$overlap.diagnostics <- overlap.diagnostics
@@ -359,7 +363,13 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 
   result <- list(rmst1 = rmst1, rmst0 = rmst0, log.rmtl.ratio = delta.rmtl, log.hazard.ratio = delta.hr)
   if (cumulative.hr) {
-    result$log.cumulative.hazard.ratio <- aipw_log_cumulative_hr(y, d, trt, survival0, survival1, ps, surv.new, tau0)
+    horizon <- aipw_horizon_survival(y, d, trt, survival0, survival1, ps, surv.new, tau0)
+    result$log.cumulative.hazard.ratio <- if (all(is.finite(horizon)) && all(horizon > 0 & horizon < 1))
+      unname(log(-log(horizon[2])) - log(-log(horizon[1]))) else NA_real_
+    risks <- ifelse(is.finite(horizon) & horizon >= 0 & horizon <= 1, 1 - horizon, NA_real_)
+    result$risk0 <- unname(risks[1])
+    result$risk1 <- unname(risks[2])
+    result$risk.difference <- unname(risks[2] - risks[1])
   }
   if (diagnostic) result$overlap.diagnostics <- treatment_overlap(trt, ps, minPS, maxPS)
   result
@@ -369,12 +379,17 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
 # Undefined probabilities are returned as NA rather than clipped into range.
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 aipw_log_cumulative_hr <- function(y, d, trt, q0, q1, ps, censor_survival, tau0) {
+  s <- aipw_horizon_survival(y, d, trt, q0, q1, ps, censor_survival, tau0)
+  if (!all(is.finite(s)) || any(s <= 0 | s >= 1)) return(NA_real_)
+  unname(log(-log(s[2])) - log(-log(s[1])))
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+aipw_horizon_survival <- function(y, d, trt, q0, q1, ps, censor_survival, tau0) {
   alive <- as.numeric(y > tau0 | (y == tau0 & d == 0))
   observed <- alive / censor_survival
-  s0 <- mean(q0 + (1 - trt) / (1 - ps) * (observed - q0))
-  s1 <- mean(q1 + trt / ps * (observed - q1))
-  if (!is.finite(s0) || !is.finite(s1) || s0 <= 0 || s0 >= 1 || s1 <= 0 || s1 >= 1) return(NA_real_)
-  log(-log(s1)) - log(-log(s0))
+  c(s0 = mean(q0 + (1 - trt) / (1 - ps) * (observed - q0)),
+    s1 = mean(q1 + trt / ps * (observed - q1)))
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
@@ -454,11 +469,12 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, 1 - prop)
   n.subgroup <- length(prop)
-  ate.rmtl.high <- hr.high <- chr.high <- rep(NA_real_, n.subgroup)
+  ate.rmtl.high <- hr.high <- chr.high <- rd.high <- rep(NA_real_, n.subgroup)
+  risk0.high <- risk1.high <- rmst0.high <- rmst1.high <- rep(NA_real_, n.subgroup)
   warn.high <- err.high <- vector("list", length = n.subgroup)
   names(warn.high) <- names(err.high) <- paste("prop", round(prop, 2))
   if (onlyhigh == FALSE) {
-    ate.rmtl.low <- hr.low <- chr.low <- rep(NA_real_, n.subgroup)
+    ate.rmtl.low <- hr.low <- chr.low <- rd.low <- rep(NA_real_, n.subgroup)
     warn.low <- err.low <- vector("list", length = n.subgroup)
     names(warn.low) <- names(err.low) <- paste("prop", round(1 - prop, 2))
   }
@@ -471,6 +487,11 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
     ate.rmtl.high[b] <- fit.high$log.rmtl.ratio
     hr.high[b] <- fit.high$log.hazard.ratio
     chr.high[b] <- if (cumulative.hr) fit.high$log.cumulative.hazard.ratio else NA_real_
+    rd.high[b] <- fit.high$risk.difference
+    risk0.high[b] <- fit.high$risk0
+    risk1.high[b] <- fit.high$risk1
+    rmst0.high[b] <- fit.high$rmst0
+    rmst1.high[b] <- fit.high$rmst1
     warn.high[b] <- list(fit.high$warnings)
     err.high[b] <- list(fit.high$errors)
 
@@ -482,15 +503,16 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
       ate.rmtl.low[b] <- fit.low$log.rmtl.ratio
       hr.low[b] <- fit.low$log.hazard.ratio
       chr.low[b] <- if (cumulative.hr) fit.low$log.cumulative.hazard.ratio else NA_real_
+      rd.low[b] <- fit.low$risk.difference
       warn.low[b] <- list(fit.low$warnings)
       err.low[b] <- list(fit.low$errors)
     }
   }
 
   if (onlyhigh == TRUE) {
-    return(list(ate.rmtl.high = exp(ate.rmtl.high), hr.high = exp(hr.high), chr.high = exp(chr.high), warn.high = warn.high, err.high = err.high))
+    return(list(ate.rmtl.high = exp(ate.rmtl.high), hr.high = exp(hr.high), chr.high = exp(chr.high), rd.high = rd.high, risk0.high = risk0.high, risk1.high = risk1.high, rmst0.high = rmst0.high, rmst1.high = rmst1.high, warn.high = warn.high, err.high = err.high))
   } else {
-    return(list(ate.rmtl.high = exp(ate.rmtl.high), ate.rmtl.low = exp(ate.rmtl.low), hr.high = exp(hr.high), hr.low = exp(hr.low), chr.high = exp(chr.high), chr.low = exp(chr.low),
+    return(list(ate.rmtl.high = exp(ate.rmtl.high), ate.rmtl.low = exp(ate.rmtl.low), hr.high = exp(hr.high), hr.low = exp(hr.low), chr.high = exp(chr.high), chr.low = exp(chr.low), rd.high = rd.high, rd.low = rd.low,
                 warn.high = warn.high, warn.low = warn.low, err.high = err.high, err.low = err.low))
   }
 }
@@ -552,7 +574,7 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
   if (higher.y == TRUE) score <- -score
   cut <- quantile(score, prop)
   n.subgroup <- length(cut) - 1
-  ate.rmtl <- hr <- chr <- rep(NA_real_, n.subgroup)
+  ate.rmtl <- hr <- chr <- rd <- rep(NA_real_, n.subgroup)
   warn <- err <- vector("list", length = n.subgroup)
   names(warn) <- names(err) <- paste("prop",  round(prop[-1], 2))
 
@@ -564,10 +586,11 @@ estsurv.multilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, ta
     ate.rmtl[b] <- fit$log.rmtl.ratio
     hr[b] <- fit$log.hazard.ratio
     chr[b] <- fit$log.cumulative.hazard.ratio
+    rd[b] <- fit$risk.difference
     warn[b] <- list(fit$warnings)
     err[b] <- list(fit$errors)
   }
-  return(list(ate.rmtl = exp(ate.rmtl), hr = exp(hr), chr = exp(chr), warn = warn, err = err))
+  return(list(ate.rmtl = exp(ate.rmtl), hr = exp(hr), chr = exp(chr), rd = rd, warn = warn, err = err))
 }
 
 #' Probability of being censored
