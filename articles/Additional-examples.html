@@ -46,9 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -86,7 +89,7 @@
     
 <!-- badges: start -->
 <p><a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://www.r-pkg.org/badges/version/precmed" alt="CRAN_Status_Badge"></a> <a href="https://cran.r-project.org/package=precmed" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/last-month/precmed" alt="metacran downloads"></a> <!-- badges: end --></p>
-<p>This vignette builds on the worked examples for <a href="Count-examples.html">count outcomes</a> and <a href="Survival-examples.html">survival outcomes</a>. It shows how to
+<p>This vignette builds on the worked examples for <a href="Count-CATE.html">count CATE outcomes</a> and <a href="Survival-CATE.html">survival CATE outcomes</a>. It shows how to
 customize initial outcome models, define responder subgroups, and choose
 censoring models and follow-up settings for CATE estimation and
 validation.</p>
@@ -153,7 +156,6 @@ to <code><a href="../reference/catefitcount.html">catefitcount()</a></code> as w
 <span>       initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>,       <span class="co"># NEW</span></span>
 <span>       cv.n <span class="op">=</span> <span class="fl">5</span>, </span>
 <span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An example of using GAM as the initial predictor method</span></span>
@@ -167,7 +169,6 @@ to <code><a href="../reference/catefitcount.html">catefitcount()</a></code> as w
 <span>       xvar.smooth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"previous_cost"</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>       cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>Note that for the GAM method, there is an additional argument called
 <code>xvar.smooth</code>. If left as default (which is NULL), GAM will
@@ -247,7 +248,6 @@ reflected in the results.</p></li>
 <span>  initial.predictor.method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
@@ -320,7 +320,6 @@ estimates.</p>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">0.30</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
@@ -338,14 +337,14 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Tue Nov 17 10:58:41 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:13:55 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Tue Nov 17 10:58:44 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:13:58 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -356,7 +355,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 3: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Tue Nov 17 10:58:49 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:14:01 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -367,7 +366,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 4: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Tue Nov 17 10:58:55 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:14:04 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -380,9 +379,9 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 5: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Tue Nov 17 10:59:00 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:14:07 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 26.01 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 15.43 secs</span></span>
 <span><span class="va">fit_cv_3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1        cv2       cv3          cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.01        NA 0.09705963        NA 2.447035e+06        NA</span></span>
@@ -483,7 +482,6 @@ other 2 non-linear and more flexible options. Below, we use
 <span>       initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>, <span class="co"># NEW</span></span>
 <span>       tree.depth <span class="op">=</span> <span class="fl">3</span>,                        <span class="co"># NEW</span></span>
 <span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An example of using random forest as the initial predictor method</span></span>
@@ -503,7 +501,6 @@ other 2 non-linear and more flexible options. Below, we use
 <span>       initial.predictor.method <span class="op">=</span> <span class="st">"randomForest"</span>, <span class="co"># NEW</span></span>
 <span>       n.trees.rf <span class="op">=</span> <span class="fl">500</span>,                          <span class="co"># NEW</span></span>
 <span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
 <p>For boosting, <code>tree.depth</code> and
 <code>n.trees.boosting</code> control tree depth and the maximum number
@@ -577,7 +574,6 @@ reflected in the results.</p>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,   <span class="co"># NEW</span></span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
@@ -657,7 +653,6 @@ estimates.</p>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
@@ -670,37 +665,37 @@ estimates.</p>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Tue Nov 17 11:00:31 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:15:12 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Tue Nov 17 11:00:35 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:15:15 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Tue Nov 17 11:00:40 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:15:18 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Tue Nov 17 11:00:44 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:15:21 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Tue Nov 17 11:00:48 2026 </span></span>
+<span><span class="co">#&gt;    Tue Nov 17 14:15:24 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 20.97 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 14.22 secs</span></span>
 <span><span class="va">fit_cv_3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>
@@ -769,7 +764,6 @@ model.</p>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -806,7 +800,6 @@ show how setting different values of the truncation time.</p>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model</span></span>
@@ -823,12 +816,15 @@ show how setting different values of the truncation time.</p>
 <ul>
 <li><a href="doubly-robust.html">Understanding doubly robust
 methods</a></li>
-<li><a href="Binary-examples.html">Estimating and validating treatment
-effects for binary outcomes</a></li>
-<li><a href="Count-examples.html">Estimating and validating treatment
-effects for count outcomes</a></li>
-<li><a href="Survival-examples.html">Estimating and validating treatment
-effects for survival outcomes</a></li>
+<li>
+<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
+</li>
+<li>
+<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
+</li>
+<li>
+<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
+</li>
 <li><a href="ATE-theory.html">Methods for estimating average treatment
 effects</a></li>
 <li><a href="Theoretical-details.html">Methods for developing and

@@ -4,10 +4,10 @@
 [![metacran
 downloads](https://cranlogs.r-pkg.org/badges/last-month/precmed)](https://cran.r-project.org/package=precmed)
 
-This vignette builds on the worked examples for [count
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-and [survival
-outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md).
+This vignette builds on the worked examples for [count CATE
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+and [survival CATE
+outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md).
 It shows how to customize initial outcome models, define responder
 subgroups, and choose censoring models and follow-up settings for CATE
 estimation and validation.
@@ -64,7 +64,6 @@ catecvcount(data = countExample,
        initial.predictor.method = "boosting",       # NEW
        cv.n = 5, 
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 
 # An example of using GAM as the initial predictor method
@@ -78,7 +77,6 @@ catecvcount(data = countExample,
        xvar.smooth = c("age", "previous_cost"), # NEW
        cv.n = 5,
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 ```
 
@@ -160,7 +158,6 @@ fit_cv_2 <- catecv(
   initial.predictor.method = "poisson",
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -252,7 +249,6 @@ fit_cv_3 <- catecv(
   prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 1
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -270,14 +266,14 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 10:58:41 2026 
+#>    Tue Nov 17 14:13:55 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Tue Nov 17 10:58:44 2026 
+#>    Tue Nov 17 14:13:58 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -288,7 +284,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 10:58:49 2026 
+#>    Tue Nov 17 14:14:01 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -299,7 +295,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 10:58:55 2026 
+#>    Tue Nov 17 14:14:04 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -312,9 +308,9 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Tue Nov 17 10:59:00 2026 
+#>    Tue Nov 17 14:14:07 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 26.01 secs
+#> Total runtime : 15.43 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -407,7 +403,6 @@ catecv(response = "survival",
        initial.predictor.method = "boosting", # NEW
        tree.depth = 3,                        # NEW
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 
 # An example of using random forest as the initial predictor method
@@ -427,7 +422,6 @@ catecv(response = "survival",
        initial.predictor.method = "randomForest", # NEW
        n.trees.rf = 500,                          # NEW
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 ```
 
@@ -502,7 +496,6 @@ fit_cv_2 <- catecv(
   prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -601,7 +594,6 @@ fit_cv_3 <- catecv(
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 1
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -614,37 +606,37 @@ fit_cv_3 <- catecv(
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 11:00:31 2026 
+#>    Tue Nov 17 14:15:12 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 11:00:35 2026 
+#>    Tue Nov 17 14:15:15 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 11:00:40 2026 
+#>    Tue Nov 17 14:15:18 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 11:00:44 2026 
+#>    Tue Nov 17 14:15:21 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Tue Nov 17 11:00:48 2026 
+#>    Tue Nov 17 14:15:24 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 20.97 secs
+#> Total runtime : 14.22 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -719,7 +711,6 @@ fit_cv_4 <- catecv(
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 ```
@@ -758,7 +749,6 @@ fit_cv_5 <- catecv(
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 #> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
@@ -774,12 +764,18 @@ plot(fit_cv_5)
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
-- [Estimating and validating treatment effects for binary
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-- [Estimating and validating treatment effects for count
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-- [Estimating and validating treatment effects for survival
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Binary ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+  and [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+  and [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+  and [Survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Methods for estimating average treatment
   effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md)
 - [Methods for developing and validating CATE

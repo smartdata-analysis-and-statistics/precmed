@@ -1,25 +1,24 @@
 # Doubly robust estimator of and inference for the average treatment effect for continuous data
 
-Doubly robust estimator of the average treatment effect between two
-treatments, which is the rate ratio of treatment 1 over treatment 0 for
-count outcomes. Bootstrap is used for inference.
+Continuous-outcome average treatment effect estimation is not yet
+implemented.
 
 ## Usage
 
 ``` r
 atefitmean(
   data,
-  cate.model,
+  outcome_model,
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE,
   n.boot = 500,
   plot.boot = FALSE,
   seed = NULL,
   verbose = 0,
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 ```
 
@@ -30,10 +29,11 @@ atefitmean(
   A data frame containing the variables in the outcome and treatment
   models; a data frame with `n` rows (1 row per observation).
 
-- cate.model:
+- outcome_model:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side.
+  A formula specifying the outcome model, with the continuous outcome on
+  the left and baseline covariates on the right. Do not include
+  treatment. Continuous-outcome fitting is not yet implemented.
 
 - ps.model:
 
@@ -61,15 +61,6 @@ atefitmean(
   A numerical value between 0 and 1 above which estimated propensity
   scores should be truncated. Must be strictly greater than `minPS`.
   Default is `0.99`.
-
-- interactions:
-
-  A logical value indicating whether the outcome model should be fitted
-  separately by treatment arm with the variables in `cate.model`, which
-  is equivalent to assuming treatment-covariate interaction by all of
-  the variables in `cate.model`. If `TRUE`, the outcome model will be
-  fitted separately by treatment arms only if at least 10 patients
-  received each treatment option. Default is `TRUE`.
 
 - n.boot:
 
@@ -101,6 +92,10 @@ atefitmean(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- cate.model:
+
+  Deprecated alias for `outcome_model`. Supply only one.
 
 ## Value
 

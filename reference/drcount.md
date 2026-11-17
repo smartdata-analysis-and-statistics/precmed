@@ -18,7 +18,9 @@ drcount(
   maxPS = 0.99,
   interactions = TRUE,
   ps.control = list(),
-  diagnostic = FALSE
+  diagnostic = FALSE,
+  ate_outcome_mode = NULL,
+  outcome_method = "poisson"
 )
 ```
 
@@ -89,6 +91,16 @@ drcount(
 - diagnostic:
 
   Internal: retain full-sample treatment overlap diagnostics.
+
+- ate_outcome_mode:
+
+  Internal ATE outcome-model specification; `NULL` preserves the
+  subgroup estimator's existing behavior.
+
+- outcome_method:
+
+  Internal ATE outcome-model method: `"poisson"` or
+  `"negative_binomial"`.
 
 ## Value
 

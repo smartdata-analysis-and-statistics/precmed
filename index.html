@@ -49,9 +49,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -145,30 +148,35 @@
 <p>The package compares two treatments using outcome-specific effect measures:</p>
 <table class="table">
 <colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
 </colgroup>
 <thead><tr>
 <th>Outcome</th>
 <th>Effect measure</th>
-<th>Example</th>
+<th>ATE example</th>
+<th>CATE example</th>
 </tr></thead>
 <tbody>
 <tr>
 <td>Binary</td>
 <td>Risk difference in outcome probabilities (treatment 1 minus treatment 0)</td>
-<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">Binary outcomes</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">ATE</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html">CATE</a></td>
 </tr>
 <tr>
 <td>Count</td>
 <td>Ratio of event rates (treatment 1 over treatment 0)</td>
-<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">Count outcomes</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">ATE</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html">CATE</a></td>
 </tr>
 <tr>
 <td>Survival</td>
 <td>At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0)</td>
-<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival outcomes</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">ATE</a></td>
+<td><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html">CATE</a></td>
 </tr>
 </tbody>
 </table>
@@ -242,9 +250,12 @@
 </h2>
 <ul>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">Binary outcome example</a></li>
-<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">Count outcome example</a></li>
-<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival outcome example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html">Binary ATE example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html">Binary CATE example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html">Count ATE example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html">Count CATE example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html">Survival ATE example</a></li>
+<li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html">Survival CATE example</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html">Customizing CATE models and validation</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.html">ATE methods</a></li>
 <li><a href="https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html">CATE development and validation methods</a></li>

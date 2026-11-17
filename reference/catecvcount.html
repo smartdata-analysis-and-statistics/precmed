@@ -34,9 +34,12 @@ negative binomial (see score.method)."><meta property="og:image" content="https:
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -96,10 +99,11 @@ negative binomial (see <code>score.method</code>).</p>
 <span>  max.iterNR <span class="op">=</span> <span class="fl">150</span>,</span>
 <span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -144,7 +148,7 @@ only when <code>ps.model</code> has more than one variable.</p></dd>
 <dt id="arg-initial-predictor-method">initial.predictor.method<a class="anchor" aria-label="anchor" href="#arg-initial-predictor-method"></a></dt>
 <dd><p>A character vector for the method used to get
 initial outcome predictions conditional on the covariates in
-<code>cate.model</code>. Only applies when <code>score.method</code> includes
+<code>init.model</code> (or <code>cate.model</code> when omitted). Only applies when <code>score.method</code> includes
 <code>'twoReg'</code> or <code>'contrastReg'</code>. Allowed values include one of
 <code>'poisson'</code> (fastest), <code>'boosting'</code> and <code>'gam'</code>. Default is
 <code>'boosting'</code>.</p></dd>
@@ -218,8 +222,8 @@ is <code>5,000</code>.</p></dd>
 <dt id="arg-xvar-smooth">xvar.smooth<a class="anchor" aria-label="anchor" href="#arg-xvar-smooth"></a></dt>
 <dd><p>A vector of characters indicating the name of the variables used as
 the smooth terms if <code>initial.predictor.method = 'gam'</code>. The variables must be selected
-from the variables listed in <code>cate.model</code>.
-Default is <code>NULL</code>, which uses all variables in <code>cate.model</code>.</p></dd>
+from the variables listed in <code>init.model</code> (or <code>cate.model</code> when omitted).
+Default is <code>NULL</code>, which uses all initial outcome-model covariates.</p></dd>
 
 
 <dt id="arg-tree-depth">tree.depth<a class="anchor" aria-label="anchor" href="#arg-tree-depth"></a></dt>
@@ -274,7 +278,7 @@ Default is <code>NULL</code>, corresponding to no seed.</p></dd>
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
 <dd><p>A logical value indicating whether to plot the performance measures in
 boosting. Used only if <code>score.method = 'boosting'</code> or if <code>score.method = 'twoReg'</code>
-or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>TRUE</code>.</p></dd>
+or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -299,6 +303,11 @@ Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code
 Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
+
+
+<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
+<dd><p>Optional formula for initial outcome predictions in <code>twoReg</code>
+and <code>contrastReg</code>; defaults to <code>cate.model</code>. The outcome must match.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -459,7 +468,7 @@ and <code><a href="catefitcount.html">catefitcount()</a></code> function.</p></d
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 10.1 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 6.31 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"Rate ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="catecvcount-1.png" alt="" width="700" height="433"></span>

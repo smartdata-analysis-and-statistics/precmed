@@ -23,7 +23,8 @@ catefitbinary(
   Kfold = 5,
   tree.depth = 2,
   n.trees.boosting = 200,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
+  init.model = NULL,
   ...
 )
 ```
@@ -133,7 +134,17 @@ catefitbinary(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+
+- init.model:
+
+  Optional formula for the initial treatment-specific outcome models
+  used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
+  only). The outcome must match `cate.model`. The default `NULL` uses
+  `cate.model`. For count outcomes the exposure offset is taken from
+  `cate.model`; an offset in `init.model`, if supplied, must match it.
+  Other score methods do not use this argument. Continuous-outcome
+  fitting and validation are not currently implemented.
 
 - ...:
 

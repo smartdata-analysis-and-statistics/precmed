@@ -106,7 +106,7 @@ arg.checks.common(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - tree.depth:
 

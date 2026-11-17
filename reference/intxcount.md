@@ -22,12 +22,13 @@ intxcount(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 6,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 150,
   tune = c(0.5, 2),
   contrast.control = list(),
   ps.control = list(),
+  x.init = x.cate,
   ...
 )
 ```
@@ -86,7 +87,7 @@ intxcount(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `cate.model` in
+  predictions conditional on the covariates in `x.init` in
   `score.method = 'twoReg'` and `'contrastReg'`. Allowed values include
   one of `'poisson'` (fastest), `'boosting'` (default) and `'gam'`.
 
@@ -94,8 +95,8 @@ intxcount(
 
   A vector of characters indicating the name of the variables used as
   the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `cate.model`. Default is
-  `NULL`, which uses all variables in `cate.model`.
+  must be selected from the variables listed in `x.init`. Default is
+  `NULL`, which uses all variables in `x.init`.
 
 - tree.depth:
 
@@ -128,7 +129,7 @@ intxcount(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - error.maxNR:
 
@@ -168,6 +169,10 @@ intxcount(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- x.init:
+
+  Initial outcome-model covariate matrix; defaults to `x.cate`.
 
 - ...:
 

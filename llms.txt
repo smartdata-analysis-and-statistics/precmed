@@ -105,11 +105,11 @@ non-sensitive data.
 The package compares two treatments using outcome-specific effect
 measures:
 
-| Outcome | Effect measure | Example |
-|----|----|----|
-| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [Binary outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) |
-| Count | Ratio of event rates (treatment 1 over treatment 0) | [Count outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) |
-| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [Survival outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) |
+| Outcome | Effect measure | ATE example | CATE example |
+|----|----|----|----|
+| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html) |
+| Count | Ratio of event rates (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html) |
+| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html) |
 
 Count rate ratios and survival RMTL and cumulative hazard ratios from
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -182,12 +182,18 @@ the user from simple to more complex methods.
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html)
-- [Binary outcome
+- [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
-- [Count outcome
+- [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html)
+- [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
-- [Survival outcome
+- [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html)
+- [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)
+- [Survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html)
 - [ATE
@@ -553,9 +559,13 @@ Study.” *Journal of the American Statistical Association* 108 (502):
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md):
 - [Methods for estimating average treatment
   effects](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.md):
-- [Estimating and validating treatment effects for binary
+- [CATE scores and validation for binary
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md):
+- [Average treatment effects for binary
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md):
-- [Estimating and validating treatment effects for count
+- [CATE scores and validation for count
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md):
+- [Average treatment effects for count
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md):
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md):
@@ -565,7 +575,9 @@ Study.” *Journal of the American Statistical Association* 108 (502):
   precmed](https://smartdata-analysis-and-statistics.github.io/precmed/articles/precmed.md):
 - [Quick
   start](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.md):
-- [Estimating and validating treatment effects for survival
+- [CATE scores and validation for survival
+  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md):
+- [Average treatment effects for survival
   outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md):
 - [Methods for developing and validating CATE
   scores](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.md):

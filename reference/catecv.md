@@ -44,7 +44,7 @@ catecv(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   verbose = 0,
   contrast.control = list(),
   rmst.control = list(),
@@ -108,20 +108,23 @@ catecv(
 
 - init.model:
 
-  A formula describing the initial predictor model. The outcome must
-  appear on the left-hand side. It must be specified when
-  `score.method = contrastReg` or `twoReg`, except for binary outcomes,
-  which use `cate.model`.
+  Optional formula for the initial treatment-specific outcome models
+  used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
+  only). The outcome must match `cate.model`. The default `NULL` uses
+  `cate.model`. For count outcomes the exposure offset is taken from
+  `cate.model`; an offset in `init.model`, if supplied, must match it.
+  Other score methods do not use this argument. Continuous-outcome
+  fitting and validation are not currently implemented.
 
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates specified in `cate.model`.
-  Only applies when `score.method` includes `'twoReg'` or
-  `'contrastReg'`. Allowed values include one of `'randomForest'`
-  (survival outcomes only), `'boosting'`, `'logistic'` (survival
-  outcomes only, fast), `'poisson'` (count outcomes only, fast),
-  `'gaussian'` (continuous outcomes only) and `'gam'` (count and
+  predictions conditional on the covariates specified in `init.model`
+  (or `cate.model` when omitted). Only applies when `score.method`
+  includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
+  `'randomForest'` (survival outcomes only), `'boosting'`, `'logistic'`
+  (survival outcomes only, fast), `'poisson'` (count outcomes only,
+  fast), `'gaussian'` (continuous outcomes only) and `'gam'` (count and
   continuous outcomes only). Default is `NULL`, which assigns
   `'boosting'` for count outcomes and `'randomForest'` for survival
   outcomes.
@@ -306,7 +309,7 @@ catecv(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - verbose:
 
@@ -461,7 +464,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 11.89 secs 
+#> Total runtime : 7.39 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

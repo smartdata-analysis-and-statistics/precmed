@@ -36,7 +36,7 @@ catecvmean(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 6,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
@@ -83,9 +83,9 @@ catecvmean(
 
 - init.model:
 
-  A formula describing the initial predictor model. The outcome must
-  appear on the left-hand side. It must be specified when
-  `score.method = contrastReg` or `twoReg`.
+  Optional formula for initial outcome predictions in `twoReg` and
+  `contrastReg`. The outcome must match `cate.model`; the default `NULL`
+  uses `cate.model`.
 
 - initial.predictor.method:
 
@@ -212,7 +212,7 @@ catecvmean(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - error.maxNR:
 

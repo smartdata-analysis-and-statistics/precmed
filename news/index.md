@@ -4,6 +4,15 @@
 
 ### Major changes
 
+- Count
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  now always fits separate outcome models by treatment arm, without the
+  previous fallback to a pooled model for small arms. The `interactions`
+  argument has been removed from ATE fitting, including the option for a
+  pooled model without interactions. This is a breaking change: calls
+  using `interactions` must be updated, and positional arguments that
+  followed it have shifted. Results and bootstrap inference can change.
+
 - Added support for binary outcomes on the risk-difference scale to
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
@@ -11,6 +20,8 @@
   [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md),
   including doubly robust estimation, logistic and boosting scores,
   cross-validated subgroup estimates, and a new vignette. Binary
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  fits separate logistic outcome models by treatment arm. Binary
   cross-validation uses treatment-stratified splits rather than the
   balanced-split controls `error.max` and `max.iter`.
 
@@ -71,6 +82,48 @@
   effects.
 
 ### Minor changes
+
+- Split the binary, count and survival worked examples into separate ATE
+  and CATE vignettes. Existing example URLs continue to lead to the ATE
+  guides; the README and vignette navigation link to both guides for
+  each outcome.
+
+- Survival
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  supports `outcome_method = "weibull"` and `"log_normal"` (alias
+  `"lognormal"`) in addition to the default Cox outcome model.
+  Arm-specific accelerated failure time models supply RMST and horizon
+  survival predictions. The Weibull model allows different shapes by
+  arm; the log-normal model does not impose proportional hazards.
+  Censoring models remain controlled separately by `ipcw.method` and
+  `ipcw.model`.
+
+- [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  now accepts `outcome_method`: count outcomes use `"poisson"` by
+  default and also support `"negative_binomial"` (alias `"negbin"`).
+  Binary and survival outcomes accept `"logistic"` and `"coxph"`,
+  respectively. Negative binomial outcome models are refitted in each
+  bootstrap sample; their estimates and uncertainty can differ from
+  Poisson-based results. The new argument follows `outcome_model`; calls
+  placing the treatment-model formula immediately after the outcome
+  formula remain supported.
+
+- [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  and outcome-specific ATE functions now use `outcome_model` for the
+  outcome formula. The former named argument `cate.model` remains a
+  deprecated alias and emits a warning; supplying both arguments is an
+  error. The help describes how the outcome models handle treatment. See
+  the major change above for the removal of `interactions` and its
+  positional impact.
+
+- `init.model` can specify separate initial outcome-model covariates for
+  `twoReg` and `contrastReg` across supported outcome types in fitting
+  and validation. It defaults to `cate.model`. Continuous-outcome
+  fitting and validation remain unavailable.
+
+- Boosting performance plots are now disabled by default in model
+  fitting and cross-validation. Set `plot.gbmperf = TRUE` to display
+  them.
 
 - Exported
   [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md)
@@ -257,6 +310,11 @@
   attribution.
 
 ### Bug fixes
+
+- Fixed
+  [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+  argument evaluation for count and survival data supplied from a local
+  calling environment.
 
 - Fixed continuous boosting predictions by retaining the selected tree
   count for each treatment arm, and forwarding additional boosting

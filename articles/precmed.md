@@ -123,8 +123,8 @@ For binary outcomes,
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 and
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-are available in the development version. The [binary
-example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+are available in the development version. The [binary CATE
+example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
 illustrates held-out subgroup assessment. These binary features are not
 in CRAN release 1.1.0.
 
@@ -155,12 +155,18 @@ the user has to (at least) input:
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
-- [Binary outcome
+- [Binary ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-- [Count outcome
+  and [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-- [Survival outcome
+  and [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival ATE
   example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+  and [Survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
 - [ATE

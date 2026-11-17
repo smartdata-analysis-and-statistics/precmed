@@ -25,7 +25,8 @@ drsurv(
   ps.control = list(),
   cumulative.hr = FALSE,
   conditional.hr = TRUE,
-  diagnostic = FALSE
+  diagnostic = FALSE,
+  outcome_method = "coxph"
 )
 ```
 
@@ -105,9 +106,9 @@ drsurv(
   Named options for Cox restricted mean survival integration. Supported
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
-  patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of
-  `contrast.control`.
+  patient-by-event-time matrix. Cox model fitting is unchanged. Applies
+  to Cox outcome models only; parametric models use closed-form
+  integration.
 
 - ps.control:
 
@@ -128,6 +129,10 @@ drsurv(
 - diagnostic:
 
   Internal: retain full-sample treatment overlap diagnostics.
+
+- outcome_method:
+
+  Outcome-model method: `"coxph"`, `"weibull"`, or `"log_normal"`.
 
 ## Value
 

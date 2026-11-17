@@ -59,9 +59,10 @@ using baseline characteristics.
 fit_ate <- atefit(
   response = "count",
   data = countExample,
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   ps.model = trt ~ age + previous_treatment,
+  outcome_method = "poisson",
   n.boot = 50,
   seed = 999,
   verbose = 0
@@ -138,15 +139,20 @@ population.
 - Read [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
   for an introduction to the estimator and its assumptions.
-- Follow the [binary outcome
-  tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-  for fixed-horizon response and held-out subgroup validation.
-- Follow the [count outcome
-  tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-  to estimate the overall treatment effect, compare scoring methods, and
-  interpret validation results.
-- See the [survival outcome
-  tutorial](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- Follow the [binary ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+  and [binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+  for fixed-horizon response and subgroup validation.
+- Follow the [count ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+  and [count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+  to estimate overall effects and assess scoring methods.
+- See the [survival ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+  and [survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
   for time-to-event data.
 - Explore [model and validation
   options](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)

@@ -46,9 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -170,9 +173,10 @@ baseline characteristics.</p>
 <code class="sourceCode R"><span><span class="va">fit_ate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/atefit.html">atefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
 <span>  n.boot <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
@@ -247,14 +251,15 @@ population.</p>
 <li>Read <a href="doubly-robust.html">Understanding doubly robust
 methods</a> for an introduction to the estimator and its
 assumptions.</li>
-<li>Follow the <a href="Binary-examples.html">binary outcome
-tutorial</a> for fixed-horizon response and held-out subgroup
-validation.</li>
-<li>Follow the <a href="Count-examples.html">count outcome tutorial</a>
-to estimate the overall treatment effect, compare scoring methods, and
-interpret validation results.</li>
-<li>See the <a href="Survival-examples.html">survival outcome
-tutorial</a> for time-to-event data.</li>
+<li>Follow the <a href="Binary-examples.html">binary ATE example</a> and
+<a href="Binary-CATE.html">binary CATE example</a> for fixed-horizon
+response and subgroup validation.</li>
+<li>Follow the <a href="Count-examples.html">count ATE example</a> and
+<a href="Count-CATE.html">count CATE example</a> to estimate overall
+effects and assess scoring methods.</li>
+<li>See the <a href="Survival-examples.html">survival ATE example</a>
+and <a href="Survival-CATE.html">survival CATE example</a> for
+time-to-event data.</li>
 <li>Explore <a href="Additional-examples.html">model and validation
 options</a> and the methods for <a href="ATE-theory.html">average
 treatment effects</a> and <a href="Theoretical-details.html">CATE

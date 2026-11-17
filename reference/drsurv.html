@@ -26,9 +26,12 @@ of treatment 1 over treatment 0 for survival outcomes."><meta property="og:image
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -76,7 +79,8 @@ of treatment 1 over treatment 0 for survival outcomes.</p>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  cumulative.hr <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  conditional.hr <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  diagnostic <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  diagnostic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="st">"coxph"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -147,8 +151,8 @@ truncated. Must be strictly greater than <code>minPS</code>. Default is <code>0.
 <dd><p>Named options for Cox restricted mean survival integration.
 Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
 The C backend accumulates each patient's integral without allocating a
-patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of <code>contrast.control</code>.</p></dd>
+patient-by-event-time matrix. Cox model fitting is unchanged. Applies to
+Cox outcome models only; parametric models use closed-form integration.</p></dd>
 
 
 <dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
@@ -169,6 +173,10 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 <dt id="arg-diagnostic">diagnostic<a class="anchor" aria-label="anchor" href="#arg-diagnostic"></a></dt>
 <dd><p>Internal: retain full-sample treatment overlap diagnostics.</p></dd>
+
+
+<dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
+<dd><p>Outcome-model method: <code>"coxph"</code>, <code>"weibull"</code>, or <code>"log_normal"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

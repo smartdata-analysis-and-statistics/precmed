@@ -29,7 +29,7 @@ catefitsurv(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 5,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
@@ -39,6 +39,7 @@ catefitsurv(
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
+  init.model = NULL,
   ...
 )
 ```
@@ -82,8 +83,8 @@ catefitsurv(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates specified in `cate.model`.
-  Only applies when `score.method` includes `'twoReg'` or
+  predictions conditional on `init.model` (or `cate.model` when
+  omitted). Only applies when `score.method` includes `'twoReg'` or
   `'contrastReg'`. Allowed values include one of `'randomForest'`,
   `'boosting'` and `'logistic'` (fastest). Default is `'randomForest'`.
 
@@ -187,7 +188,7 @@ catefitsurv(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - error.maxNR:
 
@@ -254,6 +255,11 @@ catefitsurv(
   `nodedepth`, and `splitrule`. Applies to both treatment arms and
   survival initial-predictor forests. Use `n.trees.rf` for the number of
   trees.
+
+- init.model:
+
+  Optional formula for initial outcome predictions in `twoReg` and
+  `contrastReg`; defaults to `cate.model`. The outcome must match.
 
 - ...:
 

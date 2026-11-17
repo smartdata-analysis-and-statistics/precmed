@@ -28,9 +28,12 @@ count outcomes."><meta property="og:image" content="https://smartdata-analysis-a
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -72,7 +75,9 @@ count outcomes.</p>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  interactions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  diagnostic <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  diagnostic <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ate_outcome_mode <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="st">"poisson"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,6 +150,16 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 <dt id="arg-diagnostic">diagnostic<a class="anchor" aria-label="anchor" href="#arg-diagnostic"></a></dt>
 <dd><p>Internal: retain full-sample treatment overlap diagnostics.</p></dd>
+
+
+<dt id="arg-ate-outcome-mode">ate_outcome_mode<a class="anchor" aria-label="anchor" href="#arg-ate-outcome-mode"></a></dt>
+<dd><p>Internal ATE outcome-model specification; <code>NULL</code>
+preserves the subgroup estimator's existing behavior.</p></dd>
+
+
+<dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
+<dd><p>Internal ATE outcome-model method: <code>"poisson"</code>
+or <code>"negative_binomial"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

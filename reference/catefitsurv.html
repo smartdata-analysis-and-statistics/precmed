@@ -28,9 +28,12 @@ two regressions, and contrast regression."><meta property="og:image" content="ht
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -82,7 +85,7 @@ two regressions, and contrast regression.</p>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  B <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  Kfold <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  error.maxNR <span class="op">=</span> <span class="fl">0.001</span>,</span>
 <span>  max.iterNR <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  tune <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
@@ -92,6 +95,7 @@ two regressions, and contrast regression.</p>
 <span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  rf.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -133,7 +137,7 @@ Relevant only when <code>ps.model</code> has more than one variable.</p></dd>
 
 <dt id="arg-initial-predictor-method">initial.predictor.method<a class="anchor" aria-label="anchor" href="#arg-initial-predictor-method"></a></dt>
 <dd><p>A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in <code>cate.model</code>. Only applies
+outcome predictions conditional on <code>init.model</code> (or <code>cate.model</code> when omitted). Only applies
 when <code>score.method</code> includes <code>'twoReg'</code> or <code>'contrastReg'</code>. Allowed values include
 one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'logistic'</code> (fastest).
 Default is <code>'randomForest'</code>.</p></dd>
@@ -229,7 +233,7 @@ Default is <code>5</code>.</p></dd>
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
 <dd><p>A logical value indicating whether to plot the performance measures in
 boosting. Used only if <code>score.method = 'boosting'</code> or if <code>score.method = 'twoReg'</code>
-or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>TRUE</code>.</p></dd>
+or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-error-maxnr">error.maxNR<a class="anchor" aria-label="anchor" href="#arg-error-maxnr"></a></dt>
@@ -291,6 +295,11 @@ interaction selection rule are unchanged. Kept separate from boosting's
 <dd><p>Named list of randomForestSRC options: <code>mtry</code>, <code>nodesize</code>,
 <code>nsplit</code>, <code>nodedepth</code>, and <code>splitrule</code>. Applies to both treatment arms
 and survival initial-predictor forests. Use <code>n.trees.rf</code> for the number of trees.</p></dd>
+
+
+<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
+<dd><p>Optional formula for initial outcome predictions in <code>twoReg</code>
+and <code>contrastReg</code>; defaults to <code>cate.model</code>. The outcome must match.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

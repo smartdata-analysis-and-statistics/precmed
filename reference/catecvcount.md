@@ -37,10 +37,11 @@ catecvcount(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
+  init.model = NULL,
   ...
 )
 ```
@@ -82,10 +83,11 @@ catecvcount(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `cate.model`. Only
-  applies when `score.method` includes `'twoReg'` or `'contrastReg'`.
-  Allowed values include one of `'poisson'` (fastest), `'boosting'` and
-  `'gam'`. Default is `'boosting'`.
+  predictions conditional on the covariates in `init.model` (or
+  `cate.model` when omitted). Only applies when `score.method` includes
+  `'twoReg'` or `'contrastReg'`. Allowed values include one of
+  `'poisson'` (fastest), `'boosting'` and `'gam'`. Default is
+  `'boosting'`.
 
 - minPS:
 
@@ -155,8 +157,9 @@ catecvcount(
 
   A vector of characters indicating the name of the variables used as
   the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `cate.model`. Default is
-  `NULL`, which uses all variables in `cate.model`.
+  must be selected from the variables listed in `init.model` (or
+  `cate.model` when omitted). Default is `NULL`, which uses all initial
+  outcome-model covariates.
 
 - tree.depth:
 
@@ -214,7 +217,7 @@ catecvcount(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - verbose:
 
@@ -241,6 +244,11 @@ catecvcount(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- init.model:
+
+  Optional formula for initial outcome predictions in `twoReg` and
+  `contrastReg`; defaults to `cate.model`. The outcome must match.
 
 - ...:
 
@@ -455,7 +463,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 10.1 secs 
+#> Total runtime : 6.31 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

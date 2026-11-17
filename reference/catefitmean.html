@@ -28,9 +28,12 @@ generalized additive model."><meta property="og:image" content="https://smartdat
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -126,8 +129,9 @@ on two-way interactions (added to the model if not specified in <code>ps.model</
 
 
 <dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
-<dd><p>A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-It must be specified when <code>score.method = contrastReg</code> or <code>twoReg</code>.</p></dd>
+<dd><p>Optional formula for initial outcome predictions in <code>twoReg</code>
+and <code>contrastReg</code>. The outcome must match <code>cate.model</code>; the default
+<code>NULL</code> uses <code>cate.model</code>.</p></dd>
 
 
 <dt id="arg-initial-predictor-method">initial.predictor.method<a class="anchor" aria-label="anchor" href="#arg-initial-predictor-method"></a></dt>
@@ -210,7 +214,7 @@ Default is <code>6</code>.</p></dd>
 <dd><p>A logical value indicating whether to plot the performance measures
 in boosting. Used only if <code>score.method = 'boosting'</code> or if
 <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
-<code>initial.predictor.method = 'boosting'</code>. Default is <code>TRUE</code>.</p></dd>
+<code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-error-maxnr">error.maxNR<a class="anchor" aria-label="anchor" href="#arg-error-maxnr"></a></dt>

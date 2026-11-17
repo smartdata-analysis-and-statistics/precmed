@@ -46,9 +46,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
 <li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -149,14 +152,9 @@ and conditional effects <span class="citation">(Nguyen et al.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>m</mi><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>R</mi><mo>=</mo><mi>r</mi><mo>,</mo><mi>𝐗</mi><mo>=</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">m_r(\boldsymbol x)=\Pr(Y=1\mid R=r,\boldsymbol X=\boldsymbol x)</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>π</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mi mathvariant="normal">Pr</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>R</mi><mo>=</mo><mn>1</mn><mo>∣</mo><mi>𝐗</mi><mo>=</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\pi(\boldsymbol x)=\Pr(R=1\mid\boldsymbol X=\boldsymbol x)</annotation></semantics></math>.
-<code>cate.model</code> specifies the outcome and covariates for a
-binomial logistic model. By default, <code>interactions = TRUE</code>
-adds treatment and treatment interactions with all outcome-model
-covariates. The resulting model gives separate logistic regressions by
-treatment arm in an equivalent parameterization. With
-<code>interactions = FALSE</code>, the fitted logistic model contains
-treatment and the specified covariates without treatment–covariate
-interactions. In both cases,
+<code>outcome_model</code> specifies the outcome and covariates for
+binomial logistic outcome models, fitted separately in each treatment
+arm. The resulting
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>m</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝐗</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat m_0(\boldsymbol X_i)</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>m</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝐗</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat m_1(\boldsymbol X_i)</annotation></semantics></math>
@@ -229,12 +227,14 @@ the relationship between counts and exposure.</p>
 <div class="section level3">
 <h3 id="outcome-and-treatment-models-1">Outcome and treatment models<a class="anchor" aria-label="anchor" href="#outcome-and-treatment-models-1"></a>
 </h3>
-<p><code>cate.model</code> specifies the count outcome and covariates;
-an <code>offset(log(T))</code> accounts for exposure. The outcome model
-is Poisson with a log link. With <code>interactions = TRUE</code> and
-more than ten observations in each treatment arm, the implementation
-fits separate Poisson models for the arms. Otherwise it fits a pooled
-model with a treatment main effect and no interactions. Predicted rates
+<p><code>outcome_model</code> specifies the count outcome and
+covariates; an <code>offset(log(T))</code> accounts for exposure. The
+outcome model is Poisson with a log link by default
+(<code>outcome_method = "poisson"</code>). Set
+<code>outcome_method = "negative_binomial"</code> (or
+<code>"negbin"</code>) to use a negative binomial outcome model.
+Separate outcome models are fitted in each treatment arm; negative
+binomial dispersion is estimated separately in each arm. Predicted rates
 per unit of exposure are written
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>m</mi><mo accent="true">̂</mo></mover><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>𝐗</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat m_r(\boldsymbol X_i)</annotation></semantics></math>,
 for
@@ -299,9 +299,15 @@ different interpretations from a conditional Cox hazard ratio.</p>
 <div class="section level3">
 <h3 id="outcome-treatment-and-censoring-models">Outcome, treatment and censoring models<a class="anchor" aria-label="anchor" href="#outcome-treatment-and-censoring-models"></a>
 </h3>
-<p>The outcome model fits a Cox model separately in each treatment arm
-and uses its predictions to estimate each patient’s RMST and survival
-probability at
+<p>By default, the outcome model fits a Cox model separately in each
+treatment arm. Alternatively, <code>outcome_method = "weibull"</code> or
+<code>"log_normal"</code> fits an arm-specific accelerated failure time
+model. The Weibull model assumes proportional hazards across covariates
+within each arm, but different arm shapes allow non-proportional hazards
+between arms. The log-normal model does not impose proportional hazards.
+Both alternatives require their parametric event-time distributions to
+be appropriate. Each outcome model supplies predictions of each
+patient’s RMST and survival probability at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>τ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\tau_0</annotation></semantics></math>
 under each treatment. A treatment model estimates treatment
 probabilities, and a censoring model provides inverse probability of
@@ -348,9 +354,9 @@ prediction for that arm; this fallback is not doubly robust.</p>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>S</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat S_0(\tau_0)</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>S</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\hat S_1(\tau_0)</annotation></semantics></math>
-using arm-specific Cox survival predictions, treatment weights and
-censoring weights. For valid survival estimates strictly between zero
-and one, it reports</p>
+using arm-specific outcome-model survival predictions, treatment weights
+and censoring weights. For valid survival estimates strictly between
+zero and one, it reports</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><mspace width="-0.167em"></mspace><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>S</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>−</mi><mrow><mi mathvariant="normal">log</mi><mo>⁡</mo></mrow><msub><mover><mi>S</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>τ</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\log\!\left(\frac{-\log\hat S_1(\tau_0)}{-\log\hat S_0(\tau_0)}\right)</annotation></semantics></math></p>
 <p>as <code>log.cumulative.hazard.ratio</code>. This population-level
 ratio of cumulative hazards at
@@ -407,12 +413,15 @@ not validation of a CATE score.</p>
 <ul>
 <li><a href="doubly-robust.html">Understanding doubly robust
 methods</a></li>
-<li><a href="Binary-examples.html">Estimating and validating treatment
-effects for binary outcomes</a></li>
-<li><a href="Count-examples.html">Estimating and validating treatment
-effects for count outcomes</a></li>
-<li><a href="Survival-examples.html">Estimating and validating treatment
-effects for survival outcomes</a></li>
+<li>
+<a href="Binary-examples.html">Binary ATE example</a> and <a href="Binary-CATE.html">Binary CATE example</a>
+</li>
+<li>
+<a href="Count-examples.html">Count ATE example</a> and <a href="Count-CATE.html">Count CATE example</a>
+</li>
+<li>
+<a href="Survival-examples.html">Survival ATE example</a> and <a href="Survival-CATE.html">Survival CATE example</a>
+</li>
 <li><a href="Additional-examples.html">Customizing CATE models and
 validation</a></li>
 <li><a href="Theoretical-details.html">Methods for developing and

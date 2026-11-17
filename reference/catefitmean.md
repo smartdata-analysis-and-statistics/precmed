@@ -73,9 +73,9 @@ catefitmean(
 
 - init.model:
 
-  A formula describing the initial predictor model. The outcome must
-  appear on the left-hand side. It must be specified when
-  `score.method = contrastReg` or `twoReg`.
+  Optional formula for initial outcome predictions in `twoReg` and
+  `contrastReg`. The outcome must match `cate.model`; the default `NULL`
+  uses `cate.model`.
 
 - initial.predictor.method:
 
@@ -160,7 +160,7 @@ catefitmean(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - error.maxNR:
 

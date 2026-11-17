@@ -26,9 +26,12 @@ subgroups. This is the binary-outcome interface used by catefit."><meta property
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes"><li><a class="dropdown-item" href="../articles/doubly-robust.html">Understanding doubly robust methods</a></li>
-    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Estimating and validating treatment effects for binary outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Count-examples.html">Estimating and validating treatment effects for count outcomes</a></li>
-    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Estimating and validating treatment effects for survival outcomes</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-examples.html">Binary average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Binary-CATE.html">Binary CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-examples.html">Count average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Count-CATE.html">Count CATE scores and validation</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-examples.html">Survival average treatment effects</a></li>
+    <li><a class="dropdown-item" href="../articles/Survival-CATE.html">Survival CATE scores and validation</a></li>
     <li><a class="dropdown-item" href="../articles/Additional-examples.html">Customizing CATE models and validation</a></li>
     <li><a class="dropdown-item" href="../articles/ATE-theory.html">Methods for estimating average treatment effects</a></li>
     <li><a class="dropdown-item" href="../articles/Theoretical-details.html">Methods for developing and validating CATE scores</a></li>
@@ -74,7 +77,8 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
 <span>  Kfold <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  tree.depth <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">200</span>,</span>
-<span>  plot.gbmperf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -181,7 +185,17 @@ if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
 <dd><p>A logical value indicating whether to plot the performance measures in
 boosting. Used only if <code>score.method = 'boosting'</code> or if <code>score.method = 'twoReg'</code>
-or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>TRUE</code>.</p></dd>
+or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
+<dd><p>Optional formula for the initial treatment-specific outcome models
+used by <code>twoReg</code> and <code>contrastReg</code> (binary outcomes support
+<code>twoReg</code> only). The outcome must match <code>cate.model</code>. The default
+<code>NULL</code> uses <code>cate.model</code>. For count outcomes the exposure offset
+is taken from <code>cate.model</code>; an offset in <code>init.model</code>, if supplied,
+must match it. Other score methods do not use this argument. Continuous-outcome
+fitting and validation are not currently implemented.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

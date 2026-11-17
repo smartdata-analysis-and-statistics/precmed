@@ -27,13 +27,14 @@ intxsurv(
   n.trees.boosting = 150,
   B = 3,
   Kfold = 5,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
+  x.init = x.cate,
   ...
 )
 ```
@@ -117,7 +118,7 @@ intxsurv(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `cate.model` in
+  predictions conditional on the covariates in `x.init` in
   `score.method = 'twoReg'` and `'contrastReg'`. Allowed values include
   one of `'randomForest'`, `'boosting'` and `'logistic'` (fastest).
   Default is `'randomForest'`.
@@ -160,7 +161,7 @@ intxsurv(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - error.maxNR:
 
@@ -206,6 +207,10 @@ intxsurv(
   `nodedepth`, and `splitrule`. Applies to both treatment arms and
   survival initial-predictor forests. Use `n.trees.rf` for the number of
   trees.
+
+- x.init:
+
+  Initial outcome-model covariate matrix; defaults to `x.cate`.
 
 - ...:
 

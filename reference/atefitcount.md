@@ -9,16 +9,17 @@ used for inference.
 ``` r
 atefitcount(
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = "poisson",
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 ```
 
@@ -30,10 +31,20 @@ atefitcount(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- cate.model:
+- outcome_model:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side.
+  A formula specifying the count outcome model, fitted separately in
+  each treatment arm by default. Put the count outcome on the left and
+  baseline covariates on the right; do not include treatment. Include an
+  exposure offset where applicable. See `outcome_method` for the model
+  family.
+
+- outcome_method:
+
+  Outcome-model method: `"poisson"` (default) or `"negative_binomial"`
+  (also accepted as `"negbin"`). Negative binomial models estimate
+  dispersion separately by treatment arm. The method is refitted in each
+  bootstrap sample. Failed fits are recorded in bootstrap diagnostics.
 
 - ps.model:
 
@@ -63,13 +74,6 @@ atefitcount(
   scores should be truncated. Must be strictly greater than `minPS`.
   Default is `0.99`.
 
-- interactions:
-
-  A logical value indicating whether the outcome model should assume
-  treatment-covariate interaction by `x`. If `TRUE`, interactions will
-  be assumed only if at least 10 patients received each treatment
-  option. Default is `TRUE`.
-
 - n.boot:
 
   A numeric value indicating the number of bootstrap samples used.
@@ -93,6 +97,10 @@ atefitcount(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- cate.model:
+
+  Deprecated alias for `outcome_model`. Supply only one.
 
 ## Value
 
@@ -141,7 +149,7 @@ to inspect these records.
 
 ``` r
 output <- atefitcount(data = countExample,
-                      cate.model = y ~ age + female + previous_treatment +
+                      outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
                       ps.model = trt ~ age + previous_treatment,

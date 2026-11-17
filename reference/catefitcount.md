@@ -31,6 +31,7 @@ catefitcount(
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
+  init.model = NULL,
   ...
 )
 ```
@@ -72,10 +73,11 @@ catefitcount(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `cate.model`. Only
-  applies when `score.method` includes `'twoReg'` or `'contrastReg'`.
-  Allowed values include one of `'poisson'` (fastest), `'boosting'` and
-  `'gam'`. Default is `'boosting'`.
+  predictions conditional on the covariates in `init.model` (or
+  `cate.model` when omitted). Only applies when `score.method` includes
+  `'twoReg'` or `'contrastReg'`. Allowed values include one of
+  `'poisson'` (fastest), `'boosting'` and `'gam'`. Default is
+  `'boosting'`.
 
 - minPS:
 
@@ -106,8 +108,9 @@ catefitcount(
 
   A vector of characters indicating the name of the variables used as
   the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `cate.model`. Default is
-  `NULL`, which uses all variables in `cate.model`.
+  must be selected from the variables listed in `init.model` (or
+  `cate.model` when omitted). Default is `NULL`, which uses all initial
+  outcome-model covariates.
 
 - tree.depth:
 
@@ -165,7 +168,7 @@ catefitcount(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - verbose:
 
@@ -192,6 +195,11 @@ catefitcount(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- init.model:
+
+  Optional formula for initial outcome predictions in `twoReg` and
+  `contrastReg`; defaults to `cate.model`. The outcome must match.
 
 - ...:
 
@@ -318,5 +326,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.17 secs 
+#> Total runtime : 0.11 secs 
 ```

@@ -12,7 +12,8 @@ outcomes are not yet implemented.
 atefit(
   response,
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = NULL,
   ps.model,
   ps.method = "glm",
   ipcw.model = NULL,
@@ -22,12 +23,12 @@ atefit(
   followup.time = NULL,
   tau0 = NULL,
   surv.min = 0.025,
-  interactions = TRUE,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 ```
 
@@ -36,12 +37,13 @@ atefit(
 - response:
 
   A string describing the type of outcome in the data. Allowed values
-  include "binary", "count" (see
-  [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
-  "survival" (see
-  [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
-  and "continuous" (see
-  [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md)).
+  include "binary" (see
+  [`atefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md)),
+  "count" (see
+  [`atefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md)),
+  and "survival" (see
+  [`atefitsurv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md)).
+  Continuous outcomes are not yet implemented.
 
 - data:
 
@@ -49,11 +51,25 @@ atefit(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- cate.model:
+- outcome_model:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side. For survival outcomes, a `Surv` object
-  must be used to describe the outcome.
+  A formula specifying the outcome and baseline covariates for the
+  outcome model. Supply treatment in `ps.model`, rather than in this
+  formula. See
+  [`atefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md),
+  [`atefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md),
+  or
+  [`atefitsurv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md)
+  for the outcome-specific model and formula requirements.
+
+- outcome_method:
+
+  Outcome-model method. The default `NULL` selects `"logistic"` for
+  binary outcomes, `"poisson"` for count outcomes, and `"coxph"` for
+  survival outcomes. Count outcomes also support `"negative_binomial"`
+  (alias `"negbin"`); survival outcomes also support `"weibull"` and
+  `"log_normal"` (alias `"lognormal"`). Other methods are not currently
+  available. See the outcome-specific help pages for details.
 
 - ps.model:
 
@@ -79,7 +95,7 @@ atefit(
   of censoring weighting (IPCW). The left-hand side must be empty. Only
   applies for survival outcomes. Default is `NULL`, which uses a
   censoring model with the same covariates as the outcome model
-  `cate.model`, plus the treatment.
+  `outcome_model`, plus the treatment.
 
 - ipcw.method:
 
@@ -120,14 +136,6 @@ atefit(
   be a positive value and should be chosen close to 0. Only applies for
   survival outcomes. Default is `0.025`.
 
-- interactions:
-
-  A logical value indicating whether the outcome model should assume
-  interactions between `x` and `trt`. For binary outcomes this controls
-  all treatment-covariate interactions in the logistic outcome model.
-  For count outcomes, if `TRUE`, interactions will be assumed only if at
-  least 10 patients received each treatment option. Default is `TRUE`.
-
 - n.boot:
 
   A numeric value indicating the number of bootstrap samples used.
@@ -145,19 +153,19 @@ atefit(
   `0` otherwise. Default is `0`.
 
   Binary outcomes use `response = "binary"` and estimate a doubly robust
-  risk difference (treatment 1 minus treatment 0) with a logistic
-  outcome model. The result includes `risk.difference`, `risk0`,
-  `risk1`, and bootstrap estimates. If any bootstrap fit fails,
-  inference is unavailable.
+  risk difference (treatment 1 minus treatment 0) with logistic outcome
+  models. The result includes `risk.difference`, `risk0`, `risk1`, and
+  bootstrap estimates. If any bootstrap fit fails, inference is
+  unavailable.
 
 - rmst.control:
 
   Named options for Cox restricted mean survival integration. Supported
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
-  patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of
-  `contrast.control`.
+  patient-by-event-time matrix. Cox model fitting is unchanged. Applies
+  only to Cox survival outcome models; parametric outcome models use
+  closed-form integration. Independent of `contrast.control`.
 
 - ps.control:
 
@@ -166,6 +174,10 @@ atefit(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- cate.model:
+
+  Deprecated alias for `outcome_model`. Supply only one.
 
 ## Value
 
@@ -213,7 +225,7 @@ Xiaotong (Phoebe) Jiang <xiaotong.phoebe.jiang@gmail.com>
 # Count outcome
 output <- atefit(response = "count",
                  data = countExample,
-                 cate.model = y ~ age + female + previous_treatment +
+                 outcome_model = y ~ age + female + previous_treatment +
                               previous_cost + previous_number_relapses +
                               offset(log(years)),
                  ps.model = trt ~ age + previous_treatment,
@@ -245,7 +257,7 @@ tau0 <- with(survivalExample,
 
 output2 <- atefit(response = "survival",
                   data = survivalExample,
-                  cate.model = survival::Surv(y, d) ~ age + female +
+                  outcome_model = survival::Surv(y, d) ~ age + female +
                         previous_cost + previous_number_relapses,
                         ps.model = trt ~ age + previous_treatment,
                   tau0 = tau0,

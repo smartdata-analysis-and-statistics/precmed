@@ -57,15 +57,11 @@ conditional effects (Nguyen et al. 2026).
 Write
 $`m_r(\boldsymbol x)=\Pr(Y=1\mid R=r,\boldsymbol X=\boldsymbol x)`$ and
 $`\pi(\boldsymbol x)=\Pr(R=1\mid\boldsymbol X=\boldsymbol x)`$.
-`cate.model` specifies the outcome and covariates for a binomial
-logistic model. By default, `interactions = TRUE` adds treatment and
-treatment interactions with all outcome-model covariates. The resulting
-model gives separate logistic regressions by treatment arm in an
-equivalent parameterization. With `interactions = FALSE`, the fitted
-logistic model contains treatment and the specified covariates without
-treatment–covariate interactions. In both cases,
-$`\hat m_0(\boldsymbol X_i)`$ and $`\hat m_1(\boldsymbol X_i)`$ predict
-response for every patient under each treatment.
+`outcome_model` specifies the outcome and covariates for binomial
+logistic outcome models, fitted separately in each treatment arm. The
+resulting $`\hat m_0(\boldsymbol X_i)`$ and
+$`\hat m_1(\boldsymbol X_i)`$ predict response for every patient under
+each treatment.
 
 `ps.model` specifies treatment and covariates for the treatment model.
 The default `ps.method = "glm"` uses logistic regression; `"lasso"` uses
@@ -129,16 +125,16 @@ counts and exposure.
 
 ### Outcome and treatment models
 
-`cate.model` specifies the count outcome and covariates; an
+`outcome_model` specifies the count outcome and covariates; an
 `offset(log(T))` accounts for exposure. The outcome model is Poisson
-with a log link. With `interactions = TRUE` and more than ten
-observations in each treatment arm, the implementation fits separate
-Poisson models for the arms. Otherwise it fits a pooled model with a
-treatment main effect and no interactions. Predicted rates per unit of
-exposure are written $`\hat m_r(\boldsymbol X_i)`$, for $`r=0,1`$. A
-treatment model estimates $`\hat\pi_i=\Pr(R_i=1\mid\boldsymbol X_i)`$;
-as for binary outcomes, its fitted values are truncated using `minPS`
-and `maxPS`.
+with a log link by default (`outcome_method = "poisson"`). Set
+`outcome_method = "negative_binomial"` (or `"negbin"`) to use a negative
+binomial outcome model. Separate outcome models are fitted in each
+treatment arm; negative binomial dispersion is estimated separately in
+each arm. Predicted rates per unit of exposure are written
+$`\hat m_r(\boldsymbol X_i)`$, for $`r=0,1`$. A treatment model
+estimates $`\hat\pi_i=\Pr(R_i=1\mid\boldsymbol X_i)`$; as for binary
+outcomes, its fitted values are truncated using `minPS` and `maxPS`.
 
 ### Augmented rate estimates
 
@@ -189,16 +185,22 @@ from a conditional Cox hazard ratio.
 
 ### Outcome, treatment and censoring models
 
-The outcome model fits a Cox model separately in each treatment arm and
-uses its predictions to estimate each patient’s RMST and survival
-probability at $`\tau_0`$ under each treatment. A treatment model
-estimates treatment probabilities, and a censoring model provides
-inverse probability of censoring weights (IPCW). The censoring model is
-controlled by `ipcw.model`, `ipcw.method`, and `surv.min`; the treatment
-model and truncation use the same controls described above. Because
-censoring can leave the event time unobserved, causal interpretation
-requires appropriate censoring assumptions and sufficient follow-up in
-addition to the treatment identification assumptions.
+By default, the outcome model fits a Cox model separately in each
+treatment arm. Alternatively, `outcome_method = "weibull"` or
+`"log_normal"` fits an arm-specific accelerated failure time model. The
+Weibull model assumes proportional hazards across covariates within each
+arm, but different arm shapes allow non-proportional hazards between
+arms. The log-normal model does not impose proportional hazards. Both
+alternatives require their parametric event-time distributions to be
+appropriate. Each outcome model supplies predictions of each patient’s
+RMST and survival probability at $`\tau_0`$ under each treatment. A
+treatment model estimates treatment probabilities, and a censoring model
+provides inverse probability of censoring weights (IPCW). The censoring
+model is controlled by `ipcw.model`, `ipcw.method`, and `surv.min`; the
+treatment model and truncation use the same controls described above.
+Because censoring can leave the event time unobserved, causal
+interpretation requires appropriate censoring assumptions and sufficient
+follow-up in addition to the treatment identification assumptions.
 
 ### Augmented RMST and RMTL estimates
 
@@ -227,9 +229,10 @@ robust.
 ### Cumulative hazard ratio
 
 The function also constructs augmented marginal survival estimates
-$`\hat S_0(\tau_0)`$ and $`\hat S_1(\tau_0)`$ using arm-specific Cox
-survival predictions, treatment weights and censoring weights. For valid
-survival estimates strictly between zero and one, it reports
+$`\hat S_0(\tau_0)`$ and $`\hat S_1(\tau_0)`$ using arm-specific
+outcome-model survival predictions, treatment weights and censoring
+weights. For valid survival estimates strictly between zero and one, it
+reports
 
 ``` math
 \log\!\left(\frac{-\log\hat S_1(\tau_0)}{-\log\hat S_0(\tau_0)}\right)
@@ -287,12 +290,18 @@ not validation of a CATE score.
 
 - [Understanding doubly robust
   methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.md)
-- [Estimating and validating treatment effects for binary
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
-- [Estimating and validating treatment effects for count
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
-- [Estimating and validating treatment effects for survival
-  outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+- [Binary ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.md)
+  and [Binary CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.md)
+- [Count ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.md)
+  and [Count CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.md)
+- [Survival ATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.md)
+  and [Survival CATE
+  example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.md)
 - [Customizing CATE models and
   validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.md)
 - [Methods for developing and validating CATE

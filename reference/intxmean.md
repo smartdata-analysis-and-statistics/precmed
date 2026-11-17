@@ -26,7 +26,7 @@ intxmean(
   n.trees.boosting = 200,
   B = 1,
   Kfold = 2,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   ps.control = list(),
   rf.control = list(),
   ...
@@ -143,7 +143,7 @@ intxmean(
   A logical value indicating whether to plot the performance measures in
   boosting. Used only if `score.method = 'boosting'` or if
   `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `TRUE`.
+  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
 
 - ps.control:
 

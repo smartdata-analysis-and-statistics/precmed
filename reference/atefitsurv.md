@@ -9,7 +9,8 @@ outcomes. Bootstrap is used for inference.
 ``` r
 atefitsurv(
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = "coxph",
   ps.model,
   ps.method = "glm",
   ipcw.model = NULL,
@@ -23,7 +24,8 @@ atefitsurv(
   seed = NULL,
   verbose = 0,
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 ```
 
@@ -35,11 +37,24 @@ atefitsurv(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- cate.model:
+- outcome_model:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side. For survival outcomes, a `Surv` object
-  must be used to describe the outcome.
+  A formula specifying the survival outcome model, fitted separately in
+  each treatment arm. Use a `Surv` outcome on the left and baseline
+  covariates on the right; do not include treatment.
+
+- outcome_method:
+
+  Survival outcome-model method: `"coxph"` (default), `"weibull"`, or
+  `"log_normal"` (alias `"lognormal"`). The parametric methods fit
+  accelerated failure time models with separate scale parameters in each
+  treatment arm. Weibull models have proportional hazards across
+  covariates within an arm but can have non-proportional hazards between
+  arms if their shapes differ. Log-normal models do not impose
+  proportional hazards. Both assume their specified event-time
+  distribution and require positive observed times and an event in each
+  arm. The censoring model is specified separately by `ipcw.method` and
+  `ipcw.model`.
 
 - ps.model:
 
@@ -64,7 +79,7 @@ atefitsurv(
   of censoring weighting (IPCW). The left-hand side must be empty. Only
   applies for survival outcomes. Default is `NULL`, which uses a
   censoring model with the same covariates as the outcome model
-  `cate.model`, plus the treatment.
+  `outcome_model`, plus the treatment.
 
 - ipcw.method:
 
@@ -126,9 +141,9 @@ atefitsurv(
   Named options for Cox restricted mean survival integration. Supported
   entry: `solver = "C"` (default) or `solver = "R"`. The C backend
   accumulates each patient's integral without allocating a
-  patient-by-event-time matrix. Cox model fitting is unchanged.
-  Available only for survival outcomes; independent of
-  `contrast.control`.
+  patient-by-event-time matrix. Cox model fitting is unchanged. Applies
+  to Cox outcome models only; parametric models use closed-form
+  integration.
 
 - ps.control:
 
@@ -137,6 +152,10 @@ atefitsurv(
   affects screening when `ps.method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
+
+- cate.model:
+
+  Deprecated alias for `outcome_model`. Supply only one.
 
 ## Value
 
@@ -214,7 +233,7 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 output <- atefitsurv(data = survivalExample,
-                     cate.model = Surv(y, d) ~ age + female +
+                     outcome_model = Surv(y, d) ~ age + female +
                                   previous_cost + previous_number_relapses,
                      ps.model = trt ~ age + previous_treatment,
                      tau0 = tau0,
