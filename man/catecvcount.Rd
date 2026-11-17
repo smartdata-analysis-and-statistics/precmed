@@ -31,10 +31,11 @@ catecvcount(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
+  init.model = NULL,
   ...
 )
 }
@@ -64,7 +65,7 @@ only when \code{ps.model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get
 initial outcome predictions conditional on the covariates in
-\code{cate.model}. Only applies when \code{score.method} includes
+\code{init.model} (or \code{cate.model} when omitted). Only applies when \code{score.method} includes
 \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
 \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
 \code{'boosting'}.}
@@ -116,8 +117,8 @@ is \code{5,000}.}
 
 \item{xvar.smooth}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{cate.model}.
-Default is \code{NULL}, which uses all variables in \code{cate.model}.}
+from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
+Default is \code{NULL}, which uses all initial outcome-model covariates.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
@@ -154,7 +155,7 @@ Default is \code{NULL}, corresponding to no seed.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
@@ -173,6 +174,9 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
+and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

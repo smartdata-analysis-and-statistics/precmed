@@ -1,5 +1,7 @@
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-binary_data <- function(data, cate.model, ps.model) {
+binary_data <- function(data, cate.model, ps.model, init.model = NULL) {
+  cate.model <- as.formula(cate.model)
+  ps.model <- as.formula(ps.model)
   cm <- model.frame(cate.model, data, na.action = stats::na.pass)
   pm <- model.frame(ps.model, data, na.action = stats::na.pass)
   y <- model.response(cm); trt <- model.response(pm)
@@ -13,7 +15,7 @@ binary_data <- function(data, cate.model, ps.model) {
   if (anyNA(x) || anyNA(z) || any(!is.finite(x)) || any(!is.finite(z))) stop("Missing or non-finite covariates are not allowed.")
   if (ncol(x) == 0L || !"(Intercept)" %in% colnames(x) || !"(Intercept)" %in% colnames(z)) stop("Binary models must include an intercept.")
   if (!is.null(model.offset(cm))) stop("Offsets are not supported for binary outcomes.")
-  list(y = as.numeric(y), trt = t, x = x, z = z, labels = labels)
+  list(y = as.numeric(y), trt = t, x = x, x.init = initial_outcome_design(data, cate.model, init.model, intercept = TRUE), z = z, labels = labels)
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
@@ -62,10 +64,10 @@ binary_tworeg_dr <- function(d, ps.method, minPS, maxPS, ps.control, B, Kfold) {
       train <- fold != k; valid <- !train
       for (arm in 0:1) {
         selected <- train & d$trt == arm
-        fit <- stats::glm.fit(d$x[selected, , drop = FALSE], d$y[selected], family = stats::binomial())
-        if (!fit$converged || fit$rank < ncol(d$x) || any(!is.finite(fit$coefficients)))
+        fit <- stats::glm.fit(d$x.init[selected, , drop = FALSE], d$y[selected], family = stats::binomial())
+        if (!fit$converged || fit$rank < ncol(d$x.init) || any(!is.finite(fit$coefficients)))
           stop("Binary twoReg outcome model failed to converge or is rank deficient in a cross-fitting fold.")
-        pred <- stats::plogis(drop(d$x[valid, , drop = FALSE] %*% fit$coefficients))
+        pred <- stats::plogis(drop(d$x.init[valid, , drop = FALSE] %*% fit$coefficients))
         if (arm == 0) mu0[valid] <- pred else mu1[valid] <- pred
       }
       args <- list(trt = d$trt[train], x.ps = d$z[train, , drop = FALSE],
@@ -86,12 +88,13 @@ binary_tworeg_dr <- function(d, ps.method, minPS, maxPS, ps.control, B, Kfold) {
 }
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE, diagnostic = FALSE) {
+binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE, diagnostic = FALSE,
+                          separate = FALSE) {
   if (length(unique(d$trt)) != 2L) stop("Both treatment groups are required.")
   p <- if (ps.method == "glm") glm.simplereg.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS, return.raw = diagnostic) else
     glm.ps(d$trt, d$z, minPS = minPS, maxPS = maxPS, solver = resolve_ps_control(ps.control)$solver, return.raw = diagnostic)
   if (any(!is.finite(p) | p <= 0 | p >= 1)) stop("Propensity scores must be strictly between 0 and 1.")
-  m <- binary_predictions(d$y, d$trt, d$x, "logistic", interactions)
+  m <- binary_predictions(d$y, d$trt, d$x, if (separate) "twoReg" else "logistic", interactions)
   r1 <- mean(m$mu1 + d$trt * (d$y - m$mu1) / p)
   r0 <- mean(m$mu0 + (1 - d$trt) * (d$y - m$mu0) / (1 - p))
   result <- c(risk0 = r0, risk1 = r1, risk.difference = r1 - r0)
@@ -101,6 +104,6 @@ binary_effect <- function(d, ps.method, minPS, maxPS, ps.control, interactions =
 
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 binary_subset <- function(d, i) {
-  list(y = d$y[i], trt = d$trt[i], x = d$x[i, , drop = FALSE], z = d$z[i, , drop = FALSE])
+  list(y = d$y[i], trt = d$trt[i], x = d$x[i, , drop = FALSE], x.init = if (!is.null(d$x.init)) d$x.init[i, , drop = FALSE] else NULL, z = d$z[i, , drop = FALSE])
 }
 

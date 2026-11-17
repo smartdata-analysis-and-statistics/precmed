@@ -50,9 +50,10 @@ Start with `atefit()` to estimate the average treatment effect across the study 
 fit_ate <- atefit(
   response = "count",
   data = countExample,
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
   ps.model = trt ~ age + previous_treatment,
+  outcome_method = "poisson",
   n.boot = 50,
   seed = 999,
   verbose = 0
@@ -107,9 +108,9 @@ The curves summarize estimated treatment effects in nested subgroups ranked by t
 ## Next steps
 
 - Read [Understanding doubly robust methods](doubly-robust.html) for an introduction to the estimator and its assumptions.
-- Follow the [binary outcome tutorial](Binary-examples.html) for fixed-horizon response and held-out subgroup validation.
-- Follow the [count outcome tutorial](Count-examples.html) to estimate the overall treatment effect, compare scoring methods, and interpret validation results.
-- See the [survival outcome tutorial](Survival-examples.html) for time-to-event data.
+- Follow the [binary ATE example](Binary-examples.html) and [binary CATE example](Binary-CATE.html) for fixed-horizon response and subgroup validation.
+- Follow the [count ATE example](Count-examples.html) and [count CATE example](Count-CATE.html) to estimate overall effects and assess scoring methods.
+- See the [survival ATE example](Survival-examples.html) and [survival CATE example](Survival-CATE.html) for time-to-event data.
 - Explore [model and validation options](Additional-examples.html) and the methods for [average treatment effects](ATE-theory.html) and [CATE scores](Theoretical-details.html).
 
 For observational data, causal interpretation depends on assumptions including adequate control of confounding and sufficient treatment overlap. A CATE describes an average effect conditional on observed characteristics; it does not reveal an individual patient's actual benefit.

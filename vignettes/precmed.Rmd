@@ -72,7 +72,7 @@ For count and survival outcomes, the following workflow estimates the ATE and de
     * Compare the distribution of the estimated ATE across different levels of the CATE score percentiles using `boxplot()`. 
 4. Fit the chosen approach using `catefit()` and assess it in an independent dataset where possible.
 
-For binary outcomes, `atefit()` and `catefit()` are available in the development version. The [binary example](Binary-examples.html) illustrates held-out subgroup assessment. These binary features are not in CRAN release 1.1.0.
+For binary outcomes, `atefit()` and `catefit()` are available in the development version. The [binary CATE example](Binary-CATE.html) illustrates held-out subgroup assessment. These binary features are not in CRAN release 1.1.0.
 
 In the vignettes, we will adopt a different workflow to gradually expose the user from simple to more complex methods.
 
@@ -90,9 +90,9 @@ When applying `catefit()` or `catecv()`, the user has to (at least) input:
 ## Overview of the vignettes
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Binary outcome example](Binary-examples.html)
-- [Count outcome example](Count-examples.html)
-- [Survival outcome example](Survival-examples.html)
+- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
+- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
+- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
 - [Customizing CATE models and validation](Additional-examples.html)
 - [ATE methods](ATE-theory.html)
 - [CATE development and validation methods](Theoretical-details.html)

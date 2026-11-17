@@ -15,7 +15,9 @@ drcount(
   maxPS = 0.99,
   interactions = TRUE,
   ps.control = list(),
-  diagnostic = FALSE
+  diagnostic = FALSE,
+  ate_outcome_mode = NULL,
+  outcome_method = "poisson"
 )
 }
 \arguments{
@@ -63,6 +65,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
 \item{diagnostic}{Internal: retain full-sample treatment overlap diagnostics.}
+
+\item{ate_outcome_mode}{Internal ATE outcome-model specification; \code{NULL}
+preserves the subgroup estimator's existing behavior.}
+
+\item{outcome_method}{Internal ATE outcome-model method: \code{"poisson"}
+or \code{"negative_binomial"}.}
 }
 \value{
 Return a list of 4 elements:

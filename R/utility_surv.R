@@ -445,7 +445,8 @@ balancesurv.split <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, train.
     warning(paste("Maximum iteration reached and the SMD between training and validation set is still greater than error.max (error=", round(errorbest, 4), "). Consider increasing max.iter, decreasing error.max, or increasing sample size.", sep = ""))
   }
 
-  return(list(y.train = y.train, d.train = d.train, trt.train = trt.train, x.cate.train = x.cate.train,
+  return(list(bestid.valid = if (iter == max.iter + 1) bestid.valid else id.valid,
+              y.train = y.train, d.train = d.train, trt.train = trt.train, x.cate.train = x.cate.train,
               x.ps.train = x.ps.train, x.ipcw.train = x.ipcw.train, yf.train = yf.train,
               y.valid = y.valid, d.valid = d.valid, trt.valid = trt.valid, x.cate.valid = x.cate.valid,
               x.ps.valid = x.ps.valid, x.ipcw.valid = x.ipcw.valid, yf.valid = yf.valid))
@@ -468,3 +469,48 @@ integrate_forest_survival <- function(time, survival, tau0) {
   as.vector(curves[, indices + 1L, drop = FALSE] %*% diff(breaks))
 }
 
+
+# Fit an arm-specific parametric survival model and predict RMST and survival.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+parametric_survival_outcome <- function(y, d, x, xnew, tau0, method, return_survival = FALSE) {
+  if (length(method) != 1L || is.na(method) || !method %in% c("weibull", "log_normal"))
+    stop("Unsupported parametric survival outcome method.")
+  x <- as.matrix(x); xnew <- as.matrix(xnew)
+  if (!length(y) || any(!is.finite(y) | y <= 0) || !any(d == 1))
+    stop("Parametric survival models require positive observed times and at least one event per treatment arm.")
+  if (ncol(x) != ncol(xnew)) stop("Outcome-model covariate dimensions do not match.")
+  if (!is.finite(tau0) || tau0 <= 0) stop("tau0 must be positive and finite.")
+  keep <- if (ncol(x)) apply(x, 2, function(z) length(unique(z)) > 1L) else logical()
+  x <- x[, keep, drop = FALSE]; xnew <- xnew[, keep, drop = FALSE]
+  predictors <- as.data.frame(x)
+  if (ncol(x)) names(predictors) <- paste0("x", seq_len(ncol(x)))
+  data <- data.frame(.time = y, .event = d, predictors, check.names = FALSE)
+  formula <- stats::reformulate(names(predictors), response = "survival::Surv(.time, .event)")
+  fit <- withCallingHandlers(
+    survival::survreg(formula, data = data, dist = if (method == "weibull") "weibull" else "lognormal"),
+    warning = function(w) {
+      if (grepl("did not converge|failed to converge|ran out of iterations", conditionMessage(w), ignore.case = TRUE))
+        stop("Parametric survival outcome model did not converge: ", conditionMessage(w), call. = FALSE)
+    })
+  beta <- fit$coefficients
+  if (any(!is.finite(beta)) || !is.finite(fit$scale) || fit$scale <= 0)
+    stop("Parametric survival outcome model is rank deficient or has invalid scale.")
+  eta <- drop(cbind(1, xnew) %*% beta)
+  if (method == "weibull") {
+    shape <- 1 / fit$scale
+    logz <- (log(tau0) - eta) * shape
+    z <- exp(pmin(logz, log(.Machine$double.xmax)))
+    survival <- exp(-z)
+    truncated <- exp(eta + lgamma(1 + 1 / shape) +
+                       stats::pgamma(z, shape = 1 + 1 / shape, log.p = TRUE))
+  } else {
+    sigma <- fit$scale
+    z <- (log(tau0) - eta) / sigma
+    survival <- stats::pnorm(z, lower.tail = FALSE)
+    truncated <- exp(eta + sigma^2 / 2 + stats::pnorm(z - sigma, log.p = TRUE))
+  }
+  rmst <- truncated + tau0 * survival
+  if (any(!is.finite(rmst)) || any(!is.finite(survival)) || any(rmst < 0 | rmst > tau0 * (1 + 1e-8)))
+    stop("Parametric survival outcome model produced invalid predictions.")
+  if (return_survival) list(rmst = pmin(rmst, tau0), survival = survival) else pmin(rmst, tau0)
+}

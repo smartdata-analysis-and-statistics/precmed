@@ -23,7 +23,7 @@ intxmean(
   n.trees.boosting = 200,
   B = 1,
   Kfold = 2,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   ps.control = list(),
   rf.control = list(),
   ...
@@ -95,7 +95,7 @@ Default is \code{6}.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.

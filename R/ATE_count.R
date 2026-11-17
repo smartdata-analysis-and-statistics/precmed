@@ -5,8 +5,16 @@
 #' treatments, which is the rate ratio for count outcomes. Bootstrap is used for
 #' inference.
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
+#' @param outcome_model A formula specifying the count outcome model, fitted
+#' separately in each treatment arm by default. Put the count outcome on the
+#' left and baseline covariates on the right; do not include treatment. Include
+#' an exposure offset where applicable. See \code{outcome_method} for the
+#' model family.
+#' @param outcome_method Outcome-model method: \code{"poisson"} (default) or
+#' \code{"negative_binomial"} (also accepted as \code{"negbin"}). Negative
+#' binomial models estimate dispersion separately by treatment arm. The method is refitted
+#' in each bootstrap sample. Failed fits are recorded in bootstrap diagnostics.
+#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
 #' @param ps.model A formula describing the treatment model (propensity-score
 #' model) to be fitted. The treatment must appear on the left-hand side. The treatment must
 #' be a numeric vector coded as 0 or 1. If data are from a randomized controlled
@@ -25,10 +33,6 @@
 #' @param maxPS A numerical value between 0 and 1 above which estimated
 #' propensity scores should be truncated. Must be strictly greater than
 #' \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model
-#' should assume treatment-covariate interaction by \code{x}. If \code{TRUE},
-#' interactions will be assumed only if at least 10 patients received each
-#' treatment option. Default is \code{TRUE}.
 #' @param n.boot A numeric value indicating the number of bootstrap samples
 #' used. Default is \code{500}.
 #' @param seed An optional integer specifying an initial randomization seed for
@@ -74,7 +78,7 @@
 #'
 #' @examples
 #' output <- atefitcount(data = countExample,
-#'                       cate.model = y ~ age + female + previous_treatment +
+#'                       outcome_model = y ~ age + female + previous_treatment +
 #'                                    previous_cost + previous_number_relapses +
 #'                                    offset(log(years)),
 #'                       ps.model = trt ~ age + previous_treatment,
@@ -92,15 +96,32 @@
 #'
 
 atefitcount <- function(data,
-                        cate.model,
+                        outcome_model,
+                        outcome_method = "poisson",
                         ps.model,
                         ps.method = "glm",
                         minPS = 0.01,
                         maxPS = 0.99,
-                        interactions = TRUE,
                         n.boot = 500,
                         seed = NULL,
-                        verbose = 0, ps.control = list()) {
+                        verbose = 0, ps.control = list(), cate.model = NULL) {
+  call_names <- names(as.list(sys.call()))
+  named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
+  if (!missing(outcome_method) && !named_method &&
+      (inherits(outcome_method, "formula") ||
+       (is.character(outcome_method) && length(outcome_method) == 1L &&
+        !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
+    return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
+
+  if (!missing(cate.model)) {
+    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
+    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
+    outcome_model <- cate.model
+  }
+  if (missing(outcome_model)) stop("outcome_model must be supplied.")
+  cate.model <- outcome_model
+
+  outcome_method <- resolve_ate_outcome_method(outcome_method, "count")
   resolve_ps_control(ps.control)
 
 
@@ -114,7 +135,7 @@ atefitcount <- function(data,
              ps.method = ps.method,
              minPS = minPS,
              maxPS = maxPS,
-             interactions = interactions,
+             interactions = TRUE,
              n.boot = n.boot,
              plot.boot = FALSE)
 
@@ -136,7 +157,9 @@ atefitcount <- function(data,
                  ps.method = ps.method,
                  minPS = minPS,
                  maxPS = maxPS,
-                 interactions = interactions, ps.control = ps.control, diagnostic = TRUE)
+                 ps.control = ps.control, diagnostic = TRUE,
+                 ate_outcome_mode = "separate",
+                 outcome_method = outcome_method)
   logrr <- est$log.rate.ratio
 
   # Apply bootstrap
@@ -165,7 +188,9 @@ atefitcount <- function(data,
                                 ps.method = ps.method,
                                 minPS = minPS,
                                 maxPS = maxPS,
-                                interactions = interactions, ps.control = ps.control)
+                                ps.control = ps.control,
+                                ate_outcome_mode = "separate",
+                                outcome_method = outcome_method)
     }, error = function(e) { errors[i.boot] <<- conditionMessage(e); NULL })
     if (!is.null(boot.est)) {
       trt.boot[i.boot] <- boot.est$log.rate.ratio
@@ -252,6 +277,10 @@ atefitcount <- function(data,
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
 #' @param diagnostic Internal: retain full-sample treatment overlap diagnostics.
+#' @param ate_outcome_mode Internal ATE outcome-model specification; \code{NULL}
+#' preserves the subgroup estimator's existing behavior.
+#' @param outcome_method Internal ATE outcome-model method: \code{"poisson"}
+#' or \code{"negative_binomial"}.
 #' @return Return a list of 4 elements:
 #' \itemize{
 #'   \item{\code{log.rate.ratio}: } A numeric value of the estimated log rate ratio.
@@ -262,7 +291,8 @@ atefitcount <- function(data,
 
 drcount <- function(y, trt, x.cate, x.ps, time,
                     ps.method = "glm", minPS = 0.01, maxPS = 0.99,
-                    interactions = TRUE, ps.control = list(), diagnostic = FALSE) {
+                    interactions = TRUE, ps.control = list(), diagnostic = FALSE,
+                    ate_outcome_mode = NULL, outcome_method = "poisson") {
   ps.args <- resolve_ps_control(ps.control)
 
 
@@ -280,7 +310,17 @@ drcount <- function(y, trt, x.cate, x.ps, time,
       invokeRestart("muffleWarning")  # suppress warning: "glm.fit: fitted probabilities/rates numerically 0 occurred." or "glm.fit: algorithm did not converge."
   })
 
-  if (min(sum(trt), n - sum(trt)) > 10 & interactions == TRUE) {
+  if (!is.null(ate_outcome_mode) && length(unique(trt)) != 2L)
+    stop("Both treatment groups are required.")
+  if (identical(ate_outcome_mode, "separate")) {
+    design <- cbind(1, x.cate)
+    beta1 <- fit_ate_count_outcome(design[trt == 1, , drop = FALSE], y[trt == 1],
+                                   time[trt == 1], outcome_method)
+    beta0 <- fit_ate_count_outcome(design[trt == 0, , drop = FALSE], y[trt == 0],
+                                   time[trt == 0], outcome_method)
+    y1hat <- exp(drop(design %*% beta1))
+    y0hat <- exp(drop(design %*% beta0))
+  } else if (min(sum(trt), n - sum(trt)) > 10 && interactions) {
     withCallingHandlers({
       # Calculate rate by treatment arm by fitting two separate models
       fit1 <- glm(y ~ x.cate + offset(time), family = "poisson", subset = (trt == 1))
@@ -515,4 +555,24 @@ count_subgroup_log_effect <- function(selected, y, x.cate, x.ps, time, trt,
   if (!is.finite(value) && !is.null(diagnostic))
     diagnostic("warning", group, subgroup, selected, paste0(label, ": estimated rate ratio is not finite."))
   value
+}
+
+# Fit a count outcome model to a fixed design, retaining the log-exposure offset.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+fit_ate_count_outcome <- function(design, y, time, outcome_method) {
+  if (outcome_method == "poisson") {
+    fit <- stats::glm.fit(design, y, offset = time, family = stats::poisson())
+  } else {
+    predictors <- as.data.frame(design)
+    names(predictors) <- paste0("x", seq_len(ncol(design)))
+    model_data <- data.frame(.outcome = y, .exposure = time, predictors, check.names = FALSE)
+    formula <- stats::reformulate(names(predictors), response = ".outcome", intercept = FALSE)
+    formula <- stats::update.formula(formula, . ~ . + offset(.exposure))
+    fit <- MASS::glm.nb(formula, data = model_data, control = stats::glm.control(maxit = 100))
+    if (!is.null(fit$th.warn) || !is.finite(fit$theta) || fit$theta <= 0)
+      stop("Negative binomial outcome model dispersion estimation did not converge.")
+  }
+  if (!fit$converged || fit$rank < ncol(design) || any(!is.finite(fit$coefficients)))
+    stop("Count outcome model failed to converge or is rank deficient.")
+  unname(fit$coefficients)
 }

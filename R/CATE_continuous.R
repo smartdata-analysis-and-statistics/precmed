@@ -6,8 +6,9 @@
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
+#' \code{NULL} uses \code{cate.model}.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side.
 #' The treatment must be a numeric vector coded as 0/1.
@@ -67,7 +68,7 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures
 #' in boosting. Used only if \code{score.method = 'boosting'} or if
 #' \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
 #' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
 #' Default is \code{0.001}.
@@ -503,7 +504,7 @@ twoarmglmmean.dr  <- function(y, x.cate, trt, ps, f1.predictor, f0.predictor){
 #' Default is \code{6}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
@@ -530,7 +531,7 @@ intxmean <- function(y, trt, x.cate, x.init, x.ps,
                      ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                      initial.predictor.method = "boosting",
                      xvar.smooth.init, xvar.smooth.score,
-                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = TRUE, ps.control = list(), rf.control = list(), ...) {
+                     tree.depth = 2, n.trees.rf = 1000, n.trees.boosting = 200, B = 1, Kfold = 2, plot.gbmperf = FALSE, ps.control = list(), rf.control = list(), ...) {
   rf.control <- resolve_rf_control(rf.control)
   ps.args <- resolve_ps_control(ps.control)
 

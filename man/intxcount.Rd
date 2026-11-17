@@ -20,12 +20,13 @@ intxcount(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 6,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 150,
   tune = c(0.5, 2),
   contrast.control = list(),
   ps.control = list(),
+  x.init = x.cate,
   ...
 )
 }
@@ -58,14 +59,14 @@ truncated. Default is \code{0.01}.}
 \item{maxPS}{A number above which estimated propensity scores should be trimmed; scalar}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{cate.model}
+outcome predictions conditional on the covariates in \code{x.init}
 in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
 one of \code{'poisson'} (fastest), \code{'boosting'} (default) and \code{'gam'}.}
 
 \item{xvar.smooth}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{cate.model}.
-Default is \code{NULL}, which uses all variables in \code{cate.model}.}
+from the variables listed in \code{x.init}.
+Default is \code{NULL}, which uses all variables in \code{x.init}.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
@@ -86,7 +87,7 @@ Default is \code{6}.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
 error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
@@ -114,6 +115,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{x.init}{Initial outcome-model covariate matrix; defaults to \code{x.cate}.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

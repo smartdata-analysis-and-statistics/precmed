@@ -36,7 +36,7 @@ knitr::opts_chunk$set(cache.extra = list(
 
 
 
-This vignette builds on the worked examples for [count outcomes](Count-examples.html) and [survival outcomes](Survival-examples.html). It shows how to customize initial outcome models, define responder subgroups, and choose censoring models and follow-up settings for CATE estimation and validation.
+This vignette builds on the worked examples for [count CATE outcomes](Count-CATE.html) and [survival CATE outcomes](Survival-CATE.html). It shows how to customize initial outcome models, define responder subgroups, and choose censoring models and follow-up settings for CATE estimation and validation.
 
 ## Load required packages
 ```{r, echo = T, message=F}
@@ -69,7 +69,6 @@ catecvcount(data = countExample,
        initial.predictor.method = "boosting",       # NEW
        cv.n = 5, 
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 
 # An example of using GAM as the initial predictor method
@@ -83,7 +82,6 @@ catecvcount(data = countExample,
        xvar.smooth = c("age", "previous_cost"), # NEW
        cv.n = 5,
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 ```
 
@@ -117,7 +115,6 @@ fit_cv_2 <- catecv(
   initial.predictor.method = "poisson",
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 ```
@@ -165,7 +162,6 @@ fit_cv_3 <- catecv(
   prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 1
 )
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
@@ -224,7 +220,6 @@ catecv(response = "survival",
        initial.predictor.method = "boosting", # NEW
        tree.depth = 3,                        # NEW
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 
 # An example of using random forest as the initial predictor method
@@ -244,7 +239,6 @@ catecv(response = "survival",
        initial.predictor.method = "randomForest", # NEW
        n.trees.rf = 500,                          # NEW
        seed = 999,
-       plot.gbmperf = FALSE,
        verbose = 0)
 ```
 
@@ -284,7 +278,6 @@ fit_cv_2 <- catecv(
   prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 ```
@@ -335,7 +328,6 @@ fit_cv_3 <- catecv(
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 1
 )
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
@@ -376,7 +368,6 @@ fit_cv_4 <- catecv(
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 ```
@@ -407,7 +398,6 @@ fit_cv_5 <- catecv(
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
   seed = 999,
-  plot.gbmperf = FALSE,
   verbose = 0
 )
 plot(fit_cv_5)
@@ -417,9 +407,9 @@ plot(fit_cv_5)
 ## Other `precmed` vignettes in this series
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
-- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
-- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
+- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
+- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
 - [Methods for estimating average treatment effects](ATE-theory.html)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)
 

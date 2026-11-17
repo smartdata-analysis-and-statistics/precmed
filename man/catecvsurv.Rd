@@ -35,12 +35,13 @@ catecvsurv(
   max.iterNR = 150,
   tune = c(0.5, 2),
   seed = NULL,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   verbose = 0,
   rmst.control = list(),
   contrast.control = list(),
   ps.control = list(),
-  rf.control = list()
+  rf.control = list(),
+  init.model = NULL
 )
 }
 \arguments{
@@ -66,7 +67,7 @@ two-way interactions (added to the model if interactions are not specified in \c
 Relevant only when \code{ps.model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 Default is \code{'randomForest'}.}
@@ -172,7 +173,7 @@ Default is \code{NULL}, corresponding to no seed.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
@@ -200,6 +201,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
+\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
+and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
 }
 \value{
 Returns a list containing the following components saved as a \code{"precmed"} object:

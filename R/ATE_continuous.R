@@ -1,12 +1,12 @@
 #' Doubly robust estimator of and inference for the average treatment effect for
 #' continuous data
 #'
-#' Doubly robust estimator of the average treatment effect between two
-#' treatments, which is the rate ratio of treatment 1 over treatment 0 for
-#' count outcomes. Bootstrap is used for inference.
+#' Continuous-outcome average treatment effect estimation is not yet implemented.
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
+#' @param outcome_model A formula specifying the outcome model, with the
+#' continuous outcome on the left and baseline covariates on the right. Do not
+#' include treatment. Continuous-outcome fitting is not yet implemented.
+#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a
 #' numeric vector coded as 0/1. If data are from a RCT, specify \code{ps.model}
@@ -25,12 +25,6 @@
 #' @param maxPS A numerical value between 0 and 1 above which estimated
 #' propensity scores should be truncated. Must be strictly greater than
 #' \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model
-#' should be fitted separately by treatment arm with the variables in
-#' \code{cate.model}, which is equivalent to assuming treatment-covariate
-#' interaction by all of the variables in \code{cate.model}. If \code{TRUE}, the
-#' outcome model will be fitted separately by treatment arms only if at least
-#' 10 patients received each treatment option. Default is \code{TRUE}.
 #' @param n.boot A numeric value indicating the number of bootstrap samples
 #' used. Default is \code{500}.
 #' @param verbose An integer value indicating whether intermediate progress
@@ -86,20 +80,28 @@
 #' @importFrom dplyr mutate
 
 atefitmean <- function(data,
-                       cate.model,
+                       outcome_model,
                        ps.model,
                        ps.method = "glm",
                        minPS = 0.01,
                        maxPS = 0.99,
-                       interactions = TRUE,
                        n.boot = 500,
                        plot.boot = FALSE,
                        seed = NULL,
-                       verbose = 0, ps.control = list()) {
+                       verbose = 0, ps.control = list(), cate.model = NULL) {
+  if (!missing(cate.model)) {
+    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
+    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
+    outcome_model <- cate.model
+  }
+  if (missing(outcome_model)) stop("outcome_model must be supplied.")
+  cate.model <- outcome_model
+
   resolve_ps_control(ps.control)
 
 
   stop("This functionality is not implemented yet")
+  interactions <- TRUE
 
   # Set seed once for reproducibility
   set.seed(seed)

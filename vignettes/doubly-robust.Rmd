@@ -67,13 +67,13 @@ treated <- dat$trt == "drug1"
 ipw <- mean(treated * dat$y / ps) - mean((!treated) * dat$y / (1 - ps))
 ```
 
-Now fit the doubly robust AIPW estimator with `atefit()`. `cate.model` specifies the outcome and covariates; `atefit()` adds treatment and, by default, treatment–covariate interactions. `ps.model` specifies the treatment model. The 50 bootstrap replicates keep this example quick; use more for a substantive analysis and examine bootstrap diagnostics.
+Now fit the doubly robust AIPW estimator with `atefit()`. `outcome_model` specifies the outcome and covariates; by default, `atefit()` fits a separate logistic outcome model for each treatment arm. `ps.model` specifies the treatment model. The 50 bootstrap replicates keep this example quick; use more for a substantive analysis and examine bootstrap diagnostics.
 
 ```{r}
 fit <- atefit(response = "binary", data = dat,
-              cate.model = y ~ age + previous_treatment,
+              outcome_model = y ~ age + previous_treatment,
               ps.model = trt ~ age + previous_treatment,
-              n.boot = 50, seed = 999)
+              outcome_method = "logistic", n.boot = 50, seed = 999)
 c(outcome_standardization = standardized, ipw = ipw,
   doubly_robust = unname(fit$risk.difference$estimate))
 confint(fit)
@@ -93,9 +93,9 @@ For survival outcomes, `precmed` also uses a **censoring model** to supply proba
 
 ## Other `precmed` vignettes in this series
 
-- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
-- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
-- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
+- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
+- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
 - [Customizing CATE models and validation](Additional-examples.html)
 - [Methods for estimating average treatment effects](ATE-theory.html)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)

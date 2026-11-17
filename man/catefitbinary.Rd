@@ -20,7 +20,8 @@ catefitbinary(
   Kfold = 5,
   tree.depth = 2,
   n.trees.boosting = 200,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
+  init.model = NULL,
   ...
 )
 }
@@ -92,7 +93,15 @@ if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoRe
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+
+\item{init.model}{Optional formula for the initial treatment-specific outcome models
+used by \code{twoReg} and \code{contrastReg} (binary outcomes support
+\code{twoReg} only). The outcome must match \code{cate.model}. The default
+\code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
+is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
+must match it. Other score methods do not use this argument. Continuous-outcome
+fitting and validation are not currently implemented.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

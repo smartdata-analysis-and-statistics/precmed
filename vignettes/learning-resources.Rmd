@@ -32,9 +32,9 @@ These free courses can help you build the knowledge and practical skills needed 
 ## Other `precmed` vignettes in this series
 
 - [Understanding doubly robust methods](doubly-robust.html)
-- [Estimating and validating treatment effects for binary outcomes](Binary-examples.html)
-- [Estimating and validating treatment effects for count outcomes](Count-examples.html)
-- [Estimating and validating treatment effects for survival outcomes](Survival-examples.html)
+- [Binary ATE example](Binary-examples.html) and [Binary CATE example](Binary-CATE.html)
+- [Count ATE example](Count-examples.html) and [Count CATE example](Count-CATE.html)
+- [Survival ATE example](Survival-examples.html) and [Survival CATE example](Survival-CATE.html)
 - [Customizing CATE models and validation](Additional-examples.html)
 - [Methods for estimating average treatment effects](ATE-theory.html)
 - [Methods for developing and validating CATE scores](Theoretical-details.html)

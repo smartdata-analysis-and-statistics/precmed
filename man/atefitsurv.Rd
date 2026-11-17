@@ -6,7 +6,8 @@
 \usage{
 atefitsurv(
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = "coxph",
   ps.model,
   ps.method = "glm",
   ipcw.model = NULL,
@@ -20,16 +21,27 @@ atefitsurv(
   seed = NULL,
   verbose = 0,
   rmst.control = list(),
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 }
 \arguments{
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-must be used to describe the outcome.}
+\item{outcome_model}{A formula specifying the survival outcome model, fitted
+separately in each treatment arm. Use a \code{Surv} outcome on the left
+and baseline covariates on the right; do not include treatment.}
+
+\item{outcome_method}{Survival outcome-model method: \code{"coxph"} (default),
+\code{"weibull"}, or \code{"log_normal"} (alias \code{"lognormal"}). The
+parametric methods fit accelerated failure time models with separate scale
+parameters in each treatment arm. Weibull models have proportional hazards
+across covariates within an arm but can have non-proportional hazards between
+arms if their shapes differ. Log-normal models do not impose proportional
+hazards. Both assume their specified event-time distribution and require
+positive observed times and an event in each arm. The censoring model is
+specified separately by \code{ipcw.method} and \code{ipcw.model}.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
@@ -45,7 +57,7 @@ Relevant only when \code{ps.model} has more than one variable.}
 \item{ipcw.model}{A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 Default is \code{NULL}, which uses a censoring model with the same covariates
-as the outcome model \code{cate.model}, plus the treatment.}
+as the outcome model \code{outcome_model}, plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Only applies for survival
 outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
@@ -82,14 +94,16 @@ be printed. \code{1} indicates messages are printed and \code{0} otherwise. Defa
 \item{rmst.control}{Named options for Cox restricted mean survival integration.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 The C backend accumulates each patient's integral without allocating a
-patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of \code{contrast.control}.}
+patient-by-event-time matrix. Cox model fitting is unchanged. Applies to
+Cox outcome models only; parametric models use closed-form integration.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
 }
 \value{
 Return an object of class \code{atefit} including:
@@ -145,7 +159,7 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 output <- atefitsurv(data = survivalExample,
-                     cate.model = Surv(y, d) ~ age + female +
+                     outcome_model = Surv(y, d) ~ age + female +
                                   previous_cost + previous_number_relapses,
                      ps.model = trt ~ age + previous_treatment,
                      tau0 = tau0,

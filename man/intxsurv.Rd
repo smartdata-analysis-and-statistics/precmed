@@ -25,13 +25,14 @@ intxsurv(
   n.trees.boosting = 150,
   B = 3,
   Kfold = 5,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
+  x.init = x.cate,
   ...
 )
 }
@@ -74,7 +75,7 @@ truncated. Default is \code{0.01}.}
 \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{cate.model}
+outcome predictions conditional on the covariates in \code{x.init}
 in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
 one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest). Default is \code{'randomForest'}.}
 
@@ -102,7 +103,7 @@ Default is \code{5}.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
 error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
@@ -133,6 +134,8 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
+\item{x.init}{Initial outcome-model covariate matrix; defaults to \code{x.cate}.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

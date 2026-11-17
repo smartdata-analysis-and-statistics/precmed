@@ -22,12 +22,18 @@ navbar:
     menu:
     - text: Understanding doubly robust methods
       href: articles/doubly-robust.html
-    - text: Estimating and validating treatment effects for binary outcomes
+    - text: Binary average treatment effects
       href: articles/Binary-examples.html
-    - text: Estimating and validating treatment effects for count outcomes
+    - text: Binary CATE scores and validation
+      href: articles/Binary-CATE.html
+    - text: Count average treatment effects
       href: articles/Count-examples.html
-    - text: Estimating and validating treatment effects for survival outcomes
+    - text: Count CATE scores and validation
+      href: articles/Count-CATE.html
+    - text: Survival average treatment effects
       href: articles/Survival-examples.html
+    - text: Survival CATE scores and validation
+      href: articles/Survival-CATE.html
     - text: Customizing CATE models and validation
       href: articles/Additional-examples.html
     - text: Methods for estimating average treatment effects

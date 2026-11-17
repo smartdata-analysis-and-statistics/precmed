@@ -29,10 +29,15 @@
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}, except for binary outcomes, which use \code{cate.model}.
+#' @param init.model Optional formula for the initial treatment-specific outcome models
+#' used by \code{twoReg} and \code{contrastReg} (binary outcomes support
+#' \code{twoReg} only). The outcome must match \code{cate.model}. The default
+#' \code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
+#' is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
+#' must match it. Other score methods do not use this argument. Continuous-outcome
+#' fitting and validation are not currently implemented.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
 #' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
@@ -127,7 +132,7 @@
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
@@ -256,7 +261,7 @@ catecv <- function(response,
                    cate.model,
                    ps.model,
                    ps.method = "glm",
-                   init.model = NULL, # This is used in continuous data, when contrast/two regression is used
+                   init.model = NULL,
                    initial.predictor.method = NULL,
                    ipcw.model = NULL,
                    ipcw.method = "breslow",
@@ -284,7 +289,7 @@ catecv <- function(response,
                    max.iterNR = 150,
                    tune = c(0.5, 2),
                    seed = NULL,
-                   plot.gbmperf = TRUE,
+                   plot.gbmperf = FALSE,
                    verbose = 0,
                    contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
   check_response(response)
@@ -302,7 +307,7 @@ catecv <- function(response,
   .args <- as.list(match.call())[-1]
   .args$response <- NULL
   if (response == "binary") {
-    supported <- c("data", "score.method", "cate.model", "ps.model", "ps.method", "minPS", "maxPS", "higher.y", "prop.cutoff", "prop.multi", "abc", "train.prop", "cv.n", "tree.depth", "n.trees.boosting", "B", "Kfold", "seed", "plot.gbmperf", "verbose", "ps.control")
+    supported <- c("data", "score.method", "cate.model", "init.model", "ps.model", "ps.method", "minPS", "maxPS", "higher.y", "prop.cutoff", "prop.multi", "abc", "train.prop", "cv.n", "tree.depth", "n.trees.boosting", "B", "Kfold", "seed", "plot.gbmperf", "verbose", "ps.control")
     unused <- setdiff(names(.args), supported)
     if (length(unused)) stop("Unsupported binary catecv argument(s): ", paste(unused, collapse = ", "), ".")
     return(do.call(catecvbinary, .args, envir = parent.frame()))
@@ -336,6 +341,8 @@ catecv <- function(response,
 #'
 #' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
@@ -397,7 +404,7 @@ catecv <- function(response,
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
 #' searching for a balanced training-validation split. Default is \code{5,000}.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 #' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 #' Default is \code{'randomForest'}.
@@ -435,7 +442,7 @@ catecv <- function(response,
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
@@ -680,8 +687,8 @@ catecvsurv <- function(data,
                        max.iterNR = 150,
                        tune = c(0.5, 2),
                        seed = NULL,
-                       plot.gbmperf = TRUE,
-                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list()) {
+                       plot.gbmperf = FALSE,
+                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL) {
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
@@ -720,6 +727,7 @@ catecvsurv <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   x.ipcw <- out$x.ipcw
   prop.onlyhigh <- out$prop.onlyhigh
   prop.bi <- out$prop.bi
@@ -859,7 +867,7 @@ catecvsurv <- function(data,
 
     ####### Fit the interaction model --------------------------------------------------------------
     if (verbose >= 1) cat("  training..\n")
-    fit <- intxsurv(y = y.train, d = d.train, trt = trt.train, x.cate = x.cate.train, x.ps = x.ps.train, x.ipcw = x.ipcw.train,
+    fit <- intxsurv(y = y.train, d = d.train, trt = trt.train, x.cate = x.cate.train, x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train, x.ipcw = x.ipcw.train,
                     yf = yf.train, tau0 = tau0, surv.min = surv.min,
                     score.method = score.method,
                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method,
@@ -1151,6 +1159,8 @@ catecvsurv <- function(data,
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a
 #' numeric vector coded as 0 or 1. If data are from a randomized trial, specify
@@ -1204,14 +1214,14 @@ catecvsurv <- function(data,
 #' is \code{5,000}.
 #' @param initial.predictor.method A character vector for the method used to get
 #' initial outcome predictions conditional on the covariates in
-#' \code{cate.model}. Only applies when \code{score.method} includes
+#' \code{init.model} (or \code{cate.model} when omitted). Only applies when \code{score.method} includes
 #' \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
 #' \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
 #' \code{'boosting'}.
 #' @param xvar.smooth A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
-#' Default is \code{NULL}, which uses all variables in \code{cate.model}.
+#' from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
+#' Default is \code{NULL}, which uses all initial outcome-model covariates.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
@@ -1239,7 +1249,7 @@ catecvsurv <- function(data,
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
@@ -1428,10 +1438,10 @@ catecvcount <- function(data,
                         max.iterNR = 150,
                         tune = c(0.5, 2),
                         seed = NULL,
-                        plot.gbmperf = TRUE,
+                        plot.gbmperf = FALSE,
                         verbose = 0,
                         contrast.control = list(),
-                        ps.control = list(), ...) {
+                        ps.control = list(), init.model = NULL, ...) {
   resolve_ps_control(ps.control)
 
 
@@ -1464,6 +1474,7 @@ catecvcount <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   time <- out$time
   prop.onlyhigh <- out$prop.onlyhigh
   prop.bi <- out$prop.bi
@@ -1560,7 +1571,7 @@ catecvcount <- function(data,
     ####### Fit the interaction model --------------------------------------------------------------
     if (verbose >= 1) cat("  training..\n")
     fit <- intxcount(y = y.train, trt = trt.train,
-                     x.cate = x.cate.train, x.ps = x.ps.train,
+                     x.cate = x.cate.train, x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train,
                      time = time.train,
                      score.method = score.method,
                      initial.predictor.method = initial.predictor.method,
@@ -1784,8 +1795,9 @@ catecvcount <- function(data,
 #'
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
-#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
+#' \code{NULL} uses \code{cate.model}.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
@@ -1865,7 +1877,7 @@ catecvcount <- function(data,
 #' Default is \code{6}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
 #' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
 #' Default is \code{0.001}.
@@ -2027,7 +2039,7 @@ catecvmean <- function(data,
                        n.trees.boosting = 200,
                        B = 3,
                        Kfold = 6,
-                       plot.gbmperf = TRUE,
+                       plot.gbmperf = FALSE,
                        error.maxNR = 1e-3,
                        tune = c(0.5, 2),
                        seed = NULL,
@@ -3225,7 +3237,8 @@ balance.split <- function(y, trt, x.cate, x.ps, time,
     warning(paste("Maximum iteration reached and the SMD between training and validation set is still greater than error.max (error=", round(errorbest, 4), "). Consider increasing max.iter, decreasing error.max, or increasing sample size.", sep = ""))
   }
 
-  return(list(y.train = y.train, trt.train = trt.train, x.cate.train = x.cate.train, x.ps.train = x.ps.train, time.train = time.train,
+  return(list(bestid.valid = if (iter == max.iter + 1) bestid.valid else id.valid,
+              y.train = y.train, trt.train = trt.train, x.cate.train = x.cate.train, x.ps.train = x.ps.train, time.train = time.train,
               y.valid = y.valid, trt.valid = trt.valid, x.cate.valid = x.cate.valid, x.ps.valid = x.ps.valid, time.valid = time.valid))
 }
 

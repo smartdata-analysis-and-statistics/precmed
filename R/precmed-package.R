@@ -66,7 +66,7 @@
 #' # A small illustrative example; use more bootstrap replicates in practice.
 #' dat <- simulate_binary(n = 400, seed = 2026)
 #' fit <- atefit(response = "binary", data = dat,
-#'               cate.model = y ~ age + previous_treatment,
+#'               outcome_model = y ~ age + previous_treatment,
 #'               ps.model = trt ~ age + previous_treatment,
 #'               n.boot = 20, seed = 2026)
 #' coef(fit)

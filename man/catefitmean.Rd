@@ -54,8 +54,9 @@ Allowed values include one of: \code{'glm'} for logistic regression with main ef
 (default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
 on two-way interactions (added to the model if not specified in \code{ps.model}).}
 
-\item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
+\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
+and \code{contrastReg}. The outcome must match \code{cate.model}; the default
+\code{NULL} uses \code{cate.model}.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial outcome
 predictions conditional on the covariates in \code{init.model} in
@@ -112,7 +113,7 @@ Default is \code{6}.}
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures
 in boosting. Used only if \code{score.method = 'boosting'} or if
 \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+\code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
 error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.

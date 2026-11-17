@@ -36,7 +36,7 @@
 #' Default is \code{6}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
@@ -216,7 +216,7 @@ arg.checks.common <- function(fun,
 #' Default is \code{6}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
 #' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
 #' Default is \code{0.001}.
@@ -566,4 +566,50 @@ generate_kfold_indices <- function(N, Kfold, reverse = FALSE) {
   }
 
   return(base_index)
+}
+
+# Build the initial outcome-model design while keeping the response and exposure
+# defined by cate.model. The score model continues to use its own design.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+initial_outcome_design <- function(data, cate.model, init.model = NULL, intercept = FALSE) {
+  if (is.null(init.model)) init.model <- cate.model
+  cm <- model.frame(cate.model, data, na.action = stats::na.pass)
+  im <- model.frame(init.model, data, na.action = stats::na.pass)
+  cy <- model.response(cm)
+  iy <- model.response(im)
+  if (is.null(iy) || !isTRUE(all.equal(cy, iy, check.attributes = FALSE)))
+    stop("init.model and cate.model must specify the same outcome.")
+  io <- model.offset(im)
+  co <- model.offset(cm)
+  if (!is.null(io) && !isTRUE(all.equal(io, co, check.attributes = FALSE)))
+    stop("An offset in init.model must match the offset in cate.model.")
+  x <- model.matrix(init.model, im)
+  if (anyNA(x) || any(!is.finite(x))) stop("Missing or non-finite covariates are not allowed in init.model.")
+  if (!"(Intercept)" %in% colnames(x)) stop("init.model must include an intercept.")
+  if (!intercept) x <- x[, colnames(x) != "(Intercept)", drop = FALSE]
+  x
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+resolve_ate_outcome_method <- function(outcome_method, response) {
+  allowed <- switch(response, binary = "logistic", count = c("poisson", "negative_binomial", "negbin"),
+                    survival = c("coxph", "weibull", "log_normal", "lognormal"))
+  if (is.null(outcome_method)) return(allowed[1L])
+  if (!is.character(outcome_method) || length(outcome_method) != 1L || is.na(outcome_method) ||
+      !outcome_method %in% allowed)
+    stop("outcome_method for ", response, " outcomes must be ",
+         paste(sprintf('"%s"', allowed), collapse = ", "), ".", call. = FALSE)
+  if (outcome_method == "negbin") "negative_binomial" else if (outcome_method == "lognormal") "log_normal" else outcome_method
+}
+
+# Reconstruct calls made with the earlier positional ATE argument order.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+legacy_ate_positional_call <- function(call, fun, caller) {
+  old_formals <- as.list(formals(fun))
+  method_default <- old_formals$outcome_method
+  old_formals$outcome_method <- NULL
+  old_formals <- c(old_formals, list(outcome_method = method_default))
+  old_signature <- eval(call("function", as.pairlist(old_formals), quote(NULL)))
+  matched <- match.call(definition = old_signature, call = call)
+  do.call(fun, as.list(matched)[-1L], envir = caller)
 }

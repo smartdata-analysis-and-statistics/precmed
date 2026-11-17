@@ -22,7 +22,8 @@ drsurv(
   ps.control = list(),
   cumulative.hr = FALSE,
   conditional.hr = TRUE,
-  diagnostic = FALSE
+  diagnostic = FALSE,
+  outcome_method = "coxph"
 )
 }
 \arguments{
@@ -62,8 +63,8 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 \item{rmst.control}{Named options for Cox restricted mean survival integration.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 The C backend accumulates each patient's integral without allocating a
-patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-for survival outcomes; independent of \code{contrast.control}.}
+patient-by-event-time matrix. Cox model fitting is unchanged. Applies to
+Cox outcome models only; parametric models use closed-form integration.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
@@ -76,6 +77,8 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \item{conditional.hr}{Whether to fit the supplementary conditional Cox hazard ratio.}
 
 \item{diagnostic}{Internal: retain full-sample treatment overlap diagnostics.}
+
+\item{outcome_method}{Outcome-model method: \code{"coxph"}, \code{"weibull"}, or \code{"log_normal"}.}
 }
 \value{
 Return a list of estimates:

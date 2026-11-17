@@ -7,16 +7,17 @@ for count data}
 \usage{
 atefitcount(
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = "poisson",
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 }
 \arguments{
@@ -24,8 +25,16 @@ atefitcount(
 and censoring models (if specified); a data
 frame with \code{n} rows (1 row per observation).}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_model}{A formula specifying the count outcome model, fitted
+separately in each treatment arm by default. Put the count outcome on the
+left and baseline covariates on the right; do not include treatment. Include
+an exposure offset where applicable. See \code{outcome_method} for the
+model family.}
+
+\item{outcome_method}{Outcome-model method: \code{"poisson"} (default) or
+\code{"negative_binomial"} (also accepted as \code{"negbin"}). Negative
+binomial models estimate dispersion separately by treatment arm. The method is refitted
+in each bootstrap sample. Failed fits are recorded in bootstrap diagnostics.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score
 model) to be fitted. The treatment must appear on the left-hand side. The treatment must
@@ -46,11 +55,6 @@ propensity scores should be truncated. Default is \code{0.01}.}
 propensity scores should be truncated. Must be strictly greater than
 \code{minPS}. Default is \code{0.99}.}
 
-\item{interactions}{A logical value indicating whether the outcome model
-should assume treatment-covariate interaction by \code{x}. If \code{TRUE},
-interactions will be assumed only if at least 10 patients received each
-treatment option. Default is \code{TRUE}.}
-
 \item{n.boot}{A numeric value indicating the number of bootstrap samples
 used. Default is \code{500}.}
 
@@ -66,6 +70,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
 }
 \value{
 Return an item of the class \code{atefit} with the following
@@ -111,7 +117,7 @@ is unavailable rather than based on a subset of replicates. See also
 }
 \examples{
 output <- atefitcount(data = countExample,
-                      cate.model = y ~ age + female + previous_treatment +
+                      outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
                       ps.model = trt ~ age + previous_treatment,

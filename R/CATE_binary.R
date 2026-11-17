@@ -58,13 +58,13 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
 catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
-                          tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = TRUE, ...) {
+                          tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, init.model = NULL, ...) {
   check_score_method("binary", score.method)
   if (!ps.method %in% c("glm", "lasso") || minPS < 0 || maxPS > 1 || minPS >= maxPS) stop("Invalid propensity score settings.")
   resolve_ps_control(ps.control)
   if (!is.logical(higher.y) || length(higher.y) != 1L || is.na(higher.y)) stop("higher.y must be TRUE or FALSE.")
   if (!is.numeric(prop.cutoff) || !length(prop.cutoff) || anyNA(prop.cutoff) || any(prop.cutoff <= 0 | prop.cutoff > 1)) stop("prop.cutoff must contain values in (0, 1].")
-  d <- binary_data(data, cate.model, ps.model)
+  d <- binary_data(data, cate.model, ps.model, if ("twoReg" %in% score.method) init.model else NULL)
   if (!is.null(seed)) set.seed(seed)
   prop <- sort(prop.cutoff); out <- list(response = "binary", score.method = score.method, fit = list(), coefficients = NULL, treatment.labels = d$labels)
   for (method in score.method) {

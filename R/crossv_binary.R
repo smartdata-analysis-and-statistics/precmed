@@ -41,7 +41,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
                          prop.multi = c(0, 1/3, 2/3, 1), abc = TRUE,
                          train.prop = 3/4, cv.n = 10, tree.depth = 2,
                          n.trees.boosting = 200, B = 3, Kfold = 5,
-                         seed = NULL, plot.gbmperf = TRUE, verbose = 0, ps.control = list()) {
+                         seed = NULL, plot.gbmperf = FALSE, verbose = 0, ps.control = list(), init.model = NULL) {
   check_score_method("binary", score.method)
   if (anyDuplicated(score.method)) stop("score.method must not contain duplicates.")
   if (length(ps.method) != 1L || is.na(ps.method) || !ps.method %in% c("glm", "lasso") ||
@@ -62,7 +62,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
   if (!is.numeric(verbose) || length(verbose) != 1L || is.na(verbose) || !verbose %in% 0:2) stop("verbose must be 0, 1 or 2.")
   prop <- sort(prop.cutoff); bi <- prop[prop < 1]
   if (abc && length(prop) < 2L) stop("ABC requires at least two distinct prop.cutoff values.")
-  d <- binary_data(data, cate.model, ps.model)
+  d <- binary_data(data, cate.model, ps.model, if ("twoReg" %in% score.method) init.model else NULL)
   narm <- tabulate(d$trt + 1L, 2L)
   ntrain <- floor(narm * train.prop)
   if (any(ntrain < 1 | ntrain >= narm)) stop("Each treatment group must have observations in both training and validation sets.")
@@ -118,7 +118,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
     }
     result$splits[[i]] <- list(train = which(train), valid = which(!train))
     parts <- list(train = binary_subset(d, train), valid = binary_subset(d, !train))
-    designs <- tryCatch(list(x = binary_cv_design(data, train, cate.model), z = binary_cv_design(data, train, ps.model)), error = function(e) {
+    designs <- tryCatch(list(x = binary_cv_design(data, train, cate.model), z = binary_cv_design(data, train, ps.model), init = binary_cv_design(data, train, if ("twoReg" %in% score.method && !is.null(init.model)) init.model else cate.model)), error = function(e) {
       msg <- paste0("Binary validation iteration ", i, ": design construction failed: ", conditionMessage(e))
       record(NA_character_, "train", i, "design", NA_character_, "error", msg)
       warning(msg, call. = FALSE)
@@ -127,6 +127,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
     if (is.null(designs)) next
     for (s in c("train", "valid")) {
       parts[[s]]$x <- designs$x[[s]]
+      parts[[s]]$x.init <- designs$init[[s]]
       parts[[s]]$z <- designs$z[[s]]
     }
     for (s in c("train", "valid")) result[[paste0("overall.ate.", s)]][i] <- effect(parts[[s]], rep(TRUE, length(parts[[s]]$y)), NA_character_, s, i, "overall", "1")

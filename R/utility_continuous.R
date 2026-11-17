@@ -199,6 +199,7 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
   cate.model <- as.formula(cate.model)
   ps.model <- as.formula(ps.model)
   if (any(score.method %in% c("contrastReg", "twoReg"))) {
+    if (is.null(init.model)) init.model <- cate.model
     init.model <- as.formula(init.model)
   }
 
@@ -214,8 +215,7 @@ data.preproc.mean <- function(fun, cate.model, init.model, ps.model,
   if (is.null(y) == TRUE) stop("Outcome must be supplied on the left-hand side of the cate.model formula.")
 
   if (any(score.method %in% c("contrastReg", "twoReg"))) {
-    y <- model.response(init.mat)
-    if (is.null(y) == TRUE) stop("Outcome must be supplied on the left-hand side of the init.model formula.")
+    initial_outcome_design(data, cate.model, init.model)
   }
 
 

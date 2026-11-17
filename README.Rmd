@@ -85,11 +85,11 @@ For questions, bug reports, or feature requests, use [GitHub issues](https://git
 
 The package compares two treatments using outcome-specific effect measures:
 
-| Outcome | Effect measure | Example |
-|---|---|---|
-| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [Binary outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) |
-| Count | Ratio of event rates (treatment 1 over treatment 0) | [Count outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) |
-| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [Survival outcomes](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) |
+| Outcome | Effect measure | ATE example | CATE example |
+|---|---|---|---|
+| Binary | Risk difference in outcome probabilities (treatment 1 minus treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html) |
+| Count | Ratio of event rates (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html) |
+| Survival | At a specified follow-up horizon: population-average risk difference (treatment 1 minus treatment 0), ratio of restricted mean time lost, and population-level cumulative hazard ratio (treatment 1 over treatment 0) | [ATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html) | [CATE](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html) |
 
 Count rate ratios and survival RMTL and cumulative hazard ratios from `atefit()` are returned on the log scale; exponentiate them to obtain ratios. Survival risk differences are returned on the difference scale. Count and survival CATE scores are log rate ratios and log RMTL ratios, respectively. The ATE summarizes the population, while CATE scores describe effects conditional on observed characteristics. Survival subgroup assessment also reports risk differences at the follow-up horizon.
 
@@ -126,9 +126,12 @@ In the vignettes, we will adopt a different workflow to gradually expose the use
 ## Vignettes
 
 - [Understanding doubly robust methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/doubly-robust.html)
-- [Binary outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
-- [Count outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
-- [Survival outcome example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)
+- [Binary ATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-examples.html)
+- [Binary CATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Binary-CATE.html)
+- [Count ATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-examples.html)
+- [Count CATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Count-CATE.html)
+- [Survival ATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-examples.html)
+- [Survival CATE example](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Survival-CATE.html)
 - [Customizing CATE models and validation](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Additional-examples.html)
 - [ATE methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/ATE-theory.html)
 - [CATE development and validation methods](https://smartdata-analysis-and-statistics.github.io/precmed/articles/Theoretical-details.html)

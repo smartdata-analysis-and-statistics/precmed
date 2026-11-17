@@ -10,7 +10,7 @@ test_that("count simulator creates reproducible analysis-ready data", {
   expect_equal(attr(d$previous_cost, "scaled:scale"), 20172)
   expect_true(all(simulate_count(n = 100, followup_range = c(2, 2))$years == 2))
   expect_true(all(is.finite(simulate_count(n = 100, dispersion = 2)$y)))
-  fit <- atefitcount(data = d, cate.model = y ~ age + offset(log(years)),
+  fit <- atefitcount(data = d, outcome_model = y ~ age + offset(log(years)),
                      ps.model = trt ~ age, n.boot = 5, seed = 1)
   expect_true(is.finite(fit$log.rate.ratio$estimate))
 })

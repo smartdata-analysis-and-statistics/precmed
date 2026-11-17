@@ -6,6 +6,8 @@
 #'
 #' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
@@ -49,7 +51,7 @@
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' outcome predictions conditional on \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 #' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 #' Default is \code{'randomForest'}.
@@ -90,7 +92,7 @@
 #' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns an object of the class \code{catefit} containing the following components:
@@ -255,13 +257,13 @@ catefitsurv <- function(data,
                         n.trees.boosting = 200,
                         B = 3,
                         Kfold = 5,
-                        plot.gbmperf = TRUE,
+                        plot.gbmperf = FALSE,
                         error.maxNR = 1e-3,
                         max.iterNR = 100,
                         tune = c(0.5, 2),
                         seed = NULL,
                         verbose = 0,
-                        rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), ...) {
+                        rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL, ...) {
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
@@ -302,6 +304,7 @@ catefitsurv <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   x.ipcw <- out$x.ipcw
   prop <- out$prop
   prop.no1 <- out$prop.no1
@@ -329,7 +332,7 @@ catefitsurv <- function(data,
                                         })
 
   # Fit the interaction model
-  fit <- intxsurv(y = y, d = d, trt = trt, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, yf = yf, tau0 = tau0, surv.min = surv.min,
+  fit <- intxsurv(y = y, d = d, trt = trt, x.cate = x.cate, x.init = x.init, x.ps = x.ps, x.ipcw = x.ipcw, yf = yf, tau0 = tau0, surv.min = surv.min,
                   score.method = score.method,
                   ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method,
                   initial.predictor.method = initial.predictor.method,
@@ -630,6 +633,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' @param d The event indicator, normally \code{1 = event, 0 = censored}; vector of size \code{n}.
 #' @param trt Treatment received; vector of size \code{n} with treatment coded as 0/1.
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
+#' @param x.init Initial outcome-model covariate matrix; defaults to \code{x.cate}.
 #' @param x.ps Matrix of \code{p.ps} baseline covariates specified in the treatment model; dimension \code{n} by \code{p.ps}.
 #' @param x.ipcw Matrix of \code{p.ipw} baseline covariate specified in inverse probability of censoring weighting; dimension \code{n} by \code{p.ipw}.
 #' @param yf Follow-up time, interpreted as the potential censoring time; vector of size \code{n} if the potential censoring time is known.
@@ -650,7 +654,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' @param ipcw.method The censoring model. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
 #' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'} or \code{'aft (loglogistic)'}. Default is \code{'breslow'}.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{cate.model}
+#' outcome predictions conditional on the covariates in \code{x.init}
 #' in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
 #' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest). Default is \code{'randomForest'}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
@@ -675,7 +679,7 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' Default is \code{5}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
 #' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
 #' Default is \code{0.001}.
@@ -716,9 +720,9 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
                      ipcw.method = "breslow",
                      initial.predictor.method = "randomForest",
                      tree.depth = 3, n.trees.rf = 1000, n.trees.boosting = 150,
-                     B = 3, Kfold = 5, plot.gbmperf = TRUE,
+                     B = 3, Kfold = 5, plot.gbmperf = FALSE,
                      error.maxNR = 1e-3, max.iterNR = 100,
-                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), rf.control = list(), ...) {
+                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), rf.control = list(), x.init = x.cate, ...) {
   rf.control <- resolve_rf_control(rf.control)
   ps.args <- resolve_ps_control(ps.control)
 
@@ -750,6 +754,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
   # The restricted-time observation indicator is not a survival event status.
   datatotrf <- data.frame("y" = ynew, "d" = survival_event_at_horizon(y, d, tau0), x.cate)
   datatot <- data.frame("y" = ynew / tau0, x.cate)
+  datatot.init <- data.frame("y" = ynew / tau0, x.init)
+  datatotrf.init <- data.frame("y" = ynew, "d" = survival_event_at_horizon(y, d, tau0), x.init)
 
   # Generate indices for N1 (normal order) and N0 (reverse order)
   index1 <- generate_kfold_indices(N1, Kfold, reverse = FALSE)
@@ -773,11 +779,11 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
       for (k in seq(Kfold)) {
         if (initial.predictor.method == "randomForest") {
 
-          datatot_train <- datatotrf[index != k, ]
+          datatot_train <- datatotrf.init[index != k, , drop = FALSE]
           x_ps_train <- x.ps[index != k, , drop = FALSE]
           trt_train <- trt[index != k]
 
-          datatot_valid <- datatotrf[index == k, ]
+          datatot_valid <- datatotrf.init[index == k, , drop = FALSE]
           x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1rf <- datatot_train[trt_train == 1,]
@@ -794,12 +800,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
 
         } else if (initial.predictor.method == "boosting") {
 
-          datatot_train <- datatot[index != k, ]
+          datatot_train <- datatot.init[index != k, , drop = FALSE]
           x_ps_train <- x.ps[index != k, , drop = FALSE]
           trt_train <- trt[index != k]
           weightnew_train <- weightc[index != k]
 
-          datatot_valid <- datatot[index == k, ]
+          datatot_valid <- datatot.init[index == k, , drop = FALSE]
           x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1 <- datatot_train[trt_train == 1, ]
@@ -847,12 +853,12 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
 
         } else if (initial.predictor.method == "logistic") {
 
-          datatot_train <- datatot[index != k, ]
+          datatot_train <- datatot.init[index != k, , drop = FALSE]
           x_ps_train <- x.ps[index != k, , drop = FALSE]
           trt_train <- trt[index != k]
           weightnew_train <- weightc[index != k]
 
-          datatot_valid <- datatot[index == k, ]
+          datatot_valid <- datatot.init[index == k, , drop = FALSE]
           x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
           data1 <- datatot_train[trt_train == 1, ]

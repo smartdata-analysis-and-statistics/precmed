@@ -5,9 +5,13 @@
 #' provides a standard error, confidence interval, and p-value.
 #'
 #' @param data A data frame containing the outcome, treatment, and covariates.
-#' @param cate.model A formula with the binary outcome on the left and outcome
-#'   model covariates on the right. The outcome must be numeric or logical and
-#'   coded 0/1; missing values and offsets are not supported.
+#' @param outcome_model A formula specifying the logistic outcome model, fitted
+#'   separately in each treatment arm by default. Put the binary outcome on the
+#'   left and baseline covariates on the right; do not include treatment. The
+#'   outcome must be numeric or logical and coded 0/1. Missing values and offsets
+#'   are not supported.
+#' @param outcome_method Outcome-model method; only \code{"logistic"} (default) is supported.
+#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
 #' @param ps.model A formula with treatment on the left and treatment-model
 #'   covariates on the right. The model estimates the propensity score. Both treatment groups must be present. Numeric
 #'   0/1 or logical FALSE/TRUE map to treatment 0/1; other two-valued labels are
@@ -17,9 +21,6 @@
 #'   \code{"lasso"}, using the package's propensity-score LASSO procedure.
 #' @param minPS,maxPS Lower and upper truncation limits for propensity scores.
 #'   Defaults are 0.01 and 0.99; \code{minPS} must be smaller than \code{maxPS}.
-#' @param interactions If \code{TRUE} (default), include interactions between
-#'   treatment and all outcome-model covariates. If \code{FALSE}, fit a pooled
-#'   logistic outcome model with a treatment main effect and no interactions.
 #' @param n.boot Number of bootstrap samples, an integer of at least 2.
 #'   Default is 500.
 #' @param seed An optional integer seed; \code{NULL} uses the current random
@@ -43,7 +44,7 @@
 #'   number, affected measure and reason for each failed or non-finite estimate.
 #' }
 #'
-#' @details The estimator combines predicted risks from a logistic outcome model
+#' @details The estimator combines predicted risks from logistic outcome models
 #' with inverse-propensity-weighted residual corrections. Under appropriate
 #' identification and regularity assumptions, it is consistent if either the
 #' outcome model or treatment model is correctly specified. A causal
@@ -69,27 +70,46 @@
 #'   \code{\link{diagnostics}}
 #' @examples
 #' d <- simulate_binary(n = 500, seed = 42)
-#' fit <- atefitbinary(d, cate.model = y ~ age + female,
-#'                     ps.model = trt ~ age, n.boot = 10, seed = 42)
+#' fit <- atefitbinary(d, outcome_model = y ~ age + female,
+#'                     ps.model = trt ~ age, outcome_method = "logistic",
+#'                     n.boot = 10, seed = 42)
 #' coef(fit)
 #' confint(fit)
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-atefitbinary <- function(data, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, interactions = TRUE, n.boot = 500, seed = NULL, verbose = 0, ps.control = list()) {
+atefitbinary <- function(data, outcome_model, outcome_method = "logistic", ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, n.boot = 500, seed = NULL, verbose = 0, ps.control = list(), cate.model = NULL) {
+  call_names <- names(as.list(sys.call()))
+  named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
+  if (!missing(outcome_method) && !named_method &&
+      (inherits(outcome_method, "formula") ||
+       (is.character(outcome_method) && length(outcome_method) == 1L &&
+        !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
+    return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
+
+  if (!missing(cate.model)) {
+    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
+    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
+    outcome_model <- cate.model
+  }
+  if (missing(outcome_model)) stop("outcome_model must be supplied.")
+  cate.model <- outcome_model
+
+  resolve_ate_outcome_method(outcome_method, "binary")
   resolve_ps_control(ps.control)
   if (!ps.method %in% c("glm", "lasso") || minPS < 0 || maxPS > 1 || minPS >= maxPS) stop("Invalid propensity score settings.")
   if (length(n.boot) != 1L || is.na(n.boot) || n.boot < 2 || n.boot != floor(n.boot)) stop("n.boot must be an integer of at least 2.")
-  if (!is.logical(interactions) || length(interactions) != 1L || is.na(interactions)) stop("interactions must be TRUE or FALSE.")
   d <- binary_data(data, cate.model, ps.model)
-  est <- binary_effect(d, ps.method, minPS, maxPS, ps.control, interactions, diagnostic = TRUE)
+  est <- binary_effect(d, ps.method, minPS, maxPS, ps.control, interactions = TRUE, diagnostic = TRUE,
+                       separate = TRUE)
   if (!is.null(seed)) set.seed(seed)
   boot <- matrix(NA_real_, nrow = n.boot, ncol = 3L,
                  dimnames = list(NULL, c("risk0", "risk1", "risk.difference")))
   errors <- rep(NA_character_, n.boot)
   for (i in seq_len(n.boot)) {
     sampled <- binary_subset(d, sample.int(length(d$y), replace = TRUE))
-    value <- tryCatch(binary_effect(sampled, ps.method, minPS, maxPS, ps.control, interactions),
+    value <- tryCatch(binary_effect(sampled, ps.method, minPS, maxPS, ps.control, interactions = TRUE,
+                                        separate = TRUE),
                       error = function(e) { errors[i] <<- conditionMessage(e); NULL })
     if (!is.null(value)) boot[i, ] <- value[colnames(boot)]
   }

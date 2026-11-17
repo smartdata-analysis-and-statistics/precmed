@@ -7,11 +7,21 @@
 #' yet implemented.
 #'
 #' @param response A string describing the type of outcome in the data. Allowed values include
-#' "binary", "count" (see \code{\link{catecvcount}()}), "survival" (see
-#' \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes,
-#' a \code{Surv} object must be used to describe the outcome.
+#' "binary" (see \code{\link{atefitbinary}}), "count" (see
+#' \code{\link{atefitcount}}), and "survival" (see
+#' \code{\link{atefitsurv}}). Continuous outcomes are not yet implemented.
+#' @param outcome_model A formula specifying the outcome and baseline
+#' covariates for the outcome model. Supply treatment in \code{ps.model},
+#' rather than in this formula. See \code{\link{atefitbinary}},
+#' \code{\link{atefitcount}}, or \code{\link{atefitsurv}} for the
+#' outcome-specific model and formula requirements.
+#' @param outcome_method Outcome-model method. The default \code{NULL} selects
+#' \code{"logistic"} for binary outcomes, \code{"poisson"} for count outcomes,
+#' and \code{"coxph"} for survival outcomes. Count outcomes also support
+#' \code{"negative_binomial"} (alias \code{"negbin"}); survival outcomes
+#' also support \code{"weibull"} and \code{"log_normal"} (alias
+#' \code{"lognormal"}). Other methods are not currently available. See the outcome-specific help pages for details.
+#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. For binary outcomes, logical treatment values
 #' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
@@ -22,7 +32,7 @@
 #' @param ipcw.model A formula describing the censoring model used for inverse
 #' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which uses a censoring model with the same covariates
-#' as the outcome model \code{cate.model}, plus the treatment.
+#' as the outcome model \code{outcome_model}, plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to unknown potential censoring time.
@@ -47,10 +57,6 @@
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param interactions A logical value indicating whether the outcome model should assume interactions
-#' between \code{x} and \code{trt}. For binary outcomes this controls all
-#' treatment-covariate interactions in the logistic outcome model. For count outcomes, if \code{TRUE}, interactions will
-#' be assumed only if at least 10 patients received each treatment option. Default is \code{TRUE}.
 #' @param n.boot A numeric value indicating the number of bootstrap samples used. Default is \code{500}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
@@ -58,7 +64,7 @@
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #'
 #' Binary outcomes use \code{response = "binary"} and estimate a doubly robust
-#' risk difference (treatment 1 minus treatment 0) with a logistic outcome model.
+#' risk difference (treatment 1 minus treatment 0) with logistic outcome models.
 #' The result includes \code{risk.difference}, \code{risk0}, \code{risk1}, and
 #' bootstrap estimates. If any bootstrap fit fails, inference is unavailable.
 #' @return For binary response, see \code{\link{atefitbinary}()}.
@@ -86,7 +92,7 @@
 #' # Count outcome
 #' output <- atefit(response = "count",
 #'                  data = countExample,
-#'                  cate.model = y ~ age + female + previous_treatment +
+#'                  outcome_model = y ~ age + female + previous_treatment +
 #'                               previous_cost + previous_number_relapses +
 #'                               offset(log(years)),
 #'                  ps.model = trt ~ age + previous_treatment,
@@ -103,7 +109,7 @@
 #'
 #' output2 <- atefit(response = "survival",
 #'                   data = survivalExample,
-#'                   cate.model = survival::Surv(y, d) ~ age + female +
+#'                   outcome_model = survival::Surv(y, d) ~ age + female +
 #'                         previous_cost + previous_number_relapses,
 #'                         ps.model = trt ~ age + previous_treatment,
 #'                   tau0 = tau0,
@@ -121,8 +127,9 @@
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of \code{contrast.control}.
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Applies only
+#' to Cox survival outcome models; parametric outcome models use closed-form
+#' integration. Independent of \code{contrast.control}.
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
@@ -132,7 +139,8 @@
 
 atefit <- function(response,
                    data,
-                   cate.model,
+                   outcome_model,
+                   outcome_method = NULL,
                    ps.model,
                    ps.method = "glm",
                    ipcw.model = NULL,
@@ -142,10 +150,17 @@ atefit <- function(response,
                    followup.time = NULL,
                    tau0 = NULL,
                    surv.min = 0.025,
-                   interactions = TRUE,
                    n.boot = 500,
                    seed = NULL,
-                   verbose = 0, rmst.control = list(), ps.control = list()) {
+                   verbose = 0, rmst.control = list(), ps.control = list(), cate.model = NULL) {
+  call_names <- names(as.list(sys.call()))
+  named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
+  if (!missing(outcome_method) && !named_method &&
+      (inherits(outcome_method, "formula") ||
+       (is.character(outcome_method) && length(outcome_method) == 1L &&
+        !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
+    return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
+
   check_response(response)
   resolve_ps_control(ps.control)
 
@@ -160,13 +175,13 @@ atefit <- function(response,
            atefitout <- do.call(atefitbinary, .args, envir = parent.frame())
          },
          count = {
-           atefitout <- do.call(atefitcount, .args)
+           atefitout <- do.call(atefitcount, .args, envir = parent.frame())
          },
          survival = {
-           atefitout <- do.call(atefitsurv, .args)
+           atefitout <- do.call(atefitsurv, .args, envir = parent.frame())
          },
          continuous = {
-           atefitout <- do.call(atefitmean, .args)
+           atefitout <- do.call(atefitmean, .args, envir = parent.frame())
          }
   )
   return(atefitout)

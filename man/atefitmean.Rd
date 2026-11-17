@@ -7,17 +7,17 @@ continuous data}
 \usage{
 atefitmean(
   data,
-  cate.model,
+  outcome_model,
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE,
   n.boot = 500,
   plot.boot = FALSE,
   seed = NULL,
   verbose = 0,
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 }
 \arguments{
@@ -25,8 +25,9 @@ atefitmean(
 treatment models; a data frame with \code{n} rows (1 row per
 observation).}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_model}{A formula specifying the outcome model, with the
+continuous outcome on the left and baseline covariates on the right. Do not
+include treatment. Continuous-outcome fitting is not yet implemented.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a
@@ -46,13 +47,6 @@ propensity scores should be truncated. Default is \code{0.01}.}
 \item{maxPS}{A numerical value between 0 and 1 above which estimated
 propensity scores should be truncated. Must be strictly greater than
 \code{minPS}. Default is \code{0.99}.}
-
-\item{interactions}{A logical value indicating whether the outcome model
-should be fitted separately by treatment arm with the variables in
-\code{cate.model}, which is equivalent to assuming treatment-covariate
-interaction by all of the variables in \code{cate.model}. If \code{TRUE}, the
-outcome model will be fitted separately by treatment arms only if at least
-10 patients received each treatment option. Default is \code{TRUE}.}
 
 \item{n.boot}{A numeric value indicating the number of bootstrap samples
 used. Default is \code{500}.}
@@ -74,6 +68,8 @@ Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
+
+\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
 }
 \value{
 Return a list of 8 elements:
@@ -97,9 +93,7 @@ Return a list of 8 elements:
 }
 }
 \description{
-Doubly robust estimator of the average treatment effect between two
-treatments, which is the rate ratio of treatment 1 over treatment 0 for
-count outcomes. Bootstrap is used for inference.
+Continuous-outcome average treatment effect estimation is not yet implemented.
 }
 \details{
 This helper function estimates the average treatment effect (ATE) between two

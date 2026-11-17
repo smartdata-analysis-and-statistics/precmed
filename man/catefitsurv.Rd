@@ -25,7 +25,7 @@ catefitsurv(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 5,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   max.iterNR = 100,
   tune = c(0.5, 2),
@@ -35,6 +35,7 @@ catefitsurv(
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
+  init.model = NULL,
   ...
 )
 }
@@ -61,7 +62,7 @@ two-way interactions (added to the model if interactions are not specified in \c
 Relevant only when \code{ps.model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+outcome predictions conditional on \code{init.model} (or \code{cate.model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 Default is \code{'randomForest'}.}
@@ -127,7 +128,7 @@ Default is \code{5}.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
 error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
@@ -171,6 +172,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
+\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
+and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

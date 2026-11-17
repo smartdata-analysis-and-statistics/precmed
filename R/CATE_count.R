@@ -11,6 +11,8 @@
 #' and \code{'negBin'}.
 #' @param cate.model A formula describing the outcome model to be fitted.
 #' The outcome must appear on the left-hand side.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side. The treatment must be a numeric vector
 #' coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.
@@ -33,14 +35,14 @@
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{cate.model}. Only applies
+#' outcome predictions conditional on the covariates in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
 #' include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
 #' Default is \code{'boosting'}.
 #' @param xvar.smooth A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
-#' Default is \code{NULL}, which uses all variables in \code{cate.model}.
+#' from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
+#' Default is \code{NULL}, which uses all initial outcome-model covariates.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
@@ -71,7 +73,7 @@
 #' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns a list containing the following components:
@@ -199,7 +201,7 @@ catefitcount <- function(data,
                          plot.gbmperf = FALSE,
                          verbose = 0,
                          contrast.control = list(),
-                         ps.control = list(), ...) {
+                         ps.control = list(), init.model = NULL, ...) {
   resolve_ps_control(ps.control)
 
 
@@ -229,6 +231,7 @@ catefitcount <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   time <- out$time
   prop <- out$prop
 
@@ -237,7 +240,7 @@ catefitcount <- function(data,
   names(result) <- c(paste0("ate.", score.method),
                      paste0("score.", score.method), "fit", "coefficients")
 
-  fit <- intxcount(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time,
+  fit <- intxcount(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, x.init = x.init,
                    score.method = score.method,
                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                    initial.predictor.method = initial.predictor.method,
@@ -501,6 +504,7 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #'
 #' @param y Observed outcome; vector of size \code{n} (observations)
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
+#' @param x.init Initial outcome-model covariate matrix; defaults to \code{x.cate}.
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
 #' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
@@ -518,13 +522,13 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A number above which estimated propensity scores should be trimmed; scalar
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{cate.model}
+#' outcome predictions conditional on the covariates in \code{x.init}
 #' in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
 #' one of \code{'poisson'} (fastest), \code{'boosting'} (default) and \code{'gam'}.
 #' @param xvar.smooth A vector of characters indicating the name of the variables used as
 #' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
-#' Default is \code{NULL}, which uses all variables in \code{cate.model}.
+#' from the variables listed in \code{x.init}.
+#' Default is \code{NULL}, which uses all variables in \code{x.init}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
@@ -540,7 +544,7 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' Default is \code{6}.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
 #' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
 #' Default is \code{0.001}.
@@ -581,8 +585,8 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
                       ps.method = "glm", minPS = 0.01, maxPS = 0.99,
                       initial.predictor.method = "boosting",
                       xvar.smooth = NULL,
-                      tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = TRUE,
-                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ps.control = list(), ...) {
+                      tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = FALSE,
+                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ps.control = list(), x.init = x.cate, ...) {
   ps.args <- resolve_ps_control(ps.control)
 
 
@@ -603,6 +607,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   p.aug <- ncol(x.cate) + 1
 
   datatot <- data.frame("y" = y, x.cate, "time" = time)
+  datatot.init <- data.frame("y" = y, x.init, "time" = time)
 
   ######### cross-fitting
 
@@ -627,11 +632,11 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
       f1.predictcv <- f0.predictcv <- pscv <- rep(NA, N)
       for (k in seq(Kfold)) {
-        datatot_train <- datatot[index != k, ]
+        datatot_train <- datatot.init[index != k, , drop = FALSE]
         x_ps_train <- x.ps[index != k, , drop = FALSE]
         trt_train <- trt[index != k]
 
-        datatot_valid <- datatot[index == k, ]
+        datatot_valid <- datatot.init[index == k, , drop = FALSE]
         x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
         data1 <- datatot_train[trt_train == 1, ]
@@ -678,7 +683,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 
         } else if (initial.predictor.method == "gam") {
 
-          xvars <- colnames(x.cate)
+          xvars <- colnames(x.init)
           if (is.null(xvar.smooth)) {
             fgam <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
           } else {

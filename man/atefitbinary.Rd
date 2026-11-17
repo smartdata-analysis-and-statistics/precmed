@@ -6,24 +6,29 @@
 \usage{
 atefitbinary(
   data,
-  cate.model,
+  outcome_model,
+  outcome_method = "logistic",
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
-  interactions = TRUE,
   n.boot = 500,
   seed = NULL,
   verbose = 0,
-  ps.control = list()
+  ps.control = list(),
+  cate.model = NULL
 )
 }
 \arguments{
 \item{data}{A data frame containing the outcome, treatment, and covariates.}
 
-\item{cate.model}{A formula with the binary outcome on the left and outcome
-model covariates on the right. The outcome must be numeric or logical and
-coded 0/1; missing values and offsets are not supported.}
+\item{outcome_model}{A formula specifying the logistic outcome model, fitted
+separately in each treatment arm by default. Put the binary outcome on the
+left and baseline covariates on the right; do not include treatment. The
+outcome must be numeric or logical and coded 0/1. Missing values and offsets
+are not supported.}
+
+\item{outcome_method}{Outcome-model method; only \code{"logistic"} (default) is supported.}
 
 \item{ps.model}{A formula with treatment on the left and treatment-model
 covariates on the right. The model estimates the propensity score. Both treatment groups must be present. Numeric
@@ -37,10 +42,6 @@ intercept-only model.}
 \item{minPS, maxPS}{Lower and upper truncation limits for propensity scores.
 Defaults are 0.01 and 0.99; \code{minPS} must be smaller than \code{maxPS}.}
 
-\item{interactions}{If \code{TRUE} (default), include interactions between
-treatment and all outcome-model covariates. If \code{FALSE}, fit a pooled
-logistic outcome model with a treatment main effect and no interactions.}
-
 \item{n.boot}{Number of bootstrap samples, an integer of at least 2.
 Default is 500.}
 
@@ -52,6 +53,8 @@ the binary implementation does not currently display progress messages.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction
 screening. Supported entry: \code{solver = "C"} (default) or \code{"R"}.}
+
+\item{cate.model}{Deprecated alias for \code{outcome_model}. Supply only one.}
 }
 \value{
 An object of class \code{atefit} containing:
@@ -74,7 +77,7 @@ using augmented inverse probability weighting (AIPW). Bootstrap resampling
 provides a standard error, confidence interval, and p-value.
 }
 \details{
-The estimator combines predicted risks from a logistic outcome model
+The estimator combines predicted risks from logistic outcome models
 with inverse-propensity-weighted residual corrections. Under appropriate
 identification and regularity assumptions, it is consistent if either the
 outcome model or treatment model is correctly specified. A causal
@@ -93,8 +96,9 @@ object; \code{confint()} calculates Wald intervals at a requested level.
 }
 \examples{
 d <- simulate_binary(n = 500, seed = 42)
-fit <- atefitbinary(d, cate.model = y ~ age + female,
-                    ps.model = trt ~ age, n.boot = 10, seed = 42)
+fit <- atefitbinary(d, outcome_model = y ~ age + female,
+                    ps.model = trt ~ age, outcome_method = "logistic",
+                    n.boot = 10, seed = 42)
 coef(fit)
 confint(fit)
 }

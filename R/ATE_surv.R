@@ -4,9 +4,20 @@
 #' restricted mean time lost ratio for survival outcomes. Bootstrap is used for inference.
 #'
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
-#' must be used to describe the outcome.
+#' @param outcome_model A formula specifying the survival outcome model, fitted
+#' separately in each treatment arm. Use a \code{Surv} outcome on the left
+#' and baseline covariates on the right; do not include treatment.
+#' @param outcome_method Survival outcome-model method: \code{"coxph"} (default),
+#' \code{"weibull"}, or \code{"log_normal"} (alias \code{"lognormal"}). The
+#' parametric methods fit accelerated failure time models with separate scale
+#' parameters in each treatment arm. Weibull models have proportional hazards
+#' across covariates within an arm but can have non-proportional hazards between
+#' arms if their shapes differ. Log-normal models do not impose proportional
+#' hazards. Both assume their specified event-time distribution and require
+#' positive observed times and an event in each arm. The censoring model is
+#' specified separately by \code{ipcw.method} and \code{ipcw.model}.
+
+#' @param cate.model Deprecated alias for \code{outcome_model}. Supply only one.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
@@ -15,7 +26,7 @@
 #' @param ipcw.model A formula describing the censoring model used for inverse
 #' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
 #' Default is \code{NULL}, which uses a censoring model with the same covariates
-#' as the outcome model \code{cate.model}, plus the treatment.
+#' as the outcome model \code{outcome_model}, plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Only applies for survival outcomes.
 #' Default is \code{NULL}, which corresponds to unknown potential censoring time.
@@ -94,7 +105,7 @@
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
 #' output <- atefitsurv(data = survivalExample,
-#'                      cate.model = Surv(y, d) ~ age + female +
+#'                      outcome_model = Surv(y, d) ~ age + female +
 #'                                   previous_cost + previous_number_relapses,
 #'                      ps.model = trt ~ age + previous_treatment,
 #'                      tau0 = tau0,
@@ -111,8 +122,8 @@
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of \code{contrast.control}.
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Applies to
+#' Cox outcome models only; parametric models use closed-form integration.
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
@@ -121,7 +132,8 @@
 #' @importFrom tidyr gather
 
 atefitsurv <- function(data,
-                       cate.model,
+                       outcome_model,
+                       outcome_method = "coxph",
                        ps.model,
                        ps.method = "glm",
                        ipcw.model = NULL,
@@ -133,7 +145,24 @@ atefitsurv <- function(data,
                        surv.min = 0.025,
                        n.boot = 500,
                        seed = NULL,
-                       verbose = 0, rmst.control = list(), ps.control = list()) {
+                       verbose = 0, rmst.control = list(), ps.control = list(), cate.model = NULL) {
+  call_names <- names(as.list(sys.call()))
+  named_method <- !is.null(call_names) && any(nzchar(call_names) & startsWith("outcome_method", call_names))
+  if (!missing(outcome_method) && !named_method &&
+      (inherits(outcome_method, "formula") ||
+       (is.character(outcome_method) && length(outcome_method) == 1L &&
+        !is.na(outcome_method) && grepl("~", outcome_method, fixed = TRUE))))
+    return(legacy_ate_positional_call(sys.call(), sys.function(), parent.frame()))
+
+  if (!missing(cate.model)) {
+    if (!missing(outcome_model)) stop("Specify only outcome_model; cate.model is deprecated.")
+    warning("cate.model is deprecated for atefit(); use outcome_model instead.", call. = FALSE)
+    outcome_model <- cate.model
+  }
+  if (missing(outcome_model)) stop("outcome_model must be supplied.")
+  cate.model <- outcome_model
+
+  outcome_method <- resolve_ate_outcome_method(outcome_method, "survival")
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
@@ -175,7 +204,7 @@ atefitsurv <- function(data,
                 ps.method = ps.method,
                 minPS = minPS,
                 maxPS = maxPS,
-                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE, diagnostic = TRUE)
+                ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE, diagnostic = TRUE, outcome_method = outcome_method)
 
   overlap.diagnostics <- est$overlap.diagnostics
   est$overlap.diagnostics <- NULL
@@ -205,7 +234,7 @@ atefitsurv <- function(data,
                        x.ipcw = x.ipcw[idsub.boot, , drop = FALSE],
                        trt = trt[idsub.boot],
                        yf = yf[idsub.boot],
-                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE)
+                       tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE, conditional.hr = FALSE, outcome_method = outcome_method)
     },
       rmst_fallback = function(w) {
         fallback.in.sample <<- TRUE
@@ -293,6 +322,7 @@ atefitsurv <- function(data,
 #' @param cumulative.hr Whether to estimate the marginal cumulative hazard ratio at \code{tau0}.
 #' @param conditional.hr Whether to fit the supplementary conditional Cox hazard ratio.
 #' @param diagnostic Internal: retain full-sample treatment overlap diagnostics.
+#' @param outcome_method Outcome-model method: \code{"coxph"}, \code{"weibull"}, or \code{"log_normal"}.
 #' @return Return a list of estimates:
 #' \itemize{
 #'   \item{\code{rmst1}: } A numeric value of the estimated restricted mean survival time n the group \code{trt = 1}.
@@ -304,8 +334,8 @@ atefitsurv <- function(data,
 #' @param rmst.control Named options for Cox restricted mean survival integration.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of \code{contrast.control}.
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Applies to
+#' Cox outcome models only; parametric models use closed-form integration.
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
 #' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
@@ -315,7 +345,7 @@ atefitsurv <- function(data,
 
 drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 0.025,
                    ps.method = "glm",
-                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE, conditional.hr = TRUE, diagnostic = FALSE) {
+                   minPS = 0.01, maxPS = 0.99, ipcw.method = "breslow", rmst.control = list(), ps.control = list(), cumulative.hr = FALSE, conditional.hr = TRUE, diagnostic = FALSE, outcome_method = "coxph") {
   ps.args <- resolve_ps_control(ps.control)
 
   rmst.args <- resolve_rmst_control(rmst.control)
@@ -341,9 +371,13 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   weightc <- dnew / surv.new
   weightc <- weightc / mean(weightc)
 
-  coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
-
-  coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, ]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
+  if (outcome_method == "coxph") {
+    coxest1 <- cox.rmst(y = y[trt == 1], d = d[trt == 1], x.cate = as.matrix(x.cate[trt == 1, , drop = FALSE]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
+    coxest0 <- cox.rmst(y = y[trt == 0], d = d[trt == 0], x.cate = as.matrix(x.cate[trt == 0, , drop = FALSE]), xnew = x.cate, tau0 = tau0, solver = rmst.args$solver, return_survival = cumulative.hr)
+  } else {
+    coxest1 <- parametric_survival_outcome(y[trt == 1], d[trt == 1], x.cate[trt == 1, , drop = FALSE], x.cate, tau0, outcome_method, cumulative.hr)
+    coxest0 <- parametric_survival_outcome(y[trt == 0], d[trt == 0], x.cate[trt == 0, , drop = FALSE], x.cate, tau0, outcome_method, cumulative.hr)
+  }
 
   if (cumulative.hr) {
     survival1 <- coxest1$survival

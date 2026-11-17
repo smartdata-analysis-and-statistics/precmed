@@ -29,7 +29,7 @@ catecvmean(
   n.trees.boosting = 200,
   B = 3,
   Kfold = 6,
-  plot.gbmperf = TRUE,
+  plot.gbmperf = FALSE,
   error.maxNR = 0.001,
   tune = c(0.5, 2),
   seed = NULL,
@@ -61,8 +61,9 @@ Allowed values include one of:
 two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 Relevant only when \code{ps.model} has more than one variable.}
 
-\item{init.model}{A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-It must be specified when \code{score.method = contrastReg} or \code{twoReg}.}
+\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
+and \code{contrastReg}. The outcome must match \code{cate.model}; the default
+\code{NULL} uses \code{cate.model}.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates in \code{cate.model}
@@ -144,7 +145,7 @@ Default is \code{6}.}
 
 \item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
 boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.}
+or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
 error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.

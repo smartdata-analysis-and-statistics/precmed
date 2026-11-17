@@ -28,10 +28,15 @@
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
 #' Relevant only when \code{ps.model} has more than one variable.
-#' @param init.model A formula describing the initial predictor model. The outcome must appear on the left-hand side.
-#' It must be specified when \code{score.method = contrastReg} or \code{twoReg}, except for binary outcomes, which use \code{cate.model}.
+#' @param init.model Optional formula for the initial treatment-specific outcome models
+#' used by \code{twoReg} and \code{contrastReg} (binary outcomes support
+#' \code{twoReg} only). The outcome must match \code{cate.model}. The default
+#' \code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
+#' is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
+#' must match it. Other score methods do not use this argument. Continuous-outcome
+#' fitting and validation are not currently implemented.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{cate.model}. Only applies
+#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
 #' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
@@ -108,7 +113,7 @@
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{TRUE}.
+#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating whether intermediate progress messages and histograms should
 #' be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
@@ -266,7 +271,7 @@ catefit <- function(response,
                     cate.model,
                     ps.model,
                     ps.method = "glm",
-                    init.model = NULL, # This is used in continuous data, when contrast/two regression is used
+                    init.model = NULL,
                     initial.predictor.method = NULL,
                     ipcw.model = NULL,
                     ipcw.method = "breslow",
@@ -288,7 +293,7 @@ catefit <- function(response,
                     max.iterNR = 150,
                     tune = c(0.5, 2),
                     seed = NULL,
-                    plot.gbmperf = TRUE,
+                    plot.gbmperf = FALSE,
                     verbose = 0,
                     contrast.control = list(),
                     rmst.control = list(), ps.control = list(), rf.control = list(), ...) {
