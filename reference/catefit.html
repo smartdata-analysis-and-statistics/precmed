@@ -333,7 +333,43 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p>
+<dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>Fitted objects retain <code>treatment.labels</code> in treatment 0/1 order
+for score plot labels. For binary response, see <code><a href="catefitbinary.html">catefitbinary()</a></code>.
+For count response, see description of other outputs in <code><a href="catefitcount.html">catefitcount()</a></code>.
+For survival response, see description of outputs in <code><a href="catefitsurv.html">catefitsurv()</a></code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The table summarizes the available score-fitting methods. "Yes" in the
+final column indicates a doubly robust score estimator, subject to the
+assumptions described below; "–" means that the method is not available
+for that outcome.</p>
+<table class="table table"><tr><td><strong>Score method</strong></td><td><strong>Binary</strong></td><td><strong>Count</strong></td><td><strong>Survival</strong></td><td><strong>Doubly robust</strong></td></tr><tr><td><code>twoReg</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>contrastReg</code></td><td>–</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>logistic</code></td><td>Yes</td><td>–</td><td>–</td><td>No</td></tr><tr><td><code>poisson</code></td><td>–</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>negBin</code></td><td>–</td><td>Yes</td><td>–</td><td>No</td></tr><tr><td><code>boosting</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>randomForest</code></td><td>–</td><td>–</td><td>Yes</td><td>No</td></tr></table><p>The doubly robust methods combine outcome and treatment models. Their
+robustness to misspecification of one of these models is conditional on
+identification, positivity, and method-specific model and regularity
+assumptions. For example, binary <code>twoReg</code> estimates a linear projection
+of the conditional risk difference; this projection equals the conditional
+risk difference only if the latter is linear in the specified design.
+Truncating propensity scores can affect the robustness property. Survival
+methods also require appropriate censoring assumptions and a correctly
+specified censoring model.</p>
+<p>This table describes <em>score fitting</em>. Subgroup effects can be estimated
+using doubly robust methods even when the score used to define the subgroups
+is not doubly robust. Neither score fitting nor subgroup estimates calculated
+on the fitting data constitute independent validation; see <code><a href="catecv.html">catecv</a></code>.</p>
+<p>For binary response, see the Binary outcomes section below and <code><a href="catefitbinary.html">catefitbinary()</a></code>.
+For count response, see details in <code><a href="catefitcount.html">catefitcount()</a></code>.
+For survival response, see details in <code><a href="catefitsurv.html">catefitsurv()</a></code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="binary-outcomes">Binary outcomes<a class="anchor" aria-label="anchor" href="#binary-outcomes"></a></h2>
+
+
 <p>For <code>response = "binary"</code>, <code>score.method = "logistic"</code>
 fits a logistic model with treatment interactions. <code>"twoReg"</code> cross-fits
 separate logistic outcome models and a treatment model, then projects the
@@ -361,19 +397,7 @@ and both outcome values in each arm. Its fitted models and selected tree
 counts are stored in <code>fit$boosting</code>. Scores and subgroup effects are
 estimated on the same data; they are not independent validation. For extra boosting controls,
 see <code><a href="boosting-control.html">boosting-control</a></code>.
-Subgroup fits without both arms or with rank-deficient models return NA.</p></dd>
-
-</dl></div>
-    <div class="section level2">
-    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Fitted objects retain <code>treatment.labels</code> in treatment 0/1 order
-for score plot labels. For count response, see description of other outputs in <code><a href="catefitcount.html">catefitcount()</a></code>.
-For survival response, see description of outputs in <code><a href="catefitsurv.html">catefitsurv()</a></code>.</p>
-    </div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>For count response, see details in <code><a href="catefitcount.html">catefitcount()</a></code>.
-For survival response, see details in <code><a href="catefitsurv.html">catefitsurv()</a></code>.</p>
+Subgroup fits without both arms or with rank-deficient models return NA.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

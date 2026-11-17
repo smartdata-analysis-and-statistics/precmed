@@ -72,6 +72,24 @@
 
 ### Minor changes
 
+- Exported
+  [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md)
+  as the binary-outcome counterpart to
+  [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md)
+  and
+  [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md),
+  with a dedicated help page.
+
+- Expanded the
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  help to compare CATE score methods and explain which use doubly robust
+  estimation and their qualifications.
+
+- Added a package-level overview accessible with
+  [`?precmed`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/precmed-package.md),
+  including a short example, effect scales, and links to online guides
+  and the handbook.
+
 - Added an introductory vignette explaining doubly robust estimation,
   propensity score weighting, outcome-model standardization
   (g-computation), their assumptions, and their use in `precmed`.

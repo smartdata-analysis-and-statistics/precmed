@@ -110,6 +110,9 @@
 - [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
   : Estimate conditional treatment effect scores
 
+- [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md)
+  : Estimate conditional treatment-effect scores for binary outcomes
+
 - [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md)
   : Estimation of the conditional average treatment effect (CATE) score
   for count data

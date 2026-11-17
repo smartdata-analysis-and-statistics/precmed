@@ -49,8 +49,7 @@ suitable modeling and regularity assumptions. Outcome-model
 standardization generally relies on a correctly specified outcome model,
 whereas IPW relies on a correctly specified treatment model. These are
 sometimes called **singly robust** approaches with respect to model
-misspecification. Rather than calling them “non-robust,” it is more
-informative to say which assumptions each approach requires.
+misspecification.
 
 ## What does doubly robust mean?
 

@@ -306,54 +306,91 @@ catefit(
   Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
-  For `response = "binary"`, `score.method = "logistic"` fits a logistic
-  model with treatment interactions. `"twoReg"` cross-fits separate
-  logistic outcome models and a treatment model, then projects the
-  augmented inverse-propensity outcomes for each arm onto the covariates
-  in `cate.model` using linear regression. The score is the difference
-  of these projections, averaged over `B` repetitions of `Kfold` folds.
-  It estimates the linear projection of the conditional risk difference
-  if either the treatment model or both outcome models are correct,
-  under identification and positivity assumptions. Propensity score
-  truncation can affect this property. The projection need not lie
-  between -1 and 1 and equals the conditional risk difference only if
-  that difference is linear in the specified design. The difference
-  between arm coefficients is returned in `coefficients$twoReg` and by
-  [`coef()`](https://rdrr.io/r/stats/coef.html); the separate arm
-  coefficients are stored in `fit$twoReg$coefficients`. Logistic model
-  coefficients are on the log-odds scale and are stored in
-  `fit$logistic`; they are not linear risk-difference score
-  coefficients. Boosting does not have a linear score coefficient
-  vector. With neither `twoReg` nor another linear binary score,
-  [`coef()`](https://rdrr.io/r/stats/coef.html) returns `NULL`.
-  `"boosting"` fits separate Bernoulli gradient-boosting models in each
-  treatment arm, with the number of trees selected by five-fold
-  cross-validation. All three scores are predicted risk differences;
-  subgroup effects are doubly robust risk differences. Binary boosting
-  requires at least one outcome-model covariate and both outcome values
-  in each arm. Its fitted models and selected tree counts are stored in
-  `fit$boosting`. Scores and subgroup effects are estimated on the same
-  data; they are not independent validation. For extra boosting
-  controls, see
-  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
-  Subgroup fits without both arms or with rank-deficient models return
-  NA.
-
 ## Value
 
 Fitted objects retain `treatment.labels` in treatment 0/1 order for
-score plot labels. For count response, see description of other outputs
-in
+score plot labels. For binary response, see
+[`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md).
+For count response, see description of other outputs in
 [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md).
 For survival response, see description of outputs in
 [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md).
 
 ## Details
 
+The table summarizes the available score-fitting methods. "Yes" in the
+final column indicates a doubly robust score estimator, subject to the
+assumptions described below; "–" means that the method is not available
+for that outcome.
+
+|                  |            |           |              |                   |
+|------------------|------------|-----------|--------------|-------------------|
+| **Score method** | **Binary** | **Count** | **Survival** | **Doubly robust** |
+| `twoReg`         | Yes        | Yes       | Yes          | Yes               |
+| `contrastReg`    | –          | Yes       | Yes          | Yes               |
+| `logistic`       | Yes        | –         | –            | No                |
+| `poisson`        | –          | Yes       | Yes          | No                |
+| `negBin`         | –          | Yes       | –            | No                |
+| `boosting`       | Yes        | Yes       | Yes          | No                |
+| `randomForest`   | –          | –         | Yes          | No                |
+
+The doubly robust methods combine outcome and treatment models. Their
+robustness to misspecification of one of these models is conditional on
+identification, positivity, and method-specific model and regularity
+assumptions. For example, binary `twoReg` estimates a linear projection
+of the conditional risk difference; this projection equals the
+conditional risk difference only if the latter is linear in the
+specified design. Truncating propensity scores can affect the robustness
+property. Survival methods also require appropriate censoring
+assumptions and a correctly specified censoring model.
+
+This table describes *score fitting*. Subgroup effects can be estimated
+using doubly robust methods even when the score used to define the
+subgroups is not doubly robust. Neither score fitting nor subgroup
+estimates calculated on the fitting data constitute independent
+validation; see
+[`catecv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
+
+For binary response, see the Binary outcomes section below and
+[`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md).
 For count response, see details in
 [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md).
 For survival response, see details in
 [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md).
+
+## Binary outcomes
+
+For `response = "binary"`, `score.method = "logistic"` fits a logistic
+model with treatment interactions. `"twoReg"` cross-fits separate
+logistic outcome models and a treatment model, then projects the
+augmented inverse-propensity outcomes for each arm onto the covariates
+in `cate.model` using linear regression. The score is the difference of
+these projections, averaged over `B` repetitions of `Kfold` folds. It
+estimates the linear projection of the conditional risk difference if
+either the treatment model or both outcome models are correct, under
+identification and positivity assumptions. Propensity score truncation
+can affect this property. The projection need not lie between -1 and 1
+and equals the conditional risk difference only if that difference is
+linear in the specified design. The difference between arm coefficients
+is returned in `coefficients$twoReg` and by
+[`coef()`](https://rdrr.io/r/stats/coef.html); the separate arm
+coefficients are stored in `fit$twoReg$coefficients`. Logistic model
+coefficients are on the log-odds scale and are stored in `fit$logistic`;
+they are not linear risk-difference score coefficients. Boosting does
+not have a linear score coefficient vector. With neither `twoReg` nor
+another linear binary score,
+[`coef()`](https://rdrr.io/r/stats/coef.html) returns `NULL`.
+`"boosting"` fits separate Bernoulli gradient-boosting models in each
+treatment arm, with the number of trees selected by five-fold
+cross-validation. All three scores are predicted risk differences;
+subgroup effects are doubly robust risk differences. Binary boosting
+requires at least one outcome-model covariate and both outcome values in
+each arm. Its fitted models and selected tree counts are stored in
+`fit$boosting`. Scores and subgroup effects are estimated on the same
+data; they are not independent validation. For extra boosting controls,
+see
+[`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+Subgroup fits without both arms or with rank-deficient models return NA.
 
 ## References
 
