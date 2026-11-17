@@ -48,8 +48,9 @@
 
 ## Minor changes
 
-* Added an introductory vignette explaining doubly robust estimation, its
-  assumptions, and its use in `precmed`.
+* Added an introductory vignette explaining doubly robust estimation, propensity
+  score weighting, outcome-model standardization (g-computation), their
+  assumptions, and their use in `precmed`.
 
 * Added `subgroup_estimates()` to extract nested binary, count and survival subgroup estimates by
   scoring method and measure. Newly fitted survival `catefit()` objects also
