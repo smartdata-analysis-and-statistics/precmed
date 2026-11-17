@@ -57,14 +57,23 @@ fit_ate <- atefit(
   seed = 999,
   verbose = 0
 )
-fit_ate
 ```
 
-The output reports the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
+The fitted object contains the log rate ratio and bootstrap-based uncertainty. Exponentiate the estimate and confidence limits to obtain the rate ratio and its 95% confidence interval; a rate ratio below 1 indicates a lower estimated relapse rate with `drug1`. The confidence interval uses the bootstrap standard error. The estimator is doubly robust: under the required causal and other regularity assumptions, it is consistent if either the outcome model or the treatment model is correctly specified. The 50 bootstrap replicates used here keep the example short; use more for a substantive analysis.
 
 ```{r rate-ratio}
-unname(exp(coef(fit_ate)))
-exp(confint(fit_ate))
+rate_ratio <- exp(coef(fit_ate))
+rate_ratio_ci <- exp(confint(fit_ate))
+```
+
+```{r rate-ratio-table, echo=FALSE}
+rate_ratio_results <- data.frame(
+  `Rate ratio` = as.numeric(rate_ratio),
+  `95% CI lower` = as.numeric(rate_ratio_ci[, 1]),
+  `95% CI upper` = as.numeric(rate_ratio_ci[, 2]),
+  check.names = FALSE
+)
+knitr::kable(rate_ratio_results, digits = 2, row.names = FALSE)
 ```
 
 The overall effect can mask differences across patients. Next, we explore treatment effect heterogeneity.
@@ -97,6 +106,7 @@ The curves summarize estimated treatment effects in nested subgroups ranked by t
 
 ## Next steps
 
+- Read [Understanding doubly robust methods](doubly-robust.html) for an introduction to the estimator and its assumptions.
 - Follow the [binary outcome tutorial](Binary-examples.html) for fixed-horizon response and held-out subgroup validation.
 - Follow the [count outcome tutorial](Count-examples.html) to estimate the overall treatment effect, compare scoring methods, and interpret validation results.
 - See the [survival outcome tutorial](Survival-examples.html) for time-to-event data.

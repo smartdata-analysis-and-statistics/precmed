@@ -99,7 +99,10 @@
   models, clarifying propensity scores and inverse probability of censoring weights.
 
 * Clarified binary, count and survival outcome support in the package
-  description, README, quick start and function documentation.
+  description, README, quick start and function documentation. The README and
+  introductory vignettes also describe survival risk differences and distinguish
+  their scale from survival CATE scores. The quick start presents the estimated
+  count rate ratio and confidence interval in a concise table.
 
 * Added an ATE methods vignette covering binary, count and survival outcomes,
   assumptions and bootstrap inference; the CATE methods vignette separates score

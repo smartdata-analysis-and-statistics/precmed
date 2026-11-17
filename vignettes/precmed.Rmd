@@ -56,6 +56,8 @@ The **precmed** package contains functions to
 -	Plot the proportion of subjects with an estimated treatment effect no less than $c$ over a range of values for $c$ [@zhao2013effectively]. 
 -	Compute the area between the average treatment difference curve of competing models for the CATE using `abc()`  [@zhao2013effectively]
 
+For survival outcomes, `atefit()` reports the population-average event risk difference at the chosen follow-up horizon (treatment 1 minus treatment 0), alongside the restricted mean time lost ratio and cumulative hazard ratio. Survival CATE scores are on the log restricted mean time lost ratio scale; subgroup estimates and validation plots can also report risk differences at the horizon.
+
 ## Recommended workflow
 
 Chapter 19 discusses validation strategies and the assessment of discrimination, calibration, and decision accuracy [@thao2026validation]. Chapter 20 provides practical guidance on validation curves, ABC statistics, and responder diagnostics, including examples using `precmed` [@jiang2026visualization].
