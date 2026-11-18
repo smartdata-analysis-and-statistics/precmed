@@ -6,8 +6,9 @@
 \usage{
 catefitsurv(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   initial.predictor.method = "randomForest",
@@ -43,12 +44,11 @@ catefitsurv(
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
-\code{'contrastReg'}.}
+\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
 
-\item{cate.model}{A standard \code{Surv} formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
+
+\item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
@@ -62,7 +62,7 @@ two-way interactions (added to the model if interactions are not specified in \c
 Relevant only when \code{ps.model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on \code{init.model} (or \code{cate.model} when omitted). Only applies
+outcome predictions conditional on \code{init.model} (or \code{outcome_model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 Default is \code{'randomForest'}.}
@@ -70,7 +70,7 @@ Default is \code{'randomForest'}.}
 \item{ipcw.model}{A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
 which corresponds to specifying the censoring model with the same covariates as the outcome model
-\code{cate.model} plus the treatment.}
+\code{outcome_model} plus the treatment.}
 
 \item{ipcw.method}{A character value for the censoring model. Allowed values are:
 \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
@@ -174,7 +174,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
+and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
@@ -263,6 +263,8 @@ up to 5 scoring methods among the following: Random forest, boosting, poisson re
 two regressions, and contrast regression.
 }
 \details{
+The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+
 The CATE score represents an individual-level treatment effect for survival data,
 estimated with random forest, boosting, Poisson regression, and the doubly
 robust estimator (two regressions, Yadlowsky, 2020) applied separately by treatment group
@@ -292,9 +294,10 @@ tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
                                quantile(y[trt == "drug0"], 0.95)))
 
 fit <- catefitsurv(data = survivalExample,
-                   score.method = "randomForest",
-                   cate.model = Surv(y, d) ~ age + female + previous_cost +
+                   outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                              previous_number_relapses,
+                   outcome_method = "random_forest",
+                   benefit_method = "t_learner",
                    ps.model = trt ~ age + previous_treatment,
                    ipcw.model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,

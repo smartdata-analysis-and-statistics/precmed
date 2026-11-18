@@ -4,6 +4,8 @@ test_that("subgroup extraction validates methods and supports older fits", {
     chr.contrastReg = c(prop0.5 = .7, prop1 = .8),
     rd.contrastReg = c(prop0.5 = -.2, prop1 = -.1)), class = "catefit")
   expect_equal(subgroup_estimates(fit), fit$ate.contrastReg)
+  expect_equal(subgroup_estimates(fit, method = "contrast_regression"), fit$ate.contrastReg)
+  expect_equal(subgroup_estimates(fit, method = "contrastreg"), fit$ate.contrastReg)
   expect_equal(subgroup_estimates(fit, measure = "cumulative.hr"), fit$chr.contrastReg)
   expect_equal(subgroup_estimates(fit, measure = "cumulative_hr"), fit$chr.contrastReg)
   expect_equal(subgroup_estimates(fit, measure = "absolute_risk_reduction"), -fit$rd.contrastReg)
@@ -11,6 +13,10 @@ test_that("subgroup extraction validates methods and supports older fits", {
   expect_error(subgroup_estimates(fit, method = "unknown"), "available scoring")
   expect_error(subgroup_estimates(fit, measure = "unknown"), "measure")
   fit$score.poisson <- c(1, 2)
+  fit$ate.poisson <- c(prop0.5 = 1, prop1 = 1)
+  expect_equal(subgroup_estimates(fit, method = "t_learner"), fit$ate.poisson)
+  fit$score.randomForest <- c(1, 2)
+  expect_error(subgroup_estimates(fit, method = "t_learner"), "poisson, randomForest")
   expect_error(subgroup_estimates(fit), "Specify one")
   fit$response <- "continuous"
   expect_error(subgroup_estimates(fit), "binary, count or survival")
@@ -52,4 +58,13 @@ test_that("binary subgroup estimates preserve signed risk differences", {
   expect_identical(subgroup_estimates(fit, method = "logistic", measure = "risk_difference"), fit$ate.logistic)
   expect_error(subgroup_estimates(fit, measure = "risk0"), "measure")
   expect_equal(names(subgroup_estimates(fit)), c("prop0.5", "prop1"))
+})
+
+test_that("subgroup score selectors accept outcome-method names", {
+  fit <- structure(list(response = "count", score.negBin = 1:2,
+    ate.negBin = c(prop0.5 = .8, prop1 = 1), score.twoReg = 1:2,
+    ate.twoReg = c(prop0.5 = .7, prop1 = .9)), class = "catefit")
+  expect_equal(subgroup_estimates(fit, method = "negative_binomial"), fit$ate.negBin)
+  expect_equal(subgroup_estimates(fit, method = "two_regression"), fit$ate.twoReg)
+  expect_equal(subgroup_estimates(fit, method = "t_learner"), fit$ate.negBin)
 })

@@ -35,12 +35,9 @@ library(precmed)
 library(dplyr)
 library(ggplot2)
 data(countExample)
-countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
-countExample$previous_cost <- round(as.numeric(countExample$previous_cost * attr(countExample$previous_cost, "scaled:scale") + attr(countExample$previous_cost, "scaled:center")))
-countExample$female <- factor(countExample$female, levels = c(0, 1), labels = c("male", "female"))
 ```
 
-The example uses 4,000 simulated observations based on a multiple sclerosis claims-data scenario. The outcome is the number of relapses during observed follow-up, and `years` provides exposure time. The score is interpreted on the conditional rate-ratio scale.
+The example uses 4,000 simulated observations based on a multiple sclerosis claims-data scenario. In the packaged data, `age` is centered at approximately 46.2 years and `previous_cost` is centered at approximately 13,824 USD and divided by 20,172 USD. The outcome is the number of relapses during observed follow-up, and `years` provides exposure time. The score is interpreted on the conditional rate-ratio scale.
 
 ## Estimate CATE scores 
 
@@ -56,11 +53,13 @@ A population-average effect may vary across patients. We fit conditional average
 
   * `negBin` fits negative binomial regressions by treatment group. This method is recommended if there is overdispersion in the data.
 
-We can use `catefit()` to compare these scoring methods using the outcome and treatment formulas below.
+We can use `catefit()` to compare these scoring methods using the formulas below. The outcome formula specifies relapse counts and score covariates, with a log follow-up offset for exposure time. The treatment-model formula specifies treatment and its covariates; it estimates propensity scores used by the doubly robust scores and subgroup estimators. The direct Poisson, negative binomial, and boosting scores are constructed from outcome predictions.
 
 The score represents an estimated conditional log rate ratio: exponentiating it gives the estimated rate ratio for patients with those covariates. Lower scores therefore indicate greater estimated benefit from drug 1 in this example. Chapter 17 describes treatment effect heterogeneity and methods for CATE prediction [@hoogland2026introduction]. Because `catefit()` fits the scores using the full dataset, its results do not on their own establish performance in new patients.
 
 The mandatory arguments are `response`, `data`, `benefit_method`, `outcome_method`, `outcome_model`, and `ps.model`. The user can also specify the non-mandatory arguments to fit with the data and problem at hand. Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html) section for details.
+
+For compatibility, `benefit_method` also accepts the established names `"twoReg"` and `"contrastReg"` for `"two_regression"` and `"contrast_regression"`, respectively. The fitted scores retain their established names.
 
 If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. We set `n.cores = 1` to run boosting with one thread. `precmed` translates this argument to the GBM3 parallel settings; one thread is also the fallback when neither `n.cores` nor `par.details` is supplied and the `gbm.parallel` option is unset.
 
@@ -88,12 +87,15 @@ The fitted object contains scores, available score coefficients, and estimated t
 The fitted scores estimate conditional log rate ratios. The relationship
 between covariates and the score depends on the scoring method. Here, lower
 scores indicate greater estimated benefit from drug 1 because fewer relapses
-are desirable. Use `predict()` to retrieve scores for the original analysis
-sample; prediction for new data is not currently supported. Below are the
-contrast-regression scores for the first 6 patients.
+are desirable. Pass `fit_cate` to `predict()` and choose a score with `method`:
+`"poisson"`, `"boosting"`, or `"negative_binomial"` for the T-learners,
+and `"two_regression"` or `"contrast_regression"` for the doubly robust
+procedures. The returned scores correspond to the original analysis sample;
+prediction for new data is not currently supported. Below are the first six
+contrast-regression scores.
 
 ```{r print_catefit.score, eval = T, echo = T}
-scores <- predict(fit_cate, method = "contrastReg")
+scores <- predict(fit_cate, method = "contrast_regression")
 head(scores)
 ```
 
@@ -116,8 +118,8 @@ not have linear coefficients. The coefficients describe the fitted log
 rate-ratio score and are not themselves a validation of that score.
 
 ```{r print_catefit.coefs, eval = T, echo = T}
-coef(fit_cate, method = "contrastReg")
-confint(fit_cate, method = "contrastReg")
+coef(fit_cate, method = "contrast_regression")
+confint(fit_cate, method = "contrast_regression")
 ```
 
 Use `subgroup_estimates()` to inspect estimated rate ratios for nested
@@ -126,7 +128,7 @@ data as the score fit; the validation section below assesses the score in
 held-out data.
 
 ```{r print_catefit.ate, eval = T, echo = T}
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "rate_ratio")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "rate_ratio")
 ```
 
 ## Internally validate CATE scores

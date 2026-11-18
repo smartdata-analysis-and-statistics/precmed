@@ -20,17 +20,27 @@ This vignette fits and internally validates conditional treatment-effect scores 
 library(precmed)
 binaryExample <- simulate_binary(n = 4000, seed = 2026,
                                  followup = 1, threshold = 0)
-outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
-  previous_number_relapses
-ps_formula <- trt ~ age + previous_treatment
 ```
 
 The binary outcome indicates at least one relapse within one year; treatment assignment depends on age and previous treatment. The scores describe treatment differences in relapse risk. The data are synthetic and the simulation parameters are illustrative.
 
 ## Estimate CATE scores
 
-CATE scores estimate the difference in relapse probability for patients with
-different baseline covariates. The `logistic` method fits a separate logistic
+CATE scores estimate the difference in relapse probability under drug1 versus
+drug0 for patients with given baseline covariates. We specify an outcome formula
+with the outcome and covariates used to fit the scores, and a treatment-model
+formula with treatment on the left. The treatment model estimates propensity
+scores: the probabilities of receiving each treatment given the covariates.
+It is used by the doubly robust `twoReg` score and subgroup estimators; the
+direct logistic and boosting scores are constructed from outcome predictions.
+
+```{r}
+outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
+  previous_number_relapses
+ps_formula <- trt ~ age + previous_treatment
+```
+
+The `logistic` method fits a separate logistic
 outcome model in each treatment arm and subtracts their predicted risks;
 `twoReg` cross-fits separate logistic
 outcome models and a treatment model, then projects augmented outcomes for each
@@ -62,14 +72,24 @@ fit_cate <- catefit(
 ## Inspect CATE scores and subgroup estimates
 
 The fitted scores estimate differences in relapse probability for patients with
-different baseline covariates. Use `predict()` to retrieve scores for the
-original analysis sample; prediction for new data is not currently supported.
-Below are the first 6 scores from the two-regression method.
+different baseline covariates. Pass the complete `fit_cate` object to
+`predict()` and use `method` to select a score. This fit contains three scores:
+use `"logistic"` for the logistic T-learner, `"two_regression"` for
+two-regression, or `"boosting"` for the boosting T-learner. The established
+name `"twoReg"` is also accepted. Because two T-learners are present, their
+outcome-method names identify which score to retrieve.
+
+`predict()` returns the stored scores for the original analysis sample, in
+its original row order; prediction for new patients is not currently
+supported. Below are the first six two-regression scores.
 
 ```{r inspect_catefit}
-scores <- predict(fit_cate, method = "twoReg")
+scores <- predict(fit_cate, method = "two_regression")
 head(scores)
 ```
+
+To retrieve the logistic T-learner scores instead, use
+`predict(fit_cate, method = "logistic")`.
 
 Use `plot()` to compare fitted score distributions. Scores are on the risk
 difference scale, with zero indicating no difference in relapse probability.
@@ -89,7 +109,7 @@ have a linear score coefficient vector. Confidence intervals for binary score
 coefficients are not currently available.
 
 ```{r inspect_catefit_coefficients}
-coef(fit_cate, method = "twoReg")
+coef(fit_cate, method = "two_regression")
 ```
 
 Use `subgroup_estimates()` to inspect estimated risk differences in nested
@@ -98,7 +118,7 @@ as the score fit; the validation section below assesses the score in held-out
 data. The contrast is drug 1 minus drug 0, so a negative value favors drug 1.
 
 ```{r inspect_catefit_subgroups}
-subgroup_estimates(fit_cate, method = "twoReg", measure = "risk_difference")
+subgroup_estimates(fit_cate, method = "two_regression", measure = "risk_difference")
 ```
 
 For example, `prop0.5` is the estimated treatment effect in the half with the

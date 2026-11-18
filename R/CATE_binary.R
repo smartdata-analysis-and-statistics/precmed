@@ -37,11 +37,12 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
 #'
 #' @inheritParams catefit
-#' @param score.method One or more of \code{"logistic"}, \code{"twoReg"}, and
-#'   \code{"boosting"}.
-#' @param cate.model A formula specifying the binary outcome and score covariates.
+#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
+#' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
+#' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
+#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #' @param init.model Optional formula for the initial logistic outcome models
-#' used by \code{twoReg}; \code{NULL} uses \code{cate.model}.
+#' used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #' @return A \code{catefit} object containing treatment labels, fitted models,
 #'   predicted risk-difference scores and nested subgroup risk differences for
@@ -54,15 +55,22 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' @examples
 #' \donttest{
 #' dat <- simulate_binary(n = 400, seed = 2026)
-#' fit <- catefitbinary(data = dat, score.method = "logistic",
-#'                      cate.model = y ~ age + previous_treatment,
+#' fit <- catefitbinary(data = dat,
+#'                      outcome_model = y ~ age + previous_treatment,
+#'                      outcome_method = "logistic",
+#'                      benefit_method = "t_learner",
 #'                      ps.model = trt ~ age + previous_treatment,
 #'                      seed = 2026)
 #' }
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
-catefitbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
+catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_method = NULL, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
                           tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, init.model = NULL, ...) {
+  old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
+  config <- resolve_catefit_arguments("binary", outcome_model, outcome_method, benefit_method, NULL, NULL)
+  cate.model <- config$outcome_model
+  score.method <- config$scores
   check_score_method("binary", score.method)
   if (!ps.method %in% c("glm", "lasso") || minPS < 0 || maxPS > 1 || minPS >= maxPS) stop("Invalid propensity score settings.")
   resolve_ps_control(ps.control)

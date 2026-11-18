@@ -70,7 +70,10 @@ that would produce the same score name are not supported.}
 \item{benefit_method}{A vector of score-construction methods: \code{"t_learner"},
 \code{"two_regression"}, or \code{"contrast_regression"}. Each is paired
 with the corresponding entry in \code{outcome_method}. Contrast regression
-is not available for binary outcomes. Continuous outcomes are not implemented.}
+is not available for binary outcomes. Continuous outcomes are not implemented.
+The previous method names \code{"twoReg"} and \code{"contrastReg"} are
+accepted as aliases for \code{"two_regression"} and
+\code{"contrast_regression"}, respectively.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values

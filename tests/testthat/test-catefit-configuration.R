@@ -10,8 +10,21 @@ test_that("paired CATE configurations retain existing score calculations", {
     cate.model = outcome, score.method = c("poisson", "twoReg", "contrastReg"),
     initial.predictor.method = "poisson"))))
   expect_equal(modern, old)
+  aliases <- suppressWarnings(do.call(catefit, c(args, list(
+    outcome_model = outcome, benefit_method = c("t_learner", "twoReg", "contrastReg"),
+    outcome_method = c("poisson", "poisson", "poisson")))))
+  expect_equal(aliases, modern)
+  mixed <- suppressWarnings(do.call(catefit, c(args, list(
+    outcome_model = outcome, benefit_method = c("t_learner", "twoReg", "contrast_regression"),
+    outcome_method = c("poisson", "poisson", "poisson")))))
+  expect_equal(mixed, modern)
+  expect_error(do.call(catefit, c(args, list(outcome_model = outcome,
+    benefit_method = c("twoReg", "two_regression"),
+    outcome_method = c("poisson", "poisson")))), "same score")
   expect_s3_class(plot(modern), "ggplot")
   expect_equal(predict(modern, method = "twoReg"), old$score.twoReg)
+  expect_equal(predict(modern, method = "two_regression"), old$score.twoReg)
+  expect_equal(predict(modern, method = "contrast_regression"), old$score.contrastReg)
   expect_equal(coef(modern), coef(old))
   expect_output(print(modern), "twoReg")
   local_fit <- function() {
@@ -25,6 +38,9 @@ test_that("paired CATE configurations retain existing score calculations", {
 })
 
 test_that("CATE configuration checks supported pairs and compatibility aliases", {
+  expect_silent(config <- precmed:::resolve_benefit_config(
+    "count", c("twoReg", "contrastReg"), c("poisson", "poisson")))
+  expect_identical(config$scores, c("twoReg", "contrastReg"))
   d <- simulate_binary(n = 300, seed = 204)
   expect_identical(names(formals(catefit))[1:5],
                    c("response", "data", "outcome_model", "outcome_method", "benefit_method"))
@@ -58,6 +74,7 @@ test_that("CATE configuration checks supported pairs and compatibility aliases",
                                                     outcome_method = c("logistic", "logistic"),
                                                     initial.predictor.method = "logistic"))))
   expect_error(do.call(catefit, c(args, list(benefit_method = "contrast_regression", outcome_method = "logistic"))), "not supported")
+  expect_error(do.call(catefit, c(args, list(benefit_method = "contrastReg", outcome_method = "logistic"))), "not supported")
   expect_error(do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"), outcome_method = "logistic"))), "one non-missing")
   expect_error(catefit("count", data.frame(), benefit_method = c("two_regression", "contrast_regression"),
                        outcome_method = c("poisson", "boosting")), "same outcome_method")
@@ -76,6 +93,10 @@ test_that("survival configurations preserve cross-fitted outcome models", {
     cate.model = formula, score.method = c("poisson", "twoReg", "contrastReg"),
     initial.predictor.method = "logistic")))))
   expect_equal(modern, old)
+  aliases <- suppressWarnings(suppressMessages(do.call(catefit, c(args, list(
+    outcome_model = formula, benefit_method = c("t_learner", "twoReg", "contrastReg"),
+    outcome_method = c("poisson", "logistic", "logistic"))))))
+  expect_equal(aliases, modern)
   expect_error(do.call(catefit, c(args, list(outcome_model = formula,
     benefit_method = "two_regression", outcome_method = "poisson"))), "not supported")
 })

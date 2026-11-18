@@ -19,10 +19,19 @@
 \item{newdata}{New data are not currently supported; omit this argument to
 retrieve scores for the original analysis sample in its original order.}
 
-\item{method}{A single scoring method used to fit the object, such as
-\code{"contrastReg"}. For \code{predict()}, it may be omitted if exactly
-one method is available. For \code{coef()}, omission returns the stored
-coefficient table. For \code{confint()}, the default is \code{"contrastReg"}.}
+\item{method}{A single score to extract from the fitted object. Use
+\code{"two_regression"} or
+\code{"contrast_regression"} for those procedures, or the outcome method
+(such as \code{"logistic"}, \code{"boosting"}, \code{"poisson"},
+\code{"negative_binomial"}, or \code{"random_forest"}) for a T-learner.
+The established stored names \code{"twoReg"}, \code{"contrastReg"},
+\code{"negBin"}, and \code{"randomForest"} are also accepted; contrast
+regression can also be selected with \code{"contrastreg"}. If exactly
+one T-learner score is present, \code{"t_learner"} selects it. If exactly
+one score of any kind is present, \code{method} may be omitted from
+\code{predict()}. For \code{coef()}, omission returns the coefficient table.
+For \code{confint()}, the default is \code{"contrastReg"}. Coefficients
+and confidence intervals are available only for certain score methods.}
 
 \item{...}{Additional arguments; currently unused.}
 
@@ -43,7 +52,10 @@ available, confidence intervals for score coefficients from a \code{catefit}.
 \details{
 Scores for count and survival outcomes are on the log ratio scale;
 binary scores are on the risk-difference scale. They describe fitted scores,
-not validated individual treatment effects. Confidence intervals require
+not validated individual treatment effects. Pass the fitted \code{catefit}
+object to \code{predict()}, not an individual outcome model in its \code{fit}
+component. When multiple T-learners are fitted, select one by its outcome
+method. Confidence intervals require
 stored coefficient standard errors, currently available for contrast
 regression in count and continuous fits only. They are not available for
 survival or binary fits. Methods that do not fit linear scores, such as

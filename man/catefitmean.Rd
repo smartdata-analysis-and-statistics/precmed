@@ -6,8 +6,9 @@
 \usage{
 catefitmean(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   init.model = NULL,
@@ -37,12 +38,11 @@ catefitmean(
 \item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'},
-\code{'contrastReg'}, \code{'randomForest'}, \code{'gam'}.}
+\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
+
+\item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side.
@@ -56,7 +56,7 @@ on two-way interactions (added to the model if not specified in \code{ps.model})
 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
 and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-\code{NULL} uses \code{cate.model}.}
+\code{NULL} uses \code{outcome_model}.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial outcome
 predictions conditional on the covariates in \code{init.model} in
@@ -215,6 +215,8 @@ among the following: Linear regression, boosting, two regressions, contrast regr
 generalized additive model.
 }
 \details{
+The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+
 The CATE score represents an individual-level treatment effect, estimated with
 either linear regression, boosting, random forest and generalized additive model applied separately by
 treatment group or with two doubly robust estimators, two regressions and contrast regression

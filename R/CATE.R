@@ -28,6 +28,9 @@
 #' \code{"two_regression"}, or \code{"contrast_regression"}. Each is paired
 #' with the corresponding entry in \code{outcome_method}. Contrast regression
 #' is not available for binary outcomes. Continuous outcomes are not implemented.
+#' The previous method names \code{"twoReg"} and \code{"contrastReg"} are
+#' accepted as aliases for \code{"two_regression"} and
+#' \code{"contrast_regression"}, respectively.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. For binary outcomes, logical treatment values
 #' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
@@ -373,12 +376,6 @@ catefit <- function(response,
       if (response == "binary") .args$initial.predictor.method <- NULL
       else .args$initial.predictor.method <- config$initial
     }
-  }
-  .args$benefit_method <- NULL
-  .args$outcome_method <- NULL
-  .args$score.method <- methods
-  if ("outcome_model" %in% names(.args)) {
-    names(.args)[names(.args) == "outcome_model"] <- "cate.model"
   }
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)

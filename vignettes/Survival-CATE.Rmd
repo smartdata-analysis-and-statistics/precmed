@@ -36,17 +36,26 @@ library(dplyr)
 library(ggplot2)
 library(survival)
 survival_data <- simulate_survival(n = 4000, seed = 20261114)
-tau0 <- with(survival_data,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 ```
 
-The synthetic data record time to first relapse or censoring. The illustrative horizon `tau0` is the smaller 95th percentile of observed follow-up in the two arms; it does not guarantee adequate follow-up. Choose a clinically meaningful horizon and inspect support near it. Scores are interpreted on the conditional RMTL-ratio scale at that horizon.
+The synthetic data record time to first relapse or censoring.
 
 ## Estimate CATE scores
 
 Chapter 17 describes treatment effect heterogeneity and CATE prediction [@hoogland2026introduction]. In this example, scores are on the log-RMTL-ratio scale, so exponentiating a score gives an estimated conditional RMTL ratio. Lower scores indicate greater estimated benefit from drug 1. Fitting scores on the full dataset does not establish their performance in new patients.
 
 A population-average effect may vary across patients. We fit conditional average treatment effect (CATE) scores to rank patients by estimated treatment effect. `catefit()` fits scores and estimates score-defined subgroup effects on the full dataset; internal validation is discussed below.
+
+Restricted mean time lost (RMTL) is the horizon minus the mean event-free time up to that horizon. The scores compare RMTL under drug 1 with RMTL under drug 0, conditional on covariates. We first choose the horizon `tau0`: for this illustration, it is the smaller of the 95th percentiles of observed follow-up in the two treatment groups, as in the companion ATE example.
+
+```{r define_tau0}
+tau0 <- with(survival_data,
+             min(quantile(y[trt == "drug1"], 0.95),
+                 quantile(y[trt == "drug0"], 0.95)))
+tau0
+```
+
+This choice uses observed times, including censoring, and does not guarantee adequate follow-up. In practice, choose a clinically meaningful horizon and inspect numbers at risk and censoring near it in both groups.
 
 
 The mandatory arguments in `catefit()` are:
@@ -107,10 +116,10 @@ fit_cate <- catefit(
 
 The fitted object contains scores, available score coefficients, and estimated treatment effects in score-defined subgroups. These are results from the fitting sample, not an assessment of performance in new patients.
 
-The fitted scores are the log-transformed estimated CATE scores for each subject. The relationship between covariates and the score depends on the scoring method. For survival outcomes, lower scores correspond to high responders to drug 1 when `higher.y` = TRUE; higher scores correspond to high responders when `higher.y` = FALSE. In our example, the survival outcome is time to first relapse, which is a negative event, so higher values indicate later onset of the first relapse. Hence, we specify `higher.y` = TRUE in the example. Each subject has 1 CATE score so the length of this output is 4,000 for our toy example. Use `predict()` to retrieve scores for the original analysis sample; prediction for new data is not currently supported. Below are the contrast-regression scores for the first 6 subjects.
+The fitted scores are the log-transformed estimated CATE scores for each subject. The relationship between covariates and the score depends on the scoring method. For survival outcomes, lower scores correspond to high responders to drug 1 when `higher.y` = TRUE; higher scores correspond to high responders when `higher.y` = FALSE. In our example, the survival outcome is time to first relapse, which is a negative event, so higher values indicate later onset of the first relapse. Hence, we specify `higher.y` = TRUE in the example. Each subject has a score for each fitted method. Pass `fit_cate` to `predict()` and use `method = "contrast_regression"` for the contrast-regression score or `method = "random_forest"` for the T-learner score. The returned scores correspond to the original analysis sample; prediction for new data is not currently supported. Below are the first six contrast-regression scores.
 
 ```{r print_catefit.score, eval = T, echo = T}
-scores <- predict(fit_cate, method = "contrastReg")
+scores <- predict(fit_cate, method = "contrast_regression")
 head(scores)
 ```
 
@@ -130,7 +139,7 @@ coefficients. Coefficient confidence intervals are not currently available for
 survival fits, so `confint()` cannot be used for this example.
 
 ```{r print_catefit.coefs, eval = T, echo = T}
-coef(fit_cate, method = "contrastReg")
+coef(fit_cate, method = "contrast_regression")
 ```
 
 The contrast-regression coefficients above describe how the fitted log-RMTL score changes with each covariate. They are estimates from these synthetic data.
@@ -142,9 +151,9 @@ estimates use the same data as the score fit; the validation section below
 assesses their performance in held-out data.
 
 ```{r print_catefit.ate, eval = T, echo = T}
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "rmtl")
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "cumulative_hr")
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "risk0")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "rmtl")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "cumulative_hr")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "risk0")
 ```
 
 The `risk0` measure is the estimated event risk under drug 0, not a treatment

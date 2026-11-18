@@ -4,20 +4,19 @@
 #' among the following: Linear regression, boosting, two regressions, contrast regression, random forest and
 #' generalized additive model.
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-#' \code{NULL} uses \code{cate.model}.
+#' @param data A data frame containing the variables in the outcome and treatment models;
+#' a data frame with \code{n} rows (1 row per observation).
+#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
+#' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
+#' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
 #' The treatment must appear on the left-hand side.
 #' The treatment must be a numeric vector coded as 0/1.
 #' If data are from a RCT, specify \code{ps.model} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome and treatment models;
-#' a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'},
-#' \code{'contrastReg'}, \code{'randomForest'}, \code{'gam'}.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
+#' \code{NULL} uses \code{outcome_model}.
+#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of
@@ -182,8 +181,9 @@
 #'
 
 catefitmean <- function(data,
-                        score.method,
-                        cate.model,
+                        outcome_model = NULL,
+                        outcome_method = NULL,
+                        benefit_method = NULL,
                         ps.model,
                         ps.method = "glm",
                         init.model = NULL,
@@ -205,6 +205,12 @@ catefitmean <- function(data,
                         seed = NULL,
                         verbose = 0,
                         ps.control = list(), rf.control = list(), ...) {
+  old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
+  config <- resolve_catefit_arguments("continuous", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, missing(initial.predictor.method))
+  cate.model <- config$outcome_model
+  score.method <- config$scores
+  initial.predictor.method <- config$initial
   check_score_method("continuous", score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)

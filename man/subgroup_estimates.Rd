@@ -10,7 +10,10 @@ subgroup_estimates(object, method = NULL, measure = NULL)
 \item{object}{A binary, count or survival \code{catefit} object.}
 
 \item{method}{One scoring method used to fit the object, such as
-\code{"contrastReg"}. If omitted, it is inferred when exactly one method is available.}
+\code{"contrast_regression"} or a T-learner outcome method such as
+\code{"poisson"}. The same method selectors as \code{predict()} are
+accepted; see \code{\link{catefit-extract}}. If omitted, it is inferred
+when exactly one method is available.}
 
 \item{measure}{For binary outcomes, \code{"risk_difference"} (risk under
 treatment 1 minus treatment 0). For count outcomes, \code{"rate_ratio"}. For survival outcomes,

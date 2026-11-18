@@ -6,8 +6,9 @@
 \usage{
 catefitbinary(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
@@ -29,10 +30,11 @@ catefitbinary(
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{One or more of \code{"logistic"}, \code{"twoReg"}, and
-\code{"boosting"}.}
+\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
 
-\item{cate.model}{A formula specifying the binary outcome and score covariates.}
+\item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
+
+\item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
@@ -94,7 +96,7 @@ boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method
 or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{init.model}{Optional formula for the initial logistic outcome models
-used by \code{twoReg}; \code{NULL} uses \code{cate.model}.}
+used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
@@ -109,6 +111,8 @@ Fit binary-outcome CATE scores and estimate risk differences in nested
 subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
 }
 \details{
+The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+
 See the Binary outcomes section of \code{\link{catefit}} for the score
 methods, their assumptions, and interpretation. Subgroup effects are estimated
 on the fitting data and do not provide independent validation.
@@ -116,8 +120,10 @@ on the fitting data and do not provide independent validation.
 \examples{
 \donttest{
 dat <- simulate_binary(n = 400, seed = 2026)
-fit <- catefitbinary(data = dat, score.method = "logistic",
-                     cate.model = y ~ age + previous_treatment,
+fit <- catefitbinary(data = dat,
+                     outcome_model = y ~ age + previous_treatment,
+                     outcome_method = "logistic",
+                     benefit_method = "t_learner",
                      ps.model = trt ~ age + previous_treatment,
                      seed = 2026)
 }

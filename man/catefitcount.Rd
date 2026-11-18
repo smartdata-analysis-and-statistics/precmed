@@ -6,8 +6,9 @@
 \usage{
 catefitcount(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   initial.predictor.method = "boosting",
@@ -36,12 +37,11 @@ catefitcount(
 \item{data}{A data frame containing the variables in the outcome and treatment model; a data frame with \code{n} rows
 (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
-and \code{'negBin'}.}
+\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
+
+\item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
 \item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
@@ -55,7 +55,7 @@ two-way interactions (added to the model if interactions are not specified in \c
 Relevant only when \code{ps.model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{init.model} (or \code{cate.model} when omitted). Only applies
+outcome predictions conditional on the covariates in \code{init.model} (or \code{outcome_model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
 include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
 Default is \code{'boosting'}.}
@@ -78,7 +78,7 @@ Default is \code{seq(0.5, 1, length = 6)}.}
 
 \item{xvar.smooth}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
+from the variables listed in \code{init.model} (or \code{outcome_model} when omitted).
 Default is \code{NULL}, which uses all initial outcome-model covariates.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
@@ -137,7 +137,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
+and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
@@ -201,6 +201,8 @@ among the following: Poisson regression, boosting, two regressions, contrast reg
 negative binomial.
 }
 \details{
+The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+
 The CATE score represents an individual-level treatment effect, estimated with
 either Poisson regression, boosting or negative binomial regression applied separately by
 treatment group or with two doubly robust estimators, two regressions and contrast regression
@@ -224,10 +226,11 @@ validation to reduce optimism.
 }
 \examples{
 fit <- catefitcount(data = countExample,
-                    score.method = "poisson",
-                    cate.model = y ~ age + female + previous_treatment +
+                    outcome_model = y ~ age + female + previous_treatment +
                                  previous_cost + previous_number_relapses +
                                  offset(log(years)),
+                    outcome_method = "poisson",
+                    benefit_method = "t_learner",
                     ps.model = trt ~ age + previous_treatment,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)

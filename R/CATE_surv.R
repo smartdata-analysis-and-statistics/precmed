@@ -4,22 +4,21 @@
 #' up to 5 scoring methods among the following: Random forest, boosting, poisson regression,
 #' two regressions, and contrast regression.
 #'
-#' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
+#' @param data A data frame containing the variables in the outcome, treatment,
+#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
+#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
+#' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
+#' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
 #' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
 #' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
-#' @param data A data frame containing the variables in the outcome, treatment,
-#' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
-#' \code{'contrastReg'}.
+#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
+#' and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.
+#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #' @param ipcw.model A formula describing the censoring model used for inverse
 #' probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
 #' which corresponds to specifying the censoring model with the same covariates as the outcome model
-#' \code{cate.model} plus the treatment.
+#' \code{outcome_model} plus the treatment.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Default is \code{followup.time = NULL},
 #' which corresponds to unknown potential censoring time.
@@ -51,7 +50,7 @@
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on \code{init.model} (or \code{cate.model} when omitted). Only applies
+#' outcome predictions conditional on \code{init.model} (or \code{outcome_model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
 #' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
 #' Default is \code{'randomForest'}.
@@ -208,9 +207,10 @@
 #'                                quantile(y[trt == "drug0"], 0.95)))
 #'
 #' fit <- catefitsurv(data = survivalExample,
-#'                    score.method = "randomForest",
-#'                    cate.model = Surv(y, d) ~ age + female + previous_cost +
+#'                    outcome_model = Surv(y, d) ~ age + female + previous_cost +
 #'                                              previous_number_relapses,
+#'                    outcome_method = "random_forest",
+#'                    benefit_method = "t_learner",
 #'                    ps.model = trt ~ age + previous_treatment,
 #'                    ipcw.model = ~ age + previous_cost + previous_treatment,
 #'                    tau0 = tau0,
@@ -238,8 +238,9 @@
 #' @export
 
 catefitsurv <- function(data,
-                        score.method,
-                        cate.model,
+                        outcome_model = NULL,
+                        outcome_method = NULL,
+                        benefit_method = NULL,
                         ps.model,
                         ps.method = "glm",
                         initial.predictor.method = "randomForest",
@@ -264,6 +265,12 @@ catefitsurv <- function(data,
                         seed = NULL,
                         verbose = 0,
                         rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL, ...) {
+  old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
+  config <- resolve_catefit_arguments("survival", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, missing(initial.predictor.method))
+  cate.model <- config$outcome_model
+  score.method <- config$scores
+  initial.predictor.method <- config$initial
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)

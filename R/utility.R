@@ -333,8 +333,80 @@ check_score_method <- function(response, score.method) {
          paste(shQuote(allowed), collapse = ", "), ".", call. = FALSE)
 }
 
+# Rematch calls using the original outcome-specific positional order.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+rematch_catefit_legacy_call <- function(fun, call, env) {
+  call_names <- names(as.list(call))
+  matched <- as.list(match.call(definition = fun, call = call))[-1]
+  candidate <- if ("outcome_model" %in% names(matched) &&
+                   (is.null(call_names) || !"outcome_model" %in% call_names))
+    tryCatch(eval(matched$outcome_model, env), error = function(e) NULL) else NULL
+  old_positional <- is.character(candidate) && length(candidate) > 0L &&
+    all(candidate %in% c("logistic", "boosting", "poisson", "twoReg", "contrastReg",
+                         "negBin", "randomForest", "gam", "gaussian",
+                         "t_learner", "two_regression", "contrast_regression"))
+  old_named <- !is.null(call_names) && any(call_names %in% c("score.method", "cate.model")) &&
+    !any(call_names %in% c("benefit_method", "outcome_model"))
+  has_alias <- !is.null(call_names) && any(call_names %in% c("score.method", "cate.model"))
+  if (!old_positional && !has_alias) return(NULL)
+  if (old_positional || old_named) {
+    old_formals <- as.list(formals(fun))
+    old_formals$score.method <- NULL
+    old_formals$cate.model <- NULL
+    # Assigning NULL removes a list element; retain explicit defaulted formals.
+    old_formals["score.method"] <- list(NULL)
+    old_formals["cate.model"] <- list(NULL)
+    first <- c("data", "score.method", "cate.model")
+    last <- c("outcome_model", "outcome_method", "benefit_method", "...")
+    old_formals <- old_formals[c(first, setdiff(names(old_formals), c(first, last)), last)]
+    old_signature <- eval(call("function", as.pairlist(old_formals), quote(NULL)))
+    args <- as.list(match.call(definition = old_signature, call = call))[-1]
+  } else args <- matched
+  for (alias in c("score.method", "cate.model")) {
+    replacement <- if (alias == "score.method") "benefit_method" else "outcome_model"
+    if (alias %in% names(args)) {
+      if (replacement %in% names(args)) stop("Specify only ", replacement, " or ", alias, ", not both.", call. = FALSE)
+      names(args)[names(args) == alias] <- replacement
+    }
+  }
+  args
+}
+
+# Resolve the public and legacy outcome-specific CATE interfaces.
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+resolve_catefit_arguments <- function(response, outcome_model, outcome_method, benefit_method,
+                                      cate.model, score.method, initial = NULL,
+                                      initial_missing = TRUE) {
+  if (!is.null(outcome_model) && !is.null(cate.model))
+    stop("Specify only outcome_model or cate.model, not both.", call. = FALSE)
+  if (!is.null(benefit_method) && !is.null(score.method))
+    stop("Specify only benefit_method or score.method, not both.", call. = FALSE)
+  model <- if (!is.null(outcome_model)) outcome_model else cate.model
+  methods <- if (!is.null(benefit_method)) benefit_method else score.method
+  if (is.null(methods)) stop("benefit_method must be supplied.", call. = FALSE)
+  if (is.null(outcome_method)) {
+    if (is.character(methods) && any(methods %in% c("t_learner", "two_regression", "contrast_regression")))
+      stop("outcome_method must be supplied for the selected benefit_method.", call. = FALSE)
+    check_score_method(response, methods)
+    if (is.null(model)) stop("outcome_model must be supplied.", call. = FALSE)
+    return(list(outcome_model = model, scores = methods, initial = initial))
+  }
+  config <- resolve_benefit_config(response, methods, outcome_method)
+  if (is.null(model)) stop("outcome_model must be supplied.", call. = FALSE)
+  if (!is.null(config$initial) && response != "binary") {
+    if (!initial_missing && !is.null(initial) && !identical(initial, config$initial))
+      stop("initial.predictor.method must agree with the outcome_method for two_regression and contrast_regression.", call. = FALSE)
+    initial <- config$initial
+  }
+  list(outcome_model = model, scores = config$scores, initial = initial)
+}
+
 # Author: Thomas Debray
 resolve_benefit_config <- function(response, benefit_method, outcome_method) {
+  if (is.character(benefit_method)) {
+    benefit_method[!is.na(benefit_method) & benefit_method == "twoReg"] <- "two_regression"
+    benefit_method[!is.na(benefit_method) & benefit_method == "contrastReg"] <- "contrast_regression"
+  }
   if (!is.character(benefit_method) || !length(benefit_method) || anyNA(benefit_method) ||
       any(!benefit_method %in% c("t_learner", "two_regression", "contrast_regression")))
     stop("benefit_method must contain t_learner, two_regression, or contrast_regression.", call. = FALSE)

@@ -98,7 +98,7 @@ The variable `years` records follow-up time in years and supplies the exposure
 time for the rate-model offset. The treatment variable `trt` identifies drug0
 or drug1.
 
-For convenience, `age` is centered at 48 years and `previous_cost` is centered at 13,824 USD and divided by 20,172 USD.
+For convenience, `age` is centered at approximately 46.2 years and `previous_cost` is centered at approximately 13,824 USD and divided by 20,172 USD.
 
 ```{r, include = FALSE}
 data(countExample) # Restore the centered data for analysis.

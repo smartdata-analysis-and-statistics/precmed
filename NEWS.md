@@ -56,9 +56,31 @@
 
 ## Minor changes
 
+* Outcome-specific `catefitbinary()`, `catefitcount()`, `catefitsurv()`, and
+  `catefitmean()` accept `outcome_model`, `benefit_method`, and `outcome_method`
+  in the same order as `catefit()`. Existing dotted arguments and positional calls remain supported.
+  Continuous-outcome fitting remains unimplemented.
+
+* `predict()` for `catefit` objects accepts
+  `"two_regression"`, `"contrast_regression"`, `"contrastreg"`,
+  `"negative_binomial"`, and `"random_forest"` alongside the score names.
+  `"t_learner"` selects a T-learner when exactly one is present; otherwise select it by its
+  outcome method. `coef()`, `confint()`, and `subgroup_estimates()` accept the
+  same selectors, subject to coefficient and inference availability. Prediction
+  still returns scores for the fitting sample.
+
+* `catefit()` accepts the established method names `"twoReg"` and
+  `"contrastReg"` in `benefit_method` as aliases for `"two_regression"` and
+  `"contrast_regression"`.
+
+* Clarified the package description and overview to identify AIPW ATE
+  estimators, T-learner CATE scores, and the associated methodological work.
+
 * Reordered the vignette navigation to introduce ATE methods and examples
   before CATE methods and examples. The CATE methods vignette now begins with
   a cross-outcome introduction to CATE scores, T-learners, and validation.
+  The binary and count CATE guides explain the outcome and treatment formulas
+  alongside score fitting.
 
 * `catefit()` accepts paired `benefit_method` and `outcome_method` vectors,
   with `outcome_model` for the common outcome formula. The previous named

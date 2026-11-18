@@ -4,10 +4,19 @@
 #' available, confidence intervals for score coefficients from a \code{catefit}.
 #'
 #' @param object An object of class \code{catefit}.
-#' @param method A single scoring method used to fit the object, such as
-#' \code{"contrastReg"}. For \code{predict()}, it may be omitted if exactly
-#' one method is available. For \code{coef()}, omission returns the stored
-#' coefficient table. For \code{confint()}, the default is \code{"contrastReg"}.
+#' @param method A single score to extract from the fitted object. Use
+#' \code{"two_regression"} or
+#' \code{"contrast_regression"} for those procedures, or the outcome method
+#' (such as \code{"logistic"}, \code{"boosting"}, \code{"poisson"},
+#' \code{"negative_binomial"}, or \code{"random_forest"}) for a T-learner.
+#' The established stored names \code{"twoReg"}, \code{"contrastReg"},
+#' \code{"negBin"}, and \code{"randomForest"} are also accepted; contrast
+#' regression can also be selected with \code{"contrastreg"}. If exactly
+#' one T-learner score is present, \code{"t_learner"} selects it. If exactly
+#' one score of any kind is present, \code{method} may be omitted from
+#' \code{predict()}. For \code{coef()}, omission returns the coefficient table.
+#' For \code{confint()}, the default is \code{"contrastReg"}. Coefficients
+#' and confidence intervals are available only for certain score methods.
 #' @param newdata New data are not currently supported; omit this argument to
 #' retrieve scores for the original analysis sample in its original order.
 #' @param parm Coefficient names or positions; omitted selects all coefficients.
@@ -19,7 +28,10 @@
 #' limits for the selected coefficients.
 #' @details Scores for count and survival outcomes are on the log ratio scale;
 #' binary scores are on the risk-difference scale. They describe fitted scores,
-#' not validated individual treatment effects. Confidence intervals require
+#' not validated individual treatment effects. Pass the fitted \code{catefit}
+#' object to \code{predict()}, not an individual outcome model in its \code{fit}
+#' component. When multiple T-learners are fitted, select one by its outcome
+#' method. Confidence intervals require
 #' stored coefficient standard errors, currently available for contrast
 #' regression in count and continuous fits only. They are not available for
 #' survival or binary fits. Methods that do not fit linear scores, such as
@@ -28,14 +40,39 @@
 #' @name catefit-extract
 NULL
 
+# Normalize score selectors consistently across CATE extraction methods.
+# Author: Thomas Debray
+resolve_cate_score_method <- function(method, methods) {
+  if (is.character(method) && length(method) == 1L && !is.na(method)) {
+    aliases <- c(two_regression = "twoReg", contrast_regression = "contrastReg",
+                 contrastreg = "contrastReg", negative_binomial = "negBin",
+                 random_forest = "randomForest")
+    if (method %in% names(aliases)) method <- unname(aliases[[method]])
+    if (method == "t_learner") {
+      candidates <- intersect(methods, c("logistic", "poisson", "negBin", "boosting", "randomForest", "gam", "gaussian"))
+      if (length(candidates) != 1L)
+        stop("Select one T-learner by its outcome method. Available T-learner scores: ",
+             if (length(candidates)) paste(candidates, collapse = ", ") else "none", ".", call. = FALSE)
+      method <- candidates
+    }
+  }
+  method
+}
+
+# Author: Thomas Debray
+catefit_score_methods <- function(object) {
+  keys <- setdiff(grep("^score\\.", names(object), value = TRUE), "score.method")
+  keys <- keys[!vapply(object[keys], is.null, logical(1))]
+  sub("^score\\.", "", keys)
+}
+
 #' @rdname catefit-extract
 #' @export
 predict.catefit <- function(object, newdata = NULL, method = NULL, ...) {
   if (!is.null(newdata)) stop("Prediction for new data is not supported for catefit objects.")
-  keys <- setdiff(grep("^score\\.", names(object), value = TRUE), "score.method")
-  keys <- keys[!vapply(object[keys], is.null, logical(1))]
-  methods <- sub("^score\\.", "", keys)
+  methods <- catefit_score_methods(object)
   if (is.null(method) && length(methods) == 1L) method <- methods
+  method <- resolve_cate_score_method(method, methods)
   if (!is.character(method) || length(method) != 1L || is.na(method) || !method %in% methods)
     stop("Specify one available scoring method: ", paste(methods, collapse = ", "), ".")
   object[[paste0("score.", method)]]
@@ -46,6 +83,9 @@ predict.catefit <- function(object, newdata = NULL, method = NULL, ...) {
 coef.catefit <- function(object, method = NULL, ...) {
   cf <- object$coefficients
   if (is.null(method)) return(cf)
+  methods <- catefit_score_methods(object)
+  if (!length(methods)) methods <- setdiff(names(cf), "SE_contrastReg")
+  method <- resolve_cate_score_method(method, methods)
   if (!is.character(method) || length(method) != 1L || is.na(method) ||
       is.null(cf) || !method %in% setdiff(names(cf), "SE_contrastReg"))
     stop("No score coefficients are available for the requested method.")
@@ -57,6 +97,9 @@ coef.catefit <- function(object, method = NULL, ...) {
 confint.catefit <- function(object, parm, level = 0.95, method = "contrastReg", ...) {
   if (!is.numeric(level) || length(level) != 1L || !is.finite(level) || level <= 0 || level >= 1)
     stop("level must be a single number strictly between 0 and 1.")
+  methods <- catefit_score_methods(object)
+  if (!length(methods)) methods <- setdiff(names(object$coefficients), "SE_contrastReg")
+  method <- resolve_cate_score_method(method, methods)
   estimates <- coef(object, method = method)
   if (!identical(method, "contrastReg") || !object$response %in% c("count", "continuous") ||
       is.null(object$coefficients$SE_contrastReg))

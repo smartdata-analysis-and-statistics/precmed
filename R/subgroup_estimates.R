@@ -5,7 +5,10 @@
 #'
 #' @param object A binary, count or survival \code{catefit} object.
 #' @param method One scoring method used to fit the object, such as
-#' \code{"contrastReg"}. If omitted, it is inferred when exactly one method is available.
+#' \code{"contrast_regression"} or a T-learner outcome method such as
+#' \code{"poisson"}. The same method selectors as \code{predict()} are
+#' accepted; see \code{\link{catefit-extract}}. If omitted, it is inferred
+#' when exactly one method is available.
 #' @param measure For binary outcomes, \code{"risk_difference"} (risk under
 #' treatment 1 minus treatment 0). For count outcomes, \code{"rate_ratio"}. For survival outcomes,
 #' one of \code{"rmtl"} (RMTL ratio), \code{"cumulative_hr"}
@@ -32,10 +35,9 @@ subgroup_estimates <- function(object, method = NULL, measure = NULL) {
     stop("object must be a binary, count or survival catefit object.")
   if (is.null(measure)) measure <- switch(object$response, binary = "risk_difference",
                                            count = "rate_ratio", survival = "rmtl")
-  keys <- setdiff(grep("^score\\.", names(object), value = TRUE), "score.method")
-  keys <- keys[!vapply(object[keys], is.null, logical(1))]
-  methods <- sub("^score\\.", "", keys)
+  methods <- catefit_score_methods(object)
   if (is.null(method) && length(methods) == 1L) method <- methods
+  method <- resolve_cate_score_method(method, methods)
   if (!is.character(method) || length(method) != 1L || is.na(method) || !method %in% methods)
     stop("Specify one available scoring method: ", paste(methods, collapse = ", "), ".")
   aliases <- c(rate.ratio = "rate_ratio", cumulative.hr = "cumulative_hr", conditional.hr = "conditional_hr",

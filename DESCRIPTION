@@ -36,13 +36,15 @@ Authors@R: c(person(given = "Lu",
 Description: Methods for estimating average treatment effects (ATE) and
     conditional average treatment effects (CATE) in randomized trials and
     observational studies with binary, count or time-to-event outcomes.
-    The package provides doubly robust ATE estimation and CATE score fitting,
-    with tools for cross-validation and visualization of CATE prediction models.
-    For time-to-event outcomes,
-    the package estimates restricted mean survival and marginal cumulative
-    hazard ratios at a specified horizon, using outcome and censoring models.
-    Ratio-based methods for treatment-covariate interactions build on
-    Yadlowsky et al. (2020) <doi:10.1080/01621459.2020.1772080>.
+    ATE estimators use augmented inverse probability weighting, with censoring
+    adjustment for time-to-event outcomes. CATE score methods include
+    T-learners that contrast treatment-specific outcome predictions, as
+    described by Kunzel et al. (2019) <doi:10.1073/pnas.1804597116>, and
+    doubly robust methods building on Yadlowsky et al. (2020)
+    <doi:10.1080/01621459.2020.1772080>. Tools support visualization of fitted
+    CATE scores and cross-validation. For time-to-event outcomes, the package
+    estimates restricted mean survival times and marginal restricted mean time
+    lost and cumulative hazard ratios at a specified horizon.
     The visualization and interpretation of individualized treatment rules are
     discussed by Jiang et al. (2026) <doi:10.1201/9781003300809-20>.
 Depends: R (>= 3.5.0)
