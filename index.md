@@ -13,19 +13,28 @@ medicine.
 
 Use **precmed** when you want to:
 
-- Estimate the ATE comparing two treatments using doubly robust methods.
+- Estimate the ATE comparing two treatments using doubly robust
+  augmented inverse probability weighting (AIPW).
 - Explore treatment effect heterogeneity by developing and assessing
   CATE models for binary, count and survival outcomes.
 - Visualize and compare estimated effects across patient subgroups.
 
+For CATE scores, T-learners compare predictions from outcome models
+fitted separately in each treatment arm. The package also provides
+doubly robust two-regression and contrast-regression scores, as well as
+cross-validation and subgroup visualizations. The ratio-based doubly
+robust methods build on Yadlowsky et al. (2021); the T-learner framework
+is described by [Künzel et
+al. (2019)](https://doi.org/10.1073/pnas.1804597116). Related methods
+for treatment selection are described by Zhao et al. (2013), and Jiang
+et al. (2026) discuss interpretation and visualization.
+
 The methods support causal inference under appropriate assumptions; for
 observational data, these include adequate control of confounding and
-sufficient treatment overlap. The package combines outcome-regression
-approaches, such as Poisson models fitted separately in each treatment
-group, with doubly robust methods for estimating and validating
-treatment effects. Its methods build on work by Zhao et al. (2013) and
-Yadlowsky et al. (2021); Jiang et al. (2026) illustrate their
-application and interpretation.
+sufficient treatment overlap. Survival analyses also use a censoring
+model for inverse probability of censoring weighting and require
+appropriate censoring assumptions. Fitting a CATE score and assessing
+its performance are distinct tasks.
 
 See [Is precmed suitable for
 me?](https://smartdata-analysis-and-statistics.github.io/precmed/articles/quick-start.html#is-precmed-suitable-for-me)

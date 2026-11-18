@@ -17,8 +17,12 @@ subgroup_estimates(object, method = NULL, measure = NULL)
 
 - method:
 
-  One scoring method used to fit the object, such as `"contrastReg"`. If
-  omitted, it is inferred when exactly one method is available.
+  One scoring method used to fit the object, such as
+  `"contrast_regression"` or a T-learner outcome method such as
+  `"poisson"`. The same method selectors as
+  [`predict()`](https://rdrr.io/r/stats/predict.html) are accepted; see
+  [`catefit-extract`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md).
+  If omitted, it is inferred when exactly one method is available.
 
 - measure:
 

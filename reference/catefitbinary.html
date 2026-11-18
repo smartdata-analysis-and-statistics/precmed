@@ -62,8 +62,9 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">catefitbinary</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
-<span>  <span class="va">score.method</span>,</span>
-<span>  <span class="va">cate.model</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">ps.model</span>,</span>
 <span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
@@ -91,13 +92,16 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
 and censoring models (if specified); a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
-<dt id="arg-score-method">score.method<a class="anchor" aria-label="anchor" href="#arg-score-method"></a></dt>
-<dd><p>One or more of <code>"logistic"</code>, <code>"twoReg"</code>, and
-<code>"boosting"</code>.</p></dd>
+<dt id="arg-outcome-model">outcome_model<a class="anchor" aria-label="anchor" href="#arg-outcome-model"></a></dt>
+<dd><p>Outcome and score covariate formula; replaces <code>cate.model</code>.</p></dd>
 
 
-<dt id="arg-cate-model">cate.model<a class="anchor" aria-label="anchor" href="#arg-cate-model"></a></dt>
-<dd><p>A formula specifying the binary outcome and score covariates.</p></dd>
+<dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
+<dd><p>Outcome-model methods paired with <code>benefit_method</code>; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
+
+
+<dt id="arg-benefit-method">benefit_method<a class="anchor" aria-label="anchor" href="#arg-benefit-method"></a></dt>
+<dd><p>Score-construction methods; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
 
 
 <dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
@@ -187,7 +191,7 @@ or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</c
 
 <dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
 <dd><p>Optional formula for the initial logistic outcome models
-used by <code>twoReg</code>; <code>NULL</code> uses <code>cate.model</code>.</p></dd>
+used by <code>twoReg</code>; <code>NULL</code> uses <code>outcome_model</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -203,7 +207,8 @@ used by <code>twoReg</code>; <code>NULL</code> uses <code>cate.model</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>See the Binary outcomes section of <code><a href="catefit.html">catefit</a></code> for the score
+    <p>The legacy arguments <code>score.method</code> and <code>cate.model</code> are accepted through <code>...</code>; see <code><a href="catefit.html">catefit</a></code>.</p>
+<p>See the Binary outcomes section of <code><a href="catefit.html">catefit</a></code> for the score
 methods, their assumptions, and interpretation. Subgroup effects are estimated
 on the fitting data and do not provide independent validation.</p>
     </div>
@@ -216,8 +221,10 @@ on the fitting data and do not provide independent validation.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_binary.html">simulate_binary</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">400</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">catefitbinary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>, score.method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
-<span class="r-in"><span>                     cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">catefitbinary</span><span class="op">(</span>data <span class="op">=</span> <span class="va">dat</span>,</span></span>
+<span class="r-in"><span>                     outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                     outcome_method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
+<span class="r-in"><span>                     benefit_method <span class="op">=</span> <span class="st">"t_learner"</span>,</span></span>
 <span class="r-in"><span>                     ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                     seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>

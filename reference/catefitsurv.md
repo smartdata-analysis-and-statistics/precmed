@@ -10,8 +10,9 @@ regression.
 ``` r
 catefitsurv(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   initial.predictor.method = "randomForest",
@@ -52,16 +53,19 @@ catefitsurv(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'randomForest'`, `'boosting'`, `'poisson'`,
-  `'twoReg'`, and `'contrastReg'`.
+  Outcome and score covariate formula; replaces `cate.model`.
 
-- cate.model:
+- outcome_method:
 
-  A standard `Surv` formula describing the outcome model to be fitted.
-  The outcome must appear on the left-hand side.
+  Outcome-model methods paired with `benefit_method`; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
+- benefit_method:
+
+  Score-construction methods; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps.model:
 
@@ -83,7 +87,7 @@ catefitsurv(
 - initial.predictor.method:
 
   A character vector for the method used to get initial outcome
-  predictions conditional on `init.model` (or `cate.model` when
+  predictions conditional on `init.model` (or `outcome_model` when
   omitted). Only applies when `score.method` includes `'twoReg'` or
   `'contrastReg'`. Allowed values include one of `'randomForest'`,
   `'boosting'` and `'logistic'` (fastest). Default is `'randomForest'`.
@@ -94,7 +98,7 @@ catefitsurv(
   of censoring weighting (IPCW). The left-hand side must be empty.
   Default is `ipcw.model = NULL`, which corresponds to specifying the
   censoring model with the same covariates as the outcome model
-  `cate.model` plus the treatment.
+  `outcome_model` plus the treatment.
 
 - ipcw.method:
 
@@ -259,7 +263,7 @@ catefitsurv(
 - init.model:
 
   Optional formula for initial outcome predictions in `twoReg` and
-  `contrastReg`; defaults to `cate.model`. The outcome must match.
+  `contrastReg`; defaults to `outcome_model`. The outcome must match.
 
 - ...:
 
@@ -379,6 +383,10 @@ components:
 
 ## Details
 
+The legacy arguments `score.method` and `cate.model` are accepted
+through `...`; see
+[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
 The CATE score represents an individual-level treatment effect for
 survival data, estimated with random forest, boosting, Poisson
 regression, and the doubly robust estimator (two regressions, Yadlowsky,
@@ -426,9 +434,10 @@ tau0 <- with(survivalExample, min(quantile(y[trt == "drug1"], 0.95),
                                quantile(y[trt == "drug0"], 0.95)))
 
 fit <- catefitsurv(data = survivalExample,
-                   score.method = "randomForest",
-                   cate.model = Surv(y, d) ~ age + female + previous_cost +
+                   outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                              previous_number_relapses,
+                   outcome_method = "random_forest",
+                   benefit_method = "t_learner",
                    ps.model = trt ~ age + previous_treatment,
                    ipcw.model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,

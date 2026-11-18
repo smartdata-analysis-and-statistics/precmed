@@ -14,9 +14,6 @@ fitting sample are not independent validation.
 library(precmed)
 binaryExample <- simulate_binary(n = 4000, seed = 2026,
                                  followup = 1, threshold = 0)
-outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
-  previous_number_relapses
-ps_formula <- trt ~ age + previous_treatment
 ```
 
 The binary outcome indicates at least one relapse within one year;
@@ -26,20 +23,35 @@ and the simulation parameters are illustrative.
 
 ## Estimate CATE scores
 
-CATE scores estimate the difference in relapse probability for patients
-with different baseline covariates. The `logistic` method fits a
-separate logistic outcome model in each treatment arm and subtracts
-their predicted risks; `twoReg` cross-fits separate logistic outcome
-models and a treatment model, then projects augmented outcomes for each
-arm onto the outcome-model design. The difference is a doubly robust
-linear projection of the risk difference if either the treatment model
-or both outcome models are correct, subject to identification,
-positivity and truncation. It need not lie between -1 and 1. The
-`boosting` method fits a Bernoulli gradient boosting model in each
-treatment arm and subtracts the predicted relapse probabilities.
-Five-fold cross-validation selects the number of trees in each arm;
-`tree.depth` and `n.trees.boosting` control the fitted trees. These
-scores are estimated on the training data; the subgroup ATEs shown by
+CATE scores estimate the difference in relapse probability under drug1
+versus drug0 for patients with given baseline covariates. We specify an
+outcome formula with the outcome and covariates used to fit the scores,
+and a treatment-model formula with treatment on the left. The treatment
+model estimates propensity scores: the probabilities of receiving each
+treatment given the covariates. It is used by the doubly robust `twoReg`
+score and subgroup estimators; the direct logistic and boosting scores
+are constructed from outcome predictions.
+
+``` r
+
+outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
+  previous_number_relapses
+ps_formula <- trt ~ age + previous_treatment
+```
+
+The `logistic` method fits a separate logistic outcome model in each
+treatment arm and subtracts their predicted risks; `twoReg` cross-fits
+separate logistic outcome models and a treatment model, then projects
+augmented outcomes for each arm onto the outcome-model design. The
+difference is a doubly robust linear projection of the risk difference
+if either the treatment model or both outcome models are correct,
+subject to identification, positivity and truncation. It need not lie
+between -1 and 1. The `boosting` method fits a Bernoulli gradient
+boosting model in each treatment arm and subtracts the predicted relapse
+probabilities. Five-fold cross-validation selects the number of trees in
+each arm; `tree.depth` and `n.trees.boosting` control the fitted trees.
+These scores are estimated on the training data; the subgroup ATEs shown
+by
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
 use the doubly robust estimator and the same data used to build the
 scores, so they may be optimistic. Chapter 17, “Introduction to methods
@@ -62,21 +74,31 @@ fit_cate <- catefit(
 ## Inspect CATE scores and subgroup estimates
 
 The fitted scores estimate differences in relapse probability for
-patients with different baseline covariates. Use
-[`predict()`](https://rdrr.io/r/stats/predict.html) to retrieve scores
-for the original analysis sample; prediction for new data is not
-currently supported. Below are the first 6 scores from the
-two-regression method.
+patients with different baseline covariates. Pass the complete
+`fit_cate` object to [`predict()`](https://rdrr.io/r/stats/predict.html)
+and use `method` to select a score. This fit contains three scores: use
+`"logistic"` for the logistic T-learner, `"two_regression"` for
+two-regression, or `"boosting"` for the boosting T-learner. The
+established name `"twoReg"` is also accepted. Because two T-learners are
+present, their outcome-method names identify which score to retrieve.
+
+[`predict()`](https://rdrr.io/r/stats/predict.html) returns the stored
+scores for the original analysis sample, in its original row order;
+prediction for new patients is not currently supported. Below are the
+first six two-regression scores.
 
 ``` r
 
-scores <- predict(fit_cate, method = "twoReg")
+scores <- predict(fit_cate, method = "two_regression")
 head(scores)
 #>             1             2             3             4             5 
 #> -1.642382e-01  6.177954e-02 -5.741223e-02  5.561457e-05 -1.572941e-01 
 #>             6 
 #>  1.046504e-01
 ```
+
+To retrieve the logistic T-learner scores instead, use
+`predict(fit_cate, method = "logistic")`.
 
 Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
 fitted score distributions. Scores are on the risk difference scale,
@@ -87,7 +109,7 @@ with zero indicating no difference in relapse probability.
 plot(fit_cate, type = "density")
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-3-1.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-4-1.png)
 
 Differences between the score distributions can reflect model
 flexibility, estimation noise or overfitting. The plot alone cannot
@@ -103,7 +125,7 @@ score coefficients are not currently available.
 
 ``` r
 
-coef(fit_cate, method = "twoReg")
+coef(fit_cate, method = "two_regression")
 #>              (Intercept)                      age                   female 
 #>              -0.16042803              -0.00747815               0.11779453 
 #>  previous_treatmentdrugB  previous_treatmentdrugC            previous_cost 
@@ -121,7 +143,7 @@ The contrast is drug 1 minus drug 0, so a negative value favors drug 1.
 
 ``` r
 
-subgroup_estimates(fit_cate, method = "twoReg", measure = "risk_difference")
+subgroup_estimates(fit_cate, method = "two_regression", measure = "risk_difference")
 #>    prop0.5   prop0.75      prop1 
 #> -0.1792806 -0.1474149 -0.1079285
 ```
@@ -163,14 +185,14 @@ fit_cv <- catecv(
 plot(fit_cv, show.abc = FALSE)
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-4-1.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-5-1.png)
 
 ``` r
 
 boxplot(fit_cv)
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-4-2.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-5-2.png)
 
 ``` r
 

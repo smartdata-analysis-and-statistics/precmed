@@ -83,10 +83,43 @@
 
 ### Minor changes
 
+- Outcome-specific
+  [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md),
+  [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md),
+  [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md),
+  and
+  [`catefitmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitmean.md)
+  accept `outcome_model`, `benefit_method`, and `outcome_method` in the
+  same order as
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+  Existing dotted arguments and positional calls remain supported.
+  Continuous-outcome fitting remains unimplemented.
+
+- [`predict()`](https://rdrr.io/r/stats/predict.html) for `catefit`
+  objects accepts `"two_regression"`, `"contrast_regression"`,
+  `"contrastreg"`, `"negative_binomial"`, and `"random_forest"`
+  alongside the score names. `"t_learner"` selects a T-learner when
+  exactly one is present; otherwise select it by its outcome method.
+  [`coef()`](https://rdrr.io/r/stats/coef.html),
+  [`confint()`](https://rdrr.io/r/stats/confint.html), and
+  [`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
+  accept the same selectors, subject to coefficient and inference
+  availability. Prediction still returns scores for the fitting sample.
+
+- [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  accepts the established method names `"twoReg"` and `"contrastReg"` in
+  `benefit_method` as aliases for `"two_regression"` and
+  `"contrast_regression"`.
+
+- Clarified the package description and overview to identify AIPW ATE
+  estimators, T-learner CATE scores, and the associated methodological
+  work.
+
 - Reordered the vignette navigation to introduce ATE methods and
   examples before CATE methods and examples. The CATE methods vignette
   now begins with a cross-outcome introduction to CATE scores,
-  T-learners, and validation.
+  T-learners, and validation. The binary and count CATE guides explain
+  the outcome and treatment formulas alongside score fitting.
 
 - [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
   accepts paired `benefit_method` and `outcome_method` vectors, with

@@ -10,8 +10,9 @@ generalized additive model.
 ``` r
 catefitmean(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   init.model = NULL,
@@ -45,16 +46,19 @@ catefitmean(
   A data frame containing the variables in the outcome and treatment
   models; a data frame with `n` rows (1 row per observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'boosting'`, `'gaussian'`, `'twoReg'`,
-  `'contrastReg'`, `'randomForest'`, `'gam'`.
+  Outcome and score covariate formula; replaces `cate.model`.
 
-- cate.model:
+- outcome_method:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side.
+  Outcome-model methods paired with `benefit_method`; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
+- benefit_method:
+
+  Score-construction methods; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps.model:
 
@@ -75,7 +79,7 @@ catefitmean(
 
   Optional formula for initial outcome predictions in `twoReg` and
   `contrastReg`. The outcome must match `cate.model`; the default `NULL`
-  uses `cate.model`.
+  uses `outcome_model`.
 
 - initial.predictor.method:
 
@@ -295,6 +299,10 @@ Returns a list containing the following components:
   linear combination of coefficients and covariates.
 
 ## Details
+
+The legacy arguments `score.method` and `cate.model` are accepted
+through `...`; see
+[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 The CATE score represents an individual-level treatment effect,
 estimated with either linear regression, boosting, random forest and

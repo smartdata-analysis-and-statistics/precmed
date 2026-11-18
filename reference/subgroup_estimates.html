@@ -73,7 +73,10 @@ subgroups in a binary, count or survival <code>catefit</code> object.</p>
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
 <dd><p>One scoring method used to fit the object, such as
-<code>"contrastReg"</code>. If omitted, it is inferred when exactly one method is available.</p></dd>
+<code>"contrast_regression"</code> or a T-learner outcome method such as
+<code>"poisson"</code>. The same method selectors as <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> are
+accepted; see <code><a href="catefit-extract.html">catefit-extract</a></code>. If omitted, it is inferred
+when exactly one method is available.</p></dd>
 
 
 <dt id="arg-measure">measure<a class="anchor" aria-label="anchor" href="#arg-measure"></a></dt>

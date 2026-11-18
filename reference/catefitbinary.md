@@ -9,8 +9,9 @@ subgroups. This is the binary-outcome interface used by
 ``` r
 catefitbinary(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   minPS = 0.01,
@@ -37,13 +38,19 @@ catefitbinary(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- score.method:
+- outcome_model:
 
-  One or more of `"logistic"`, `"twoReg"`, and `"boosting"`.
+  Outcome and score covariate formula; replaces `cate.model`.
 
-- cate.model:
+- outcome_method:
 
-  A formula specifying the binary outcome and score covariates.
+  Outcome-model methods paired with `benefit_method`; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
+- benefit_method:
+
+  Score-construction methods; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps.model:
 
@@ -137,7 +144,7 @@ catefitbinary(
 - init.model:
 
   Optional formula for the initial logistic outcome models used by
-  `twoReg`; `NULL` uses `cate.model`.
+  `twoReg`; `NULL` uses `outcome_model`.
 
 - ...:
 
@@ -152,6 +159,10 @@ requested method. Linear `twoReg` score coefficients are stored in
 `coefficients`.
 
 ## Details
+
+The legacy arguments `score.method` and `cate.model` are accepted
+through `...`; see
+[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 See the Binary outcomes section of
 [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -168,8 +179,10 @@ Thomas Debray <tdebray@fromdatatowisdom.com>
 ``` r
 # \donttest{
 dat <- simulate_binary(n = 400, seed = 2026)
-fit <- catefitbinary(data = dat, score.method = "logistic",
-                     cate.model = y ~ age + previous_treatment,
+fit <- catefitbinary(data = dat,
+                     outcome_model = y ~ age + previous_treatment,
+                     outcome_method = "logistic",
+                     benefit_method = "t_learner",
                      ps.model = trt ~ age + previous_treatment,
                      seed = 2026)
 # }

@@ -15,15 +15,15 @@ library(precmed)
 library(dplyr)
 library(ggplot2)
 data(countExample)
-countExample$age <- as.numeric(countExample$age + attr(countExample$age, "scaled:center"))
-countExample$previous_cost <- round(as.numeric(countExample$previous_cost * attr(countExample$previous_cost, "scaled:scale") + attr(countExample$previous_cost, "scaled:center")))
-countExample$female <- factor(countExample$female, levels = c(0, 1), labels = c("male", "female"))
 ```
 
 The example uses 4,000 simulated observations based on a multiple
-sclerosis claims-data scenario. The outcome is the number of relapses
-during observed follow-up, and `years` provides exposure time. The score
-is interpreted on the conditional rate-ratio scale.
+sclerosis claims-data scenario. In the packaged data, `age` is centered
+at approximately 46.2 years and `previous_cost` is centered at
+approximately 13,824 USD and divided by 20,172 USD. The outcome is the
+number of relapses during observed follow-up, and `years` provides
+exposure time. The score is interpreted on the conditional rate-ratio
+scale.
 
 ## Estimate CATE scores
 
@@ -50,8 +50,13 @@ dataset; internal validation is discussed below.
 
 We can use
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-to compare these scoring methods using the outcome and treatment
-formulas below.
+to compare these scoring methods using the formulas below. The outcome
+formula specifies relapse counts and score covariates, with a log
+follow-up offset for exposure time. The treatment-model formula
+specifies treatment and its covariates; it estimates propensity scores
+used by the doubly robust scores and subgroup estimators. The direct
+Poisson, negative binomial, and boosting scores are constructed from
+outcome predictions.
 
 The score represents an estimated conditional log rate ratio:
 exponentiating it gives the estimated rate ratio for patients with those
@@ -69,6 +74,11 @@ specify the non-mandatory arguments to fit with the data and problem at
 hand. Please see the [Function
 description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html)
 section for details.
+
+For compatibility, `benefit_method` also accepts the established names
+`"twoReg"` and `"contrastReg"` for `"two_regression"` and
+`"contrast_regression"`, respectively. The fitted scores retain their
+established names.
 
 If you run into errors or warnings with your data, it might be helpful
 to go over the descriptions to see if you need to alter the default
@@ -106,17 +116,19 @@ patients.
 The fitted scores estimate conditional log rate ratios. The relationship
 between covariates and the score depends on the scoring method. Here,
 lower scores indicate greater estimated benefit from drug 1 because
-fewer relapses are desirable. Use
-[`predict()`](https://rdrr.io/r/stats/predict.html) to retrieve scores
-for the original analysis sample; prediction for new data is not
-currently supported. Below are the contrast-regression scores for the
-first 6 patients.
+fewer relapses are desirable. Pass `fit_cate` to
+[`predict()`](https://rdrr.io/r/stats/predict.html) and choose a score
+with `method`: `"poisson"`, `"boosting"`, or `"negative_binomial"` for
+the T-learners, and `"two_regression"` or `"contrast_regression"` for
+the doubly robust procedures. The returned scores correspond to the
+original analysis sample; prediction for new data is not currently
+supported. Below are the first six contrast-regression scores.
 
 ``` r
 
-scores <- predict(fit_cate, method = "contrastReg")
+scores <- predict(fit_cate, method = "contrast_regression")
 head(scores)
-#> [1]  0.1223460  0.2463520  0.5284283 -0.8526073 -0.1546943 -0.3700465
+#> [1]  0.1223985  0.2463684  0.5284533 -0.8525778 -0.1547064 -0.3700220
 ```
 
 Use [`plot()`](https://rdrr.io/r/graphics/plot.default.html) to compare
@@ -146,22 +158,22 @@ rate-ratio score and are not themselves a validation of that score.
 
 ``` r
 
-coef(fit_cate, method = "contrastReg")
-#>              (Intercept)                      age             femalefemale 
-#>             1.105294e+00            -3.586424e-02             7.564006e-01 
+coef(fit_cate, method = "contrast_regression")
+#>              (Intercept)                      age                   female 
+#>              -0.60435660              -0.03586527               0.75637775 
 #>  previous_treatmentdrugB  previous_treatmentdrugC            previous_cost 
-#>             7.889518e-01            -1.558254e-01            -3.767755e-06 
+#>               0.78891625              -0.15584596              -0.07600948 
 #> previous_number_relapses 
-#>            -3.062789e-02
-confint(fit_cate, method = "contrastReg")
-#>                                   2.5%         97.5%
-#> (Intercept)               1.841644e-02  2.192171e+00
-#> age                      -6.174646e-02 -9.982016e-03
-#> femalefemale              6.294586e-02  1.449855e+00
-#> previous_treatmentdrugB   1.597895e-01  1.418114e+00
-#> previous_treatmentdrugC  -6.263454e-01  3.146946e-01
-#> previous_cost            -1.547269e-05  7.937181e-06
-#> previous_number_relapses -2.970358e-01  2.357801e-01
+#>              -0.03062952
+confint(fit_cate, method = "contrast_regression")
+#>                                 2.5%        97.5%
+#> (Intercept)              -1.31191969  0.103206478
+#> age                      -0.06174761 -0.009982927
+#> female                    0.06291976  1.449835753
+#> previous_treatmentdrugB   0.15975848  1.418074015
+#> previous_treatmentdrugC  -0.62636705  0.314675140
+#> previous_cost            -0.31212467  0.160105703
+#> previous_number_relapses -0.29703725  0.235778207
 ```
 
 Use
@@ -173,9 +185,9 @@ data.
 
 ``` r
 
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "rate_ratio")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "rate_ratio")
 #>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
-#> 0.5802533 0.6538655 0.7712538 0.8185615 0.9570745 1.0640578
+#> 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579
 ```
 
 ## Internally validate CATE scores
@@ -361,20 +373,20 @@ both `higher.y` and outcome type.
 
 fit_cv$ate.contrastReg$ate.est.train.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 0.6125202 0.6352505 0.5639550 0.6292319 0.5745308
-#> prop0.6 0.6354691 0.6965326 0.6101321 0.6748155 0.6940572
-#> prop0.7 0.7451821 0.8142458 0.7558228 0.7635836 0.7714710
-#> prop0.8 0.7826935 0.8677194 0.8190230 0.8538576 0.7662716
-#> prop0.9 0.8857736 0.9977591 0.9484941 0.9689972 0.9385940
-#> prop1   1.0599740 1.0520674 1.0577453 1.0641113 1.0677618
+#> prop0.5 0.6125203 0.6352505 0.5639550 0.6292319 0.5745308
+#> prop0.6 0.6354691 0.6965326 0.6101321 0.6748155 0.6940573
+#> prop0.7 0.7451821 0.8142459 0.7558228 0.7635837 0.7714710
+#> prop0.8 0.7826935 0.8677195 0.8190230 0.8538577 0.7662717
+#> prop0.9 0.8857736 0.9977592 0.9484942 0.9689973 0.9385940
+#> prop1   1.0599740 1.0520675 1.0577453 1.0641114 1.0677619
 fit_cv$ate.contrastReg$ate.est.valid.high.cv
 #>               cv1       cv2       cv3       cv4       cv5
-#> prop0.5 0.7311677 0.6043822 0.7529943 0.5478390 0.6293874
-#> prop0.6 0.8000372 0.7004677 0.7960391 0.5956395 0.6547416
-#> prop0.7 0.9369607 0.7707901 0.8355228 0.8042829 0.7552521
-#> prop0.8 1.0871103 0.8248841 0.8341719 0.9117819 0.8535701
-#> prop0.9 1.0802617 0.8014012 0.9334664 0.9079555 0.9866164
-#> prop1   1.0812602 1.0978549 1.0531928 1.0726351 1.0689638
+#> prop0.5 0.7311677 0.6043823 0.7529942 0.5478392 0.6293874
+#> prop0.6 0.8000372 0.7004678 0.7960390 0.5956396 0.6547416
+#> prop0.7 0.9369608 0.7707901 0.8355227 0.8042829 0.7552522
+#> prop0.8 1.0871104 0.8248842 0.8341719 0.9117819 0.8535701
+#> prop0.9 1.0802617 0.8014013 0.9334663 0.9079556 0.9866164
+#> prop1   1.0812603 1.0978549 1.0531927 1.0726353 1.0689638
 ```
 
 The output is a matrix with columns corresponding to the CV iterations,
@@ -407,11 +419,11 @@ survival outcomes. The direction of CATE scores depends on both
 
 fit_cv$ate.contrastReg$ate.est.train.low.cv
 #>              cv1      cv2      cv3      cv4      cv5
-#> prop0.5 1.620139 1.602497 1.697586 1.567209 1.711755
-#> prop0.4 1.877925 1.629830 1.879557 1.629753 1.636679
+#> prop0.5 1.620139 1.602498 1.697586 1.567210 1.711755
+#> prop0.4 1.877926 1.629831 1.879557 1.629753 1.636678
 #> prop0.3 1.890165 1.614336 1.757029 1.689462 1.720674
-#> prop0.2 2.344703 1.867808 2.032255 1.843133 2.430756
-#> prop0.1 2.259442 1.423523 1.875833 1.680824 2.318982
+#> prop0.2 2.344703 1.867807 2.032254 1.843133 2.430757
+#> prop0.1 2.259441 1.423523 1.875834 1.680824 2.318978
 ```
 
 The outputs are also matrices with columns corresponding to the CV
@@ -437,14 +449,14 @@ validation (`$ate.est.valid.group.cv`) sets across all CV iterations.
 
 fit_cv$ate.contrastReg$ate.est.train.group.cv
 #>                cv1       cv2       cv3       cv4       cv5
-#> prop0.33 1.8256921 1.6013359 1.8965410 1.6739862 1.6308310
-#> prop0.67 1.0603709 1.2529665 0.9926956 1.1134700 1.0786284
-#> prop1    0.4956232 0.4939227 0.4729564 0.5167835 0.5607068
+#> prop0.33 1.8256926 1.6013361 1.8965411 1.6739862 1.6308308
+#> prop0.67 1.0603708 1.2529668 0.9926959 1.1134701 1.0786287
+#> prop1    0.4956232 0.4939226 0.4729564 0.5167835 0.5607068
 fit_cv$ate.contrastReg$ate.est.valid.group.cv
-#>               cv1       cv2       cv3       cv4       cv5
-#> prop0.33 1.290659 1.9702555 1.4029571 1.4667775 2.1290325
-#> prop0.67 1.305644 0.8357765 0.9766352 0.9076748 0.9125320
-#> prop1    0.595350 0.6296902 0.6691814 0.6195589 0.5786596
+#>                cv1       cv2       cv3       cv4       cv5
+#> prop0.33 1.2906594 1.9702555 1.4029576 1.4667778 2.1290327
+#> prop0.67 1.3056454 0.8357763 0.9766351 0.9076750 0.9125326
+#> prop1    0.5953497 0.6296901 0.6691813 0.6195591 0.5786599
 ```
 
 The output is a matrix with columns corresponding to the CV iterations
@@ -529,9 +541,9 @@ section for a detailed illustration of the relationship between
 
 abc(fit_cv)
 #>                    cv1       cv2        cv3        cv4       cv5
-#> poisson     0.13758991 0.2236276 0.06941078 0.09647509 0.1304204
-#> contrastReg 0.06273854 0.1762676 0.09214377 0.15117031 0.1387335
-#> negBin      0.14517125 0.2203584 0.08899028 0.09382327 0.1395976
+#> poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204
+#> contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554
+#> negBin      0.14517127 0.2203584 0.08899030 0.09382214 0.1395976
 ```
 
 The output is a matrix with columns corresponding to the CV iterations
@@ -543,7 +555,7 @@ iterations to compare methods:
 
 abc(fit_cv, combine = "mean")
 #>     poisson contrastReg      negBin 
-#>   0.1315048   0.1242107   0.1375882
+#>   0.1314988   0.1241822   0.1375879
 ```
 
 In this example, negative binomial also offers the best overall

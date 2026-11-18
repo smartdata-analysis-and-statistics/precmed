@@ -21,6 +21,14 @@ to inspect available diagnostics and
 [`subgroup_estimates()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/subgroup_estimates.md)
 to extract subgroup results.
 
+ATE estimation uses augmented inverse probability weighting (AIPW), with
+censoring adjustment for survival outcomes. CATE score methods include
+T-learners that contrast predictions from separate treatment-specific
+outcome models, and doubly robust two-regression and contrast-regression
+procedures. The ratio-based doubly robust methods build on Yadlowsky et
+al.; the T-learner framework is described by Kunzel et al. See the
+outcome-specific help for available methods and their assumptions.
+
 ## Outcomes and effect scales
 
 For binary outcomes,
@@ -85,6 +93,18 @@ Debray, T. P. A., Nguyen, T.-L., and Platt, R. W. (eds.) (2026).
 *Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data*. Chapman & Hall/CRC.
 [doi:10.1201/9781003300809](https://doi.org/10.1201/9781003300809) .
+
+Kunzel, S. R., Sekhon, J. S., Bickel, P. J., and Yu, B. (2019).
+Metalearners for estimating heterogeneous treatment effects using
+machine learning. *Proceedings of the National Academy of Sciences*,
+116, 4156–4165.
+[doi:10.1073/pnas.1804597116](https://doi.org/10.1073/pnas.1804597116) .
+
+Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., and Tian, L.
+(2020). Estimation and validation of ratio-based conditional average
+treatment effects using observational data.
+[doi:10.1080/01621459.2020.1772080](https://doi.org/10.1080/01621459.2020.1772080)
+.
 
 ## See also
 

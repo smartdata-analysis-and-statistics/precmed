@@ -16,16 +16,9 @@ library(dplyr)
 library(ggplot2)
 library(survival)
 survival_data <- simulate_survival(n = 4000, seed = 20261114)
-tau0 <- with(survival_data,
-             min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 ```
 
-The synthetic data record time to first relapse or censoring. The
-illustrative horizon `tau0` is the smaller 95th percentile of observed
-follow-up in the two arms; it does not guarantee adequate follow-up.
-Choose a clinically meaningful horizon and inspect support near it.
-Scores are interpreted on the conditional RMTL-ratio scale at that
-horizon.
+The synthetic data record time to first relapse or censoring.
 
 ## Estimate CATE scores
 
@@ -42,6 +35,27 @@ treatment effect.
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
 fits scores and estimates score-defined subgroup effects on the full
 dataset; internal validation is discussed below.
+
+Restricted mean time lost (RMTL) is the horizon minus the mean
+event-free time up to that horizon. The scores compare RMTL under drug 1
+with RMTL under drug 0, conditional on covariates. We first choose the
+horizon `tau0`: for this illustration, it is the smaller of the 95th
+percentiles of observed follow-up in the two treatment groups, as in the
+companion ATE example.
+
+``` r
+
+tau0 <- with(survival_data,
+             min(quantile(y[trt == "drug1"], 0.95),
+                 quantile(y[trt == "drug0"], 0.95)))
+tau0
+#> [1] 778.4532
+```
+
+This choice uses observed times, including censoring, and does not
+guarantee adequate follow-up. In practice, choose a clinically
+meaningful horizon and inspect numbers at risk and censoring near it in
+both groups.
 
 The mandatory arguments in
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -167,16 +181,18 @@ high responders to drug 1 when `higher.y` = TRUE; higher scores
 correspond to high responders when `higher.y` = FALSE. In our example,
 the survival outcome is time to first relapse, which is a negative
 event, so higher values indicate later onset of the first relapse.
-Hence, we specify `higher.y` = TRUE in the example. Each subject has 1
-CATE score so the length of this output is 4,000 for our toy example.
-Use [`predict()`](https://rdrr.io/r/stats/predict.html) to retrieve
-scores for the original analysis sample; prediction for new data is not
-currently supported. Below are the contrast-regression scores for the
-first 6 subjects.
+Hence, we specify `higher.y` = TRUE in the example. Each subject has a
+score for each fitted method. Pass `fit_cate` to
+[`predict()`](https://rdrr.io/r/stats/predict.html) and use
+`method = "contrast_regression"` for the contrast-regression score or
+`method = "random_forest"` for the T-learner score. The returned scores
+correspond to the original analysis sample; prediction for new data is
+not currently supported. Below are the first six contrast-regression
+scores.
 
 ``` r
 
-scores <- predict(fit_cate, method = "contrastReg")
+scores <- predict(fit_cate, method = "contrast_regression")
 head(scores)
 #> [1]  0.02667802  0.43303845 -0.30655826 -0.03183065 -0.05597842 -0.08235174
 ```
@@ -210,7 +226,7 @@ cannot be used for this example.
 
 ``` r
 
-coef(fit_cate, method = "contrastReg")
+coef(fit_cate, method = "contrast_regression")
 #>              (Intercept)                      age                   female 
 #>               0.09036581              -0.02371135              -0.13567528 
 #>            previous_cost previous_number_relapses 
@@ -231,13 +247,13 @@ section below assesses their performance in held-out data.
 
 ``` r
 
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "rmtl")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "rmtl")
 #>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
 #> 0.7427012 0.7494395 0.7727382 0.8214067 0.8349706 0.8798625
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "cumulative_hr")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "cumulative_hr")
 #>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
 #> 0.4647887 0.4834859 0.5528552 0.6324199 0.6834531 0.7680014
-subgroup_estimates(fit_cate, method = "contrastReg", measure = "risk0")
+subgroup_estimates(fit_cate, method = "contrast_regression", measure = "risk0")
 #>   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 
 #> 0.9203872 0.9111298 0.8743197 0.8379378 0.8197298 0.7851434
 ```

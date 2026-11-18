@@ -94,7 +94,9 @@ catefit(
   `"two_regression"`, or `"contrast_regression"`. Each is paired with
   the corresponding entry in `outcome_method`. Contrast regression is
   not available for binary outcomes. Continuous outcomes are not
-  implemented.
+  implemented. The previous method names `"twoReg"` and `"contrastReg"`
+  are accepted as aliases for `"two_regression"` and
+  `"contrast_regression"`, respectively.
 
 - ps.model:
 

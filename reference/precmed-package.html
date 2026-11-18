@@ -73,6 +73,13 @@ to evaluate scores using cross-validation. Estimating a population-average
 effect and validating a conditional treatment-effect score are distinct tasks.
 Use <code><a href="diagnostics.html">diagnostics()</a></code> to inspect available diagnostics and
 <code><a href="subgroup_estimates.html">subgroup_estimates()</a></code> to extract subgroup results.</p>
+<p>ATE estimation uses augmented inverse probability weighting (AIPW), with
+censoring adjustment for survival outcomes. CATE score methods include
+T-learners that contrast predictions from separate treatment-specific outcome
+models, and doubly robust two-regression and contrast-regression procedures.
+The ratio-based doubly robust methods build on Yadlowsky et al.; the
+T-learner framework is described by Kunzel et al. See the outcome-specific
+help for available methods and their assumptions.</p>
     </div>
     <div class="section level2">
     <h2 id="outcomes-and-effect-scales">Outcomes and effect scales<a class="anchor" aria-label="anchor" href="#outcomes-and-effect-scales"></a></h2>
@@ -135,6 +142,15 @@ CRAN package build.</p>
 <em>Comparative Effectiveness and Personalized Medicine Research Using
 Real-World Data</em>. Chapman &amp; Hall/CRC.
 <a href="https://doi.org/10.1201/9781003300809" class="external-link">doi:10.1201/9781003300809</a>
+.</p>
+<p>Kunzel, S. R., Sekhon, J. S., Bickel, P. J., and Yu, B. (2019).
+Metalearners for estimating heterogeneous treatment effects using machine
+learning. <em>Proceedings of the National Academy of Sciences</em>, 116,
+4156–4165. <a href="https://doi.org/10.1073/pnas.1804597116" class="external-link">doi:10.1073/pnas.1804597116</a>
+.</p>
+<p>Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., and Tian, L. (2020).
+Estimation and validation of ratio-based conditional average treatment
+effects using observational data. <a href="https://doi.org/10.1080/01621459.2020.1772080" class="external-link">doi:10.1080/01621459.2020.1772080</a>
 .</p>
     </div>
     <div class="section level2">

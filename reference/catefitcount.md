@@ -9,8 +9,9 @@ boosting, two regressions, contrast regression, and negative binomial.
 ``` r
 catefitcount(
   data,
-  score.method,
-  cate.model,
+  outcome_model = NULL,
+  outcome_method = NULL,
+  benefit_method = NULL,
   ps.model,
   ps.method = "glm",
   initial.predictor.method = "boosting",
@@ -43,16 +44,19 @@ catefitcount(
   A data frame containing the variables in the outcome and treatment
   model; a data frame with `n` rows (1 row per observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'boosting'`, `'poisson'`, `'twoReg'`,
-  `'contrastReg'`, and `'negBin'`.
+  Outcome and score covariate formula; replaces `cate.model`.
 
-- cate.model:
+- outcome_method:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side.
+  Outcome-model methods paired with `benefit_method`; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
+- benefit_method:
+
+  Score-construction methods; see
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps.model:
 
@@ -74,8 +78,8 @@ catefitcount(
 
   A character vector for the method used to get initial outcome
   predictions conditional on the covariates in `init.model` (or
-  `cate.model` when omitted). Only applies when `score.method` includes
-  `'twoReg'` or `'contrastReg'`. Allowed values include one of
+  `outcome_model` when omitted). Only applies when `score.method`
+  includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
   `'poisson'` (fastest), `'boosting'` and `'gam'`. Default is
   `'boosting'`.
 
@@ -109,8 +113,8 @@ catefitcount(
   A vector of characters indicating the name of the variables used as
   the smooth terms if `initial.predictor.method = 'gam'`. The variables
   must be selected from the variables listed in `init.model` (or
-  `cate.model` when omitted). Default is `NULL`, which uses all initial
-  outcome-model covariates.
+  `outcome_model` when omitted). Default is `NULL`, which uses all
+  initial outcome-model covariates.
 
 - tree.depth:
 
@@ -199,7 +203,7 @@ catefitcount(
 - init.model:
 
   Optional formula for initial outcome predictions in `twoReg` and
-  `contrastReg`; defaults to `cate.model`. The outcome must match.
+  `contrastReg`; defaults to `outcome_model`. The outcome must match.
 
 - ...:
 
@@ -277,6 +281,10 @@ Returns a list containing the following components:
 
 ## Details
 
+The legacy arguments `score.method` and `cate.model` are accepted
+through `...`; see
+[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+
 The CATE score represents an individual-level treatment effect,
 estimated with either Poisson regression, boosting or negative binomial
 regression applied separately by treatment group or with two doubly
@@ -318,13 +326,14 @@ Statistical Association, 1-18.* DOI: 10.1080/01621459.2020.1772080.
 
 ``` r
 fit <- catefitcount(data = countExample,
-                    score.method = "poisson",
-                    cate.model = y ~ age + female + previous_treatment +
+                    outcome_model = y ~ age + female + previous_treatment +
                                  previous_cost + previous_number_relapses +
                                  offset(log(years)),
+                    outcome_method = "poisson",
+                    benefit_method = "t_learner",
                     ps.model = trt ~ age + previous_treatment,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.17 secs 
+#> Total runtime : 0.1 secs 
 ```

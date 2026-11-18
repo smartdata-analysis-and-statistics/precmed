@@ -84,10 +84,19 @@ retrieve scores for the original analysis sample in its original order.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>A single scoring method used to fit the object, such as
-<code>"contrastReg"</code>. For <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, it may be omitted if exactly
-one method is available. For <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, omission returns the stored
-coefficient table. For <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, the default is <code>"contrastReg"</code>.</p></dd>
+<dd><p>A single score to extract from the fitted object. Use
+<code>"two_regression"</code> or
+<code>"contrast_regression"</code> for those procedures, or the outcome method
+(such as <code>"logistic"</code>, <code>"boosting"</code>, <code>"poisson"</code>,
+<code>"negative_binomial"</code>, or <code>"random_forest"</code>) for a T-learner.
+The established stored names <code>"twoReg"</code>, <code>"contrastReg"</code>,
+<code>"negBin"</code>, and <code>"randomForest"</code> are also accepted; contrast
+regression can also be selected with <code>"contrastreg"</code>. If exactly
+one T-learner score is present, <code>"t_learner"</code> selects it. If exactly
+one score of any kind is present, <code>method</code> may be omitted from
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>. For <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, omission returns the coefficient table.
+For <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, the default is <code>"contrastReg"</code>. Coefficients
+and confidence intervals are available only for certain score methods.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -113,7 +122,10 @@ limits for the selected coefficients.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Scores for count and survival outcomes are on the log ratio scale;
 binary scores are on the risk-difference scale. They describe fitted scores,
-not validated individual treatment effects. Confidence intervals require
+not validated individual treatment effects. Pass the fitted <code>catefit</code>
+object to <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, not an individual outcome model in its <code>fit</code>
+component. When multiple T-learners are fitted, select one by its outcome
+method. Confidence intervals require
 stored coefficient standard errors, currently available for contrast
 regression in count and continuous fits only. They are not available for
 survival or binary fits. Methods that do not fit linear scores, such as
