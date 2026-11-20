@@ -9,11 +9,10 @@ catefit(
   data,
   outcome_model,
   outcome_method = NULL,
-  benefit_method,
+  benefit_model = NULL,
+  benefit_method = NULL,
   ps_model,
   ps_method = "glm",
-  init.model = NULL,
-  initial.predictor.method = NULL,
   ipcw.model = NULL,
   ipcw.method = "breslow",
   minPS = 0.01,
@@ -45,29 +44,35 @@ catefit(
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data. Allowed values include
-"binary", "count" (see \code{\link{catecvcount}()}), "survival" (see \code{\link{catecvsurv}()}) and "continuous" (see \code{\link{catecvmean}()}).}
+"binary" (see \code{\link{catefitbinary}}), "count" (see \code{\link{catefitcount}}),
+"survival" (see \code{\link{catefitsurv}}), and "continuous" (not implemented).}
 
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{outcome_model}{A formula describing the outcome and score covariates.
+\item{outcome_model}{A formula describing the outcome and covariates for outcome models.
 The outcome must appear on the left-hand side. For survival outcomes, a \code{Surv} object
 must be used to describe the outcome.}
 
-\item{outcome_method}{A character vector with one entry per \code{benefit_method}.
-For T-learners the available methods are \code{"logistic"} or \code{"boosting"}
-for binary outcomes, \code{"poisson"}, \code{"negative_binomial"}, or
-\code{"boosting"} for count outcomes, and \code{"poisson"}, \code{"boosting"},
-or \code{"random_forest"} for survival outcomes. For two-regression or contrast
-regression it selects the initial outcome models: binary supports only
-\code{"logistic"}, count supports \code{"poisson"}, \code{"boosting"}, or
-\code{"gam"}, and survival supports \code{"logistic"}, \code{"boosting"},
-or \code{"random_forest"}. When both doubly robust methods are requested,
-they must use the same initial outcome method. An explicitly supplied
-\code{initial.predictor.method} must agree with it. Repeated configurations
-that would produce the same score name are not supported.}
+\item{outcome_method}{Outcome-model method, with one entry per
+\code{benefit_method}. For a T-learner, \code{NULL} selects
+\code{"logistic"} for binary, \code{"poisson"} for count, and
+\code{"coxph"} for survival outcomes. Specify a method for two-regression
+or contrast regression. When both are fitted together, they may use different
+outcome methods. See \code{\link{catefitbinary}},
+\code{\link{catefitcount}}, or \code{\link{catefitsurv}} for the
+available methods and their assumptions.}
 
-\item{benefit_method}{A vector of score-construction methods: \code{"t_learner"},
+\item{benefit_model}{Optional one-sided formula specifying the covariates and
+terms for the two-regression or contrast-regression score. The default
+\code{NULL} uses the covariates and terms of \code{outcome_model}.
+An intercept is required and offsets are not supported. T-learner scores use
+the outcome model directly and do not use this formula. In a mixed fit it
+applies only to two-regression and contrast regression. Continuous-outcome
+fitting is not implemented.}
+
+\item{benefit_method}{A vector of score-construction methods (default
+\code{"t_learner"}): \code{"t_learner"},
 \code{"two_regression"}, or \code{"contrast_regression"}. Each is paired
 with the corresponding entry in \code{outcome_method}. Contrast regression
 is not available for binary outcomes. Continuous outcomes are not implemented.
@@ -87,22 +92,6 @@ Allowed values include one of:
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
 Relevant only when \code{ps_model} has more than one variable.}
-
-\item{init.model}{Optional formula for the initial treatment-specific outcome models
-used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-\code{twoReg} only). The outcome must match \code{outcome_model}. The default
-\code{NULL} uses \code{outcome_model}. For count outcomes the exposure offset
-is taken from \code{outcome_model}; an offset in \code{init.model}, if supplied,
-must match it. Other score methods do not use this argument. Continuous-outcome
-fitting and validation are not currently implemented.}
-
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{init.model} (or \code{outcome_model} when omitted). Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}.Allowed values include one of
-\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
-(survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-\code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-for count outcomes and \code{'randomForest'} for survival outcomes.}
 
 \item{ipcw.model}{A formula describing the censoring model used for inverse
 probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
@@ -133,13 +122,13 @@ maximum survival time in the data.}
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
 
 \item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
 Default is \code{seq(0.5, 1, length = 6)}.}
 
-\item{surv.min}{Lower truncation limit for the probability of being censored.
+\item{surv.min}{Lower truncation limit for the probability of remaining uncensored, used in IPCW.
 It must be a positive value and should be chosen close to 0. Only applies for survival
 outcomes. Default is \code{0.025}.}
 
@@ -148,51 +137,45 @@ the smooth terms if \code{score.method = 'gam'}. The variables must be selected
 from the variables listed in \code{outcome_model}.}
 
 \item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{init.model}.
-Default is \code{NULL}, which uses all variables in \code{init.model}.}
+the smooth terms if \code{outcome_method = 'gam'}. The variables must be selected
+from the variables listed in \code{outcome_model}.
+Default is \code{NULL}, which uses all variables in \code{outcome_model}.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is 2.}
+\item{tree.depth}{A positive integer specifying the maximum depth of boosting trees.
+Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
+Used if \code{score.method = 'randomForest'} or if \code{outcome_method = 'random_forest'}
 with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
 Default is \code{1000}.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is \code{200}.}
+\item{n.trees.boosting}{The maximum number of boosting trees, used when
+\code{outcome_method = 'boosting'}. Default is \code{200}.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of repetitions of cross-fitting for \code{benefit_method =
+'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.}
 
 \item{Kfold}{A positive integer specifying the number of folds used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
 Default is \code{5}.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Convergence tolerance for the Newton-Raphson algorithm used by
+\code{benefit_method = 'contrast_regression'}. Default is \code{0.001}.}
 
 \item{max.iterNR}{A positive integer indicating the maximum number of iterations in the
-Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+Newton Raphson algorithm. Used only if \code{benefit_method = 'contrast_regression'}.
 Default is \code{150}.}
 
 \item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+Used only if \code{benefit_method = 'contrast_regression'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance measures when
+\code{outcome_method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{verbose}{An integer value indicating whether intermediate progress messages and histograms should
 be printed. \code{1} indicates messages are printed and \code{0} otherwise. Default is \code{0}.}
@@ -221,7 +204,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
+\item{...}{The legacy \code{init.model} argument supplies a separate initial
+outcome formula using the previous interface, where \code{outcome_model}
+defines the score. It cannot be combined with \code{benefit_model}.
+The legacy \code{initial.predictor.method} is accepted with a deprecation
+warning and cannot be supplied together with \code{outcome_method}.
+Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 The old named arguments \code{score.method} and \code{cate.model} are
 accepted with deprecation warnings. Legacy score names and positional calls
 remain supported when \code{outcome_method} is omitted.}
@@ -253,7 +241,17 @@ for that outcome.
 \code{negBin} \tab -- \tab Yes \tab -- \tab No \cr
 \code{boosting} \tab Yes \tab Yes \tab Yes \tab No \cr
 \code{randomForest} \tab -- \tab -- \tab Yes \tab No \cr
+\code{coxph}, \code{weibull}, \code{log_normal} \tab -- \tab -- \tab Yes \tab No \cr
 }
+
+Two-regression and contrast regression share cross-fitted treatment-model
+predictions. When their outcome methods match, they also share the
+cross-fitted outcome predictions; otherwise, each outcome method is fitted
+separately on the same folds. A T-learner uses outcome models fitted on the
+full fitting sample, so it does not reuse the cross-fitted models. When two
+distinct initial outcome methods are used, \code{outcome_methods} records
+the method for each score. For stochastic outcome methods, random-number
+consumption can differ from fitting each score in a separate call.
 
 The doubly robust methods combine outcome and treatment models. Their
 robustness to misspecification of one of these models is conditional on
@@ -281,7 +279,7 @@ fits a separate logistic outcome model in each treatment arm and subtracts
 their predicted risks. \code{"twoReg"} cross-fits
 separate logistic outcome models and a treatment model, then projects the
 augmented inverse-propensity outcomes for each arm onto the covariates in
-\code{outcome_model} using linear regression. The score is the difference of
+\code{benefit_model} (or \code{outcome_model} by default) using linear regression. The score is the difference of
 these projections, averaged over \code{B} repetitions of \code{Kfold} folds.
 It estimates the linear projection of the conditional risk difference if
 either the treatment model or both outcome models are correct, under
@@ -335,8 +333,7 @@ fit_2 <- catefit(response = "survival",
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
                  ps_model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "logistic",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
+                 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 
 coef(fit_2)

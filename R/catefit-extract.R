@@ -8,6 +8,7 @@
 #' \code{"two_regression"} or
 #' \code{"contrast_regression"} for those procedures, or the outcome method
 #' (such as \code{"logistic"}, \code{"boosting"}, \code{"poisson"},
+#' \code{"coxph"}, \code{"weibull"}, \code{"log_normal"},
 #' \code{"negative_binomial"}, or \code{"random_forest"}) for a T-learner.
 #' The established stored names \code{"twoReg"}, \code{"contrastReg"},
 #' \code{"negBin"}, and \code{"randomForest"} are also accepted; contrast
@@ -24,7 +25,10 @@
 #' @param ... Additional arguments; currently unused.
 #' @return \code{predict()} returns a numeric vector of stored scores.
 #' \code{coef()} returns the stored coefficient table or a named numeric vector
-#' for a selected method. \code{confint()} returns a matrix of Wald confidence
+#' for a selected method. When score models use different covariates, the
+#' table has the union of coefficient names and missing entries for terms not
+#' used by a method; selecting a method returns only its terms.
+#' \code{confint()} returns a matrix of Wald confidence
 #' limits for the selected coefficients.
 #' @details Scores for count and survival outcomes are on the log ratio scale;
 #' binary scores are on the risk-difference scale. They describe fitted scores,
@@ -35,7 +39,8 @@
 #' stored coefficient standard errors, currently available for contrast
 #' regression in count and continuous fits only. They are not available for
 #' survival or binary fits. Methods that do not fit linear scores, such as
-#' random forests and boosting, do not provide score coefficients.
+#' random forests, boosting, Cox, Weibull and log-normal T-learners, do not
+#' provide linear score coefficients.
 #' @author Thomas Debray
 #' @name catefit-extract
 NULL
@@ -49,7 +54,7 @@ resolve_cate_score_method <- function(method, methods) {
                  random_forest = "randomForest")
     if (method %in% names(aliases)) method <- unname(aliases[[method]])
     if (method == "t_learner") {
-      candidates <- intersect(methods, c("logistic", "poisson", "negBin", "boosting", "randomForest", "gam", "gaussian"))
+      candidates <- intersect(methods, c("logistic", "poisson", "negBin", "boosting", "randomForest", "gam", "gaussian", "coxph", "weibull", "log_normal"))
       if (length(candidates) != 1L)
         stop("Select one T-learner by its outcome method. Available T-learner scores: ",
              if (length(candidates)) paste(candidates, collapse = ", ") else "none", ".", call. = FALSE)
@@ -89,7 +94,9 @@ coef.catefit <- function(object, method = NULL, ...) {
   if (!is.character(method) || length(method) != 1L || is.na(method) ||
       is.null(cf) || !method %in% setdiff(names(cf), "SE_contrastReg"))
     stop("No score coefficients are available for the requested method.")
-  stats::setNames(cf[[method]], rownames(cf))
+  result <- stats::setNames(cf[[method]], rownames(cf))
+  if (!is.null(object$coefficient.terms[[method]])) result <- result[object$coefficient.terms[[method]]]
+  result
 }
 
 #' @rdname catefit-extract
@@ -104,7 +111,7 @@ confint.catefit <- function(object, parm, level = 0.95, method = "contrastReg", 
   if (!identical(method, "contrastReg") || !object$response %in% c("count", "continuous") ||
       is.null(object$coefficients$SE_contrastReg))
     stop("Coefficient standard errors are not available for this method and outcome; confidence intervals cannot be calculated.")
-  se <- stats::setNames(object$coefficients$SE_contrastReg, names(estimates))
+  se <- stats::setNames(object$coefficients$SE_contrastReg, rownames(object$coefficients))[names(estimates)]
   if (missing(parm)) parm <- seq_along(estimates)
   if (!(is.character(parm) || is.numeric(parm)) || anyNA(parm) ||
       (is.character(parm) && any(!parm %in% names(estimates))) ||

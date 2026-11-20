@@ -27,6 +27,8 @@ intxcount(
   contrast.control = list(),
   ps.control = list(),
   x.init = x.cate,
+  x.benefit = x.cate,
+  initial.methods = NULL,
   ...
 )
 }
@@ -117,6 +119,11 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
 \item{x.init}{Initial outcome-model covariate matrix; defaults to \code{x.cate}.}
+
+\item{x.benefit}{Benefit-score covariate matrix; defaults to \code{x.cate}.}
+
+\item{initial.methods}{Named initial outcome methods for the doubly robust
+scores; \code{NULL} uses \code{initial.predictor.method} for both.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

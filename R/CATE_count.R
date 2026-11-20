@@ -6,23 +6,21 @@
 #'
 #' @param data A data frame containing the variables in the outcome and treatment model; a data frame with \code{n} rows
 #' (1 row per observation).
-#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
-#' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
-#' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
-#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted.
-#' The treatment must appear on the left-hand side. The treatment must be a numeric vector
-#' coded as 0/1. If data are from a randomized trial, specify \code{ps_model} as an intercept-only model.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
-#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-#' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
-#' separate observations in nested subgroups (below vs above cutoff).
-#' The length of \code{prop.cutoff} is the number of nested subgroups.
-#' An equally-spaced sequence of proportions ending with 1 is recommended.
-#' Default is \code{seq(0.5, 1, length = 6)}.
+#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_method Outcome-model method paired with \code{benefit_method}.
+#' For a T-learner, \code{"poisson"} (default), \code{"negative_binomial"},
+#' or \code{"boosting"}; for two-regression or contrast regression,
+#' \code{"poisson"}, \code{"boosting"}, or \code{"gam"}.
+#' Two-regression and contrast regression may use different initial outcome
+#' methods; matching methods share cross-fitted outcome predictions.
+#' @param benefit_model Optional one-sided formula for the two-regression or
+#' contrast-regression score covariates. Defaults to the covariates and terms
+#' in \code{outcome_model}; T-learner scores do not use it. See \code{\link{catefit}}.
+#' @param benefit_method Score-construction methods; defaults to \code{"t_learner"}.
+#' See \code{\link{catefit}}.
+#' @param ps_model A formula for the treatment model, which estimates propensity scores.
+#' Put the treatment variable on the left-hand side; for an intercept-only
+#' treatment model, use for example \code{trt ~ 1}. See \code{\link{catefit}}.
 #' @param ps_method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
@@ -33,49 +31,66 @@
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{init.model} (or \code{outcome_model} when omitted). Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values
-#' include one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-#' Default is \code{'boosting'}.
+#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
+#' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+#' separate observations in nested subgroups (below vs above cutoff).
+#' The length of \code{prop.cutoff} is the number of nested subgroups.
+#' An equally-spaced sequence of proportions ending with 1 is recommended.
+#' Default is \code{seq(0.5, 1, length = 6)}.
 #' @param xvar.smooth A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{init.model} (or \code{outcome_model} when omitted).
+#' the smooth terms if \code{outcome_method = 'gam'}. The variables must be selected
+#' from the variables listed in \code{outcome_model}.
 #' Default is \code{NULL}, which uses all initial outcome-model covariates.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
+#' @param tree.depth A positive integer specifying the maximum depth of boosting trees.
+#' Used when \code{outcome_method = 'boosting'}. Default is \code{2}.
+#' @param n.trees.boosting The maximum number of boosting trees, used when
+#' \code{outcome_method = 'boosting'}. Default is \code{200}.
+#' @param B Number of repetitions of cross-fitting for \code{benefit_method =
+#' 'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.
 #' @param Kfold A positive integer specifying the number of folds used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+#' to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
 #' Default is \code{5}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
+#' @param error.maxNR Convergence tolerance for the Newton-Raphson algorithm used by
+#' \code{benefit_method = 'contrast_regression'}. Default is \code{0.001}.
 #' @param max.iterNR A positive integer indicating the maximum number of iterations in the
-#' Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
+#' Newton Raphson algorithm. Used only if \code{benefit_method = 'contrast_regression'}.
 #' Default is \code{150}.
 #' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' Used only if \code{benefit_method = 'contrast_regression'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
+#' @param plot.gbmperf Whether to plot boosting performance measures when
+#' \code{outcome_method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 #' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
-#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
-#' @param ... Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @param contrast.control A named list of options for count or survival contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param ... The legacy \code{init.model} argument specifies a separate initial
+#' outcome formula under the previous interface; it cannot be combined with
+#' \code{benefit_model}. The legacy \code{initial.predictor.method} is also
+#' accepted with a deprecation warning; do not supply it with
+#' \code{outcome_method}.
+#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #'
 #' @return Returns a list containing the following components:
+#' When the doubly robust scores use distinct outcome methods, \code{outcome_methods}
+#' records the method selected for each score.
 #' \itemize{
 #'  \item{\code{ate.poisson}: }A vector of numerical values of length \code{prop.cutoff}
 #'  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
@@ -128,7 +143,7 @@
 #'  express the log-CATE as a linear combination of coefficients and covariates.
 #' }
 #'
-#' @details The CATE score represents an individual-level treatment effect, estimated with
+#' @details The CATE score estimates a covariate-conditional average treatment effect, estimated with
 #' either Poisson regression, boosting or negative binomial regression applied separately by
 #' treatment group or with two doubly robust estimators, two regressions and contrast regression
 #' (Yadlowsky, 2020) applied to the entire dataset.
@@ -165,27 +180,15 @@
 #'                     ps_model = trt ~ age + previous_treatment,
 #'                     higher.y = FALSE,
 #'                     seed = 999, verbose = 1)
-#' @param contrast.control A named list of options for count or survival contrast
-#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
-#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
-#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
-#' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
-#' outcomes support this list; continuous outcomes retain their existing solver.
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @export
 
 catefitcount <- function(data,
                          outcome_model = NULL,
                          outcome_method = NULL,
+                         benefit_model = NULL,
                          benefit_method = NULL,
                          ps_model,
                          ps_method = "glm",
-                         initial.predictor.method = "boosting",
                          minPS = 0.01,
                          maxPS = 0.99,
                          higher.y = TRUE,
@@ -202,7 +205,11 @@ catefitcount <- function(data,
                          plot.gbmperf = FALSE,
                          verbose = 0,
                          contrast.control = list(),
-                         ps.control = list(), init.model = NULL, ...) {
+                         ps.control = list(), ...) {
+  previous_call <- rematch_pre_benefit_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(previous_call)) return(do.call(sys.function(), previous_call, envir = parent.frame()))
+  previous_initial_call <- rematch_hidden_initial_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(previous_initial_call)) return(do.call(sys.function(), previous_initial_call, envir = parent.frame()))
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
@@ -211,7 +218,15 @@ catefitcount <- function(data,
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
-  config <- resolve_catefit_arguments("count", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, missing(initial.predictor.method))
+  .dots <- list(...)
+  check_cate_initial_alias(.args)
+  initial_missing <- !"initial.predictor.method" %in% names(.dots)
+  initial.predictor.method <- if (initial_missing || is.null(.dots$initial.predictor.method)) "boosting" else .dots$initial.predictor.method
+  .dots$initial.predictor.method <- NULL
+  init.model <- .dots$init.model
+  .dots$init.model <- NULL
+  if (!is.null(init.model) && !is.null(benefit_model)) stop("Specify only benefit_model or init.model, not both.", call. = FALSE)
+  config <- resolve_catefit_arguments("count", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, initial_missing)
   cate.model <- config$outcome_model
   score.method <- config$scores
   initial.predictor.method <- config$initial
@@ -244,6 +259,7 @@ catefitcount <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  x.benefit <- benefit_design(data, benefit_model, x.cate)
   x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   time <- out$time
   prop <- out$prop
@@ -253,7 +269,7 @@ catefitcount <- function(data,
   names(result) <- c(paste0("ate.", score.method),
                      paste0("score.", score.method), "fit", "coefficients")
 
-  fit <- intxcount(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, x.init = x.init,
+  fit <- do.call(intxcount, c(list(y = y, trt = trt, x.cate = x.cate, x.benefit = x.benefit, x.ps = x.ps, time = time, x.init = x.init, initial.methods = config$initial_methods,
                    score.method = score.method,
                    ps.method = ps.method, minPS = minPS, maxPS = maxPS,
                    initial.predictor.method = initial.predictor.method,
@@ -261,7 +277,7 @@ catefitcount <- function(data,
                    tree.depth = tree.depth, n.trees.boosting = n.trees.boosting,
                    Kfold = Kfold, B = B, plot.gbmperf = plot.gbmperf,
                    error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                   contrast.control = contrast.control, ..., ps.control = ps.control)
+                   contrast.control = contrast.control, ps.control = ps.control), .dots))
 
   if (fit$best.iter == n.trees.boosting) {
     warning(paste0("The best boosting iteration was iteration number",
@@ -289,7 +305,7 @@ catefitcount <- function(data,
   }
 
   fit.score <- scorecount(fit = fit,
-                          x.cate = x.cate, time = time,
+                          x.cate = x.cate, x.benefit = x.benefit, time = time,
                           score.method = score.method)
 
   count.diagnostics <- count_diagnostic_collector()
@@ -308,22 +324,28 @@ catefitcount <- function(data,
   }
 
   if (sum(score.method %in% c("poisson", "twoReg", "contrastReg", "negBin")) > 0) {
-    cf <- data.frame(matrix(NA, nrow = ncol(x.cate) + 1, ncol = 5))
+    cf <- data.frame(matrix(NA, nrow = length(unique(c("(Intercept)", colnames(x.cate), colnames(x.benefit)))), ncol = 5))
     colnames(cf) <- c("poisson", "twoReg", "contrastReg", "SE_contrastReg", "negBin")
-    rownames(cf) <- c("(Intercept)", colnames(x.cate))
+    rownames(cf) <- unique(c("(Intercept)", colnames(x.cate), colnames(x.benefit)))
 
-    if ("poisson" %in% score.method) cf$poisson <- fit$result.poisson
+    if ("poisson" %in% score.method) cf[names(fit$result.poisson), "poisson"] <- fit$result.poisson
 
-    if ("twoReg" %in% score.method) cf$twoReg <- fit$result.twoReg
+    if ("twoReg" %in% score.method) cf[names(fit$result.twoReg), "twoReg"] <- fit$result.twoReg
 
     if ("contrastReg" %in% score.method) {
-      cf$contrastReg <- fit$result.contrastReg$delta.contrastReg
-      cf$SE_contrastReg <- sqrt(diag(fit$result.contrastReg$sigma.contrastReg))
+      cf[names(fit$result.contrastReg$delta.contrastReg), "contrastReg"] <- fit$result.contrastReg$delta.contrastReg
+      cf[rownames(fit$result.contrastReg$sigma.contrastReg), "SE_contrastReg"] <- sqrt(diag(fit$result.contrastReg$sigma.contrastReg))
     }
 
-    if ("negBin" %in% score.method) cf$negBin <- fit$result.negBin
+    if ("negBin" %in% score.method) cf[names(fit$result.negBin), "negBin"] <- fit$result.negBin
 
     result$coefficients <- cf[, colSums(is.na(cf)) != nrow(cf), drop = FALSE]
+    if (!identical(colnames(x.cate), colnames(x.benefit))) {
+      result$coefficient.terms <- list(poisson = c("(Intercept)", colnames(x.cate)),
+                                       negBin = c("(Intercept)", colnames(x.cate)),
+                                       twoReg = c("(Intercept)", colnames(x.benefit)),
+                                       contrastReg = c("(Intercept)", colnames(x.benefit)))
+    }
   }
 
 
@@ -352,6 +374,12 @@ catefitcount <- function(data,
     cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
   }
 
+  if (length(unique(config$initial_methods)) > 1L) {
+    result$outcome_methods <- config$initial_methods
+    labels <- c(twoReg = "two_regression", contrastReg = "contrast_regression")
+    names(result$outcome_methods) <- unname(labels[names(result$outcome_methods)])
+    result$outcome_methods[result$outcome_methods == "randomForest"] <- "random_forest"
+  }
   result$response <- "count"
   result$score.method <- score.method
   result$treatment.labels <- out$treatment.labels
@@ -378,10 +406,11 @@ onearmglmcount.dr <- function(y, x.cate, time, trt, ps, f.predictor) {
   x <- as.matrix(cbind(1, log(f.predictor), x.cate))
 
   withCallingHandlers({
-    fit <- glm(y ~ log(f.predictor) + x.cate, family = "poisson", weights = trt / ps)
+    fit <- if (ncol(x.cate)) glm(y ~ log(f.predictor) + x.cate, family = "poisson", weights = trt / ps)
+    else glm(y ~ log(f.predictor), family = "poisson", weights = trt / ps)
     beta <- fit$coef
     yhat <- exp(as.matrix(x[, is.na(beta) == FALSE, drop = FALSE]) %*% beta[is.na(beta) == FALSE])
-    fit2 <- glm(yhat ~ x.cate, family = "poisson")
+    fit2 <- if (ncol(x.cate)) glm(yhat ~ x.cate, family = "poisson") else glm(yhat ~ 1, family = "poisson")
   },
   warning = function(w) { # don't change the = to <- in withCallingHandlers
     if (grepl("non-integer", conditionMessage(w)))
@@ -518,6 +547,7 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' @param y Observed outcome; vector of size \code{n} (observations)
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} by \code{p.cate} (covariates in the outcome model)
 #' @param x.init Initial outcome-model covariate matrix; defaults to \code{x.cate}.
+#' @param x.benefit Benefit-score covariate matrix; defaults to \code{x.cate}.
 #' @param x.ps Matrix of \code{p.ps} baseline covariates (plus a leading column of 1 for the intercept);
 #' dimension \code{n} by \code{p.ps + 1} (covariates in the treatment model plus intercept)
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
@@ -570,6 +600,8 @@ twoarmglmcount.dr <- function(y, x.cate, time, trt,
 #' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
+#' @param initial.methods Named initial outcome methods for the doubly robust
+#' scores; \code{NULL} uses \code{initial.predictor.method} for both.
 #' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
@@ -599,11 +631,17 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
                       initial.predictor.method = "boosting",
                       xvar.smooth = NULL,
                       tree.depth = 2, n.trees.boosting = 200, B = 3, Kfold = 6, plot.gbmperf = FALSE,
-                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ps.control = list(), x.init = x.cate, ...) {
+                      error.maxNR = 1e-3, max.iterNR = 150, tune = c(0.5, 2.0), contrast.control = list(), ps.control = list(), x.init = x.cate, x.benefit = x.cate, initial.methods = NULL, ...) {
   ps.args <- resolve_ps_control(ps.control)
 
 
   contrast.args <- resolve_contrast_control(contrast.control, error.maxNR, max.iterNR, tune)
+  dr_scores <- intersect(score.method, c("twoReg", "contrastReg"))
+  if (is.null(initial.methods)) initial.methods <- stats::setNames(rep(initial.predictor.method, length(dr_scores)), dr_scores)
+  if (length(dr_scores) && (!all(dr_scores %in% names(initial.methods)) ||
+                            anyNA(initial.methods[dr_scores])))
+    stop("Each doubly robust score must have an initial outcome method.", call. = FALSE)
+  initial_groups <- unique(unname(initial.methods[dr_scores]))
 
   result <- vector("list", length(score.method) + 1)
   names(result) <- c(paste0("result.", score.method), "best.iter")
@@ -616,8 +654,8 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   # Total number of patients
   N <- length(trt)              # N is simply the total number of patients
 
-  # Calculate p.aug: the number of covariates in x.cate plus 1 for the intercept
-  p.aug <- ncol(x.cate) + 1
+  # Calculate the benefit-model dimension including its intercept
+  p.aug <- ncol(x.benefit) + 1
 
   datatot <- data.frame("y" = y, x.cate, "time" = time)
   datatot.init <- data.frame("y" = y, x.init, "time" = time)
@@ -643,98 +681,110 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
       index[trt == 1] <- index1cv
       index[trt == 0] <- index0cv
 
-      f1.predictcv <- f0.predictcv <- pscv <- rep(NA, N)
+      predictions <- stats::setNames(lapply(initial_groups, function(method) {
+        list(f1 = rep(NA_real_, N), f0 = rep(NA_real_, N))
+      }), initial_groups)
+      pscv <- rep(NA_real_, N)
       for (k in seq(Kfold)) {
-        datatot_train <- datatot.init[index != k, , drop = FALSE]
-        x_ps_train <- x.ps[index != k, , drop = FALSE]
-        trt_train <- trt[index != k]
+        for (initial.predictor.method in initial_groups) {
+          f1.predictcv <- predictions[[initial.predictor.method]]$f1
+          f0.predictcv <- predictions[[initial.predictor.method]]$f0
+            datatot_train <- datatot.init[index != k, , drop = FALSE]
+            x_ps_train <- x.ps[index != k, , drop = FALSE]
+            trt_train <- trt[index != k]
 
-        datatot_valid <- datatot.init[index == k, , drop = FALSE]
-        x_ps_valid <- x.ps[index == k, , drop = FALSE]
+            datatot_valid <- datatot.init[index == k, , drop = FALSE]
+            x_ps_valid <- x.ps[index == k, , drop = FALSE]
 
-        data1 <- datatot_train[trt_train == 1, ]
-        data0 <- datatot_train[trt_train == 0, ]
+            data1 <- datatot_train[trt_train == 1, ]
+            data0 <- datatot_train[trt_train == 0, ]
 
-        if (initial.predictor.method == "boosting") {
-          # Fit each treatment arm once per cross-fitting fold.
-          fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
-          best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
-          withCallingHandlers({
-            f1.predictcv[index == k] <- predict(object = fit1.boosting, newdata = datatot_valid, n.trees = best1.iter, type = "response")
-          },
-          warning = function(w) {
-            if (grepl("does not add the offset", conditionMessage(w)))
-              invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
-          })
+            if (initial.predictor.method == "boosting") {
+              # Fit each treatment arm once per cross-fitting fold.
+              fit1.boosting <- fit_boosting(y ~ . - time + offset(time), data = data1, distribution = "poisson",
+                                   interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+              best1.iter <- max(10, best_boosting_iteration(fit1.boosting, method = "cv", plot.it = plot.gbmperf))
+              withCallingHandlers({
+                f1.predictcv[index == k] <- predict(object = fit1.boosting, newdata = datatot_valid, n.trees = best1.iter, type = "response")
+              },
+              warning = function(w) {
+                if (grepl("does not add the offset", conditionMessage(w)))
+                  invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
+              })
 
-          fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
-                               interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
-          best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
-          withCallingHandlers({
-            f0.predictcv[index == k] <- predict(object = fit0.boosting, newdata = datatot_valid, n.trees = best0.iter, type = "response")
-          },
-          warning = function(w) {
-            if (grepl("does not add the offset", conditionMessage(w)))
-              invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
-          })
+              fit0.boosting <- fit_boosting(y ~ . - time + offset(time), data = data0, distribution = "poisson",
+                                   interaction.depth = tree.depth, n.trees = n.trees.boosting, cv.folds = 5, ...)
+              best0.iter <- max(10, best_boosting_iteration(fit0.boosting, method = "cv", plot.it = plot.gbmperf))
+              withCallingHandlers({
+                f0.predictcv[index == k] <- predict(object = fit0.boosting, newdata = datatot_valid, n.trees = best0.iter, type = "response")
+              },
+              warning = function(w) {
+                if (grepl("does not add the offset", conditionMessage(w)))
+                  invokeRestart("muffleWarning")  # suppress warning: "predict.gbm does not add the offset to the predicted values."
+              })
 
-          best.iter <- max(best.iter, best1.iter, best0.iter)
+              best.iter <- max(best.iter, best1.iter, best0.iter)
 
 
-        } else if (initial.predictor.method == "poisson") {
+            } else if (initial.predictor.method == "poisson") {
 
-          # The offset is needed for fitting counts, but downstream estimators
-          # require predicted rates, so predict at one unit of exposure.
-          datatot_valid_rate <- datatot_valid
-          datatot_valid_rate$time <- 0
-          fit1.pois <- glm(y ~ . - time + offset(time), data = data1, family = "poisson")
-          f1.predictcv[index == k] <- predict(object = fit1.pois, newdata = datatot_valid_rate, type = "response")
+              # The offset is needed for fitting counts, but downstream estimators
+              # require predicted rates, so predict at one unit of exposure.
+              datatot_valid_rate <- datatot_valid
+              datatot_valid_rate$time <- 0
+              fit1.pois <- glm(y ~ . - time + offset(time), data = data1, family = "poisson")
+              f1.predictcv[index == k] <- predict(object = fit1.pois, newdata = datatot_valid_rate, type = "response")
 
-          fit0.pois <- glm(y ~ . - time + offset(time), data = data0, family = "poisson")
-          f0.predictcv[index == k] <- predict(object = fit0.pois, newdata = datatot_valid_rate, type = "response")
+              fit0.pois <- glm(y ~ . - time + offset(time), data = data0, family = "poisson")
+              f0.predictcv[index == k] <- predict(object = fit0.pois, newdata = datatot_valid_rate, type = "response")
 
-        } else if (initial.predictor.method == "gam") {
+            } else if (initial.predictor.method == "gam") {
 
-          xvars <- colnames(x.init)
-          if (is.null(xvar.smooth)) {
-            fgam <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
-          } else {
-            xvar.smooth2 <- xvars[str_detect(xvars, paste(paste0(xvar.smooth, "$"), collapse = "|"))] # conver to the preprocessed names
-            xvar.linear <- setdiff(xvars, xvar.smooth2) # the remaining xvars in x.cate but not in xvar.smooth are linear predictors
-            fgam <- paste0("y ~ ", paste0(xvar.linear, collapse = "+"), "+", paste0("s(", xvar.smooth2, ")", collapse = "+"))
+              xvars <- colnames(x.init)
+              if (is.null(xvar.smooth)) {
+                fgam <- paste0("y ~ ", paste0("s(", xvars, ")", collapse = "+"))
+              } else {
+                xvar.smooth2 <- xvars[str_detect(xvars, paste(paste0(xvar.smooth, "$"), collapse = "|"))] # conver to the preprocessed names
+                xvar.linear <- setdiff(xvars, xvar.smooth2) # the remaining xvars in x.cate but not in xvar.smooth are linear predictors
+                fgam <- paste0("y ~ ", paste0(xvar.linear, collapse = "+"), "+", paste0("s(", xvar.smooth2, ")", collapse = "+"))
+              }
+              fit1.gam <- mgcv::gam(as.formula(fgam), offset = time, data = data1, family = "poisson")
+              f1.predictcv[index == k] <- predict(object = fit1.gam, newdata = datatot_valid, type = "response")
+
+              fit0.gam <- mgcv::gam(as.formula(fgam), offset = time, data = data0, family = "poisson")
+              f0.predictcv[index == k] <- predict(object = fit0.gam, newdata = datatot_valid, type = "response")
+            }
+
+            predictions[[initial.predictor.method]] <- list(f1 = f1.predictcv, f0 = f0.predictcv)
           }
-          fit1.gam <- mgcv::gam(as.formula(fgam), offset = time, data = data1, family = "poisson")
-          f1.predictcv[index == k] <- predict(object = fit1.gam, newdata = datatot_valid, type = "response")
+          if (ps.method == "glm") {
+            pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
+          } else {
+            pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
+          }
 
-          fit0.gam <- mgcv::gam(as.formula(fgam), offset = time, data = data0, family = "poisson")
-          f0.predictcv[index == k] <- predict(object = fit0.gam, newdata = datatot_valid, type = "response")
-        }
+        }#end of Kfold loops
 
-        if (ps.method == "glm") {
-          pscv[index == k] <- glm.simplereg.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS)
-        } else {
-          pscv[index == k] <- glm.ps(x.ps = x_ps_train, trt = trt_train, xnew = x_ps_valid, minPS = minPS, maxPS = maxPS, solver = ps.args$solver)
-        }
+        for (initial.predictor.method in initial_groups) {
+          f1.predictcv <- predictions[[initial.predictor.method]]$f1
+          f0.predictcv <- predictions[[initial.predictor.method]]$f0
+        if ("twoReg" %in% dr_scores && initial.methods[["twoReg"]] == initial.predictor.method) {
+          ## bb-th cross fitting two regression estimator
+          beta1.final <- onearmglmcount.dr(y = y, x.cate = x.benefit, time = time, trt = trt, ps = pscv, f.predictor = f1.predictcv)
+          beta0.final <- onearmglmcount.dr(y = y, x.cate = x.benefit, time = time, trt = 1 - trt, ps = 1 - pscv, f.predictor = f0.predictcv)
+          delta.twoReg.mat[bb, ] <- as.vector(beta1.final - beta0.final)
+        }#end of if ("twoReg" %in% score.method)
 
-      }#end of Kfold loops
-
-      if ("twoReg" %in% score.method) {
-        ## bb-th cross fitting two regression estimator
-        beta1.final <- onearmglmcount.dr(y = y, x.cate = x.cate, time = time, trt = trt, ps = pscv, f.predictor = f1.predictcv)
-        beta0.final <- onearmglmcount.dr(y = y, x.cate = x.cate, time = time, trt = 1 - trt, ps = 1 - pscv, f.predictor = f0.predictcv)
-        delta.twoReg.mat[bb, ] <- as.vector(beta1.final - beta0.final)
-      }#end of if ("twoReg" %in% score.method)
-
-      if ("contrastReg" %in% score.method) {
-        ## bb-th cross fitting contrast regression estimator
-        fit_two <- do.call(twoarmglmcount.dr, c(list(
-          y = y, x.cate = x.cate, time = time, trt = trt, ps = pscv,
-          f1.predictor = f1.predictcv, f0.predictor = f0.predictcv), contrast.args))
-        delta.contrastReg.mat[bb, ] <- fit_two$coef
-        converge[bb] <- fit_two$converge
-        if (converge[bb]) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
-      }#end of if ("contrastReg" %in% score.method)
+        if ("contrastReg" %in% dr_scores && initial.methods[["contrastReg"]] == initial.predictor.method) {
+          ## bb-th cross fitting contrast regression estimator
+          fit_two <- do.call(twoarmglmcount.dr, c(list(
+            y = y, x.cate = x.benefit, time = time, trt = trt, ps = pscv,
+            f1.predictor = f1.predictcv, f0.predictor = f0.predictcv), contrast.args))
+          delta.contrastReg.mat[bb, ] <- fit_two$coef
+          converge[bb] <- fit_two$converge
+          if (converge[bb]) sigma.contrastReg.mat <- sigma.contrastReg.mat + fit_two$vcov
+        }#end of if ("contrastReg" %in% score.method)
+      } # end of outcome-model groups
     }#end of B loops
   }#end of if c("twoReg", "contrastReg") %in% score.method
 
@@ -766,7 +816,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
   if ("twoReg" %in% score.method) {
     ## Final two regression estimator (score 3)
     delta.twoReg <- colMeans(delta.twoReg.mat)
-    names(delta.twoReg) <- c("(Intercept)", colnames(x.cate))
+    names(delta.twoReg) <- c("(Intercept)", colnames(x.benefit))
     result$result.twoReg <- delta.twoReg
   }
 
@@ -780,7 +830,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
       delta.contrastReg <- colMeans(delta.contrastReg.mat)
       sigma.contrastReg <- sigma.contrastReg.mat
     }
-    names(delta.contrastReg) <- colnames(sigma.contrastReg) <- rownames(sigma.contrastReg) <- c("(Intercept)", colnames(x.cate))
+    names(delta.contrastReg) <- colnames(sigma.contrastReg) <- rownames(sigma.contrastReg) <- c("(Intercept)", colnames(x.benefit))
     result$result.contrastReg <- list(delta.contrastReg = delta.contrastReg,
                                       sigma.contrastReg = sigma.contrastReg,
                                       converge.contrastReg = converge.contrastReg,
@@ -811,6 +861,7 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 #'
 #' @param fit List of objects generated from intxcount: outputs of boosting, naive Poisson, two regression, contrast regression, negative binomial
 #' @param x.cate Matrix of \code{p.cate} baseline covariates; dimension \code{n} (observations) by \code{p.cate} (covariates in the outcome model)
+#' @param x.benefit Benefit-score covariate matrix; defaults to \code{x.cate}.
 #' @param time Log-transformed person-years of follow-up; vector of size \code{n}
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
@@ -824,11 +875,12 @@ intxcount <- function(y, trt, x.cate, x.ps, time,
 #'         score = NA if the corresponding method is not called
 
 scorecount <- function(fit, x.cate, time,
-                       score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin")) {
+                       score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"), x.benefit = x.cate) {
 
   result <- vector("list", length(score.method))
   names(result) <- paste0("score.", score.method)
   x.aug <- cbind(1, x.cate)
+  benefit.aug <- cbind(1, x.benefit)
 
   if ("boosting" %in% score.method) {
     fit0.boosting <- fit$result.boosting$fit0.boosting
@@ -856,12 +908,12 @@ scorecount <- function(fit, x.cate, time,
 
   if ("twoReg" %in% score.method) {
     delta.twoReg <- fit$result.twoReg
-    result$score.twoReg <- as.numeric(as.matrix(x.aug[,is.na(delta.twoReg) == FALSE]) %*% delta.twoReg[is.na(delta.twoReg) == FALSE])
+    result$score.twoReg <- as.numeric(as.matrix(benefit.aug[,is.na(delta.twoReg) == FALSE]) %*% delta.twoReg[is.na(delta.twoReg) == FALSE])
   }
 
   if ("contrastReg" %in% score.method) {
     delta.contrastReg <- fit$result.contrastReg$delta.contrastReg
-    result$score.contrastReg <- as.numeric(as.matrix(x.aug[,is.na(delta.contrastReg) == FALSE]) %*% delta.contrastReg[is.na(delta.contrastReg) == FALSE])
+    result$score.contrastReg <- as.numeric(as.matrix(benefit.aug[,is.na(delta.contrastReg) == FALSE]) %*% delta.contrastReg[is.na(delta.contrastReg) == FALSE])
   }
 
   if ("negBin" %in% score.method) {

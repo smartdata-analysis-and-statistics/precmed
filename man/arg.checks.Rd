@@ -114,7 +114,7 @@ searching for a balanced training-validation split. Default is \code{5,000}.}
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates in \code{cate.model}
 in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
-one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest). Default is \code{'randomForest'}.}
+one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest). Default is \code{'randomForest'}.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
 (usually 2-3). Used only if \code{score.method = 'boosting'} or

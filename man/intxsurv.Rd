@@ -33,6 +33,9 @@ intxsurv(
   ps.control = list(),
   rf.control = list(),
   x.init = x.cate,
+  x.benefit = x.cate,
+  rmst.control = list(),
+  initial.methods = NULL,
   ...
 )
 }
@@ -77,7 +80,7 @@ truncated. Default is \code{0.01}.}
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates in \code{x.init}
 in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
-one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest). Default is \code{'randomForest'}.}
+one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest). Default is \code{'randomForest'}.}
 
 \item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
 (usually 2-3). Used only if \code{score.method = 'boosting'} or
@@ -136,6 +139,13 @@ interaction selection rule are unchanged. Kept separate from boosting's
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
 \item{x.init}{Initial outcome-model covariate matrix; defaults to \code{x.cate}.}
+
+\item{x.benefit}{Benefit-score covariate matrix; defaults to \code{x.cate}.}
+
+\item{rmst.control}{Named options for Cox restricted mean survival integration.}
+
+\item{initial.methods}{Named initial outcome methods for the doubly robust
+scores; \code{NULL} uses \code{initial.predictor.method} for both.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
 }

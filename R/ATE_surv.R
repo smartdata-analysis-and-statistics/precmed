@@ -366,7 +366,7 @@ drsurv <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf = NULL, tau0, surv.min = 
   # Reaching the horizon completes follow-up for RMST weighting, but is
   # administrative censoring in the Cox model unless an event occurred there.
   d.cox <- survival_event_at_horizon(y, d, tau0)
-  if (conditional.hr) fit <- coxph(Surv(ynew, d.cox) ~ trt + x.cate)
+  if (conditional.hr) fit <- if (ncol(x.cate)) coxph(Surv(ynew, d.cox) ~ trt + x.cate) else coxph(Surv(ynew, d.cox) ~ trt)
 
   surv.new <- ipcw.surv(y = y, d = d, x.ipcw = x.ipcw, yf = yf, ipcw.method = ipcw.method, tau0 = tau0, surv.min = surv.min)
 

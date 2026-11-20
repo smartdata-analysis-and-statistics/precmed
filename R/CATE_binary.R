@@ -36,14 +36,67 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' Fit binary-outcome CATE scores and estimate risk differences in nested
 #' subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
 #'
-#' @inheritParams catefit
-#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
-#' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
-#' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
+#' @param data A data frame containing the variables in the outcome and treatment models; a data frame with \code{n} rows (1 row per observation).
+#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_method Outcome-model method paired with \code{benefit_method}.
+#' For a T-learner, \code{"logistic"} (default) or \code{"boosting"};
+#' for two-regression, \code{"logistic"}.
+#' @param benefit_model Optional one-sided formula specifying the covariates and
+#' terms for the two-regression or contrast-regression score. The default
+#' \code{NULL} uses the covariates and terms of \code{outcome_model}.
+#' An intercept is required and offsets are not supported. T-learner scores use
+#' the outcome model directly and do not use this formula. In a mixed fit it
+#' applies only to two-regression and contrast regression. Continuous-outcome
+#' fitting is not implemented.
+#' @param benefit_method Score-construction methods; defaults to \code{"t_learner"}.
+#' See \code{\link{catefit}}.
+#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+#' appear on the left-hand side. For binary outcomes, logical treatment values
+#' \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
+#' Numeric 0/1 values or two distinct treatment labels are also accepted.
+#' If data are from a randomized controlled trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.
+#' @param ps_method A character value for the method to estimate the propensity score.
+#' Allowed values include one of:
+#' \code{'glm'} for logistic regression with main effects only (default), or
+#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
+#' two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+#' Relevant only when \code{ps_model} has more than one variable.
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
+#' estimated risk-difference CATE scores to define nested subgroups. Each element represents the cutoff to
+#' separate observations in nested subgroups (below vs above cutoff).
+#' The length of \code{prop.cutoff} is the number of nested subgroups.
+#' An equally-spaced sequence of proportions ending with 1 is recommended.
+#' Default is \code{seq(0.5, 1, length = 6)}.
+#' @param seed An optional integer specifying an initial randomization seed for reproducibility.
+#' Default is \code{NULL}, corresponding to no seed.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param B Number of repetitions of cross-fitting for \code{benefit_method =
+#' 'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.
+#' @param Kfold A positive integer specifying the number of folds used in cross-fitting
+#' to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
+#' Default is \code{5}.
+#' @param tree.depth A positive integer specifying the maximum depth of boosting trees.
+#' Used when \code{outcome_method = 'boosting'}. Default is \code{2}.
+#' @param n.trees.boosting The maximum number of boosting trees, used when
+#' \code{outcome_method = 'boosting'}. Default is \code{200}.
+#' @param plot.gbmperf Whether to plot boosting performance measures when
+#' \code{outcome_method = 'boosting'}. Default is \code{FALSE}.
+#' @param ... The legacy \code{init.model} argument specifies a separate initial
+#' outcome formula under the previous interface; it cannot be combined with
+#' \code{benefit_model}. The legacy \code{initial.predictor.method} is accepted
+#' with a deprecation warning and cannot be combined with \code{outcome_method}.
+#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 #' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-#' @param init.model Optional formula for the initial logistic outcome models
-#' used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.
-#' @param ... Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 #' @return A \code{catefit} object containing treatment labels, fitted models,
 #'   predicted risk-difference scores and nested subgroup risk differences for
 #'   each requested method. Linear \code{twoReg} score coefficients are stored
@@ -64,8 +117,10 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' }
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
-catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_method = NULL, ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
-                          tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, init.model = NULL, ...) {
+catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_model = NULL, benefit_method = NULL, ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
+                          tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, ...) {
+  previous_call <- rematch_pre_benefit_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(previous_call)) return(do.call(sys.function(), previous_call, envir = parent.frame()))
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
@@ -74,7 +129,21 @@ catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, ben
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
-  config <- resolve_catefit_arguments("binary", outcome_model, outcome_method, benefit_method, NULL, NULL)
+  .dots <- list(...)
+  check_cate_initial_alias(.args)
+  initial_missing <- !"initial.predictor.method" %in% names(.dots)
+  initial <- NULL
+  if (!initial_missing) {
+    initial <- .dots$initial.predictor.method
+    if (is.null(initial)) initial <- "logistic"
+    if (!is.null(initial) && !identical(initial, "logistic"))
+      stop("Binary initial outcome models support only logistic regression.", call. = FALSE)
+    .dots$initial.predictor.method <- NULL
+  }
+  init.model <- .dots$init.model
+  .dots$init.model <- NULL
+  if (!is.null(init.model) && !is.null(benefit_model)) stop("Specify only benefit_model or init.model, not both.", call. = FALSE)
+  config <- resolve_catefit_arguments("binary", outcome_model, outcome_method, benefit_method, NULL, NULL, initial, initial_missing)
   cate.model <- config$outcome_model
   score.method <- config$scores
   check_score_method("binary", score.method)
@@ -83,10 +152,11 @@ catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, ben
   if (!is.logical(higher.y) || length(higher.y) != 1L || is.na(higher.y)) stop("higher.y must be TRUE or FALSE.")
   if (!is.numeric(prop.cutoff) || !length(prop.cutoff) || anyNA(prop.cutoff) || any(prop.cutoff <= 0 | prop.cutoff > 1)) stop("prop.cutoff must contain values in (0, 1].")
   d <- binary_data(data, cate.model, ps.model, if ("twoReg" %in% score.method) init.model else NULL)
+  x.benefit <- benefit_design(data, benefit_model, d$x, intercept = TRUE)
   if (!is.null(seed)) set.seed(seed)
   prop <- sort(prop.cutoff); out <- list(response = "binary", score.method = score.method, fit = list(), coefficients = NULL, treatment.labels = d$labels)
   for (method in score.method) {
-    pred <- if (method == "twoReg") binary_tworeg_dr(d, ps.method, minPS, maxPS, ps.control, B, Kfold) else if (method == "boosting") binary_boosting(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) else
+    pred <- if (method == "twoReg") binary_tworeg_dr(within(d, x <- x.benefit), ps.method, minPS, maxPS, ps.control, B, Kfold) else if (method == "boosting") do.call(binary_boosting, c(list(d = d, tree.depth = tree.depth, n.trees.boosting = n.trees.boosting, plot.gbmperf = plot.gbmperf), .dots)) else
       binary_predictions(d$y, d$trt, d$x, "logistic_arms")
     score <- if (method == "twoReg") pred$score else pred$mu1 - pred$mu0
     out[[paste0("score.", method)]] <- score

@@ -185,9 +185,9 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 
 If you choose two and/or contrast regression as the scoring method, there is an option to specify how the initial outcome regression estimates ($\hat\mu_r^k$ where $r = 0,1$ is the treatment and $k$ is the cross validation fold) are calculated. See [Methods for developing and validating CATE scores](Theoretical-details.html) section for the background of these initial predictors and how they are used in the two and contrast regression. Here is a list of all 3 options:
 
--   "logistic" (logistic regression from the `glm()` function)
-    -   generalized linear model, strong assumption on binomial
-        distribution, fast
+-   "fractional_logit" (a logit-link GLM for restricted follow-up time divided
+    by `tau0`, fitted with censoring weights)
+    -   a bounded conditional mean model for a fractional response, fast
 -   "boosting" (gradient boosting machine from the `gbm3` R package)
     -   ensemble method, typically tree-based, assume the time-to-event
         outcome as Gaussian distributed, slow
@@ -195,7 +195,7 @@ If you choose two and/or contrast regression as the scoring method, there is an 
     `randomForestSRC` package)
     -   ensemble method, tree-based, non-parametric, can be slow
 
-The main example above used a logistic regression but you can try the
+The main example above used fractional logit but you can try the
 other 2 non-linear and more flexible options. Below, we use `catecv()`
 as the example code but this can be applied to `catefit()` as well.
 
@@ -244,7 +244,7 @@ catecv(response = "survival",
 
 For boosting, `tree.depth` and `n.trees.boosting` control tree depth and the maximum number of trees. For random forests, `n.trees.rf` sets the number of trees, and `rf.control` can set forest options, for example `rf.control = list(mtry = 3, nodesize = 15)`. These options also apply when random forest is the initial predictor.
 
-Generally speaking, the "logistic" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is often somewhere in between; computation time depends on the data and forest settings.
+Generally speaking, the "fractional_logit" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is often somewhere in between; computation time depends on the data and forest settings.
 
 ### Subgroup proportion
 
@@ -268,7 +268,7 @@ fit_cv_2 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = NULL,
   followup.time = NULL,
   tau0 = tau0,
@@ -318,7 +318,7 @@ fit_cv_3 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = NULL,
   followup.time = NULL,
   tau0 = tau0,
@@ -357,7 +357,7 @@ fit_cv_4 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
   ipcw.method = "aft (weibull)", # NEW
   followup.time = NULL,
@@ -387,7 +387,7 @@ fit_cv_5 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
   ipcw.method = "aft (weibull)",
   followup.time = NULL,

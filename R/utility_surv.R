@@ -19,6 +19,7 @@ cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_surv
   solver <- match.arg(solver)
   xnew <- as.matrix(xnew)
   x <- as.matrix(x.cate)
+  if (!length(y) || !any(d == 1)) stop("Cox survival models require at least one event per treatment arm.")
 
   vx <- apply(x, 2, var)
   xnew <- xnew[, vx > 0, drop = FALSE]
@@ -28,13 +29,23 @@ cox.rmst <- function(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_surv
   xnew <- t(t(xnew) - mux)
   x <- t(t(x) - mux)
 
+  if (!ncol(x)) {
+    event_times <- sort(unique(y[d == 1 & y <= tau0]))
+    hazard <- vapply(event_times, function(t) sum(d == 1 & y == t) / sum(y >= t), numeric(1))
+    surv0 <- exp(-cumsum(hazard))
+    gap <- diff(c(0, event_times, tau0))
+    rmst <- rep(sum(c(1, surv0) * gap), nrow(xnew))
+    if (return_survival) return(list(rmst = rmst, survival = rep(if (length(surv0)) utils::tail(surv0, 1) else 1, nrow(xnew))))
+    return(rmst)
+  }
+
   fit <- coxph(Surv(y, d) ~ x)
   beta <- fit$coef
   detail <- coxph.detail(fit)
   time <- detail$time
   surv0 <- exp(-cumsum(detail$hazard))
 
-  n <- length(xnew[, 1])
+  n <- nrow(xnew)
   surv0 <- surv0[time <= tau0]
   time <- time[time <= tau0]
   hr <- exp(as.vector(xnew[, is.na(beta) == FALSE, drop = FALSE] %*% beta[is.na(beta) == FALSE, drop = FALSE]))
@@ -147,7 +158,7 @@ survCatch <- function(fun) {
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates. Only applies when \code{score.method}
 #' includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'fractional_logit'}
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), and
 #' \code{'gam'} (count outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 #' for count outcomes and \code{'randomForest'} for survival outcomes.
@@ -469,6 +480,16 @@ integrate_forest_survival <- function(time, survival, tau0) {
   as.vector(curves[, indices + 1L, drop = FALSE] %*% diff(breaks))
 }
 
+
+# Predict restricted mean survival using the same models as atefit.
+# Author: Thomas Debray
+cate_survival_rmst <- function(y, d, x, xnew, tau0, method, rmst.control = list()) {
+  if (method == "coxph") {
+    cox.rmst(y, d, x, xnew, tau0, solver = resolve_rmst_control(rmst.control)$solver)
+  } else {
+    parametric_survival_outcome(y, d, x, xnew, tau0, method)
+  }
+}
 
 # Fit an arm-specific parametric survival model and predict RMST and survival.
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>

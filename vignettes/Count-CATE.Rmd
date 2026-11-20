@@ -69,6 +69,9 @@ ps_formula <- trt ~ age + previous_treatment
 
 ### Choose how to construct scores
 
+If both method arguments are omitted, `catefit()` defaults to a T-learner
+with `outcome_method = "poisson"` for this outcome.
+
 `benefit_method` selects the score-construction approach; `outcome_method`
 selects the outcome-model method for each score:
 
@@ -86,6 +89,25 @@ interpretation relies on causal identification, positivity and appropriate
 model assumptions; propensity-score truncation can affect robustness. See
 Chapter 17 for more on treatment effect heterogeneity and CATE prediction
 [@hoogland2026introduction].
+
+Two-regression and contrast regression may use different outcome methods in
+the same call. They share the treatment-model predictions; matching outcome
+methods also share cross-fitted outcome predictions. T-learner models are fitted
+on the full fitting sample and are not reused for the cross-fitted predictions.
+The `catecv()` interface continues to use a single initial outcome method.
+
+For example, this fits two-regression with Poisson initial models and contrast
+regression with GAM initial models, smoothing age in the latter:
+
+```{r, eval=FALSE}
+fit_different <- catefit(
+  response = "count", data = countExample,
+  outcome_model = outcome_formula, ps_model = ps_formula,
+  benefit_method = c("two_regression", "contrast_regression"),
+  outcome_method = c("poisson", "gam"), xvar.smooth = "age",
+  higher.y = FALSE, seed = 999
+)
+```
 
 ### Fit five scores
 
@@ -106,12 +128,33 @@ fit_cate <- catefit(
   benefit_method = c("t_learner", "t_learner", "two_regression",
                      "contrast_regression", "t_learner"),
   ps_model = ps_formula,
-  initial.predictor.method = "poisson",
   higher.y = FALSE, 
   seed = 999,
   n.cores = 1
 )
 ```
+
+To fit a more concise two-regression or contrast-regression score, you can
+supply a separate one-sided benefit formula. For example, adding
+`benefit_model = ~ age + previous_treatment` to the `catefit()` call above
+uses those covariates for the doubly robust score, while the initial outcome
+models still use all the covariates in `outcome_formula`. If omitted, the
+benefit score uses the terms in `outcome_formula`. T-learner scores in a mixed
+fit continue to use the outcome formula and do not use `benefit_model`.
+
+```{r, eval=FALSE}
+fit_cate_reduced <- catefit(
+  response = "count", data = countExample,
+  outcome_model = outcome_formula, outcome_method = "poisson",
+  benefit_model = ~ age + previous_treatment,
+  benefit_method = "two_regression", ps_model = ps_formula,
+  higher.y = FALSE, seed = 999
+)
+```
+
+`catecv()` does not currently accept a separate benefit formula, so its
+validation below applies to the default score specification used in this
+example, not to a fit with a different `benefit_model`.
 
 ## Inspect CATE scores and subgroup estimates
 

@@ -8,7 +8,7 @@ test_that("initial outcome models default to the CATE model for each outcome", {
     list(response = "count", data = count, cate.model = y ~ age + offset(log(years)),
          init.model = y ~ age + offset(log(years)), initial = "poisson"),
     list(response = "survival", data = surv, cate.model = survival::Surv(y, d) ~ age,
-         init.model = survival::Surv(y, d) ~ age, initial = "logistic")
+         init.model = survival::Surv(y, d) ~ age, initial = "fractional_logit")
   )
   for (case in cases) {
     args <- list(response = case$response, data = case$data, benefit_method = "twoReg",
@@ -36,7 +36,7 @@ test_that("separate initial designs are used for fitting and validation", {
     args <- list(response = response, data = d, score.method = "twoReg",
                  cate.model = cm, init.model = im, ps.model = trt ~ age,
                  prop.cutoff = c(0.5, 1), B = 1, Kfold = 2, seed = 23)
-    if (response != "binary") args$initial.predictor.method <- switch(response, count = "poisson", survival = "logistic", continuous = "gaussian")
+    if (response != "binary") args$initial.predictor.method <- switch(response, count = "poisson", survival = "fractional_logit", continuous = "gaussian")
     if (response == "survival") args$tau0 <- median(d$y) * 1.1
     fit <- suppressWarnings(do.call(catefit, args))
     expect_true(all(is.finite(fit$score.twoReg)), info = response)
@@ -71,7 +71,7 @@ test_that("contrast regression accepts separate initial outcome models", {
     im <- if (response == "count") y ~ age + female else survival::Surv(y, d) ~ age + female
     args <- list(response = response, data = d, score.method = "contrastReg",
                  cate.model = cm, init.model = im, ps.model = trt ~ age,
-                 initial.predictor.method = if (response == "count") "poisson" else "logistic",
+                 initial.predictor.method = if (response == "count") "poisson" else "fractional_logit",
                  prop.cutoff = c(0.5, 1), B = 1, Kfold = 2, seed = 72)
     if (response == "survival") args$tau0 <- median(d$y) * 1.1
     fit <- suppressWarnings(do.call(catefit, args))
@@ -79,6 +79,11 @@ test_that("contrast regression accepts separate initial outcome models", {
     args$cv.n <- 1; args$abc <- FALSE; args$error.max <- 1; args$max.iter <- 2
     cv <- suppressWarnings(do.call(catecv, args))
     expect_true(any(is.finite(cv$ate.contrastReg$ate.est.valid.high.cv)), info = response)
+    if (response == "survival") {
+      args$initial.predictor.method <- "logistic"
+      expect_warning(old_cv <- suppressMessages(do.call(catecv, args)), "deprecated")
+      expect_equal(old_cv$ate.contrastReg, cv$ate.contrastReg)
+    }
   }
 })
 

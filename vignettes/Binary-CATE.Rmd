@@ -52,6 +52,9 @@ ps_formula <- trt ~ age + previous_treatment
 
 ### Choose how to construct scores
 
+If both method arguments are omitted, `catefit()` defaults to a T-learner
+with `outcome_method = "logistic"` for this outcome.
+
 `benefit_method` chooses how to construct the score, while `outcome_method`
 chooses the outcome-model method for that score:
 
@@ -91,6 +94,28 @@ fit_cate <- catefit(
   n.trees.boosting = 100, n.cores = 1
 )
 ```
+
+To fit a more concise two-regression or contrast-regression score, you can
+supply a separate one-sided benefit formula. For example, adding
+`benefit_model = ~ age + previous_treatment` to the `catefit()` call above
+uses those covariates for the doubly robust score, while the initial outcome
+models still use all the covariates in `outcome_formula`. If omitted, the
+benefit score uses the terms in `outcome_formula`. T-learner scores in a mixed
+fit continue to use the outcome formula and do not use `benefit_model`.
+
+```{r, eval=FALSE}
+fit_cate_reduced <- catefit(
+  response = "binary", data = binaryExample,
+  outcome_model = outcome_formula, outcome_method = "logistic",
+  benefit_model = ~ age + previous_treatment,
+  benefit_method = "two_regression", ps_model = ps_formula,
+  higher.y = FALSE, seed = 999
+)
+```
+
+`catecv()` does not currently accept a separate benefit formula, so its
+validation below applies to the default score specification used in this
+example, not to a fit with a different `benefit_model`.
 
 ## Inspect CATE scores and subgroup estimates
 

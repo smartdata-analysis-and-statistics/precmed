@@ -42,8 +42,8 @@ test_that("CATE configuration checks supported pairs and compatibility aliases",
     "count", c("twoReg", "contrastReg"), c("poisson", "poisson")))
   expect_identical(config$scores, c("twoReg", "contrastReg"))
   d <- simulate_binary(n = 300, seed = 204)
-  expect_identical(names(formals(catefit))[1:7],
-                   c("response", "data", "outcome_model", "outcome_method", "benefit_method", "ps_model", "ps_method"))
+  expect_identical(names(formals(catefit))[1:8],
+                   c("response", "data", "outcome_model", "outcome_method", "benefit_model", "benefit_method", "ps_model", "ps_method"))
   args <- list(response = "binary", data = d, outcome_model = y ~ age,
                ps_model = trt ~ age, prop.cutoff = 1, B = 1, Kfold = 2, seed = 205)
   fit <- do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"),
@@ -68,16 +68,16 @@ test_that("CATE configuration checks supported pairs and compatibility aliases",
   expect_warning(catefit("binary", d, score.method = "logistic", y ~ age, trt ~ age,
                          prop.cutoff = 1), "score.method is deprecated")
   expect_error(do.call(catefit, c(args, list(benefit_method = "two_regression", outcome_method = "boosting"))), "not supported")
-  expect_error(do.call(catefit, c(args, list(benefit_method = "two_regression", outcome_method = "logistic",
-                                            initial.predictor.method = "boosting"))), "must agree")
-  expect_equal(fit, do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"),
+  expect_error(suppressWarnings(do.call(catefit, c(args, list(benefit_method = "two_regression", outcome_method = "logistic",
+                                            initial.predictor.method = "boosting")))), "only outcome_method")
+  expect_error(suppressWarnings(do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"),
                                                     outcome_method = c("logistic", "logistic"),
-                                                    initial.predictor.method = "logistic"))))
+                                                    initial.predictor.method = "logistic")))), "only outcome_method")
   expect_error(do.call(catefit, c(args, list(benefit_method = "contrast_regression", outcome_method = "logistic"))), "not supported")
   expect_error(do.call(catefit, c(args, list(benefit_method = "contrastReg", outcome_method = "logistic"))), "not supported")
   expect_error(do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"), outcome_method = "logistic"))), "one non-missing")
-  expect_error(catefit("count", data.frame(), benefit_method = c("two_regression", "contrast_regression"),
-                       outcome_method = c("poisson", "boosting")), "same outcome_method")
+  config <- precmed:::resolve_benefit_config("count", c("two_regression", "contrast_regression"), c("poisson", "boosting"))
+  expect_identical(unname(config$initial_methods), c("poisson", "boosting"))
   expect_false(any(c("score.method", "cate.model") %in% names(formals(catefit))))
 })
 
@@ -88,15 +88,39 @@ test_that("survival configurations preserve cross-fitted outcome models", {
   formula <- survival::Surv(y, d) ~ age
   modern <- suppressWarnings(suppressMessages(do.call(catefit, c(args, list(
     outcome_model = formula, benefit_method = c("t_learner", "two_regression", "contrast_regression"),
-    outcome_method = c("poisson", "logistic", "logistic"))))))
+    outcome_method = c("poisson", "fractional_logit", "fractional_logit"))))))
   old <- suppressWarnings(suppressMessages(do.call(catefit, c(args, list(
     cate.model = formula, score.method = c("poisson", "twoReg", "contrastReg"),
-    initial.predictor.method = "logistic")))))
+    initial.predictor.method = "fractional_logit")))))
   expect_equal(modern, old)
   aliases <- suppressWarnings(suppressMessages(do.call(catefit, c(args, list(
     outcome_model = formula, benefit_method = c("t_learner", "twoReg", "contrastReg"),
-    outcome_method = c("poisson", "logistic", "logistic"))))))
+    outcome_method = c("poisson", "fractional_logit", "fractional_logit"))))))
   expect_equal(aliases, modern)
   expect_error(do.call(catefit, c(args, list(outcome_model = formula,
     benefit_method = "two_regression", outcome_method = "poisson"))), "not supported")
+})
+
+test_that("survival fractional logit accepts the former label as an alias", {
+  d <- simulate_survival(n = 350, seed = 618)
+  args <- list(data = d, outcome_model = survival::Surv(y, d) ~ age,
+               ps_model = trt ~ age, benefit_method = c("two_regression", "contrast_regression"),
+               outcome_method = c("fractional_logit", "fractional_logit"),
+               tau0 = median(d$y), prop.cutoff = c(.8, 1), B = 1, Kfold = 2, seed = 619)
+  direct <- suppressWarnings(suppressMessages(do.call(catefitsurv, args)))
+  generic <- suppressWarnings(suppressMessages(do.call(catefit, c(list(response = "survival"), args))))
+  expect_equal(generic, direct)
+  expect_true(all(is.finite(direct$score.twoReg)))
+  expect_true(all(is.finite(direct$score.contrastReg)))
+  args$outcome_method <- c("logistic", "logistic")
+  expect_warning(old_direct <- suppressMessages(do.call(catefitsurv, args)), "deprecated")
+  expect_warning(old_generic <- suppressMessages(do.call(catefit, c(list(response = "survival"), args))), "deprecated")
+  expect_equal(old_direct, direct)
+  expect_equal(old_generic, generic)
+  old_args <- args
+  old_args$outcome_method <- NULL
+  old_args$benefit_method <- c("twoReg", "contrastReg")
+  expect_warning(old_initial <- suppressMessages(do.call(catefitsurv, c(
+    old_args, list(initial.predictor.method = "logistic")))), "deprecated")
+  expect_equal(old_initial, direct)
 })

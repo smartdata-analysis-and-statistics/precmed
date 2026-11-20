@@ -6,25 +6,15 @@
 #'
 #' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
+#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
 #' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
+#' @param benefit_model Optional one-sided formula for the two-regression or
+#' contrast-regression score covariates. Defaults to the covariates and terms
+#' in \code{outcome_model}; T-learner scores do not use it. See \code{\link{catefit}}.
 #' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
-#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted.
-#' The treatment must appear on the left-hand side.
-#' The treatment must be a numeric vector coded as 0/1.
-#' If data are from a RCT, specify \code{ps_model} as an intercept-only model.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-#' \code{NULL} uses \code{outcome_model}.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
-#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of
-#' the estimated log CATE scores to define nested subgroups. Each element represents the
-#' cutoff to separate observations in nested subgroups (below vs above cutoff).
-#' The length of \code{prop.cutoff} is the number of nested subgroups.
-#' An equally-spaced sequence of proportions ending with 1 is recommended.
-#' Default is \code{seq(0.5, 1, length = 6)}.
+#' @param ps_model A formula for the treatment model, which estimates propensity scores.
+#' Put the treatment variable on the left-hand side; for an intercept-only
+#' treatment model, use for example \code{trt ~ 1}. See \code{\link{catefit}}.
 #' @param ps_method A character value for the method to estimate the propensity score.
 #' Allowed values include one of: \code{'glm'} for logistic regression with main effects only
 #' (default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
@@ -33,54 +23,61 @@
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
 #' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
-#' @param initial.predictor.method A character vector for the method used to get initial outcome
-#' predictions conditional on the covariates in \code{init.model} in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include one of
-#' \code{'gaussian'} (fastest), \code{'boosting'} and \code{'gam'}.
-#' Default is \code{'boosting'}.
-#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as the
-#' smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected from
-#' the variables listed in \code{init.model}. Default is \code{NULL}, which uses all variables
-#' in \code{init.model}.
+#' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
+#' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
+#' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of
+#' the estimated log CATE scores to define nested subgroups. Each element represents the
+#' cutoff to separate observations in nested subgroups (below vs above cutoff).
+#' The length of \code{prop.cutoff} is the number of nested subgroups.
+#' An equally-spaced sequence of proportions ending with 1 is recommended.
+#' Default is \code{seq(0.5, 1, length = 6)}.
 #' @param xvar.smooth.score A vector of characters indicating the name of the variables used as the
 #' smooth terms if \code{score.method = 'gam'}. The variables must be selected from
 #' the variables listed in \code{cate.model}. Default is \code{NULL}, which uses all variables
 #' in \code{cate.model}.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
-#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
-#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
-#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as the
+#' smooth terms if \code{outcome_method = 'gam'}. The variables must be selected from
+#' the variables listed in \code{outcome_model}. Default is \code{NULL}, which uses all variables
+#' in \code{outcome_model}.
+#' @param tree.depth A positive integer specifying the maximum depth of boosting trees.
+#' Used when \code{outcome_method = 'boosting'}. Default is \code{2}.
 #' @param n.trees.rf A positive integer specifying the number of trees. Used only if
 #' \code{score.method = 'randomForest'}. Default is \code{1000}.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used only if \code{score.method = 'boosting'} or
-#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
+#' @param n.trees.boosting The maximum number of boosting trees, used when
+#' \code{outcome_method = 'boosting'}. Default is \code{200}.
+#' @param B Number of repetitions of cross-fitting for \code{benefit_method =
+#' 'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.
 #' @param Kfold A positive integer specifying the number of folds (parts) used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+#' to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
 #' Default is \code{6}.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures
-#' in boosting. Used only if \code{score.method = 'boosting'} or if
-#' \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
+#' @param plot.gbmperf Whether to plot boosting performance measures when
+#' \code{outcome_method = 'boosting'}. Default is \code{FALSE}.
+#' @param error.maxNR Convergence tolerance for the Newton-Raphson algorithm used by
+#' \code{benefit_method = 'contrast_regression'}. Default is \code{0.001}.
 #' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
 #' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 #' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' Used only if \code{benefit_method = 'contrast_regression'}. Default is \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
 #' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param ... The legacy \code{init.model} argument specifies a separate initial
+#' outcome formula under the previous interface; it cannot be combined with
+#' \code{benefit_model}. The legacy \code{initial.predictor.method} is also
+#' accepted with a deprecation warning; do not supply it with
+#' \code{outcome_method}.
+#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #'
 #' @return Returns a list containing the following components:
 #' \itemize{
@@ -147,7 +144,7 @@
 #'  express the CATE as a linear combination of coefficients and covariates.
 #' }
 #'
-#' @details The CATE score represents an individual-level treatment effect, estimated with
+#' @details The CATE score estimates a covariate-conditional average treatment effect, estimated with
 #' either linear regression, boosting, random forest and generalized additive model applied separately by
 #' treatment group or with two doubly robust estimators, two regressions and contrast regression
 #' (Yadlowsky, 2020) applied to the entire dataset.
@@ -172,22 +169,16 @@
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
 #' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
 #'
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @seealso \code{\link{catecvmean}()} function
 #'
 
 catefitmean <- function(data,
                         outcome_model = NULL,
                         outcome_method = NULL,
+                        benefit_model = NULL,
                         benefit_method = NULL,
                         ps_model,
                         ps_method = "glm",
-                        init.model = NULL,
-                        initial.predictor.method = "boosting",
                         minPS = 0.01,
                         maxPS = 0.99,
                         higher.y = TRUE,
@@ -205,6 +196,10 @@ catefitmean <- function(data,
                         seed = NULL,
                         verbose = 0,
                         ps.control = list(), rf.control = list(), ...) {
+  previous_call <- rematch_pre_benefit_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(previous_call)) return(do.call(sys.function(), previous_call, envir = parent.frame()))
+  previous_initial_call <- rematch_hidden_initial_call(sys.function(), sys.call(), parent.frame())
+  if (!is.null(previous_initial_call)) return(do.call(sys.function(), previous_initial_call, envir = parent.frame()))
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
@@ -213,7 +208,15 @@ catefitmean <- function(data,
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
-  config <- resolve_catefit_arguments("continuous", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, missing(initial.predictor.method))
+  .dots <- list(...)
+  check_cate_initial_alias(.args)
+  initial_missing <- !"initial.predictor.method" %in% names(.dots)
+  initial.predictor.method <- if (initial_missing || is.null(.dots$initial.predictor.method)) "boosting" else .dots$initial.predictor.method
+  .dots$initial.predictor.method <- NULL
+  init.model <- .dots$init.model
+  .dots$init.model <- NULL
+  if (!is.null(init.model) && !is.null(benefit_model)) stop("Specify only benefit_model or init.model, not both.", call. = FALSE)
+  config <- resolve_catefit_arguments("continuous", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, initial_missing)
   cate.model <- config$outcome_model
   score.method <- config$scores
   initial.predictor.method <- config$initial

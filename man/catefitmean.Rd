@@ -8,11 +8,10 @@ catefitmean(
   data,
   outcome_model = NULL,
   outcome_method = NULL,
+  benefit_model = NULL,
   benefit_method = NULL,
   ps_model,
   ps_method = "glm",
-  init.model = NULL,
-  initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -38,31 +37,24 @@ catefitmean(
 \item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
-\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
+\item{outcome_model}{Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.}
 
 \item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
 
+\item{benefit_model}{Optional one-sided formula for the two-regression or
+contrast-regression score covariates. Defaults to the covariates and terms
+in \code{outcome_model}; T-learner scores do not use it. See \code{\link{catefit}}.}
+
 \item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
-\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted.
-The treatment must appear on the left-hand side.
-The treatment must be a numeric vector coded as 0/1.
-If data are from a RCT, specify \code{ps_model} as an intercept-only model.}
+\item{ps_model}{A formula for the treatment model, which estimates propensity scores.
+Put the treatment variable on the left-hand side; for an intercept-only
+treatment model, use for example \code{trt ~ 1}. See \code{\link{catefit}}.}
 
 \item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of: \code{'glm'} for logistic regression with main effects only
 (default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
 on two-way interactions (added to the model if not specified in \code{ps_model}).}
-
-\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-\code{NULL} uses \code{outcome_model}.}
-
-\item{initial.predictor.method}{A character vector for the method used to get initial outcome
-predictions conditional on the covariates in \code{init.model} in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include one of
-\code{'gaussian'} (fastest), \code{'boosting'} and \code{'gam'}.
-Default is \code{'boosting'}.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -86,43 +78,36 @@ the variables listed in \code{cate.model}. Default is \code{NULL}, which uses al
 in \code{cate.model}.}
 
 \item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as the
-smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected from
-the variables listed in \code{init.model}. Default is \code{NULL}, which uses all variables
-in \code{init.model}.}
+smooth terms if \code{outcome_method = 'gam'}. The variables must be selected from
+the variables listed in \code{outcome_model}. Default is \code{NULL}, which uses all variables
+in \code{outcome_model}.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
+\item{tree.depth}{A positive integer specifying the maximum depth of boosting trees.
+Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees. Used only if
 \code{score.method = 'randomForest'}. Default is \code{1000}.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used only if \code{score.method = 'boosting'} or
-if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{200}.}
+\item{n.trees.boosting}{The maximum number of boosting trees, used when
+\code{outcome_method = 'boosting'}. Default is \code{200}.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of repetitions of cross-fitting for \code{benefit_method =
+'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.}
 
 \item{Kfold}{A positive integer specifying the number of folds (parts) used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
 Default is \code{6}.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures
-in boosting. Used only if \code{score.method = 'boosting'} or if
-\code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance measures when
+\code{outcome_method = 'boosting'}. Default is \code{FALSE}.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Convergence tolerance for the Newton-Raphson algorithm used by
+\code{benefit_method = 'contrast_regression'}. Default is \code{0.001}.}
 
 \item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
 Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+Used only if \code{benefit_method = 'contrast_regression'}. Default is \code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
@@ -141,7 +126,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{The legacy \code{init.model} argument specifies a separate initial
+outcome formula under the previous interface; it cannot be combined with
+\code{benefit_model}. The legacy \code{initial.predictor.method} is also
+accepted with a deprecation warning; do not supply it with
+\code{outcome_method}.
+Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 Returns a list containing the following components:
@@ -217,7 +207,7 @@ generalized additive model.
 \details{
 The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 
-The CATE score represents an individual-level treatment effect, estimated with
+The CATE score estimates a covariate-conditional average treatment effect, estimated with
 either linear regression, boosting, random forest and generalized additive model applied separately by
 treatment group or with two doubly robust estimators, two regressions and contrast regression
 (Yadlowsky, 2020) applied to the entire dataset.

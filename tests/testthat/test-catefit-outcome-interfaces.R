@@ -12,8 +12,8 @@ test_that("outcome-specific CATE interfaces agree with the generic and legacy ca
          extra = list(tau0 = median(surv$y))))
   for (case in cases) {
     expect_false(any(c("score.method", "cate.model") %in% names(formals(case$fun))))
-    expect_identical(names(formals(case$fun))[1:6],
-                     c("data", "outcome_model", "outcome_method", "benefit_method", "ps_model", "ps_method"))
+    expect_identical(names(formals(case$fun))[1:7],
+                     c("data", "outcome_model", "outcome_method", "benefit_model", "benefit_method", "ps_model", "ps_method"))
     common <- c(list(data = case$data, ps_model = trt ~ age,
                      prop.cutoff = c(.8, 1), seed = 424), case$extra)
     modern <- c(common, list(outcome_model = case$formula,
@@ -37,7 +37,7 @@ test_that("outcome-specific CATE interfaces agree with the generic and legacy ca
     expect_error(do.call(case$fun, c(modern, list(cate.model = case$formula))), "only outcome_model")
     expect_error(do.call(case$fun, c(modern, list(score.method = case$old))), "only benefit_method")
     expect_error(do.call(case$fun, c(common, list(outcome_model = case$formula,
-      benefit_method = "t_learner"))), "outcome_method must be supplied")
+      benefit_method = "two_regression"))), "outcome_method must be supplied")
   }
 })
 
@@ -49,13 +49,13 @@ test_that("outcome-specific methods resolve initial outcome models", {
   direct <- suppressWarnings(do.call(catefitcount, args))
   generic <- suppressWarnings(do.call(catefit, c(list(response = "count"), args)))
   expect_equal(direct, generic)
-  expect_error(do.call(catefitcount, c(args, list(initial.predictor.method = "boosting"))), "must agree")
+  expect_error(suppressWarnings(do.call(catefitcount, c(args, list(initial.predictor.method = "boosting")))), "only outcome_method")
 })
 
 test_that("continuous CATE interface uses the same argument order", {
   expect_false(any(c("score.method", "cate.model") %in% names(formals(catefitmean))))
-  expect_identical(names(formals(catefitmean))[1:6],
-                   c("data", "outcome_model", "outcome_method", "benefit_method", "ps_model", "ps_method"))
+  expect_identical(names(formals(catefitmean))[1:7],
+                   c("data", "outcome_model", "outcome_method", "benefit_model", "benefit_method", "ps_model", "ps_method"))
 })
 
 test_that("CATE treatment model aliases agree and reject conflicts", {

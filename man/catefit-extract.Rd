@@ -23,6 +23,7 @@ retrieve scores for the original analysis sample in its original order.}
 \code{"two_regression"} or
 \code{"contrast_regression"} for those procedures, or the outcome method
 (such as \code{"logistic"}, \code{"boosting"}, \code{"poisson"},
+\code{"coxph"}, \code{"weibull"}, \code{"log_normal"},
 \code{"negative_binomial"}, or \code{"random_forest"}) for a T-learner.
 The established stored names \code{"twoReg"}, \code{"contrastReg"},
 \code{"negBin"}, and \code{"randomForest"} are also accepted; contrast
@@ -42,7 +43,10 @@ and confidence intervals are available only for certain score methods.}
 \value{
 \code{predict()} returns a numeric vector of stored scores.
 \code{coef()} returns the stored coefficient table or a named numeric vector
-for a selected method. \code{confint()} returns a matrix of Wald confidence
+for a selected method. When score models use different covariates, the
+table has the union of coefficient names and missing entries for terms not
+used by a method; selecting a method returns only its terms.
+\code{confint()} returns a matrix of Wald confidence
 limits for the selected coefficients.
 }
 \description{
@@ -59,7 +63,8 @@ method. Confidence intervals require
 stored coefficient standard errors, currently available for contrast
 regression in count and continuous fits only. They are not available for
 survival or binary fits. Methods that do not fit linear scores, such as
-random forests and boosting, do not provide score coefficients.
+random forests, boosting, Cox, Weibull and log-normal T-learners, do not
+provide linear score coefficients.
 }
 \author{
 Thomas Debray

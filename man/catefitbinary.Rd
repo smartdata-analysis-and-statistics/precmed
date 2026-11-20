@@ -8,6 +8,7 @@ catefitbinary(
   data,
   outcome_model = NULL,
   outcome_method = NULL,
+  benefit_model = NULL,
   benefit_method = NULL,
   ps_model,
   ps_method = "glm",
@@ -22,19 +23,28 @@ catefitbinary(
   tree.depth = 2,
   n.trees.boosting = 200,
   plot.gbmperf = FALSE,
-  init.model = NULL,
   ...
 )
 }
 \arguments{
-\item{data}{A data frame containing the variables in the outcome, treatment,
-and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
+\item{data}{A data frame containing the variables in the outcome and treatment models; a data frame with \code{n} rows (1 row per observation).}
 
-\item{outcome_model}{Outcome and score covariate formula; replaces \code{cate.model}.}
+\item{outcome_model}{Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.}
 
-\item{outcome_method}{Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.}
+\item{outcome_method}{Outcome-model method paired with \code{benefit_method}.
+For a T-learner, \code{"logistic"} (default) or \code{"boosting"};
+for two-regression, \code{"logistic"}.}
 
-\item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
+\item{benefit_model}{Optional one-sided formula specifying the covariates and
+terms for the two-regression or contrast-regression score. The default
+\code{NULL} uses the covariates and terms of \code{outcome_model}.
+An intercept is required and offsets are not supported. T-learner scores use
+the outcome model directly and do not use this formula. In a mixed fit it
+applies only to two-regression and contrast regression. Continuous-outcome
+fitting is not implemented.}
+
+\item{benefit_method}{Score-construction methods; defaults to \code{"t_learner"}.
+See \code{\link{catefit}}.}
 
 \item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
@@ -59,7 +69,7 @@ truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.}
 lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.}
 
 \item{prop.cutoff}{A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+estimated risk-difference CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of \code{prop.cutoff} is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
@@ -74,31 +84,27 @@ Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of repetitions of cross-fitting for \code{benefit_method =
+'two_regression'} or \code{'contrast_regression'}. Default is \code{3}.}
 
 \item{Kfold}{A positive integer specifying the number of folds used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
+to partition the data in \code{benefit_method = 'two_regression'} and \code{'contrast_regression'}.
 Default is \code{5}.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is 2.}
+\item{tree.depth}{A positive integer specifying the maximum depth of boosting trees.
+Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is \code{200}.}
+\item{n.trees.boosting}{The maximum number of boosting trees, used when
+\code{outcome_method = 'boosting'}. Default is \code{200}.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance measures when
+\code{outcome_method = 'boosting'}. Default is \code{FALSE}.}
 
-\item{init.model}{Optional formula for the initial logistic outcome models
-used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.}
-
-\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{The legacy \code{init.model} argument specifies a separate initial
+outcome formula under the previous interface; it cannot be combined with
+\code{benefit_model}. The legacy \code{initial.predictor.method} is accepted
+with a deprecation warning and cannot be combined with \code{outcome_method}.
+Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 A \code{catefit} object containing treatment labels, fitted models,

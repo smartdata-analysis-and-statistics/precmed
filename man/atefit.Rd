@@ -41,12 +41,11 @@ rather than in this formula. See \code{\link{atefitbinary}},
 \code{\link{atefitcount}}, or \code{\link{atefitsurv}} for the
 outcome-specific model and formula requirements.}
 
-\item{outcome_method}{Outcome-model method. The default \code{NULL} selects
-\code{"logistic"} for binary outcomes, \code{"poisson"} for count outcomes,
-and \code{"coxph"} for survival outcomes. Count outcomes also support
-\code{"negative_binomial"} (alias \code{"negbin"}); survival outcomes
-also support \code{"weibull"} and \code{"log_normal"} (alias
-\code{"lognormal"}). Other methods are not currently available. See the outcome-specific help pages for details.}
+\item{outcome_method}{Outcome-model method. \code{NULL} selects
+\code{"logistic"} for binary, \code{"poisson"} for count, and
+\code{"coxph"} for survival outcomes. See \code{\link{atefitbinary}},
+\code{\link{atefitcount}}, or \code{\link{atefitsurv}} for available
+methods and their assumptions.}
 
 \item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values

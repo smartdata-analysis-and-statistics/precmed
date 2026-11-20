@@ -69,7 +69,8 @@ Relevant only when \code{ps.model} has more than one variable.}
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
-one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
+one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest).
+The older value \code{'logistic'} is accepted with a deprecation warning.
 Default is \code{'randomForest'}.}
 
 \item{ipcw.model}{A formula describing the censoring model used for inverse
@@ -384,7 +385,7 @@ catecv <- catecvsurv(data = survivalExample,
                      cate.model = Surv(y, d) ~ age + female + previous_cost +
                                                previous_number_relapses,
                      ps.model = trt ~ age + previous_treatment,
-                     initial.predictor.method = "logistic",
+                     initial.predictor.method = "fractional_logit",
                      ipcw.model = ~ age + previous_cost + previous_treatment,
                      tau0 = tau0,
                      higher.y = TRUE,

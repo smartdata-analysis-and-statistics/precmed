@@ -196,7 +196,7 @@ arg.checks.common <- function(fun,
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates in \code{cate.model}
 #' in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
-#' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest). Default is \code{'randomForest'}.
+#' one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest). Default is \code{'randomForest'}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
 #' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
@@ -306,7 +306,7 @@ arg.checks <- function(fun, response, data,
 
     # Check initial predictor method
     if (is.null(initial.predictor.method) == FALSE) {
-      if (!(initial.predictor.method %in% c("randomForest", "boosting", "logistic"))) stop("initial.predictor.method must be 'randomForest', 'boosting' or 'logistic'.")
+      if (!(initial.predictor.method %in% c("randomForest", "boosting", "fractional_logit"))) stop("initial.predictor.method must be 'randomForest', 'boosting' or 'fractional_logit'.")
     }
 
   }
@@ -325,7 +325,7 @@ check_score_method <- function(response, score.method) {
   allowed <- switch(response,
     binary = c("logistic", "twoReg", "boosting"),
     count = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"),
-    survival = c("boosting", "poisson", "twoReg", "contrastReg", "randomForest"),
+    survival = c("boosting", "poisson", "twoReg", "contrastReg", "randomForest", "coxph", "weibull", "log_normal"),
     continuous = c("boosting", "gaussian", "twoReg", "contrastReg", "randomForest", "gam"))
   if (!is.character(score.method) || !length(score.method) ||
       anyNA(score.method) || any(!score.method %in% allowed))
@@ -351,13 +351,19 @@ rematch_catefit_legacy_call <- function(fun, call, env) {
   if (!old_positional && !has_alias) return(NULL)
   if (old_positional || old_named) {
     old_formals <- as.list(formals(fun))
+    after <- if ("xvar.smooth.score" %in% names(old_formals)) match("ps_method", names(old_formals)) else match("...", names(old_formals)) - 1L
+    old_formals <- append(old_formals, list(init.model = NULL), after = after)
+    if ("verbose" %in% names(old_formals)) {
+      position <- if ("xvar.smooth.score" %in% names(old_formals)) match("init.model", names(old_formals)) else match("ps_method", names(old_formals))
+      old_formals <- append(old_formals, list(initial.predictor.method = NULL), after = position)
+    }
     old_formals$score.method <- NULL
     old_formals$cate.model <- NULL
     # Assigning NULL removes a list element; retain explicit defaulted formals.
     old_formals["score.method"] <- list(NULL)
     old_formals["cate.model"] <- list(NULL)
     first <- c("data", "score.method", "cate.model")
-    last <- c("outcome_model", "outcome_method", "benefit_method", "...")
+    last <- c("outcome_model", "outcome_method", "benefit_model", "benefit_method", "...")
     old_formals <- old_formals[c(first, setdiff(names(old_formals), c(first, last)), last)]
     old_signature <- eval(call("function", as.pairlist(old_formals), quote(NULL)))
     args <- as.list(match.call(definition = old_signature, call = call))[-1]
@@ -372,6 +378,88 @@ rematch_catefit_legacy_call <- function(fun, call, env) {
   args
 }
 
+# Author: Thomas Debray
+normalize_survival_initial_method <- function(method) {
+  if (is.character(method) && any(!is.na(method) & method == "logistic")) {
+    warning('For survival outcomes, "logistic" is deprecated; use "fractional_logit" instead.', call. = FALSE)
+    method[!is.na(method) & method == "logistic"] <- "fractional_logit"
+  }
+  method
+}
+
+# Author: Thomas Debray
+benefit_design <- function(data, benefit_model, outcome_design, intercept = FALSE) {
+  if (is.null(benefit_model)) return(outcome_design)
+  if (!inherits(benefit_model, "formula") || length(benefit_model) != 2L)
+    stop("benefit_model must be a one-sided formula.", call. = FALSE)
+  frame <- stats::model.frame(benefit_model, data, na.action = stats::na.pass)
+  if (!is.null(stats::model.offset(frame))) stop("benefit_model cannot include an offset.", call. = FALSE)
+  design <- stats::model.matrix(benefit_model, frame)
+  if (!"(Intercept)" %in% colnames(design)) stop("benefit_model must include an intercept.", call. = FALSE)
+  if (anyNA(design) || any(!is.finite(design))) stop("Missing or non-finite covariates are not allowed in benefit_model.", call. = FALSE)
+  if (!intercept) design <- design[, colnames(design) != "(Intercept)", drop = FALSE]
+  design
+}
+
+# Preserve positional calls from before benefit_model was inserted.
+# Author: Thomas Debray
+rematch_pre_benefit_call <- function(fun, call, env) {
+  matched <- as.list(match.call(definition = fun, call = call))[-1L]
+  call_names <- names(as.list(call))
+  if (!"benefit_model" %in% names(matched) || (!is.null(call_names) && "benefit_model" %in% call_names)) return(NULL)
+  candidate <- tryCatch(eval(matched$benefit_model, env), error = function(e) NULL)
+  if (!is.character(candidate) || !length(candidate) || anyNA(candidate) ||
+      !all(candidate %in% c("t_learner", "two_regression", "contrast_regression", "twoReg", "contrastReg", "logistic", "poisson", "boosting", "negBin", "randomForest", "gam", "gaussian"))) return(NULL)
+  old <- as.list(formals(fun)); old$benefit_model <- NULL
+  name <- if ("response" %in% names(old)) "generic" else if ("xvar.smooth.score" %in% names(old)) "continuous" else "specific"
+  after <- if (name %in% c("generic", "continuous")) match("ps_method", names(old)) else match("...", names(old)) - 1L
+  old <- append(old, list(init.model = NULL), after = after)
+  if (name != "specific" || "verbose" %in% names(old)) {
+    position <- if (name %in% c("generic", "continuous")) match("init.model", names(old)) else match("ps_method", names(old))
+    old <- append(old, list(initial.predictor.method = NULL), after = position)
+  }
+  signature <- eval(call("function", as.pairlist(old), quote(NULL)))
+  as.list(match.call(definition = signature, call = call))[-1L]
+}
+
+# Preserve positional calls made before the initial predictor was hidden.
+# Author: Thomas Debray
+rematch_hidden_initial_call <- function(fun, call, env) {
+  formals_list <- as.list(formals(fun))
+  if (!"response" %in% names(formals_list) && !"verbose" %in% names(formals_list)) return(NULL)
+  next_arg <- if ("response" %in% names(formals_list)) "ipcw.model" else "minPS"
+  matched <- as.list(match.call(definition = fun, call = call))[-1L]
+  call_names <- names(as.list(call))
+  if (!next_arg %in% names(matched) || (!is.null(call_names) && next_arg %in% call_names)) return(NULL)
+  value <- tryCatch(eval(matched[[next_arg]], env), error = function(e) NULL)
+  if (!is.character(value) || length(value) != 1L || is.na(value) ||
+      !value %in% c("poisson", "boosting", "gam", "gaussian", "randomForest", "fractional_logit", "logistic")) return(NULL)
+  old <- append(formals_list, list(initial.predictor.method = NULL), after = match("ps_method", names(formals_list)))
+  signature <- eval(call("function", as.pairlist(old), quote(NULL)))
+  as.list(match.call(definition = signature, call = call))[-1L]
+}
+
+# Warn about the legacy CATE initial outcome-model method and reject ambiguity.
+# Author: Thomas Debray
+check_cate_initial_alias <- function(args) {
+  indices <- which(names(args) == "initial.predictor.method")
+  if (!length(indices)) return(invisible(NULL))
+  warning("initial.predictor.method is deprecated for catefit(); use outcome_method instead.", call. = FALSE)
+  if (length(indices) > 1L || "outcome_method" %in% names(args))
+    stop("Specify only outcome_method or initial.predictor.method, not both.", call. = FALSE)
+  invisible(NULL)
+}
+
+# Apply default T-learner choices without changing legacy score names.
+# Author: Thomas Debray
+resolve_cate_defaults <- function(response, outcome_method, benefit_method) {
+  default_outcome <- switch(response, binary = "logistic", count = "poisson",
+                            survival = "coxph", continuous = NULL)
+  if (is.null(benefit_method) && !is.null(default_outcome)) benefit_method <- "t_learner"
+  if (is.null(outcome_method) && identical(benefit_method, "t_learner")) outcome_method <- default_outcome
+  list(outcome_method = outcome_method, benefit_method = benefit_method)
+}
+
 # Resolve the public and legacy outcome-specific CATE interfaces.
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
 resolve_catefit_arguments <- function(response, outcome_model, outcome_method, benefit_method,
@@ -383,13 +471,24 @@ resolve_catefit_arguments <- function(response, outcome_model, outcome_method, b
     stop("Specify only benefit_method or score.method, not both.", call. = FALSE)
   model <- if (!is.null(outcome_model)) outcome_model else cate.model
   methods <- if (!is.null(benefit_method)) benefit_method else score.method
+  defaults <- resolve_cate_defaults(response, outcome_method, methods)
+  methods <- defaults$benefit_method
+  outcome_method <- defaults$outcome_method
   if (is.null(methods)) stop("benefit_method must be supplied.", call. = FALSE)
+  modern_methods <- c("t_learner", "two_regression", "contrast_regression", "twoReg", "contrastReg")
+  if (is.null(outcome_method) && !initial_missing && !is.null(initial) &&
+      is.character(methods) && length(methods) && !anyNA(methods) &&
+      all(methods %in% modern_methods) && any(methods %in% c("two_regression", "contrast_regression", "twoReg", "contrastReg"))) {
+    initial_method <- if (identical(initial, "randomForest")) "random_forest" else initial
+    default_method <- switch(response, binary = "logistic", count = "poisson", survival = "coxph", continuous = NULL)
+    if (!is.null(default_method)) outcome_method <- ifelse(methods == "t_learner", default_method, initial_method)
+  }
   if (is.null(outcome_method)) {
     if (is.character(methods) && any(methods %in% c("t_learner", "two_regression", "contrast_regression")))
       stop("outcome_method must be supplied for the selected benefit_method.", call. = FALSE)
     check_score_method(response, methods)
     if (is.null(model)) stop("outcome_model must be supplied.", call. = FALSE)
-    return(list(outcome_model = model, scores = methods, initial = initial))
+    return(list(outcome_model = model, scores = methods, initial = initial, initial_methods = NULL))
   }
   config <- resolve_benefit_config(response, methods, outcome_method)
   if (is.null(model)) stop("outcome_model must be supplied.", call. = FALSE)
@@ -398,11 +497,14 @@ resolve_catefit_arguments <- function(response, outcome_model, outcome_method, b
       stop("initial.predictor.method must agree with the outcome_method for two_regression and contrast_regression.", call. = FALSE)
     initial <- config$initial
   }
-  list(outcome_model = model, scores = config$scores, initial = initial)
+  list(outcome_model = model, scores = config$scores, initial = initial,
+       initial_methods = config$initial_methods)
 }
 
 # Author: Thomas Debray
 resolve_benefit_config <- function(response, benefit_method, outcome_method) {
+  if (identical(response, "survival") && is.character(outcome_method))
+    outcome_method[!is.na(outcome_method) & outcome_method == "lognormal"] <- "log_normal"
   if (is.character(benefit_method)) {
     benefit_method[!is.na(benefit_method) & benefit_method == "twoReg"] <- "two_regression"
     benefit_method[!is.na(benefit_method) & benefit_method == "contrastReg"] <- "contrast_regression"
@@ -414,10 +516,10 @@ resolve_benefit_config <- function(response, benefit_method, outcome_method) {
     stop("outcome_method must have one non-missing value per benefit_method.", call. = FALSE)
   direct <- switch(response, binary = c(logistic = "logistic", boosting = "boosting"),
                    count = c(poisson = "poisson", negative_binomial = "negBin", boosting = "boosting"),
-                   survival = c(poisson = "poisson", boosting = "boosting", random_forest = "randomForest"),
+                   survival = c(poisson = "poisson", boosting = "boosting", random_forest = "randomForest", coxph = "coxph", weibull = "weibull", log_normal = "log_normal"),
                    continuous = character())
   initial <- switch(response, binary = "logistic", count = c("poisson", "boosting", "gam"),
-                    survival = c("logistic", "boosting", "random_forest"), continuous = character())
+                    survival = c("fractional_logit", "boosting", "random_forest"), continuous = character())
   scores <- character(length(benefit_method))
   for (i in seq_along(scores)) {
     method <- benefit_method[i]; outcome <- outcome_method[i]
@@ -432,11 +534,12 @@ resolve_benefit_config <- function(response, benefit_method, outcome_method) {
     }
   }
   if (anyDuplicated(scores)) stop("Repeated configurations producing the same score are not supported.", call. = FALSE)
-  nuisance <- unique(outcome_method[benefit_method != "t_learner"])
-  if (length(nuisance) > 1L) stop("two_regression and contrast_regression must use the same outcome_method; separate initial models are not supported in one call.", call. = FALSE)
-  list(scores = scores, initial = if (length(nuisance)) {
-    if (nuisance == "random_forest") "randomForest" else nuisance
-  } else NULL)
+  dr <- benefit_method != "t_learner"
+  initial_methods <- outcome_method[dr]
+  initial_methods[initial_methods == "random_forest"] <- "randomForest"
+  names(initial_methods) <- scores[dr]
+  list(scores = scores, initial = if (length(initial_methods)) unname(initial_methods[1L]) else NULL,
+       initial_methods = initial_methods)
 }
 
 #' Data preprocessing

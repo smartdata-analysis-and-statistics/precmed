@@ -8,7 +8,8 @@ scorecount(
   fit,
   x.cate,
   time,
-  score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin")
+  score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"),
+  x.benefit = x.cate
 )
 }
 \arguments{
@@ -21,6 +22,8 @@ scorecount(
 \item{score.method}{A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, \code{'contrastReg'},
 \code{'negBin'}. Default specifies all 5 methods.}
+
+\item{x.benefit}{Benefit-score covariate matrix; defaults to \code{x.cate}.}
 }
 \value{
 score.boosting: Estimated log CATE score for all \code{n} observations with the boosting method; vector of size \code{n}

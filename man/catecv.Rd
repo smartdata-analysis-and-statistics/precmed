@@ -90,7 +90,7 @@ fitting and validation are not currently implemented.}
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'fractional_logit'}
 (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
 \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 for count outcomes and \code{'randomForest'} for survival outcomes.}

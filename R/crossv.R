@@ -39,7 +39,7 @@
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'logistic'}
+#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'fractional_logit'}
 #' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
 #' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
 #' for count outcomes and \code{'randomForest'} for survival outcomes.
@@ -293,6 +293,8 @@ catecv <- function(response,
                    verbose = 0,
                    contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
   check_response(response)
+  if (identical(response, "survival") && any(score.method %in% c("coxph", "weibull", "log_normal")))
+    stop("These survival T-learner scores are currently supported only by catefit().", call. = FALSE)
   check_score_method(response, score.method)
   resolve_ps_control(ps.control)
   resolve_rf_control(rf.control)
@@ -406,7 +408,8 @@ catecv <- function(response,
 #' @param initial.predictor.method A character vector for the method used to get initial
 #' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
 #' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
-#' one of \code{'randomForest'}, \code{'boosting'} and \code{'logistic'} (fastest).
+#' one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest).
+#' The older value \code{'logistic'} is accepted with a deprecation warning.
 #' Default is \code{'randomForest'}.
 #' @param tree.depth A positive integer specifying the depth of individual trees in boosting
 #' (usually 2-3). Used only if \code{score.method = 'boosting'} or
@@ -622,7 +625,7 @@ catecv <- function(response,
 #'                      cate.model = Surv(y, d) ~ age + female + previous_cost +
 #'                                                previous_number_relapses,
 #'                      ps.model = trt ~ age + previous_treatment,
-#'                      initial.predictor.method = "logistic",
+#'                      initial.predictor.method = "fractional_logit",
 #'                      ipcw.model = ~ age + previous_cost + previous_treatment,
 #'                      tau0 = tau0,
 #'                      higher.y = TRUE,
@@ -689,6 +692,9 @@ catecvsurv <- function(data,
                        seed = NULL,
                        plot.gbmperf = FALSE,
                        verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL) {
+  if (any(score.method %in% c("coxph", "weibull", "log_normal")))
+    stop("These survival T-learner scores are currently supported only by catefit().", call. = FALSE)
+  initial.predictor.method <- normalize_survival_initial_method(initial.predictor.method)
   resolve_ps_control(ps.control)
 
   resolve_rmst_control(rmst.control)
