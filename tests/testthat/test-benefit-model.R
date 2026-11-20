@@ -24,7 +24,10 @@ test_that("benefit model changes doubly robust scores but not T-learners", {
     expect_identical(names(coef(intercept, method = "two_regression")), "(Intercept)", info = case$response)
     expect_error(do.call(catefit, c(args, list(benefit_model = age ~ female))), "one-sided")
     expect_error(do.call(catefit, c(args, list(benefit_model = ~ age - 1))), "intercept")
-    expect_error(do.call(catefit, c(args, list(benefit_model = ~ age, init.model = case$outcome))), "only benefit_model")
+    expect_warning(
+      expect_error(do.call(catefit, c(args, list(benefit_model = ~ age, init.model = case$outcome))),
+                   "only benefit_model"),
+      "init.model is deprecated")
   }
 })
 

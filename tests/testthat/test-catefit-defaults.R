@@ -1,4 +1,5 @@
 test_that("CATE default T-learners match explicit configurations", {
+  expect_identical(formals(catefit)$benefit_method, "t_learner")
   cases <- list(
     list(response = "binary", fun = catefitbinary, data = simulate_binary(n = 400, seed = 951),
          model = y ~ age, method = "logistic", extra = list()),
@@ -7,6 +8,8 @@ test_that("CATE default T-learners match explicit configurations", {
     list(response = "survival", fun = catefitsurv, data = simulate_survival(n = 400, seed = 953),
          model = survival::Surv(y, d) ~ age, method = "coxph", extra = list()))
   for (case in cases) {
+    expect_identical(formals(case$fun)$outcome_method, case$method)
+    expect_identical(formals(case$fun)$benefit_method, "t_learner")
     extra <- case$extra
     if (case$response == "survival") extra$tau0 <- median(case$data$y) * 1.1
     args <- c(list(data = case$data, outcome_model = case$model, ps_model = trt ~ age,

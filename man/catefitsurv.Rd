@@ -7,13 +7,13 @@
 catefitsurv(
   data,
   outcome_model = NULL,
-  outcome_method = NULL,
+  outcome_method = "coxph",
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -43,7 +43,7 @@ catefitsurv(
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{outcome_model}{Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates.}
 
 \item{outcome_method}{Outcome-model method paired with \code{benefit_method}.
 For a T-learner, \code{"coxph"} (default), \code{"weibull"},
@@ -79,16 +79,16 @@ Allowed values include one of:
 two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
 Relevant only when \code{ps_model} has more than one variable.}
 
-\item{ipcw.model}{A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-which corresponds to specifying the censoring model with the same covariates as the outcome model
-\code{outcome_model} plus the treatment.}
+\item{censoring_model}{A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring
+weighting (IPCW). By default (\code{NULL}), the model uses the outcome-model
+covariates and treatment.}
 
-\item{ipcw.method}{A character value for the censoring model. Allowed values are:
-\code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
-\code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
-or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
-y variable). Default is \code{'breslow'}.}
+\item{censoring_method}{Method for fitting the censoring model. The default
+\code{"breslow"} fits Cox regression with the Breslow estimator of the
+baseline survivor function. Accelerated failure time options are
+\code{"aft (exponential)"}, \code{"aft (weibull)"},
+\code{"aft (lognormal)"}, and \code{"aft (loglogistic)"}.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -120,8 +120,7 @@ It must be a positive value and should be chosen close to 0. Default is \code{0.
 Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{outcome_method = 'random_forest'}
-with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
+Used with \code{outcome_method = 'random_forest'} for survival outcomes.
 Default is \code{1000}.}
 
 \item{n.trees.boosting}{The maximum number of boosting trees, used when
@@ -179,12 +178,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{The legacy \code{init.model} argument specifies a separate initial
-outcome formula under the previous interface; it cannot be combined with
-\code{benefit_model}. The legacy \code{initial.predictor.method} is also
-accepted with a deprecation warning; do not supply it with
-\code{outcome_method}.
-Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Additional boosting options. See \code{\link{boosting-control}}.
+Deprecated argument names from precmed 1.1.0 remain supported for
+backward compatibility and emit warnings.}
 }
 \value{
 Returns an object of the class \code{catefit} containing the following components:
@@ -194,77 +190,70 @@ records the method selected for each score.
  \item{\code{ate.randomForest}: } A vector of numerical values of length \code{prop.cutoff}
  containing the estimated ATE by the RMTL ratio in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with random forest method.
- Only provided if \code{score.method} includes \code{'randomForest'}.
+ Only provided if the fit includes a random forest.
  \item{\code{ate.boosting}: }Same as \code{ate.randomForest}, but with the nested subgroups based
- the estimated CATE scores with boosting. Only provided if \code{score.method}
- includes \code{'boosting'}.
+ the estimated CATE scores with boosting. Only provided if the fit includes boosting.
  \item{\code{ate.poisson}: }Same as \code{ate.randomForest}, but with the nested subgroups based
  the estimated CATE scores with poisson regression.
- Only provided if \code{score.method} includes \code{'poisson'}.
+ Only provided if the fit includes Poisson regression.
  \item{\code{ate.twoReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if \code{score.method} includes \code{'twoReg'}.
+ Only provided if the fit includes two-regression.
  \item{\code{ate.contrastReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if \code{score.method} includes \code{'contrastReg'}.
+ Only provided if the fit includes contrast regression.
  \item{\code{chr.<method>}: } A vector of subgroup marginal cumulative hazard
  ratios at \code{tau0}, for each selected scoring method. Undefined estimates
  are \code{NA}; existing \code{hr.*} results are conditional Cox HRs.
  \item{\code{hr.randomForest}: }A vector of numerical values of length \code{prop.cutoff}
  containing the adjusted hazard ratio in nested subgroups (defined by \code{prop.cutoff})
  constructed based on the estimated CATE scores with random forest method.
- Only provided if \code{score.method} includes \code{'randomForest'}.
+ Only provided if the fit includes a random forest.
  \item{\code{hr.boosting}: }Same as \code{hr.randomForest}, but with the nested subgroups based
- the estimated CATE scores with boosting. Only provided if \code{score.method}
- includes \code{'boosting'}.
+ the estimated CATE scores with boosting. Only provided if the fit includes boosting.
  \item{\code{hr.poisson}: }Same as \code{hr.randomForest}, but with the nested subgroups based
  the estimated CATE scores with poisson regression.
- Only provided if \code{score.method} includes \code{'poisson'}.
+ Only provided if the fit includes Poisson regression.
  \item{\code{hr.twoReg}: }Same as \code{hr.randomForest}, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if \code{score.method} includes \code{'twoReg'}.
+ Only provided if the fit includes two-regression.
  \item{\code{hr.contrastReg}: }Same as \code{hr.randomForest}, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if \code{score.method} includes \code{'contrastReg'}.
+ Only provided if the fit includes contrast regression.
  \item{\code{score.randomForest}: }A vector of numerical values of length n
  (number of observations in \code{data}) containing the estimated log-CATE scores
- according to random forest. Only provided if \code{score.method}
- includes \code{'randomForest'}.
+ according to random forest. Only provided if the fit includes a random forest.
  \item{\code{score.boosting}: }Same as \code{score.randomForest}, but with estimated log-CATE score
- according to boosting. Only provided if \code{score.method} includes
- \code{'boosting'}.
+ according to boosting. Only provided if the fit includes boosting.
  \item{\code{score.poisson}: }Same as \code{score.randomForest}, but with estimated log-CATE score
- according to the Poisson regression. Only provided if \code{score.method}
- includes \code{'poisson'}.
+ according to the Poisson regression. Only provided if the fit includes Poisson regression.
  \item{\code{score.twoReg}: }Same as \code{score.randomForest}, but with estimated log-CATE score
- according to two regressions. Only provided if \code{score.method} includes
- \code{'twoReg'}.
+ according to two regressions. Only provided if the fit includes two-regression.
  \item{\code{score.contrastReg}: }Same as \code{score.randomForest}, but with estimated log-CATE score
- according to contrast regression. Only provided if \code{score.method} includes
- \code{'contrastReg'}.
- \item{\code{fit}: }Additional details on model fitting if \code{score.method}
- includes 'randomForest', 'boosting' or 'contrastReg':
+ according to contrast regression. Only provided if the fit includes contrast regression.
+ \item{\code{fit}: }Additional model-fitting details for random forests,
+ boosting, and contrast regression.
  \itemize{
    \item{\code{result.randomForest}: }Details on the random forest model fitted to observations
    with treatment = 0 \code{($fit0.rf)} and to observations with treatment = 1 \code{($fit1.rf)}.
-   Only provided if \code{score.method} includes \code{'randomForest'}.
+   Only provided if the fit includes a random forest.
    \item{\code{result.boosting}: }Details on the boosting model fitted to observations
    with treatment = 0, \code{($fit0.boosting)} and \code{($fit0.gam)} and to observations with treatment = 1,
    \code{($fit1.boosting)} and \code{($fit1.gam)}.
-   Only provided if \code{score.method} includes \code{'boosting'}.
+   Only provided if the fit includes boosting.
    \item{\code{result.contrastReg$converge.contrastReg}: }Whether the contrast regression algorithm converged
-   or not. Only provided if \code{score.method} includes \code{'contrastReg'}.
+   or not. Only provided if the fit includes contrast regression.
  }
  \item{\code{coefficients}: }A data frame with the coefficients of the estimated log-CATE
- score by \code{score.method}. The data frame has number of rows equal to the number of
- design columns in \code{cate.model}, including the intercept, and one column per
+ score for each applicable method. The data frame has number of rows equal to the number of
+ design columns in \code{outcome_model}, including the intercept, and one column per
  available linear scoring method. Standard errors are not calculated for survival scores.
  \code{'randomForest'} and \code{'boosting'} do not have coefficient results because
  tree-based methods typically do not express the log-CATE as a linear combination of coefficients
  and covariates.
  \item{\code{risk0.<method>}, \code{risk1.<method>}, \code{rd.<method>}, \code{rmst0.<method>}, \code{rmst1.<method>}: } Subgroup event risks, risk differences (treatment 1 minus 0), and treatment-specific RMST at \code{tau0}. See \code{\link{subgroup_estimates}} for extraction.
  \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
- calculation of ATE. Errors and warnings are organized by \code{score.method}.
+ calculation of ATE. Errors and warnings are organized by scoring method.
 }
 }
 \description{
@@ -273,16 +262,14 @@ up to 5 scoring methods among the following: Random forest, boosting, poisson re
 two regressions, and contrast regression.
 }
 \details{
-The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-
 The CATE score estimates a covariate-conditional average treatment effect for survival data,
 estimated with random forest, boosting, Poisson regression, and the doubly
 robust estimator (two regressions, Yadlowsky, 2020) applied separately by treatment group
 or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
 to the entire data set.
 
-\code{\link{catefitsurv}()} provides the coefficients of the CATE score for each scoring method requested
-through \code{score.method} for supported linear scoring methods. The coefficients
+\code{\link{catefitsurv}()} provides CATE score coefficients for supported
+linear scoring methods. The coefficients
 describe the fitted log-RMTL score; coefficient standard errors and confidence
 intervals are not currently calculated for survival fits.
 
@@ -309,7 +296,7 @@ fit <- catefitsurv(data = survivalExample,
                    outcome_method = "random_forest",
                    benefit_method = "t_learner",
                    ps_model = trt ~ age + previous_treatment,
-                   ipcw.model = ~ age + previous_cost + previous_treatment,
+                   censoring_model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,
                    seed = 999)
 

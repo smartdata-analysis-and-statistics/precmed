@@ -74,8 +74,9 @@ estimates combine outcome predictions and propensity scores. T-learner scores
 use outcome predictions alone, but the treatment model is still used for the
 subgroup estimates reported by `catefit()`. Survival estimation also uses a
 censoring model to supply probabilities for inverse probability of censoring
-weighting (IPCW). Here the default censoring model uses the outcome-model
-covariates; see `?catefit` for alternatives.
+weighting (IPCW). In `catefit()`, the default censoring model uses the
+outcome-model covariates and treatment. Use `censoring_model` to supply a
+different formula and `censoring_method` to change how the model is fitted.
 
 ```{r}
 outcome_formula <- survival::Surv(y, d) ~ age + female +

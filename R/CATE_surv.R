@@ -6,7 +6,7 @@
 #'
 #' @param data A data frame containing the variables in the outcome, treatment,
 #' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates.
 #' @param outcome_method Outcome-model method paired with \code{benefit_method}.
 #' For a T-learner, \code{"coxph"} (default), \code{"weibull"},
 #' \code{"log_normal"} (alias \code{"lognormal"}), \code{"poisson"},
@@ -36,15 +36,15 @@
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
 #' two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
 #' Relevant only when \code{ps_model} has more than one variable.
-#' @param ipcw.model A formula describing the censoring model used for inverse
-#' probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-#' which corresponds to specifying the censoring model with the same covariates as the outcome model
-#' \code{outcome_model} plus the treatment.
-#' @param ipcw.method A character value for the censoring model. Allowed values are:
-#' \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
-#' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
-#' or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
-#' y variable). Default is \code{'breslow'}.
+#' @param censoring_model A one-sided formula for the model that estimates
+#' probabilities of remaining uncensored for inverse probability of censoring
+#' weighting (IPCW). By default (\code{NULL}), the model uses the outcome-model
+#' covariates and treatment.
+#' @param censoring_method Method for fitting the censoring model. The default
+#' \code{"breslow"} fits Cox regression with the Breslow estimator of the
+#' baseline survivor function. Accelerated failure time options are
+#' \code{"aft (exponential)"}, \code{"aft (weibull)"},
+#' \code{"aft (lognormal)"}, and \code{"aft (loglogistic)"}.
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
@@ -67,8 +67,7 @@
 #' @param tree.depth A positive integer specifying the maximum depth of boosting trees.
 #' Used when \code{outcome_method = 'boosting'}. Default is \code{2}.
 #' @param n.trees.rf A positive integer specifying the number of trees in random forest.
-#' Used if \code{score.method = 'randomForest'} or if \code{outcome_method = 'random_forest'}
-#' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
+#' Used with \code{outcome_method = 'random_forest'} for survival outcomes.
 #' Default is \code{1000}.
 #' @param n.trees.boosting The maximum number of boosting trees, used when
 #' \code{outcome_method = 'boosting'}. Default is \code{200}.
@@ -112,13 +111,9 @@
 #' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 #' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 #' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
-#' @param ... The legacy \code{init.model} argument specifies a separate initial
-#' outcome formula under the previous interface; it cannot be combined with
-#' \code{benefit_model}. The legacy \code{initial.predictor.method} is also
-#' accepted with a deprecation warning; do not supply it with
-#' \code{outcome_method}.
-#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+#' @param ... Additional boosting options. See \code{\link{boosting-control}}.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
 #'
 #' @return Returns an object of the class \code{catefit} containing the following components:
 #' When the doubly robust scores use distinct outcome methods, \code{outcome_methods}
@@ -127,77 +122,70 @@
 #'  \item{\code{ate.randomForest}: } A vector of numerical values of length \code{prop.cutoff}
 #'  containing the estimated ATE by the RMTL ratio in nested subgroups (defined by \code{prop.cutoff})
 #'  constructed based on the estimated CATE scores with random forest method.
-#'  Only provided if \code{score.method} includes \code{'randomForest'}.
+#'  Only provided if the fit includes a random forest.
 #'  \item{\code{ate.boosting}: }Same as \code{ate.randomForest}, but with the nested subgroups based
-#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
-#'  includes \code{'boosting'}.
+#'  the estimated CATE scores with boosting. Only provided if the fit includes boosting.
 #'  \item{\code{ate.poisson}: }Same as \code{ate.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with poisson regression.
-#'  Only provided if \code{score.method} includes \code{'poisson'}.
+#'  Only provided if the fit includes Poisson regression.
 #'  \item{\code{ate.twoReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with two regressions.
-#'  Only provided if \code{score.method} includes \code{'twoReg'}.
+#'  Only provided if the fit includes two-regression.
 #'  \item{\code{ate.contrastReg}: }Same as \code{ate.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with contrast regression.
-#'  Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'  Only provided if the fit includes contrast regression.
 #'  \item{\code{chr.<method>}: } A vector of subgroup marginal cumulative hazard
 #'  ratios at \code{tau0}, for each selected scoring method. Undefined estimates
 #'  are \code{NA}; existing \code{hr.*} results are conditional Cox HRs.
 #'  \item{\code{hr.randomForest}: }A vector of numerical values of length \code{prop.cutoff}
 #'  containing the adjusted hazard ratio in nested subgroups (defined by \code{prop.cutoff})
 #'  constructed based on the estimated CATE scores with random forest method.
-#'  Only provided if \code{score.method} includes \code{'randomForest'}.
+#'  Only provided if the fit includes a random forest.
 #'  \item{\code{hr.boosting}: }Same as \code{hr.randomForest}, but with the nested subgroups based
-#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
-#'  includes \code{'boosting'}.
+#'  the estimated CATE scores with boosting. Only provided if the fit includes boosting.
 #'  \item{\code{hr.poisson}: }Same as \code{hr.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with poisson regression.
-#'  Only provided if \code{score.method} includes \code{'poisson'}.
+#'  Only provided if the fit includes Poisson regression.
 #'  \item{\code{hr.twoReg}: }Same as \code{hr.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with two regressions.
-#'  Only provided if \code{score.method} includes \code{'twoReg'}.
+#'  Only provided if the fit includes two-regression.
 #'  \item{\code{hr.contrastReg}: }Same as \code{hr.randomForest}, but with the nested subgroups based
 #'  the estimated CATE scores with contrast regression.
-#'  Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'  Only provided if the fit includes contrast regression.
 #'  \item{\code{score.randomForest}: }A vector of numerical values of length n
 #'  (number of observations in \code{data}) containing the estimated log-CATE scores
-#'  according to random forest. Only provided if \code{score.method}
-#'  includes \code{'randomForest'}.
+#'  according to random forest. Only provided if the fit includes a random forest.
 #'  \item{\code{score.boosting}: }Same as \code{score.randomForest}, but with estimated log-CATE score
-#'  according to boosting. Only provided if \code{score.method} includes
-#'  \code{'boosting'}.
+#'  according to boosting. Only provided if the fit includes boosting.
 #'  \item{\code{score.poisson}: }Same as \code{score.randomForest}, but with estimated log-CATE score
-#'  according to the Poisson regression. Only provided if \code{score.method}
-#'  includes \code{'poisson'}.
+#'  according to the Poisson regression. Only provided if the fit includes Poisson regression.
 #'  \item{\code{score.twoReg}: }Same as \code{score.randomForest}, but with estimated log-CATE score
-#'  according to two regressions. Only provided if \code{score.method} includes
-#'  \code{'twoReg'}.
+#'  according to two regressions. Only provided if the fit includes two-regression.
 #'  \item{\code{score.contrastReg}: }Same as \code{score.randomForest}, but with estimated log-CATE score
-#'  according to contrast regression. Only provided if \code{score.method} includes
-#'  \code{'contrastReg'}.
-#'  \item{\code{fit}: }Additional details on model fitting if \code{score.method}
-#'  includes 'randomForest', 'boosting' or 'contrastReg':
+#'  according to contrast regression. Only provided if the fit includes contrast regression.
+#'  \item{\code{fit}: }Additional model-fitting details for random forests,
+#'  boosting, and contrast regression.
 #'  \itemize{
 #'    \item{\code{result.randomForest}: }Details on the random forest model fitted to observations
 #'    with treatment = 0 \code{($fit0.rf)} and to observations with treatment = 1 \code{($fit1.rf)}.
-#'    Only provided if \code{score.method} includes \code{'randomForest'}.
+#'    Only provided if the fit includes a random forest.
 #'    \item{\code{result.boosting}: }Details on the boosting model fitted to observations
 #'    with treatment = 0, \code{($fit0.boosting)} and \code{($fit0.gam)} and to observations with treatment = 1,
 #'    \code{($fit1.boosting)} and \code{($fit1.gam)}.
-#'    Only provided if \code{score.method} includes \code{'boosting'}.
+#'    Only provided if the fit includes boosting.
 #'    \item{\code{result.contrastReg$converge.contrastReg}: }Whether the contrast regression algorithm converged
-#'    or not. Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'    or not. Only provided if the fit includes contrast regression.
 #'  }
 #'  \item{\code{coefficients}: }A data frame with the coefficients of the estimated log-CATE
-#'  score by \code{score.method}. The data frame has number of rows equal to the number of
-#'  design columns in \code{cate.model}, including the intercept, and one column per
+#'  score for each applicable method. The data frame has number of rows equal to the number of
+#'  design columns in \code{outcome_model}, including the intercept, and one column per
 #'  available linear scoring method. Standard errors are not calculated for survival scores.
 #'  \code{'randomForest'} and \code{'boosting'} do not have coefficient results because
 #'  tree-based methods typically do not express the log-CATE as a linear combination of coefficients
 #'  and covariates.
 #'  \item{\code{risk0.<method>}, \code{risk1.<method>}, \code{rd.<method>}, \code{rmst0.<method>}, \code{rmst1.<method>}: } Subgroup event risks, risk differences (treatment 1 minus 0), and treatment-specific RMST at \code{tau0}. See \code{\link{subgroup_estimates}} for extraction.
 #'  \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
-#'  calculation of ATE. Errors and warnings are organized by \code{score.method}.
+#'  calculation of ATE. Errors and warnings are organized by scoring method.
 #' }
 #'
 #' @details The CATE score estimates a covariate-conditional average treatment effect for survival data,
@@ -206,8 +194,8 @@
 #' or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
 #' to the entire data set.
 #'
-#' \code{\link{catefitsurv}()} provides the coefficients of the CATE score for each scoring method requested
-#' through \code{score.method} for supported linear scoring methods. The coefficients
+#' \code{\link{catefitsurv}()} provides CATE score coefficients for supported
+#' linear scoring methods. The coefficients
 #' describe the fitted log-RMTL score; coefficient standard errors and confidence
 #' intervals are not currently calculated for survival fits.
 #'
@@ -240,7 +228,7 @@
 #'                    outcome_method = "random_forest",
 #'                    benefit_method = "t_learner",
 #'                    ps_model = trt ~ age + previous_treatment,
-#'                    ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                    censoring_model = ~ age + previous_cost + previous_treatment,
 #'                    tau0 = tau0,
 #'                    seed = 999)
 #'
@@ -251,13 +239,13 @@
 
 catefitsurv <- function(data,
                         outcome_model = NULL,
-                        outcome_method = NULL,
+                        outcome_method = "coxph",
                         benefit_model = NULL,
-                        benefit_method = NULL,
+                        benefit_method = "t_learner",
                         ps_model,
                         ps_method = "glm",
-                        ipcw.model = NULL,
-                        ipcw.method = "breslow",
+                        censoring_model = NULL,
+                        censoring_method = "breslow",
                         minPS = 0.01,
                         maxPS = 0.99,
                         followup.time = NULL,
@@ -283,15 +271,16 @@ catefitsurv <- function(data,
   if (!is.null(previous_initial_call)) return(do.call(sys.function(), previous_initial_call, envir = parent.frame()))
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
-  .args <- as.list(match.call())[-1L]
-  aliases <- intersect(names(.args), c("ps.model", "ps.method"))
-  .args <- resolve_cate_ps_aliases(.args)
-  if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
+  matched <- as.list(match.call())[-1L]
+  .args <- resolve_cate_aliases(matched, censoring = TRUE)
+  if (!identical(names(matched), names(.args)))
+    return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
+  if (missing(outcome_method) && !identical(benefit_method, "t_learner")) outcome_method <- NULL
   outcome_method <- normalize_survival_initial_method(outcome_method)
   .dots <- list(...)
-  check_cate_initial_alias(.args)
+  check_cate_initial_aliases(.args)
   initial_missing <- !"initial.predictor.method" %in% names(.dots)
   initial.predictor.method <- if (initial_missing || is.null(.dots$initial.predictor.method)) "randomForest" else .dots$initial.predictor.method
   .dots$initial.predictor.method <- NULL
@@ -323,7 +312,7 @@ catefitsurv <- function(data,
     higher.y = higher.y, score.method = score.method, abc = FALSE,
     prop.cutoff = prop.cutoff,
     ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-    ipcw.method = ipcw.method,
+    ipcw.method = censoring_method,
     train.prop = 0.5, cv.n = 1,
     error.max = 1, max.iter = 2,
     initial.predictor.method = initial.predictor.method,
@@ -335,7 +324,7 @@ catefitsurv <- function(data,
 
   # PRE-PROCESSING
   out <- data.preproc.surv(fun = "catefit", cate.model = cate.model,
-                           ps.model = ps.model, ipcw.model = ipcw.model,
+                           ps.model = ps.model, ipcw.model = censoring_model,
                            tau0 = tau0, data = data, prop.cutoff = prop.cutoff,
                            ps.method = ps.method, response = "survival")
   y <- out$y
@@ -375,7 +364,7 @@ catefitsurv <- function(data,
   # Fit the interaction model
   fit <- do.call(intxsurv, c(list(y = y, d = d, trt = trt, x.cate = x.cate, x.benefit = x.benefit, x.init = x.init, initial.methods = config$initial_methods, x.ps = x.ps, x.ipcw = x.ipcw, yf = yf, tau0 = tau0, surv.min = surv.min,
                   score.method = score.method,
-                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method,
+                  ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = censoring_method,
                   initial.predictor.method = initial.predictor.method,
                   tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                   B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
@@ -396,7 +385,7 @@ catefitsurv <- function(data,
   if (prop[length(prop)] == 1) {
     est.prop1 <- survCatch(drsurv(y = y, d = d, x.cate = x.cate, x.ps = x.ps, x.ipcw = x.ipcw, trt = trt, yf = yf,
                                   tau0 = tau0, surv.min = surv.min, ps.method = ps.method, minPS = minPS, maxPS = maxPS,
-                                  ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE))
+                                  ipcw.method = censoring_method, rmst.control = rmst.control, ps.control = ps.control, cumulative.hr = TRUE))
     est.prop1$ate.rmtl.high <- exp(est.prop1$log.rmtl.ratio)
     est.prop1$hr.high <- exp(est.prop1$log.hazard.ratio)
     est.prop1$chr.high <- exp(est.prop1$log.cumulative.hazard.ratio)
@@ -410,7 +399,7 @@ catefitsurv <- function(data,
                                               tau0 = tau0, surv.min = surv.min,
                                               score = score, higher.y = higher.y,
                                               prop = prop.no1, onlyhigh = TRUE,
-                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method, rmst.control = rmst.control, ps.control = ps.control)
+                                              ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = censoring_method, rmst.control = rmst.control, ps.control = ps.control)
     result[[str_replace(name, "score", "ate")]] <- c(est.onlyhigh$ate.rmtl.high, est.prop1$ate.rmtl.high)
     result[[str_replace(name, "score", "hr")]] <- c(est.onlyhigh$hr.high, est.prop1$hr.high)
     result[[str_replace(name, "score", "chr")]] <- c(est.onlyhigh$chr.high, est.prop1$chr.high)

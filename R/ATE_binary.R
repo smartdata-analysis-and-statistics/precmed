@@ -29,11 +29,9 @@
 #' @param ps.control Named options for LASSO propensity-score interaction
 #'   screening. Supported entry: \code{solver = "C"} (default) or \code{"R"}.
 #'
-#' @param ... Additional arguments. The deprecated named argument \code{cate.model}
-#' is accepted as an alias for \code{outcome_model}, with a warning. Supply only
-#' one of these arguments. The deprecated aliases \code{ps.model} and
-#' \code{ps.method} are also accepted with warnings; use \code{ps_model} and
-#' \code{ps_method} instead. Other arguments are currently unsupported.
+#' @param ... Additional arguments.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
 #' @return An object of class \code{atefit}. See \code{\link{atefit}}
 #' for available methods and the contents of the fitted object.
 #'

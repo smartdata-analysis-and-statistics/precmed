@@ -6,7 +6,7 @@
 #'
 #' @param data A data frame containing the variables in the outcome and treatment model; a data frame with \code{n} rows
 #' (1 row per observation).
-#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates.
 #' @param outcome_method Outcome-model method paired with \code{benefit_method}.
 #' For a T-learner, \code{"poisson"} (default), \code{"negative_binomial"},
 #' or \code{"boosting"}; for two-regression or contrast regression,
@@ -80,13 +80,9 @@
 #' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-#' @param ... The legacy \code{init.model} argument specifies a separate initial
-#' outcome formula under the previous interface; it cannot be combined with
-#' \code{benefit_model}. The legacy \code{initial.predictor.method} is also
-#' accepted with a deprecation warning; do not supply it with
-#' \code{outcome_method}.
-#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+#' @param ... Additional boosting options. See \code{\link{boosting-control}}.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
 #'
 #' @return Returns a list containing the following components:
 #' When the doubly robust scores use distinct outcome methods, \code{outcome_methods}
@@ -95,49 +91,42 @@
 #'  \item{\code{ate.poisson}: }A vector of numerical values of length \code{prop.cutoff}
 #'  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
 #'  constructed based on the estimated CATE scores with poisson regression.
-#'  Only provided if \code{score.method} includes \code{'poisson'}.
+#'  Only provided if the fit includes Poisson regression.
 #'  \item{\code{ate.boosting}: }Same as \code{ate.poisson}, but with the nested subgroups based
-#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
-#'  includes \code{'boosting'}.
+#'  the estimated CATE scores with boosting. Only provided if the fit includes boosting.
 #'  \item{\code{ate.twoReg}: }Same as \code{ate.poisson}, but with the nested subgroups based
 #'  the estimated CATE scores with two regressions.
-#'  Only provided if \code{score.method} includes \code{'twoReg'}.
+#'  Only provided if the fit includes two-regression.
 #'  \item{\code{ate.contrastReg}: }Same as \code{ate.poisson}, but with the nested subgroups based
 #'  the estimated CATE scores with contrast regression.
-#'  Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'  Only provided if the fit includes contrast regression.
 #'  \item{\code{ate.negBin}: }Same as \code{ate.poisson}, but with the nested subgroups based
 #'  the estimated CATE scores with negative binomial regression.
-#'  Only provided if \code{score.method} includes \code{'negBin'}.
+#'  Only provided if the fit includes negative binomial regression.
 #'  \item{\code{score.poisson}: }A vector of numerical values of length n
 #'  (number of observations in \code{data}) containing the estimated log-CATE scores
-#'  according to the Poisson regression. Only provided if \code{score.method}
-#'  includes \code{'poisson'}.
+#'  according to the Poisson regression. Only provided if the fit includes Poisson regression.
 #'  \item{\code{score.boosting}: }Same as \code{score.poisson}, but with estimated log-CATE score
-#'  according to boosting. Only provided if \code{score.method} includes
-#'  \code{'boosting'}.
+#'  according to boosting. Only provided if the fit includes boosting.
 #'  \item{\code{score.twoReg}: }Same as \code{score.poisson}, but with estimated log-CATE score
-#'  according to two regressions. Only provided if \code{score.method} includes
-#'  \code{'twoReg'}.
+#'  according to two regressions. Only provided if the fit includes two-regression.
 #'  \item{\code{score.contrastReg}: }Same as \code{score.poisson}, but with estimated log-CATE score
-#'  according to contrast regression. Only provided if \code{score.method} includes
-#'  \code{'contrastReg'}.
+#'  according to contrast regression. Only provided if the fit includes contrast regression.
 #'  \item{\code{score.negBin}: }Same as \code{score.poisson}, but with estimated log-CATE score
-#'  according to negative binomial regression. Only provided if \code{score.method}
-#'  includes \code{'negBin'}.
-#'  \item{\code{fit}: }Additional details on model fitting if \code{score.method}
-#'  includes 'boosting' or 'contrastReg':
+#'  according to negative binomial regression. Only provided if the fit includes negative binomial regression.
+#'  \item{\code{fit}: }Additional details on model fitting when the fit includes boosting or contrast regression:
 #'  \itemize{
 #'    \item{\code{result.boosting}: }Details on the boosting model fitted to observations
 #'    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
-#'    Only provided if \code{score.method} includes \code{'boosting'}.
+#'    Only provided if the fit includes boosting.
 #'    \item{\code{result.contrastReg$sigma.contrastReg}: }Variance-covariance matrix of
 #'    the estimated log-CATE coefficients in contrast regression.
-#'    Only provided if \code{score.method} includes \code{'contrastReg'}.
+#'    Only provided if the fit includes contrast regression.
 #'  }
 #'  \item{\code{coefficients}: }A data frame with the coefficients of the estimated log-CATE
-#'  score by \code{score.method}. The data frame has number of rows equal to the number of
-#'  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
-#'  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
+#'  score for each applicable method. The data frame has number of rows equal to the number of
+#'  covariates in \code{outcome_model} and one column per method that provides coefficients.
+#'  If the fit includes contrast regression, the data frame has an additional
 #'  column containing the standard errors of the coefficients estimated with contrast regression.
 #'  \code{'boosting'} does not have coefficient results because tree-based methods typically do not
 #'  express the log-CATE as a linear combination of coefficients and covariates.
@@ -148,11 +137,9 @@
 #' treatment group or with two doubly robust estimators, two regressions and contrast regression
 #' (Yadlowsky, 2020) applied to the entire dataset.
 #'
-#' \code{\link{catefitcount}()} provides the coefficients of the CATE score for each scoring method requested
-#' through \code{score.method}. Currently, contrast regression is the only method which allows
-#' for inference of the CATE coefficients by providing standard errors of the coefficients.
-#' The coefficients can be used to learn the effect size of each variable and predict the
-#' CATE score for a new observation.
+#' \code{\link{catefitcount}()} provides CATE score coefficients for supported
+#' linear scoring methods. Standard errors for the score coefficients are
+#' available for contrast regression.
 #'
 #' \code{\link{catefitcount}()} also provides the predicted CATE score of each observation in the data set,
 #' for each scoring method. The predictions allow ranking the observations from potentially
@@ -184,9 +171,9 @@
 
 catefitcount <- function(data,
                          outcome_model = NULL,
-                         outcome_method = NULL,
+                         outcome_method = "poisson",
                          benefit_model = NULL,
-                         benefit_method = NULL,
+                         benefit_method = "t_learner",
                          ps_model,
                          ps_method = "glm",
                          minPS = 0.01,
@@ -214,12 +201,13 @@ catefitcount <- function(data,
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
   aliases <- intersect(names(.args), c("ps.model", "ps.method"))
-  .args <- resolve_cate_ps_aliases(.args)
+  .args <- resolve_cate_aliases(.args)
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
   .dots <- list(...)
-  check_cate_initial_alias(.args)
+  if (missing(outcome_method) && !identical(benefit_method, "t_learner")) outcome_method <- NULL
+  check_cate_initial_aliases(.args)
   initial_missing <- !"initial.predictor.method" %in% names(.dots)
   initial.predictor.method <- if (initial_missing || is.null(.dots$initial.predictor.method)) "boosting" else .dots$initial.predictor.method
   .dots$initial.predictor.method <- NULL

@@ -1,12 +1,10 @@
 #' Estimation of the conditional average treatment effect (CATE) score for continuous data
 #'
-#' Provides singly robust and doubly robust estimation of CATE score with up to 6 scoring methods
-#' among the following: Linear regression, boosting, two regressions, contrast regression, random forest and
-#' generalized additive model.
+#' Continuous-outcome CATE fitting is not implemented.
 #'
 #' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates.
 #' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
 #' @param benefit_model Optional one-sided formula for the two-regression or
 #' contrast-regression score covariates. Defaults to the covariates and terms
@@ -32,9 +30,9 @@
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
 #' @param xvar.smooth.score A vector of characters indicating the name of the variables used as the
-#' smooth terms if \code{score.method = 'gam'}. The variables must be selected from
-#' the variables listed in \code{cate.model}. Default is \code{NULL}, which uses all variables
-#' in \code{cate.model}.
+#' smooth terms if fitting a generalized additive model. The variables must be selected from
+#' the variables listed in \code{outcome_model}. Default is \code{NULL}, which uses all variables
+#' in \code{outcome_model}.
 #' @param xvar.smooth.init A vector of characters indicating the name of the variables used as the
 #' smooth terms if \code{outcome_method = 'gam'}. The variables must be selected from
 #' the variables listed in \code{outcome_model}. Default is \code{NULL}, which uses all variables
@@ -42,7 +40,7 @@
 #' @param tree.depth A positive integer specifying the maximum depth of boosting trees.
 #' Used when \code{outcome_method = 'boosting'}. Default is \code{2}.
 #' @param n.trees.rf A positive integer specifying the number of trees. Used only if
-#' \code{score.method = 'randomForest'}. Default is \code{1000}.
+#' \code{outcome_method = 'random_forest'}. Default is \code{1000}.
 #' @param n.trees.boosting The maximum number of boosting trees, used when
 #' \code{outcome_method = 'boosting'}. Default is \code{200}.
 #' @param B Number of repetitions of cross-fitting for \code{benefit_method =
@@ -71,106 +69,11 @@
 #' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 #' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 #' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
-#' @param ... The legacy \code{init.model} argument specifies a separate initial
-#' outcome formula under the previous interface; it cannot be combined with
-#' \code{benefit_model}. The legacy \code{initial.predictor.method} is also
-#' accepted with a deprecation warning; do not supply it with
-#' \code{outcome_method}.
-#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-#'
-#' @return Returns a list containing the following components:
-#' \itemize{
-#'  \item{\code{ate.gaussian}: }A vector of numerical values of length \code{prop.cutoff}
-#'  containing the estimated ATE in nested subgroups (defined by \code{prop.cutoff})
-#'  constructed based on the estimated CATE scores with Poisson regression.
-#'  Only provided if \code{score.method} includes \code{'gaussian'}.
-#'  \item{\code{ate.boosting}: }Same as \code{ate.gaussian}, but with the nested subgroups based
-#'  the estimated CATE scores with boosting. Only provided if \code{score.method}
-#'  includes \code{'boosting'}.
-#'  \item{\code{ate.twoReg}: }Same as \code{ate.gaussian}, but with the nested subgroups based
-#'  the estimated CATE scores with two regressions.
-#'  Only provided if \code{score.method} includes \code{'twoReg'}.
-#'  \item{\code{ate.contrastReg}: }Same as \code{ate.gaussian}, but with the nested subgroups based
-#'  the estimated CATE scores with contrast regression.
-#'  Only provided if \code{score.method} includes \code{'contrastReg'}.
-#'  \item{\code{ate.randomForest}: }Same as \code{ate.gaussian}, but with the nested subgroups based
-#'  the estimated CATE scores with random forest.
-#'  Only provided if \code{score.method} includes \code{'gam'}.
-#'  \item{\code{ate.gam}: }Same as \code{ate.gaussian}, but with the nested subgroups based
-#'  the estimated CATE scores with generalized additive model.
-#'  Only provided if \code{score.method} includes \code{'gam'}.
-#'  \item{\code{score.gaussian}: }A vector of numerical values of length n
-#'  (number of observations in \code{data}) containing the estimated CATE scores
-#'  according to the linear regression. Only provided if \code{score.method}
-#'  includes \code{'gaussian'}.
-#'  \item{\code{score.boosting}: }Same as \code{score.gaussian}, but with estimated CATE score
-#'  according to boosting. Only provided if \code{score.method} includes
-#'  \code{'boosting'}.
-#'  \item{\code{score.twoReg}: }Same as \code{score.gaussian}, but with estimated CATE score
-#'  according to two regressions. Only provided if \code{score.method} includes
-#'  \code{'twoReg'}.
-#'  \item{\code{score.contrastReg}: }Same as \code{score.gaussian}, but with estimated CATE score
-#'  according to contrast regression. Only provided if \code{score.method} includes
-#'  \code{'contrastReg'}.
-#'  \item{\code{score.randomForest}: }Same as \code{score.gaussian}, but with estimated CATE score
-#'  according to random forest. Only provided if \code{score.method}
-#'  includes \code{'randomForest'}.
-#'  \item{\code{score.gam}: }Same as \code{score.gaussian}, but with estimated CATE score
-#'  according to generalized additive model. Only provided if \code{score.method}
-#'  includes \code{'gam'}.
-#'  \item{\code{fit}: }Additional details on model fitting if \code{score.method}
-#'  includes 'boosting' or 'contrastReg':
-#'  \itemize{
-#'    \item{\code{result.boosting}: }Details on the boosting model fitted to observations
-#'    with treatment = 0 \code{($fit0.boosting)} and to observations with treatment = 1 \code{($fit1.boosting)}.
-#'    Only provided if \code{score.method} includes \code{'boosting'}.
-#'    \item{\code{result.randomForest}: }Details on the boosting model fitted to observations
-#'    with treatment = 0 \code{($fit0.randomForest)} and to observations with treatment = 1 \code{($fit1.randomForest)}.
-#'    Only provided if \code{score.method} includes \code{'randomForest'}.
-#'    \item{\code{result.gam}: }Details on the boosting model fitted to observations
-#'    with treatment = 0 \code{($fit0.gam)} and to observations with treatment = 1 \code{($fit1.gam)}.
-#'    Only provided if \code{score.method} includes \code{'gam'}.
-#'    \item{\code{result.contrastReg$sigma.contrastReg}: }Variance-covariance matrix of
-#'    the estimated CATE coefficients in contrast regression.
-#'    Only provided if \code{score.method} includes \code{'contrastReg'}.
-#'  }
-#'  \item{\code{coefficients}: }A data frame with the coefficients of the estimated CATE
-#'  score by \code{score.method}. The data frame has number of rows equal to the number of
-#'  covariates in \code{cate.model} and number of columns equal to \code{length(score.method)}.
-#'  If \code{score.method} includes \code{'contrastReg'}, the data frame has an additional
-#'  column containing the standard errors of the coefficients estimated with contrast regression.
-#'  \code{'boosting'}, \code{'randomForest'}, \code{'gam'} do not have coefficient results because these methods do not
-#'  express the CATE as a linear combination of coefficients and covariates.
-#' }
-#'
-#' @details The CATE score estimates a covariate-conditional average treatment effect, estimated with
-#' either linear regression, boosting, random forest and generalized additive model applied separately by
-#' treatment group or with two doubly robust estimators, two regressions and contrast regression
-#' (Yadlowsky, 2020) applied to the entire dataset.
-#'
-#' \code{\link{catefitmean}()} provides the coefficients of the CATE score for each scoring method requested
-#' through \code{score.method}. Currently, contrast regression is the only method which allows
-#' for inference of the CATE coefficients by providing standard errors of the coefficients.
-#' The coefficients can be used to learn the effect size of each variable and predict the
-#' CATE score for a new observation.
-#'
-#' \code{\link{catefitmean}()} also provides the predicted CATE score of each observation in the data set,
-#' for each scoring method. The predictions allow ranking the observations from potentially
-#' high responders to the treatment to potentially low or standard responders.
-#'
-#' The estimated ATE among nested subgroups of high responders are also provided by scoring method.
-#' Note that the ATEs in \code{\link{catefitmean}()} are derived based on the CATE score which is estimated
-#' using the same data sample. Therefore, overfitting may be an issue. \code{\link{catefitmean}()} is more
-#' suitable to inspect the estimated ATEs across scoring methods as it implements internal cross
-#' validation to reduce optimism.
-#'
-#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
-#' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
-#'
-#' @seealso \code{\link{catecvmean}()} function
-#'
+#' @param ... Additional arguments.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
+#' @return Continuous-outcome fitting is not implemented. This function stops
+#' with an error.
 
 catefitmean <- function(data,
                         outcome_model = NULL,
@@ -204,12 +107,12 @@ catefitmean <- function(data,
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
   aliases <- intersect(names(.args), c("ps.model", "ps.method"))
-  .args <- resolve_cate_ps_aliases(.args)
+  .args <- resolve_cate_aliases(.args)
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
   .dots <- list(...)
-  check_cate_initial_alias(.args)
+  check_cate_initial_aliases(.args)
   initial_missing <- !"initial.predictor.method" %in% names(.dots)
   initial.predictor.method <- if (initial_missing || is.null(.dots$initial.predictor.method)) "boosting" else .dots$initial.predictor.method
   .dots$initial.predictor.method <- NULL

@@ -68,16 +68,19 @@
   now produces an error, including when the values match. Legacy calls can pair
   the dotted argument with `benefit_method`; the `catecv()` interface is unchanged.
 
-* `catefit()` and its outcome-specific interfaces now default to a T-learner:
-  logistic for binary, Poisson for count, and Cox proportional hazards for
-  survival outcomes. Specify `outcome_method` for the doubly robust methods.
+* `catefit()`, `catefitbinary()`, `catefitcount()`, and `catefitsurv()`
+  now show `benefit_method = "t_learner"` in their signatures. The
+  outcome-specific signatures show `outcome_method = "logistic"`,
+  `"poisson"`, and `"coxph"`, respectively. Specify `outcome_method` for
+  the doubly robust methods.
 
 * `catefit()` and its outcome-specific interfaces accept a one-sided
   `benefit_model` formula for two-regression and contrast-regression scores.
   It defaults to the terms of `outcome_model`, which defines the outcome
   prediction models. T-learners continue to use `outcome_model`. The previous
   `init.model` argument remains accepted through `...` under its original
-  meaning, but cannot be combined with `benefit_model`. Coefficient tables
+  meaning and emits a deprecation warning. It cannot be combined with
+  `benefit_model`. Coefficient tables
   for mixed models may contain missing entries for terms a score does not use.
   `catecv()` does not yet support a separate `benefit_model`.
 
@@ -134,8 +137,9 @@
   model per arm; fitted scores and validation results can change, including
   when an arm-specific design is rank deficient.
 
-* Survival `atefit()` and `atefitsurv()` now use `censoring_model` and
-  `censoring_method`. The former `ipcw.model` and `ipcw.method` names remain
+* Survival fitting with `atefit()`, `atefitsurv()`, `catefit()`, and
+  `catefitsurv()` now uses `censoring_model` and `censoring_method`.
+  The former `ipcw.model` and `ipcw.method` names remain
   available through `...` with deprecation warnings; supplying an old and new
   name together is an error. Positional argument order is unchanged.
 

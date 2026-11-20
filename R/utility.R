@@ -301,8 +301,11 @@ arg.checks <- function(fun, response, data,
     # Check n.trees.rf
     if (any(c(n.trees.rf) <= 0)) stop("n.trees.rf must be > 0.")
 
-    # Check values for ipcw.method
-    if (!(ipcw.method %in% c("breslow", "aft (exponential)", "aft (weibull)", "aft (lognormal)", "aft (loglogistic)"))) stop("ipcw.method must be either 'breslow', 'aft (exponential)', 'aft (weibull)', 'aft (lognormal)', 'aft (loglogistic)'.")
+    # Check the censoring method.
+    if (!(ipcw.method %in% c("breslow", "aft (exponential)", "aft (weibull)", "aft (lognormal)", "aft (loglogistic)"))) {
+      method_arg <- if (fun == "catefit") "censoring_method" else "ipcw.method"
+      stop(method_arg, " must be either 'breslow', 'aft (exponential)', 'aft (weibull)', 'aft (lognormal)', 'aft (loglogistic)'.")
+    }
 
     # Check initial predictor method
     if (is.null(initial.predictor.method) == FALSE) {
@@ -372,6 +375,8 @@ rematch_catefit_legacy_call <- function(fun, call, env) {
     replacement <- if (alias == "score.method") "benefit_method" else "outcome_model"
     if (alias %in% names(args)) {
       if (replacement %in% names(args)) stop("Specify only ", replacement, " or ", alias, ", not both.", call. = FALSE)
+      if (alias %in% call_names)
+        warning(alias, " is deprecated for catefit(); use ", replacement, " instead.", call. = FALSE)
       names(args)[names(args) == alias] <- replacement
     }
   }
@@ -427,7 +432,7 @@ rematch_pre_benefit_call <- function(fun, call, env) {
 rematch_hidden_initial_call <- function(fun, call, env) {
   formals_list <- as.list(formals(fun))
   if (!"response" %in% names(formals_list) && !"verbose" %in% names(formals_list)) return(NULL)
-  next_arg <- if ("response" %in% names(formals_list)) "ipcw.model" else "minPS"
+  next_arg <- if ("response" %in% names(formals_list)) "censoring_model" else "minPS"
   matched <- as.list(match.call(definition = fun, call = call))[-1L]
   call_names <- names(as.list(call))
   if (!next_arg %in% names(matched) || (!is.null(call_names) && next_arg %in% call_names)) return(NULL)
@@ -439,14 +444,17 @@ rematch_hidden_initial_call <- function(fun, call, env) {
   as.list(match.call(definition = signature, call = call))[-1L]
 }
 
-# Warn about the legacy CATE initial outcome-model method and reject ambiguity.
+# Warn about legacy CATE initial outcome-model arguments and reject ambiguity.
 # Author: Thomas Debray
-check_cate_initial_alias <- function(args) {
+check_cate_initial_aliases <- function(args) {
   indices <- which(names(args) == "initial.predictor.method")
-  if (!length(indices)) return(invisible(NULL))
-  warning("initial.predictor.method is deprecated for catefit(); use outcome_method instead.", call. = FALSE)
-  if (length(indices) > 1L || "outcome_method" %in% names(args))
-    stop("Specify only outcome_method or initial.predictor.method, not both.", call. = FALSE)
+  if (length(indices)) {
+    warning("initial.predictor.method is deprecated for catefit(); use outcome_method instead.", call. = FALSE)
+    if (length(indices) > 1L || "outcome_method" %in% names(args))
+      stop("Specify only outcome_method or initial.predictor.method, not both.", call. = FALSE)
+  }
+  if ("init.model" %in% names(args))
+    warning("init.model is deprecated for catefit(); use outcome_model for the outcome formula and benefit_model for a separate score formula.", call. = FALSE)
   invisible(NULL)
 }
 
@@ -845,9 +853,12 @@ legacy_ate_positional_call <- function(call, fun, caller) {
 }
 
 # Author: Thomas Debray
-resolve_cate_ps_aliases <- function(args) {
-  for (old in c("ps.model", "ps.method")) {
-    new <- if (old == "ps.model") "ps_model" else "ps_method"
+resolve_cate_aliases <- function(args, censoring = FALSE) {
+  aliases <- c(ps.model = "ps_model", ps.method = "ps_method")
+  if (censoring)
+    aliases <- c(aliases, ipcw.model = "censoring_model", ipcw.method = "censoring_method")
+  for (old in names(aliases)) {
+    new <- aliases[[old]]
     indices <- which(names(args) == old)
     if (!length(indices)) next
     if (length(indices) > 1L || new %in% names(args))

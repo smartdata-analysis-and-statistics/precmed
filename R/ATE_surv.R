@@ -66,14 +66,9 @@
 #' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-#' @param ... Additional arguments. The deprecated named argument \code{cate.model}
-#' is accepted as an alias for \code{outcome_model}, with a warning. Supply only
-#' one of these arguments. The deprecated aliases \code{ps.model} and
-#' \code{ps.method} are also accepted with warnings; use \code{ps_model} and
-#' \code{ps_method} instead. The deprecated arguments \code{ipcw.model} and
-#' \code{ipcw.method} are accepted with warnings as aliases for
-#' \code{censoring_model} and \code{censoring_method}, respectively.
-#' Other arguments are currently unsupported.
+#' @param ... Additional arguments.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
 #' @return An object of class \code{atefit}. See \code{\link{atefit}}
 #' for available methods and the contents of the fitted object.
 #'

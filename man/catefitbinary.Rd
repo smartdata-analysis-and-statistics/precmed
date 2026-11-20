@@ -7,9 +7,9 @@
 catefitbinary(
   data,
   outcome_model = NULL,
-  outcome_method = NULL,
+  outcome_method = "logistic",
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
   minPS = 0.01,
@@ -29,7 +29,7 @@ catefitbinary(
 \arguments{
 \item{data}{A data frame containing the variables in the outcome and treatment models; a data frame with \code{n} rows (1 row per observation).}
 
-\item{outcome_model}{Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates.}
 
 \item{outcome_method}{Outcome-model method paired with \code{benefit_method}.
 For a T-learner, \code{"logistic"} (default) or \code{"boosting"};
@@ -100,11 +100,9 @@ Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 \item{plot.gbmperf}{Whether to plot boosting performance measures when
 \code{outcome_method = 'boosting'}. Default is \code{FALSE}.}
 
-\item{...}{The legacy \code{init.model} argument specifies a separate initial
-outcome formula under the previous interface; it cannot be combined with
-\code{benefit_model}. The legacy \code{initial.predictor.method} is accepted
-with a deprecation warning and cannot be combined with \code{outcome_method}.
-Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Additional boosting options. See \code{\link{boosting-control}}.
+Deprecated argument names from precmed 1.1.0 remain supported for
+backward compatibility and emit warnings.}
 }
 \value{
 A \code{catefit} object containing treatment labels, fitted models,
@@ -117,8 +115,6 @@ Fit binary-outcome CATE scores and estimate risk differences in nested
 subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
 }
 \details{
-The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
-
 See the Binary outcomes section of \code{\link{catefit}} for the score
 methods, their assumptions, and interpretation. Subgroup effects are estimated
 on the fitting data and do not provide independent validation.

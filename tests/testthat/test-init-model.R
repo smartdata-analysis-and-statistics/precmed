@@ -17,10 +17,13 @@ test_that("initial outcome models default to the CATE model for each outcome", {
     if (!is.null(case$initial)) args$initial.predictor.method <- case$initial
     if (case$response == "survival") args$tau0 <- median(surv$y) * 1.1
     implicit <- suppressWarnings(do.call(catefit, args))
-    explicit <- suppressWarnings(do.call(catefit, c(args, list(init.model = case$init.model))))
+    suppressWarnings(expect_warning(
+      explicit <- do.call(catefit, c(args, list(init.model = case$init.model))),
+      "init\\.model is deprecated"))
     expect_equal(implicit$score.twoReg, explicit$score.twoReg, info = case$response)
     wrong <- if (case$response == "survival") survival::Surv(y + 1, d) ~ age else I(y + 1) ~ age
-    expect_error(do.call(catefit, c(args, list(init.model = wrong))), "same outcome", info = case$response)
+    expect_error(suppressWarnings(do.call(catefit, c(args, list(init.model = wrong)))),
+                 "same outcome", info = case$response)
   }
 })
 

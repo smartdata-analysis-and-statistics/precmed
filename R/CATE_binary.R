@@ -37,7 +37,7 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' subgroups. This is the binary-outcome interface used by \code{\link{catefit}}.
 #'
 #' @param data A data frame containing the variables in the outcome and treatment models; a data frame with \code{n} rows (1 row per observation).
-#' @param outcome_model Formula for the outcome and outcome-model covariates; replaces \code{cate.model}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates.
 #' @param outcome_method Outcome-model method paired with \code{benefit_method}.
 #' For a T-learner, \code{"logistic"} (default) or \code{"boosting"};
 #' for two-regression, \code{"logistic"}.
@@ -91,12 +91,9 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' \code{outcome_method = 'boosting'}. Default is \code{200}.
 #' @param plot.gbmperf Whether to plot boosting performance measures when
 #' \code{outcome_method = 'boosting'}. Default is \code{FALSE}.
-#' @param ... The legacy \code{init.model} argument specifies a separate initial
-#' outcome formula under the previous interface; it cannot be combined with
-#' \code{benefit_model}. The legacy \code{initial.predictor.method} is accepted
-#' with a deprecation warning and cannot be combined with \code{outcome_method}.
-#' Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
-#' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
+#' @param ... Additional boosting options. See \code{\link{boosting-control}}.
+#' Deprecated argument names from precmed 1.1.0 remain supported for
+#' backward compatibility and emit warnings.
 #' @return A \code{catefit} object containing treatment labels, fitted models,
 #'   predicted risk-difference scores and nested subgroup risk differences for
 #'   each requested method. Linear \code{twoReg} score coefficients are stored
@@ -117,7 +114,7 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' }
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
-catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_model = NULL, benefit_method = NULL, ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
+catefitbinary <- function(data, outcome_model = NULL, outcome_method = "logistic", benefit_model = NULL, benefit_method = "t_learner", ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
                           tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, ...) {
   previous_call <- rematch_pre_benefit_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(previous_call)) return(do.call(sys.function(), previous_call, envir = parent.frame()))
@@ -125,12 +122,13 @@ catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, ben
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
   .args <- as.list(match.call())[-1L]
   aliases <- intersect(names(.args), c("ps.model", "ps.method"))
-  .args <- resolve_cate_ps_aliases(.args)
+  .args <- resolve_cate_aliases(.args)
   if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
   if (!missing(ps_model)) ps.model <- ps_model
   ps.method <- ps_method
   .dots <- list(...)
-  check_cate_initial_alias(.args)
+  if (missing(outcome_method) && !identical(benefit_method, "t_learner")) outcome_method <- NULL
+  check_cate_initial_aliases(.args)
   initial_missing <- !"initial.predictor.method" %in% names(.dots)
   initial <- NULL
   if (!initial_missing) {

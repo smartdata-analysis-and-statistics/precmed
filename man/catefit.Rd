@@ -10,11 +10,11 @@ catefit(
   outcome_model,
   outcome_method = NULL,
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -93,16 +93,17 @@ Allowed values include one of:
 two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
 Relevant only when \code{ps_model} has more than one variable.}
 
-\item{ipcw.model}{A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
-Default is \code{NULL}, which uses a censoring model with the same covariates
-as the outcome model \code{outcome_model}, plus the treatment.}
+\item{censoring_model}{A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring
+weighting (IPCW). By default (\code{NULL}), the model uses the outcome-model
+covariates and treatment. Applies to survival outcomes only.}
 
-\item{ipcw.method}{A character value for the censoring model. Only applies for survival
-outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-\code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-with different distributions for y variable). Default is \code{'breslow'}.}
+\item{censoring_method}{Method for fitting the censoring model. The default
+\code{"breslow"} fits Cox regression with the Breslow estimator of the
+baseline survivor function. Accelerated failure time options are
+\code{"aft (exponential)"}, \code{"aft (weibull)"},
+\code{"aft (lognormal)"}, and \code{"aft (loglogistic)"}.
+Applies to survival outcomes only.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -132,9 +133,7 @@ Default is \code{seq(0.5, 1, length = 6)}.}
 It must be a positive value and should be chosen close to 0. Only applies for survival
 outcomes. Default is \code{0.025}.}
 
-\item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-from the variables listed in \code{outcome_model}.}
+\item{xvar.smooth.score}{Reserved for smooth terms in continuous-outcome scores.}
 
 \item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as
 the smooth terms if \code{outcome_method = 'gam'}. The variables must be selected
@@ -145,8 +144,7 @@ Default is \code{NULL}, which uses all variables in \code{outcome_model}.}
 Used when \code{outcome_method = 'boosting'}. Default is \code{2}.}
 
 \item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{outcome_method = 'random_forest'}
-with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
+Used with \code{outcome_method = 'random_forest'} for survival outcomes.
 Default is \code{1000}.}
 
 \item{n.trees.boosting}{The maximum number of boosting trees, used when
@@ -204,15 +202,9 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{The legacy \code{init.model} argument supplies a separate initial
-outcome formula using the previous interface, where \code{outcome_model}
-defines the score. It cannot be combined with \code{benefit_model}.
-The legacy \code{initial.predictor.method} is accepted with a deprecation
-warning and cannot be supplied together with \code{outcome_method}.
-Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
-The old named arguments \code{score.method} and \code{cate.model} are
-accepted with deprecation warnings. Legacy score names and positional calls
-remain supported when \code{outcome_method} is omitted.}
+\item{...}{Additional boosting options. See \code{\link{boosting-control}}.
+Deprecated argument names from precmed 1.1.0 remain supported for
+backward compatibility and emit warnings.}
 }
 \value{
 Fitted objects retain \code{treatment.labels} in treatment 0/1 order
@@ -274,7 +266,7 @@ For survival response, see details in \code{\link{catefitsurv}()}.
 }
 \section{Binary outcomes}{
 
-For \code{response = "binary"}, \code{score.method = "logistic"}
+For binary outcomes, the default logistic T-learner
 fits a separate logistic outcome model in each treatment arm and subtracts
 their predicted risks. \code{"twoReg"} cross-fits
 separate logistic outcome models and a treatment model, then projects the
@@ -333,7 +325,7 @@ fit_2 <- catefit(response = "survival",
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
                  ps_model = trt ~ age + previous_treatment,
-                 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
+                 censoring_model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 
 coef(fit_2)
