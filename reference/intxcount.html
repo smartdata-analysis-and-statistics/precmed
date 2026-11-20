@@ -80,6 +80,8 @@
 <span>  contrast.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  x.init <span class="op">=</span> <span class="va">x.cate</span>,</span>
+<span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span>,</span>
+<span>  initial.methods <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -217,6 +219,15 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 <dt id="arg-x-init">x.init<a class="anchor" aria-label="anchor" href="#arg-x-init"></a></dt>
 <dd><p>Initial outcome-model covariate matrix; defaults to <code>x.cate</code>.</p></dd>
+
+
+<dt id="arg-x-benefit">x.benefit<a class="anchor" aria-label="anchor" href="#arg-x-benefit"></a></dt>
+<dd><p>Benefit-score covariate matrix; defaults to <code>x.cate</code>.</p></dd>
+
+
+<dt id="arg-initial-methods">initial.methods<a class="anchor" aria-label="anchor" href="#arg-initial-methods"></a></dt>
+<dd><p>Named initial outcome methods for the doubly robust
+scores; <code>NULL</code> uses <code>initial.predictor.method</code> for both.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

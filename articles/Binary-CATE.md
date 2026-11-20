@@ -55,6 +55,11 @@ ps_formula <- trt ~ age + previous_treatment
 
 ### Choose how to construct scores
 
+If both method arguments are omitted,
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+defaults to a T-learner with `outcome_method = "logistic"` for this
+outcome.
+
 `benefit_method` chooses how to construct the score, while
 `outcome_method` chooses the outcome-model method for that score:
 
@@ -98,6 +103,32 @@ fit_cate <- catefit(
 )
 ```
 
+To fit a more concise two-regression or contrast-regression score, you
+can supply a separate one-sided benefit formula. For example, adding
+`benefit_model = ~ age + previous_treatment` to the
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+call above uses those covariates for the doubly robust score, while the
+initial outcome models still use all the covariates in
+`outcome_formula`. If omitted, the benefit score uses the terms in
+`outcome_formula`. T-learner scores in a mixed fit continue to use the
+outcome formula and do not use `benefit_model`.
+
+``` r
+
+fit_cate_reduced <- catefit(
+  response = "binary", data = binaryExample,
+  outcome_model = outcome_formula, outcome_method = "logistic",
+  benefit_model = ~ age + previous_treatment,
+  benefit_method = "two_regression", ps_model = ps_formula,
+  higher.y = FALSE, seed = 999
+)
+```
+
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+does not currently accept a separate benefit formula, so its validation
+below applies to the default score specification used in this example,
+not to a fit with a different `benefit_model`.
+
 ## Inspect CATE scores and subgroup estimates
 
 The fitted scores estimate differences in relapse probability for
@@ -136,7 +167,7 @@ with zero indicating no difference in relapse probability.
 plot(fit_cate, type = "density")
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-4-1.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-5-1.png)
 
 Differences between the score distributions can reflect model
 flexibility, estimation noise or overfitting. The plot alone cannot
@@ -212,14 +243,14 @@ fit_cv <- catecv(
 plot(fit_cv, show.abc = FALSE)
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-5-1.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-6-1.png)
 
 ``` r
 
 boxplot(fit_cv)
 ```
 
-![](Binary-CATE_files/figure-html/unnamed-chunk-5-2.png)
+![](Binary-CATE_files/figure-html/unnamed-chunk-6-2.png)
 
 ``` r
 

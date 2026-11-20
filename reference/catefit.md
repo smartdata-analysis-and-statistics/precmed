@@ -14,11 +14,10 @@ catefit(
   data,
   outcome_model,
   outcome_method = NULL,
-  benefit_method,
+  benefit_model = NULL,
+  benefit_method = NULL,
   ps_model,
   ps_method = "glm",
-  init.model = NULL,
-  initial.predictor.method = NULL,
   ipcw.model = NULL,
   ipcw.method = "breslow",
   minPS = 0.01,
@@ -54,12 +53,13 @@ catefit(
 - response:
 
   A string describing the type of outcome in the data. Allowed values
-  include "binary", "count" (see
-  [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
+  include "binary" (see
+  [`catefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md)),
+  "count" (see
+  [`catefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md)),
   "survival" (see
-  [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
-  and "continuous" (see
-  [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md)).
+  [`catefitsurv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md)),
+  and "continuous" (not implemented).
 
 - data:
 
@@ -69,33 +69,41 @@ catefit(
 
 - outcome_model:
 
-  A formula describing the outcome and score covariates. The outcome
-  must appear on the left-hand side. For survival outcomes, a `Surv`
-  object must be used to describe the outcome.
+  A formula describing the outcome and covariates for outcome models.
+  The outcome must appear on the left-hand side. For survival outcomes,
+  a `Surv` object must be used to describe the outcome.
 
 - outcome_method:
 
-  A character vector with one entry per `benefit_method`. For T-learners
-  the available methods are `"logistic"` or `"boosting"` for binary
-  outcomes, `"poisson"`, `"negative_binomial"`, or `"boosting"` for
-  count outcomes, and `"poisson"`, `"boosting"`, or `"random_forest"`
-  for survival outcomes. For two-regression or contrast regression it
-  selects the initial outcome models: binary supports only `"logistic"`,
-  count supports `"poisson"`, `"boosting"`, or `"gam"`, and survival
-  supports `"logistic"`, `"boosting"`, or `"random_forest"`. When both
-  doubly robust methods are requested, they must use the same initial
-  outcome method. An explicitly supplied `initial.predictor.method` must
-  agree with it. Repeated configurations that would produce the same
-  score name are not supported.
+  Outcome-model method, with one entry per `benefit_method`. For a
+  T-learner, `NULL` selects `"logistic"` for binary, `"poisson"` for
+  count, and `"coxph"` for survival outcomes. Specify a method for
+  two-regression or contrast regression. When both are fitted together,
+  they may use different outcome methods. See
+  [`catefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md),
+  [`catefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md),
+  or
+  [`catefitsurv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md)
+  for the available methods and their assumptions.
+
+- benefit_model:
+
+  Optional one-sided formula specifying the covariates and terms for the
+  two-regression or contrast-regression score. The default `NULL` uses
+  the covariates and terms of `outcome_model`. An intercept is required
+  and offsets are not supported. T-learner scores use the outcome model
+  directly and do not use this formula. In a mixed fit it applies only
+  to two-regression and contrast regression. Continuous-outcome fitting
+  is not implemented.
 
 - benefit_method:
 
-  A vector of score-construction methods: `"t_learner"`,
-  `"two_regression"`, or `"contrast_regression"`. Each is paired with
-  the corresponding entry in `outcome_method`. Contrast regression is
-  not available for binary outcomes. Continuous outcomes are not
-  implemented. The previous method names `"twoReg"` and `"contrastReg"`
-  are accepted as aliases for `"two_regression"` and
+  A vector of score-construction methods (default `"t_learner"`):
+  `"t_learner"`, `"two_regression"`, or `"contrast_regression"`. Each is
+  paired with the corresponding entry in `outcome_method`. Contrast
+  regression is not available for binary outcomes. Continuous outcomes
+  are not implemented. The previous method names `"twoReg"` and
+  `"contrastReg"` are accepted as aliases for `"two_regression"` and
   `"contrast_regression"`, respectively.
 
 - ps_model:
@@ -115,29 +123,6 @@ catefit(
   with main effects and LASSO penalization on two-way interactions
   (added to the model if interactions are not specified in `ps_model`).
   Relevant only when `ps_model` has more than one variable.
-
-- init.model:
-
-  Optional formula for the initial treatment-specific outcome models
-  used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
-  only). The outcome must match `outcome_model`. The default `NULL` uses
-  `outcome_model`. For count outcomes the exposure offset is taken from
-  `outcome_model`; an offset in `init.model`, if supplied, must match
-  it. Other score methods do not use this argument. Continuous-outcome
-  fitting and validation are not currently implemented.
-
-- initial.predictor.method:
-
-  A character vector for the method used to get initial outcome
-  predictions conditional on the covariates specified in `init.model`
-  (or `outcome_model` when omitted). Only applies when `score.method`
-  includes `'twoReg'` or `'contrastReg'`.Allowed values include one of
-  `'randomForest'` (survival outcomes only), `'boosting'`, `'logistic'`
-  (survival outcomes only, fast), `'poisson'` (count outcomes only,
-  fast), `'gaussian'` (continuous outcomes only) and `'gam'` (count and
-  continuous outcomes only). Default is `NULL`, which assigns
-  `'boosting'` for count outcomes and `'randomForest'` for survival
-  outcomes.
 
 - ipcw.model:
 
@@ -188,17 +173,17 @@ catefit(
 - prop.cutoff:
 
   A vector of numerical values (in \`(0, 1\]\`) specifying percentiles
-  of the estimated log CATE scores to define nested subgroups. Each
-  element represents the cutoff to separate observations in nested
-  subgroups (below vs above cutoff). The length of `prop.cutoff` is the
-  number of nested subgroups. An equally-spaced sequence of proportions
-  ending with 1 is recommended. Default is `seq(0.5, 1, length = 6)`.
+  of the estimated CATE scores to define nested subgroups. Each element
+  represents the cutoff to separate observations in nested subgroups
+  (below vs above cutoff). The length of `prop.cutoff` is the number of
+  nested subgroups. An equally-spaced sequence of proportions ending
+  with 1 is recommended. Default is `seq(0.5, 1, length = 6)`.
 
 - surv.min:
 
-  Lower truncation limit for the probability of being censored. It must
-  be a positive value and should be chosen close to 0. Only applies for
-  survival outcomes. Default is `0.025`.
+  Lower truncation limit for the probability of remaining uncensored,
+  used in IPCW. It must be a positive value and should be chosen close
+  to 0. Only applies for survival outcomes. Default is `0.025`.
 
 - xvar.smooth.score:
 
@@ -209,63 +194,59 @@ catefit(
 - xvar.smooth.init:
 
   A vector of characters indicating the name of the variables used as
-  the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `init.model`. Default is
-  `NULL`, which uses all variables in `init.model`.
+  the smooth terms if `outcome_method = 'gam'`. The variables must be
+  selected from the variables listed in `outcome_model`. Default is
+  `NULL`, which uses all variables in `outcome_model`.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  A positive integer specifying the maximum depth of boosting trees.
+  Used when `outcome_method = 'boosting'`. Default is `2`.
 
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
   Used if `score.method = 'randomForest'` or if
-  `initial.predictor.method = 'randomForest'` with
-  `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
-  survival outcomes. Default is `1000`.
+  `outcome_method = 'random_forest'` with `score.method = 'twoReg'` or
+  `'contrastReg'`. Only applies for survival outcomes. Default is
+  `1000`.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  The maximum number of boosting trees, used when
+  `outcome_method = 'boosting'`. Default is `200`.
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of repetitions of cross-fitting for
+  `benefit_method = 'two_regression'` or `'contrast_regression'`.
+  Default is `3`.
 
 - Kfold:
 
   A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  cross-fitting to partition the data in
+  `benefit_method = 'two_regression'` and `'contrast_regression'`.
+  Default is `5`.
 
 - error.maxNR:
 
-  A numerical value \> 0 indicating the minimum value of the mean
-  absolute error in Newton Raphson algorithm. Used only if
-  `score.method = 'contrastReg'`. Default is `0.001`.
+  Convergence tolerance for the Newton-Raphson algorithm used by
+  `benefit_method = 'contrast_regression'`. Default is `0.001`.
 
 - max.iterNR:
 
   A positive integer indicating the maximum number of iterations in the
-  Newton Raphson algorithm. Used only if `score.method = 'contrastReg'`.
-  Default is `150`.
+  Newton Raphson algorithm. Used only if
+  `benefit_method = 'contrast_regression'`. Default is `150`.
 
 - tune:
 
   A vector of 2 numerical values \> 0 specifying tuning parameters for
   the Newton Raphson algorithm. `tune[1]` is the step size, `tune[2]`
   specifies a quantity to be added to diagonal of the slope matrix to
-  prevent singularity. Used only if `score.method = 'contrastReg'`.
-  Default is `c(0.5, 2)`.
+  prevent singularity. Used only if
+  `benefit_method = 'contrast_regression'`. Default is `c(0.5, 2)`.
 
 - seed:
 
@@ -274,10 +255,8 @@ catefit(
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+  Whether to plot boosting performance measures when
+  `outcome_method = 'boosting'`. Default is `FALSE`.
 
 - verbose:
 
@@ -322,8 +301,13 @@ catefit(
 
 - ...:
 
-  Legacy arguments `ps.model` and `ps.method` are accepted with
-  warnings. Additional boosting arguments; see
+  The legacy `init.model` argument supplies a separate initial outcome
+  formula using the previous interface, where `outcome_model` defines
+  the score. It cannot be combined with `benefit_model`. The legacy
+  `initial.predictor.method` is accepted with a deprecation warning and
+  cannot be supplied together with `outcome_method`. Legacy arguments
+  `ps.model` and `ps.method` are accepted with warnings. Additional
+  boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
   The old named arguments `score.method` and `cate.model` are accepted
   with deprecation warnings. Legacy score names and positional calls
@@ -346,16 +330,27 @@ final column indicates a doubly robust score estimator, subject to the
 assumptions described below; "–" means that the method is not available
 for that outcome.
 
-|                  |            |           |              |                   |
-|------------------|------------|-----------|--------------|-------------------|
+|  |  |  |  |  |
+|----|----|----|----|----|
 | **Score method** | **Binary** | **Count** | **Survival** | **Doubly robust** |
-| `twoReg`         | Yes        | Yes       | Yes          | Yes               |
-| `contrastReg`    | –          | Yes       | Yes          | Yes               |
-| `logistic`       | Yes        | –         | –            | No                |
-| `poisson`        | –          | Yes       | Yes          | No                |
-| `negBin`         | –          | Yes       | –            | No                |
-| `boosting`       | Yes        | Yes       | Yes          | No                |
-| `randomForest`   | –          | –         | Yes          | No                |
+| `twoReg` | Yes | Yes | Yes | Yes |
+| `contrastReg` | – | Yes | Yes | Yes |
+| `logistic` | Yes | – | – | No |
+| `poisson` | – | Yes | Yes | No |
+| `negBin` | – | Yes | – | No |
+| `boosting` | Yes | Yes | Yes | No |
+| `randomForest` | – | – | Yes | No |
+| `coxph`, `weibull`, `log_normal` | – | – | Yes | No |
+
+Two-regression and contrast regression share cross-fitted
+treatment-model predictions. When their outcome methods match, they also
+share the cross-fitted outcome predictions; otherwise, each outcome
+method is fitted separately on the same folds. A T-learner uses outcome
+models fitted on the full fitting sample, so it does not reuse the
+cross-fitted models. When two distinct initial outcome methods are used,
+`outcome_methods` records the method for each score. For stochastic
+outcome methods, random-number consumption can differ from fitting each
+score in a separate call.
 
 The doubly robust methods combine outcome and treatment models. Their
 robustness to misspecification of one of these models is conditional on
@@ -387,16 +382,16 @@ For `response = "binary"`, `score.method = "logistic"` fits a separate
 logistic outcome model in each treatment arm and subtracts their
 predicted risks. `"twoReg"` cross-fits separate logistic outcome models
 and a treatment model, then projects the augmented inverse-propensity
-outcomes for each arm onto the covariates in `outcome_model` using
-linear regression. The score is the difference of these projections,
-averaged over `B` repetitions of `Kfold` folds. It estimates the linear
-projection of the conditional risk difference if either the treatment
-model or both outcome models are correct, under identification and
-positivity assumptions. Propensity score truncation can affect this
-property. The projection need not lie between -1 and 1 and equals the
-conditional risk difference only if that difference is linear in the
-specified design. The difference between arm coefficients is returned in
-`coefficients$twoReg` and by
+outcomes for each arm onto the covariates in `benefit_model` (or
+`outcome_model` by default) using linear regression. The score is the
+difference of these projections, averaged over `B` repetitions of
+`Kfold` folds. It estimates the linear projection of the conditional
+risk difference if either the treatment model or both outcome models are
+correct, under identification and positivity assumptions. Propensity
+score truncation can affect this property. The projection need not lie
+between -1 and 1 and equals the conditional risk difference only if that
+difference is linear in the specified design. The difference between arm
+coefficients is returned in `coefficients$twoReg` and by
 [`coef()`](https://rdrr.io/r/stats/coef.html); the separate arm
 coefficients are stored in `fit$twoReg$coefficients`. Logistic model
 coefficients for each arm are on the log-odds scale and stored in
@@ -485,20 +480,19 @@ fit_2 <- catefit(response = "survival",
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
                  ps_model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "logistic",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
+                 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" 
-#> Warning: Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson"; see 'errors/warnings'.
+#>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting" 
+#> Warning: Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting"; see 'errors/warnings'.
 
 coef(fit_2)
 #>                              poisson
-#> (Intercept)               0.46109243
-#> age                      -0.24335209
-#> female                    0.12532711
-#> previous_cost             0.89803249
-#> previous_number_relapses -0.02470863
+#> (Intercept)               0.45047296
+#> age                      -0.24616564
+#> female                    0.11776100
+#> previous_cost             0.87728869
+#> previous_number_relapses -0.03975634
 
 # }
 ```

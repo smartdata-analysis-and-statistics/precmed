@@ -94,8 +94,9 @@ catecvsurv(
   predictions conditional on the covariates specified in `init.model`
   (or `cate.model` when omitted). Only applies when `score.method`
   includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'randomForest'`, `'boosting'` and `'logistic'` (fastest). Default is
-  `'randomForest'`.
+  `'randomForest'`, `'boosting'` and `'fractional_logit'` (fastest). The
+  older value `'logistic'` is accepted with a deprecation warning.
+  Default is `'randomForest'`.
 
 - ipcw.model:
 
@@ -554,7 +555,7 @@ catecv <- catecvsurv(data = survivalExample,
                      cate.model = Surv(y, d) ~ age + female + previous_cost +
                                                previous_number_relapses,
                      ps.model = trt ~ age + previous_treatment,
-                     initial.predictor.method = "logistic",
+                     initial.predictor.method = "fractional_logit",
                      ipcw.model = ~ age + previous_cost + previous_treatment,
                      tau0 = tau0,
                      higher.y = TRUE,
@@ -565,33 +566,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 17:58:52 2026 
+#>    Fri Nov 20 19:23:15 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 17:58:55 2026 
+#>    Fri Nov 20 19:23:18 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 17:58:59 2026 
+#>    Fri Nov 20 19:23:20 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 17:59:03 2026 
+#>    Fri Nov 20 19:23:23 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 17:59:07 2026 
+#>    Fri Nov 20 19:23:25 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 18.83 secs 
+#> Total runtime : 12.49 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

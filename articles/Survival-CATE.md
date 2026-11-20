@@ -89,32 +89,73 @@ ps_formula <- trt ~ age + previous_treatment
 
 ### Choose how to construct scores
 
+If both method arguments are omitted,
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+defaults to a T-learner with `outcome_method = "coxph"` for this
+outcome.
+
 `benefit_method` selects the score-construction approach, while
 `outcome_method` selects the outcome-model method for each score:
 
 - A **T-learner** fits an outcome model in each treatment arm and
   compares predicted restricted mean time lost. Available outcome
-  methods include Poisson, boosting and random forests.
+  methods include Poisson, boosting, random forests, Cox proportional
+  hazards, Weibull and log-normal survival models. The last three are
+  available through `outcome_method = "coxph"`, `"weibull"`, or
+  `"log_normal"` in
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md);
+  they compare arm-specific predicted RMTL at `tau0` and rely on the
+  corresponding survival-model assumptions. They are not yet available
+  for T-learner validation in
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
 - **Two-regression** combines initial outcome predictions with
   propensity scores and fits separate augmented outcome regressions
   before comparing arms.
 - **Contrast regression** combines initial outcome predictions with
   propensity scores to fit a treatment-contrast model directly.
 
+For `fractional_logit`, the initial model uses a logit-link mean model
+for restricted observed follow-up divided by `tau0`, with censoring
+weights. The response is a fraction of the horizon, not a binary event
+indicator.
+
 Two-regression and contrast regression are doubly robust methods
 (Yadlowsky et al. 2021). Their interpretation requires causal
 identification, positivity and suitable outcome, treatment and censoring
 model assumptions; truncation can affect robustness.
 
+Two-regression and contrast regression may use different outcome methods
+in the same call. They share the treatment-model predictions; matching
+outcome methods also share cross-fitted outcome predictions. T-learner
+models are fitted on the full fitting sample and are not reused for the
+cross-fitted predictions. The
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+interface continues to use a single initial outcome method.
+
+For example, this fits two-regression using fractional logit and
+contrast regression using random forests for their respective initial
+outcome models:
+
+``` r
+
+fit_different <- catefit(
+  response = "survival", data = survival_data,
+  outcome_model = outcome_formula, ps_model = ps_formula,
+  benefit_method = c("two_regression", "contrast_regression"),
+  outcome_method = c("fractional_logit", "random_forest"),
+  tau0 = tau0, higher.y = TRUE, seed = 999
+)
+```
+
 ### Fit two scores
 
 The entries in `outcome_method` and `benefit_method` are paired in
 order. To limit runtime, this example fits a random forest T-learner and
-contrast regression using logistic initial outcome models. `tau0` sets
-the RMTL horizon; `higher.y = TRUE` indicates that longer time to
-relapse is preferable, and the seed makes the fit reproducible. The
-fitted scores and subgroup effects use the full dataset; the validation
-section evaluates scores in held-out data.
+contrast regression using fractional-logit initial outcome models.
+`tau0` sets the RMTL horizon; `higher.y = TRUE` indicates that longer
+time to relapse is preferable, and the seed makes the fit reproducible.
+The fitted scores and subgroup effects use the full dataset; the
+validation section evaluates scores in held-out data.
 
 ``` r
 
@@ -122,16 +163,41 @@ fit_cate <- catefit(
   response = "survival",
   data = survival_data,
   outcome_model = outcome_formula,
-  outcome_method = c("random_forest", "logistic"),
+  outcome_method = c("random_forest", "fractional_logit"),
   benefit_method = c("t_learner", "contrast_regression"),
   ps_model = ps_formula,
-  initial.predictor.method = "logistic",
   tau0 = tau0,
   higher.y = TRUE,
   seed = 999
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 ```
+
+To fit a more concise two-regression or contrast-regression score, you
+can supply a separate one-sided benefit formula. For example, adding
+`benefit_model = ~ age + previous_treatment` to the
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+call above uses those covariates for the doubly robust score, while the
+initial outcome models still use all the covariates in
+`outcome_formula`. If omitted, the benefit score uses the terms in
+`outcome_formula`. T-learner scores in a mixed fit continue to use the
+outcome formula and do not use `benefit_model`.
+
+``` r
+
+fit_cate_reduced <- catefit(
+  response = "survival", data = survival_data,
+  outcome_model = outcome_formula, outcome_method = "fractional_logit",
+  benefit_model = ~ age + previous_treatment,
+  benefit_method = "two_regression", ps_model = ps_formula, tau0 = tau0,
+  higher.y = TRUE, seed = 999
+)
+```
+
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+does not currently accept a separate benefit formula, so its validation
+below applies to the default score specification used in this example,
+not to a fit with a different `benefit_model`.
 
 ## Inspect CATE scores and subgroup estimates
 
@@ -324,9 +390,9 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
 - `initial.predictor.method` specifies how predictions of the outcome
   are estimated in two regressions and contrast regression. Flexible
   models can be used such as GBM (“boosting”), random forests
-  (“randomForest”) or logistic regression (“logistic”). We chose
-  “logistic” because it is relatively faster than boosting methods and
-  random forest.
+  (“randomForest”) or fractional logit (“fractional_logit”). We chose
+  “fractional_logit” because it is relatively faster than boosting
+  methods and random forest.
 
 - `followup.time` specifies the maximum follow-up time in the data. We
   set it default as `NULL`, which indicates unknown potential censoring
@@ -392,7 +458,7 @@ fit_cv <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   followup.time = NULL,
   tau0 = tau0,
   higher.y = TRUE,

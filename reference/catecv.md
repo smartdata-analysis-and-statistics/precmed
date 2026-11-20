@@ -122,12 +122,12 @@ catecv(
   predictions conditional on the covariates specified in `init.model`
   (or `cate.model` when omitted). Only applies when `score.method`
   includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'randomForest'` (survival outcomes only), `'boosting'`, `'logistic'`
-  (survival outcomes only, fast), `'poisson'` (count outcomes only,
-  fast), `'gaussian'` (continuous outcomes only) and `'gam'` (count and
-  continuous outcomes only). Default is `NULL`, which assigns
-  `'boosting'` for count outcomes and `'randomForest'` for survival
-  outcomes.
+  `'randomForest'` (survival outcomes only), `'boosting'`,
+  `'fractional_logit'` (survival outcomes only, fast), `'poisson'`
+  (count outcomes only, fast), `'gaussian'` (continuous outcomes only)
+  and `'gam'` (count and continuous outcomes only). Default is `NULL`,
+  which assigns `'boosting'` for count outcomes and `'randomForest'` for
+  survival outcomes.
 
 - ipcw.model:
 
@@ -464,7 +464,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 7.87 secs 
+#> Total runtime : 6.13 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 

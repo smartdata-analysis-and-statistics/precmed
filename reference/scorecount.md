@@ -11,7 +11,8 @@ scorecount(
   fit,
   x.cate,
   time,
-  score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin")
+  score.method = c("boosting", "poisson", "twoReg", "contrastReg", "negBin"),
+  x.benefit = x.cate
 )
 ```
 
@@ -36,6 +37,10 @@ scorecount(
   A vector of one or multiple methods to estimate the CATE score.
   Allowed values are: `'boosting'`, `'poisson'`, `'twoReg'`,
   `'contrastReg'`, `'negBin'`. Default specifies all 5 methods.
+
+- x.benefit:
+
+  Benefit-score covariate matrix; defaults to `x.cate`.
 
 ## Value
 

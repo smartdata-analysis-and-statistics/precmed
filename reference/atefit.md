@@ -64,12 +64,13 @@ atefit(
 
 - outcome_method:
 
-  Outcome-model method. The default `NULL` selects `"logistic"` for
-  binary outcomes, `"poisson"` for count outcomes, and `"coxph"` for
-  survival outcomes. Count outcomes also support `"negative_binomial"`
-  (alias `"negbin"`); survival outcomes also support `"weibull"` and
-  `"log_normal"` (alias `"lognormal"`). Other methods are not currently
-  available. See the outcome-specific help pages for details.
+  Outcome-model method. `NULL` selects `"logistic"` for binary,
+  `"poisson"` for count, and `"coxph"` for survival outcomes. See
+  [`atefitbinary`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitbinary.md),
+  [`atefitcount`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitcount.md),
+  or
+  [`atefitsurv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefitsurv.md)
+  for available methods and their assumptions.
 
 - ps_model:
 

@@ -6,7 +6,15 @@ model
 ## Usage
 
 ``` r
-cox.rmst(y, d, x.cate, xnew, tau0, solver = c("C", "R"), return_survival = FALSE)
+cox.rmst(
+  y,
+  d,
+  x.cate,
+  xnew,
+  tau0,
+  solver = c("C", "R"),
+  return_survival = FALSE
+)
 ```
 
 ## Arguments

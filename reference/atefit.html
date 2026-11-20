@@ -117,12 +117,11 @@ outcome-specific model and formula requirements.</p></dd>
 
 
 <dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
-<dd><p>Outcome-model method. The default <code>NULL</code> selects
-<code>"logistic"</code> for binary outcomes, <code>"poisson"</code> for count outcomes,
-and <code>"coxph"</code> for survival outcomes. Count outcomes also support
-<code>"negative_binomial"</code> (alias <code>"negbin"</code>); survival outcomes
-also support <code>"weibull"</code> and <code>"log_normal"</code> (alias
-<code>"lognormal"</code>). Other methods are not currently available. See the outcome-specific help pages for details.</p></dd>
+<dd><p>Outcome-model method. <code>NULL</code> selects
+<code>"logistic"</code> for binary, <code>"poisson"</code> for count, and
+<code>"coxph"</code> for survival outcomes. See <code><a href="atefitbinary.html">atefitbinary</a></code>,
+<code><a href="atefitcount.html">atefitcount</a></code>, or <code><a href="atefitsurv.html">atefitsurv</a></code> for available
+methods and their assumptions.</p></dd>
 
 
 <dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>

@@ -61,7 +61,8 @@
 <span>  <span class="va">fit</span>,</span>
 <span>  <span class="va">x.cate</span>,</span>
 <span>  <span class="va">tau0</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"boosting"</span>, <span class="st">"poisson"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span><span class="op">)</span></span>
+<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"boosting"</span>, <span class="st">"poisson"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
+<span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,7 +85,11 @@
 <dt id="arg-score-method">score.method<a class="anchor" aria-label="anchor" href="#arg-score-method"></a></dt>
 <dd><p>A vector of one or multiple methods to estimate the CATE score.
 Allowed values are: <code>'randomForest'</code>, <code>'boosting'</code>, <code>'poisson'</code>, <code>'twoReg'</code>,
-<code>'contrastReg'</code>. Default specifies all 5 methods.</p></dd>
+<code>'contrastReg'</code>, <code>'coxph'</code>, <code>'weibull'</code>, and <code>'log_normal'</code>. Default specifies all 5 methods.</p></dd>
+
+
+<dt id="arg-x-benefit">x.benefit<a class="anchor" aria-label="anchor" href="#arg-x-benefit"></a></dt>
+<dd><p>Benefit-score covariate matrix; defaults to <code>x.cate</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

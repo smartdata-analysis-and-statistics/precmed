@@ -105,10 +105,10 @@ data.preproc.surv(
   predictions conditional on the covariates. Only applies when
   `score.method` includes `'twoReg'` or `'contrastReg'`. Allowed values
   include one of `'randomForest'` (survival outcomes only),
-  `'boosting'`, `'logistic'` (survival outcomes only, fast), `'poisson'`
-  (count outcomes only, fast), and `'gam'` (count outcomes only).
-  Default is `NULL`, which assigns `'boosting'` for count outcomes and
-  `'randomForest'` for survival outcomes.
+  `'boosting'`, `'fractional_logit'` (survival outcomes only, fast),
+  `'poisson'` (count outcomes only, fast), and `'gam'` (count outcomes
+  only). Default is `NULL`, which assigns `'boosting'` for count
+  outcomes and `'randomForest'` for survival outcomes.
 
 - response:
 

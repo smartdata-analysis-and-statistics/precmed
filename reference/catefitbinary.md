@@ -11,6 +11,7 @@ catefitbinary(
   data,
   outcome_model = NULL,
   outcome_method = NULL,
+  benefit_model = NULL,
   benefit_method = NULL,
   ps_model,
   ps_method = "glm",
@@ -25,7 +26,6 @@ catefitbinary(
   tree.depth = 2,
   n.trees.boosting = 200,
   plot.gbmperf = FALSE,
-  init.model = NULL,
   ...
 )
 ```
@@ -34,22 +34,33 @@ catefitbinary(
 
 - data:
 
-  A data frame containing the variables in the outcome, treatment, and
-  censoring models (if specified); a data frame with `n` rows (1 row per
-  observation).
+  A data frame containing the variables in the outcome and treatment
+  models; a data frame with `n` rows (1 row per observation).
 
 - outcome_model:
 
-  Outcome and score covariate formula; replaces `cate.model`.
+  Formula for the outcome and outcome-model covariates; replaces
+  `cate.model`.
 
 - outcome_method:
 
-  Outcome-model methods paired with `benefit_method`; see
-  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+  Outcome-model method paired with `benefit_method`. For a T-learner,
+  `"logistic"` (default) or `"boosting"`; for two-regression,
+  `"logistic"`.
+
+- benefit_model:
+
+  Optional one-sided formula specifying the covariates and terms for the
+  two-regression or contrast-regression score. The default `NULL` uses
+  the covariates and terms of `outcome_model`. An intercept is required
+  and offsets are not supported. T-learner scores use the outcome model
+  directly and do not use this formula. In a mixed fit it applies only
+  to two-regression and contrast regression. Continuous-outcome fitting
+  is not implemented.
 
 - benefit_method:
 
-  Score-construction methods; see
+  Score-construction methods; defaults to `"t_learner"`. See
   [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps_model:
@@ -89,11 +100,12 @@ catefitbinary(
 - prop.cutoff:
 
   A vector of numerical values (in \`(0, 1\]\`) specifying percentiles
-  of the estimated log CATE scores to define nested subgroups. Each
-  element represents the cutoff to separate observations in nested
-  subgroups (below vs above cutoff). The length of `prop.cutoff` is the
-  number of nested subgroups. An equally-spaced sequence of proportions
-  ending with 1 is recommended. Default is `seq(0.5, 1, length = 6)`.
+  of the estimated risk-difference CATE scores to define nested
+  subgroups. Each element represents the cutoff to separate observations
+  in nested subgroups (below vs above cutoff). The length of
+  `prop.cutoff` is the number of nested subgroups. An equally-spaced
+  sequence of proportions ending with 1 is recommended. Default is
+  `seq(0.5, 1, length = 6)`.
 
 - seed:
 
@@ -110,46 +122,40 @@ catefitbinary(
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of repetitions of cross-fitting for
+  `benefit_method = 'two_regression'` or `'contrast_regression'`.
+  Default is `3`.
 
 - Kfold:
 
   A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  cross-fitting to partition the data in
+  `benefit_method = 'two_regression'` and `'contrast_regression'`.
+  Default is `5`.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  A positive integer specifying the maximum depth of boosting trees.
+  Used when `outcome_method = 'boosting'`. Default is `2`.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  The maximum number of boosting trees, used when
+  `outcome_method = 'boosting'`. Default is `200`.
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
-
-- init.model:
-
-  Optional formula for the initial logistic outcome models used by
-  `twoReg`; `NULL` uses `outcome_model`.
+  Whether to plot boosting performance measures when
+  `outcome_method = 'boosting'`. Default is `FALSE`.
 
 - ...:
 
-  Legacy arguments `ps.model` and `ps.method` are accepted with
-  warnings. Additional boosting arguments; see
+  The legacy `init.model` argument specifies a separate initial outcome
+  formula under the previous interface; it cannot be combined with
+  `benefit_model`. The legacy `initial.predictor.method` is accepted
+  with a deprecation warning and cannot be combined with
+  `outcome_method`. Legacy arguments `ps.model` and `ps.method` are
+  accepted with warnings. Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value

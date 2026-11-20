@@ -152,7 +152,8 @@ Relevant only when <code>ps.model</code> has more than one variable.</p></dd>
 <dd><p>A character vector for the method used to get initial
 outcome predictions conditional on the covariates specified in <code>init.model</code> (or <code>cate.model</code> when omitted). Only applies
 when <code>score.method</code> includes <code>'twoReg'</code> or <code>'contrastReg'</code>. Allowed values include
-one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'logistic'</code> (fastest).
+one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'fractional_logit'</code> (fastest).
+The older value <code>'logistic'</code> is accepted with a deprecation warning.
 Default is <code>'randomForest'</code>.</p></dd>
 
 
@@ -520,7 +521,7 @@ observational data. Journal of the American Statistical Association, 1-18.</em>.
 <span class="r-in"><span>                     cate.model <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>                                               <span class="va">previous_number_relapses</span>,</span></span>
 <span class="r-in"><span>                     ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                     initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
+<span class="r-in"><span>                     initial.predictor.method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span></span>
 <span class="r-in"><span>                     ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                     tau0 <span class="op">=</span> <span class="va">tau0</span>,</span></span>
 <span class="r-in"><span>                     higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
@@ -531,33 +532,33 @@ observational data. Journal of the American Statistical Association, 1-18.</em>.
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 17:58:52 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 19:23:15 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==============                                                        |  20%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 17:58:55 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 19:23:18 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |============================                                          |  40%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 17:58:59 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 19:23:20 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |==========================================                            |  60%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 4 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 17:59:03 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 19:23:23 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |========================================================              |  80%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> cv = 5 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   splitting the data..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   training..</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   validating..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 17:59:07 2026 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Fri Nov 20 19:23:25 2026 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |======================================================================| 100%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 18.83 secs </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Total runtime : 12.49 secs </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Try:</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">catecv</span>, ylab <span class="op">=</span> <span class="st">"RMTL ratio of drug1 vs drug0 in each subgroup"</span><span class="op">)</span></span></span>

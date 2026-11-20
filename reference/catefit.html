@@ -71,11 +71,10 @@ doubly robust scores. Continuous outcomes are not yet implemented.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  <span class="va">outcome_model</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">benefit_method</span>,</span>
+<span>  benefit_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">ps_model</span>,</span>
 <span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
-<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
@@ -112,7 +111,8 @@ doubly robust scores. Continuous outcomes are not yet implemented.</p>
 
 <dl><dt id="arg-response">response<a class="anchor" aria-label="anchor" href="#arg-response"></a></dt>
 <dd><p>A string describing the type of outcome in the data. Allowed values include
-"binary", "count" (see <code><a href="catecvcount.html">catecvcount()</a></code>), "survival" (see <code><a href="catecvsurv.html">catecvsurv()</a></code>) and "continuous" (see <code><a href="catecvmean.html">catecvmean()</a></code>).</p></dd>
+"binary" (see <code><a href="catefitbinary.html">catefitbinary</a></code>), "count" (see <code><a href="catefitcount.html">catefitcount</a></code>),
+"survival" (see <code><a href="catefitsurv.html">catefitsurv</a></code>), and "continuous" (not implemented).</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
@@ -121,28 +121,35 @@ and censoring models (if specified); a data frame with <code>n</code> rows (1 ro
 
 
 <dt id="arg-outcome-model">outcome_model<a class="anchor" aria-label="anchor" href="#arg-outcome-model"></a></dt>
-<dd><p>A formula describing the outcome and score covariates.
+<dd><p>A formula describing the outcome and covariates for outcome models.
 The outcome must appear on the left-hand side. For survival outcomes, a <code>Surv</code> object
 must be used to describe the outcome.</p></dd>
 
 
 <dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
-<dd><p>A character vector with one entry per <code>benefit_method</code>.
-For T-learners the available methods are <code>"logistic"</code> or <code>"boosting"</code>
-for binary outcomes, <code>"poisson"</code>, <code>"negative_binomial"</code>, or
-<code>"boosting"</code> for count outcomes, and <code>"poisson"</code>, <code>"boosting"</code>,
-or <code>"random_forest"</code> for survival outcomes. For two-regression or contrast
-regression it selects the initial outcome models: binary supports only
-<code>"logistic"</code>, count supports <code>"poisson"</code>, <code>"boosting"</code>, or
-<code>"gam"</code>, and survival supports <code>"logistic"</code>, <code>"boosting"</code>,
-or <code>"random_forest"</code>. When both doubly robust methods are requested,
-they must use the same initial outcome method. An explicitly supplied
-<code>initial.predictor.method</code> must agree with it. Repeated configurations
-that would produce the same score name are not supported.</p></dd>
+<dd><p>Outcome-model method, with one entry per
+<code>benefit_method</code>. For a T-learner, <code>NULL</code> selects
+<code>"logistic"</code> for binary, <code>"poisson"</code> for count, and
+<code>"coxph"</code> for survival outcomes. Specify a method for two-regression
+or contrast regression. When both are fitted together, they may use different
+outcome methods. See <code><a href="catefitbinary.html">catefitbinary</a></code>,
+<code><a href="catefitcount.html">catefitcount</a></code>, or <code><a href="catefitsurv.html">catefitsurv</a></code> for the
+available methods and their assumptions.</p></dd>
+
+
+<dt id="arg-benefit-model">benefit_model<a class="anchor" aria-label="anchor" href="#arg-benefit-model"></a></dt>
+<dd><p>Optional one-sided formula specifying the covariates and
+terms for the two-regression or contrast-regression score. The default
+<code>NULL</code> uses the covariates and terms of <code>outcome_model</code>.
+An intercept is required and offsets are not supported. T-learner scores use
+the outcome model directly and do not use this formula. In a mixed fit it
+applies only to two-regression and contrast regression. Continuous-outcome
+fitting is not implemented.</p></dd>
 
 
 <dt id="arg-benefit-method">benefit_method<a class="anchor" aria-label="anchor" href="#arg-benefit-method"></a></dt>
-<dd><p>A vector of score-construction methods: <code>"t_learner"</code>,
+<dd><p>A vector of score-construction methods (default
+<code>"t_learner"</code>): <code>"t_learner"</code>,
 <code>"two_regression"</code>, or <code>"contrast_regression"</code>. Each is paired
 with the corresponding entry in <code>outcome_method</code>. Contrast regression
 is not available for binary outcomes. Continuous outcomes are not implemented.
@@ -166,26 +173,6 @@ Allowed values include one of:
 <code>'lasso'</code> for a logistic regression with main effects and LASSO penalization on
 two-way interactions (added to the model if interactions are not specified in <code>ps_model</code>).
 Relevant only when <code>ps_model</code> has more than one variable.</p></dd>
-
-
-<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
-<dd><p>Optional formula for the initial treatment-specific outcome models
-used by <code>twoReg</code> and <code>contrastReg</code> (binary outcomes support
-<code>twoReg</code> only). The outcome must match <code>outcome_model</code>. The default
-<code>NULL</code> uses <code>outcome_model</code>. For count outcomes the exposure offset
-is taken from <code>outcome_model</code>; an offset in <code>init.model</code>, if supplied,
-must match it. Other score methods do not use this argument. Continuous-outcome
-fitting and validation are not currently implemented.</p></dd>
-
-
-<dt id="arg-initial-predictor-method">initial.predictor.method<a class="anchor" aria-label="anchor" href="#arg-initial-predictor-method"></a></dt>
-<dd><p>A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in <code>init.model</code> (or <code>outcome_model</code> when omitted). Only applies
-when <code>score.method</code> includes <code>'twoReg'</code> or <code>'contrastReg'</code>.Allowed values include one of
-<code>'randomForest'</code> (survival outcomes only), <code>'boosting'</code>, <code>'logistic'</code>
-(survival outcomes only, fast), <code>'poisson'</code> (count outcomes only, fast), <code>'gaussian'</code> (continuous outcomes only) and
-<code>'gam'</code> (count and continuous outcomes only). Default is <code>NULL</code>, which assigns <code>'boosting'</code>
-for count outcomes and <code>'randomForest'</code> for survival outcomes.</p></dd>
 
 
 <dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
@@ -232,7 +219,7 @@ lower (<code>FALSE</code>) values of the outcome are more desirable. Default is 
 
 <dt id="arg-prop-cutoff">prop.cutoff<a class="anchor" aria-label="anchor" href="#arg-prop-cutoff"></a></dt>
 <dd><p>A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of <code>prop.cutoff</code> is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
@@ -240,7 +227,7 @@ Default is <code>seq(0.5, 1, length = 6)</code>.</p></dd>
 
 
 <dt id="arg-surv-min">surv.min<a class="anchor" aria-label="anchor" href="#arg-surv-min"></a></dt>
-<dd><p>Lower truncation limit for the probability of being censored.
+<dd><p>Lower truncation limit for the probability of remaining uncensored, used in IPCW.
 It must be a positive value and should be chosen close to 0. Only applies for survival
 outcomes. Default is <code>0.025</code>.</p></dd>
 
@@ -253,52 +240,47 @@ from the variables listed in <code>outcome_model</code>.</p></dd>
 
 <dt id="arg-xvar-smooth-init">xvar.smooth.init<a class="anchor" aria-label="anchor" href="#arg-xvar-smooth-init"></a></dt>
 <dd><p>A vector of characters indicating the name of the variables used as
-the smooth terms if <code>initial.predictor.method = 'gam'</code>. The variables must be selected
-from the variables listed in <code>init.model</code>.
-Default is <code>NULL</code>, which uses all variables in <code>init.model</code>.</p></dd>
+the smooth terms if <code>outcome_method = 'gam'</code>. The variables must be selected
+from the variables listed in <code>outcome_model</code>.
+Default is <code>NULL</code>, which uses all variables in <code>outcome_model</code>.</p></dd>
 
 
 <dt id="arg-tree-depth">tree.depth<a class="anchor" aria-label="anchor" href="#arg-tree-depth"></a></dt>
-<dd><p>A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if <code>score.method = 'boosting'</code> or
-if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 'twoReg'</code> or
-<code>'contrastReg'</code>. Default is 2.</p></dd>
+<dd><p>A positive integer specifying the maximum depth of boosting trees.
+Used when <code>outcome_method = 'boosting'</code>. Default is <code>2</code>.</p></dd>
 
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
 <dd><p>A positive integer specifying the number of trees in random forest.
-Used if <code>score.method = 'randomForest'</code> or if <code>initial.predictor.method = 'randomForest'</code>
+Used if <code>score.method = 'randomForest'</code> or if <code>outcome_method = 'random_forest'</code>
 with <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code>. Only applies for survival outcomes.
 Default is <code>1000</code>.</p></dd>
 
 
 <dt id="arg-n-trees-boosting">n.trees.boosting<a class="anchor" aria-label="anchor" href="#arg-n-trees-boosting"></a></dt>
-<dd><p>A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if <code>score.method = 'boosting'</code> or
-if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 'twoReg'</code> or
-<code>'contrastReg'</code>. Default is <code>200</code>.</p></dd>
+<dd><p>The maximum number of boosting trees, used when
+<code>outcome_method = 'boosting'</code>. Default is <code>200</code>.</p></dd>
 
 
 <dt id="arg-b">B<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
-<dd><p>A positive integer specifying the number of time cross-fitting is repeated in
-<code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>. Default is <code>3</code>.</p></dd>
+<dd><p>Number of repetitions of cross-fitting for <code>benefit_method =
+'two_regression'</code> or <code>'contrast_regression'</code>. Default is <code>3</code>.</p></dd>
 
 
 <dt id="arg-kfold">Kfold<a class="anchor" aria-label="anchor" href="#arg-kfold"></a></dt>
 <dd><p>A positive integer specifying the number of folds used in cross-fitting
-to partition the data in <code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>.
+to partition the data in <code>benefit_method = 'two_regression'</code> and <code>'contrast_regression'</code>.
 Default is <code>5</code>.</p></dd>
 
 
 <dt id="arg-error-maxnr">error.maxNR<a class="anchor" aria-label="anchor" href="#arg-error-maxnr"></a></dt>
-<dd><p>A numerical value &gt; 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if <code>score.method = 'contrastReg'</code>.
-Default is <code>0.001</code>.</p></dd>
+<dd><p>Convergence tolerance for the Newton-Raphson algorithm used by
+<code>benefit_method = 'contrast_regression'</code>. Default is <code>0.001</code>.</p></dd>
 
 
 <dt id="arg-max-iternr">max.iterNR<a class="anchor" aria-label="anchor" href="#arg-max-iternr"></a></dt>
 <dd><p>A positive integer indicating the maximum number of iterations in the
-Newton Raphson algorithm. Used only if <code>score.method = 'contrastReg'</code>.
+Newton Raphson algorithm. Used only if <code>benefit_method = 'contrast_regression'</code>.
 Default is <code>150</code>.</p></dd>
 
 
@@ -306,7 +288,7 @@ Default is <code>150</code>.</p></dd>
 <dd><p>A vector of 2 numerical values &gt; 0 specifying tuning parameters for the
 Newton Raphson algorithm. <code>tune[1]</code> is the step size, <code>tune[2]</code> specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if <code>score.method = 'contrastReg'</code>. Default is <code>c(0.5, 2)</code>.</p></dd>
+Used only if <code>benefit_method = 'contrast_regression'</code>. Default is <code>c(0.5, 2)</code>.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -315,9 +297,8 @@ Default is <code>NULL</code>, corresponding to no seed.</p></dd>
 
 
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
-<dd><p>A logical value indicating whether to plot the performance measures in
-boosting. Used only if <code>score.method = 'boosting'</code> or if <code>score.method = 'twoReg'</code>
-or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
+<dd><p>Whether to plot boosting performance measures when
+<code>outcome_method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -358,7 +339,12 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.
+<dd><p>The legacy <code>init.model</code> argument supplies a separate initial
+outcome formula using the previous interface, where <code>outcome_model</code>
+defines the score. It cannot be combined with <code>benefit_model</code>.
+The legacy <code>initial.predictor.method</code> is accepted with a deprecation
+warning and cannot be supplied together with <code>outcome_method</code>.
+Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.
 The old named arguments <code>score.method</code> and <code>cate.model</code> are
 accepted with deprecation warnings. Legacy score names and positional calls
 remain supported when <code>outcome_method</code> is omitted.</p></dd>
@@ -377,7 +363,15 @@ For survival response, see description of outputs in <code><a href="catefitsurv.
 final column indicates a doubly robust score estimator, subject to the
 assumptions described below; "–" means that the method is not available
 for that outcome.</p>
-<table class="table table"><tr><td><strong>Score method</strong></td><td><strong>Binary</strong></td><td><strong>Count</strong></td><td><strong>Survival</strong></td><td><strong>Doubly robust</strong></td></tr><tr><td><code>twoReg</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>contrastReg</code></td><td>–</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>logistic</code></td><td>Yes</td><td>–</td><td>–</td><td>No</td></tr><tr><td><code>poisson</code></td><td>–</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>negBin</code></td><td>–</td><td>Yes</td><td>–</td><td>No</td></tr><tr><td><code>boosting</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>randomForest</code></td><td>–</td><td>–</td><td>Yes</td><td>No</td></tr></table><p>The doubly robust methods combine outcome and treatment models. Their
+<table class="table table"><tr><td><strong>Score method</strong></td><td><strong>Binary</strong></td><td><strong>Count</strong></td><td><strong>Survival</strong></td><td><strong>Doubly robust</strong></td></tr><tr><td><code>twoReg</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>contrastReg</code></td><td>–</td><td>Yes</td><td>Yes</td><td>Yes</td></tr><tr><td><code>logistic</code></td><td>Yes</td><td>–</td><td>–</td><td>No</td></tr><tr><td><code>poisson</code></td><td>–</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>negBin</code></td><td>–</td><td>Yes</td><td>–</td><td>No</td></tr><tr><td><code>boosting</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr><tr><td><code>randomForest</code></td><td>–</td><td>–</td><td>Yes</td><td>No</td></tr><tr><td><code>coxph</code>, <code>weibull</code>, <code>log_normal</code></td><td>–</td><td>–</td><td>Yes</td><td>No</td></tr></table><p>Two-regression and contrast regression share cross-fitted treatment-model
+predictions. When their outcome methods match, they also share the
+cross-fitted outcome predictions; otherwise, each outcome method is fitted
+separately on the same folds. A T-learner uses outcome models fitted on the
+full fitting sample, so it does not reuse the cross-fitted models. When two
+distinct initial outcome methods are used, <code>outcome_methods</code> records
+the method for each score. For stochastic outcome methods, random-number
+consumption can differ from fitting each score in a separate call.</p>
+<p>The doubly robust methods combine outcome and treatment models. Their
 robustness to misspecification of one of these models is conditional on
 identification, positivity, and method-specific model and regularity
 assumptions. For example, binary <code>twoReg</code> estimates a linear projection
@@ -403,7 +397,7 @@ fits a separate logistic outcome model in each treatment arm and subtracts
 their predicted risks. <code>"twoReg"</code> cross-fits
 separate logistic outcome models and a treatment model, then projects the
 augmented inverse-propensity outcomes for each arm onto the covariates in
-<code>outcome_model</code> using linear regression. The score is the difference of
+<code>benefit_model</code> (or <code>outcome_model</code> by default) using linear regression. The score is the difference of
 these projections, averaged over <code>B</code> repetitions of <code>Kfold</code> folds.
 It estimates the linear projection of the conditional risk difference if
 either the treatment model or both outcome models are correct, under
@@ -493,20 +487,19 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                 outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"random_forest"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                 initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
-<span class="r-in"><span>                 ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                 <span class="co">#'                  ipcw.model = ~ age + previous_cost + previous_treatment,</span></span></span>
 <span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>, higher.y <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">999</span>, n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" </span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson"; see 'errors/warnings'.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting" </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting"; see 'errors/warnings'.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              poisson</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)               0.46109243</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age                      -0.24335209</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> female                    0.12532711</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> previous_cost             0.89803249</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> previous_number_relapses -0.02470863</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)               0.45047296</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age                      -0.24616564</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> female                    0.11776100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> previous_cost             0.87728869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> previous_number_relapses -0.03975634</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

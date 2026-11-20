@@ -176,8 +176,8 @@ arg.checks(
   A character vector for the method used to get initial outcome
   predictions conditional on the covariates in `cate.model` in
   `score.method = 'twoReg'` and `'contrastReg'`. Allowed values include
-  one of `'randomForest'`, `'boosting'` and `'logistic'` (fastest).
-  Default is `'randomForest'`.
+  one of `'randomForest'`, `'boosting'` and `'fractional_logit'`
+  (fastest). Default is `'randomForest'`.
 
 - tree.depth:
 

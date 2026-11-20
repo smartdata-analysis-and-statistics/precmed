@@ -266,14 +266,14 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 18:00:14 2026 
+#>    Fri Nov 20 19:24:11 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 20 18:00:16 2026 
+#>    Fri Nov 20 19:24:13 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +284,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 18:00:20 2026 
+#>    Fri Nov 20 19:24:15 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +295,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 18:00:24 2026 
+#>    Fri Nov 20 19:24:18 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,9 +308,9 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 18:00:27 2026 
+#>    Fri Nov 20 19:24:20 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 17.71 secs
+#> Total runtime : 12.77 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -363,10 +363,9 @@ section for the background of these initial predictors and how they are
 used in the two and contrast regression. Here is a list of all 3
 options:
 
-- “logistic” (logistic regression from the
-  [`glm()`](https://rdrr.io/r/stats/glm.html) function)
-  - generalized linear model, strong assumption on binomial
-    distribution, fast
+- “fractional_logit” (a logit-link GLM for restricted follow-up time
+  divided by `tau0`, fitted with censoring weights)
+  - a bounded conditional mean model for a fractional response, fast
 - “boosting” (gradient boosting machine from the `gbm3` R package)
   - ensemble method, typically tree-based, assume the time-to-event
     outcome as Gaussian distributed, slow
@@ -374,8 +373,8 @@ options:
   `randomForestSRC` package)
   - ensemble method, tree-based, non-parametric, can be slow
 
-The main example above used a logistic regression but you can try the
-other 2 non-linear and more flexible options. Below, we use
+The main example above used fractional logit but you can try the other 2
+non-linear and more flexible options. Below, we use
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 as the example code but this can be applied to
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -431,8 +430,8 @@ number of trees, and `rf.control` can set forest options, for example
 `rf.control = list(mtry = 3, nodesize = 15)`. These options also apply
 when random forest is the initial predictor.
 
-Generally speaking, the “logistic” initial predictor method is the
-fastest and “boosting” is the slowest among the 3 methods, while
+Generally speaking, the “fractional_logit” initial predictor method is
+the fastest and “boosting” is the slowest among the 3 methods, while
 “randomForest” is often somewhere in between; computation time depends
 on the data and forest settings.
 
@@ -486,7 +485,7 @@ fit_cv_2 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = NULL,
   followup.time = NULL,
   tau0 = tau0,
@@ -584,7 +583,7 @@ fit_cv_3 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = NULL,
   followup.time = NULL,
   tau0 = tau0,
@@ -606,37 +605,37 @@ fit_cv_3 <- catecv(
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 18:01:41 2026 
+#>    Fri Nov 20 19:25:10 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 18:01:44 2026 
+#>    Fri Nov 20 19:25:12 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 18:01:47 2026 
+#>    Fri Nov 20 19:25:14 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 18:01:51 2026 
+#>    Fri Nov 20 19:25:16 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 18:01:54 2026 
+#>    Fri Nov 20 19:25:18 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 16.35 secs
+#> Total runtime : 10.98 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -700,7 +699,7 @@ fit_cv_4 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
   ipcw.method = "aft (weibull)", # NEW
   followup.time = NULL,
@@ -738,7 +737,7 @@ fit_cv_5 <- catecv(
   cate.model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
   ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "logistic",
+  initial.predictor.method = "fractional_logit",
   ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
   ipcw.method = "aft (weibull)",
   followup.time = NULL,

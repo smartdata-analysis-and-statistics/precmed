@@ -88,6 +88,7 @@ retrieve scores for the original analysis sample in its original order.</p></dd>
 <code>"two_regression"</code> or
 <code>"contrast_regression"</code> for those procedures, or the outcome method
 (such as <code>"logistic"</code>, <code>"boosting"</code>, <code>"poisson"</code>,
+<code>"coxph"</code>, <code>"weibull"</code>, <code>"log_normal"</code>,
 <code>"negative_binomial"</code>, or <code>"random_forest"</code>) for a T-learner.
 The established stored names <code>"twoReg"</code>, <code>"contrastReg"</code>,
 <code>"negBin"</code>, and <code>"randomForest"</code> are also accepted; contrast
@@ -115,7 +116,10 @@ and confidence intervals are available only for certain score methods.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> returns a numeric vector of stored scores.
 <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns the stored coefficient table or a named numeric vector
-for a selected method. <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> returns a matrix of Wald confidence
+for a selected method. When score models use different covariates, the
+table has the union of coefficient names and missing entries for terms not
+used by a method; selecting a method returns only its terms.
+<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> returns a matrix of Wald confidence
 limits for the selected coefficients.</p>
     </div>
     <div class="section level2">
@@ -129,7 +133,8 @@ method. Confidence intervals require
 stored coefficient standard errors, currently available for contrast
 regression in count and continuous fits only. They are not available for
 survival or binary fits. Methods that do not fit linear scores, such as
-random forests and boosting, do not provide score coefficients.</p>
+random forests, boosting, Cox, Weibull and log-normal T-learners, do not
+provide linear score coefficients.</p>
     </div>
     <div class="section level2">
     <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>

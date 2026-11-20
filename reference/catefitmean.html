@@ -67,11 +67,10 @@ generalized additive model.</p>
 <span>  <span class="va">data</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">ps_model</span>,</span>
 <span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
-<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -104,11 +103,17 @@ a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
 <dt id="arg-outcome-model">outcome_model<a class="anchor" aria-label="anchor" href="#arg-outcome-model"></a></dt>
-<dd><p>Outcome and score covariate formula; replaces <code>cate.model</code>.</p></dd>
+<dd><p>Formula for the outcome and outcome-model covariates; replaces <code>cate.model</code>.</p></dd>
 
 
 <dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
 <dd><p>Outcome-model methods paired with <code>benefit_method</code>; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
+
+
+<dt id="arg-benefit-model">benefit_model<a class="anchor" aria-label="anchor" href="#arg-benefit-model"></a></dt>
+<dd><p>Optional one-sided formula for the two-regression or
+contrast-regression score covariates. Defaults to the covariates and terms
+in <code>outcome_model</code>; T-learner scores do not use it. See <code><a href="catefit.html">catefit</a></code>.</p></dd>
 
 
 <dt id="arg-benefit-method">benefit_method<a class="anchor" aria-label="anchor" href="#arg-benefit-method"></a></dt>
@@ -116,10 +121,9 @@ a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
 <dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
-<dd><p>A formula describing the treatment model (propensity-score model) to be fitted.
-The treatment must appear on the left-hand side.
-The treatment must be a numeric vector coded as 0/1.
-If data are from a RCT, specify <code>ps_model</code> as an intercept-only model.</p></dd>
+<dd><p>A formula for the treatment model, which estimates propensity scores.
+Put the treatment variable on the left-hand side; for an intercept-only
+treatment model, use for example <code>trt ~ 1</code>. See <code><a href="catefit.html">catefit</a></code>.</p></dd>
 
 
 <dt id="arg-ps-method">ps_method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
@@ -127,20 +131,6 @@ If data are from a RCT, specify <code>ps_model</code> as an intercept-only model
 Allowed values include one of: <code>'glm'</code> for logistic regression with main effects only
 (default), or <code>'lasso'</code> for a logistic regression with main effects and LASSO penalization
 on two-way interactions (added to the model if not specified in <code>ps_model</code>).</p></dd>
-
-
-<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
-<dd><p>Optional formula for initial outcome predictions in <code>twoReg</code>
-and <code>contrastReg</code>. The outcome must match <code>cate.model</code>; the default
-<code>NULL</code> uses <code>outcome_model</code>.</p></dd>
-
-
-<dt id="arg-initial-predictor-method">initial.predictor.method<a class="anchor" aria-label="anchor" href="#arg-initial-predictor-method"></a></dt>
-<dd><p>A character vector for the method used to get initial outcome
-predictions conditional on the covariates in <code>init.model</code> in
-<code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>. Allowed values include one of
-<code>'gaussian'</code> (fastest), <code>'boosting'</code> and <code>'gam'</code>.
-Default is <code>'boosting'</code>.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
@@ -176,16 +166,14 @@ in <code>cate.model</code>.</p></dd>
 
 <dt id="arg-xvar-smooth-init">xvar.smooth.init<a class="anchor" aria-label="anchor" href="#arg-xvar-smooth-init"></a></dt>
 <dd><p>A vector of characters indicating the name of the variables used as the
-smooth terms if <code>initial.predictor.method = 'gam'</code>. The variables must be selected from
-the variables listed in <code>init.model</code>. Default is <code>NULL</code>, which uses all variables
-in <code>init.model</code>.</p></dd>
+smooth terms if <code>outcome_method = 'gam'</code>. The variables must be selected from
+the variables listed in <code>outcome_model</code>. Default is <code>NULL</code>, which uses all variables
+in <code>outcome_model</code>.</p></dd>
 
 
 <dt id="arg-tree-depth">tree.depth<a class="anchor" aria-label="anchor" href="#arg-tree-depth"></a></dt>
-<dd><p>A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if <code>score.method = 'boosting'</code> or
-if <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
-<code>initial.predictor.method = 'boosting'</code>. Default is <code>2</code>.</p></dd>
+<dd><p>A positive integer specifying the maximum depth of boosting trees.
+Used when <code>outcome_method = 'boosting'</code>. Default is <code>2</code>.</p></dd>
 
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
@@ -194,41 +182,36 @@ if <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
 
 
 <dt id="arg-n-trees-boosting">n.trees.boosting<a class="anchor" aria-label="anchor" href="#arg-n-trees-boosting"></a></dt>
-<dd><p>A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used only if <code>score.method = 'boosting'</code> or
-if <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
-<code>initial.predictor.method = 'boosting'</code>. Default is <code>200</code>.</p></dd>
+<dd><p>The maximum number of boosting trees, used when
+<code>outcome_method = 'boosting'</code>. Default is <code>200</code>.</p></dd>
 
 
 <dt id="arg-b">B<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
-<dd><p>A positive integer specifying the number of time cross-fitting is repeated in
-<code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>. Default is <code>3</code>.</p></dd>
+<dd><p>Number of repetitions of cross-fitting for <code>benefit_method =
+'two_regression'</code> or <code>'contrast_regression'</code>. Default is <code>3</code>.</p></dd>
 
 
 <dt id="arg-kfold">Kfold<a class="anchor" aria-label="anchor" href="#arg-kfold"></a></dt>
 <dd><p>A positive integer specifying the number of folds (parts) used in cross-fitting
-to partition the data in <code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>.
+to partition the data in <code>benefit_method = 'two_regression'</code> and <code>'contrast_regression'</code>.
 Default is <code>6</code>.</p></dd>
 
 
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
-<dd><p>A logical value indicating whether to plot the performance measures
-in boosting. Used only if <code>score.method = 'boosting'</code> or if
-<code>score.method = 'twoReg'</code> or <code>'contrastReg'</code> and
-<code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
+<dd><p>Whether to plot boosting performance measures when
+<code>outcome_method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-error-maxnr">error.maxNR<a class="anchor" aria-label="anchor" href="#arg-error-maxnr"></a></dt>
-<dd><p>A numerical value &gt; 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if <code>score.method = 'contrastReg'</code>.
-Default is <code>0.001</code>.</p></dd>
+<dd><p>Convergence tolerance for the Newton-Raphson algorithm used by
+<code>benefit_method = 'contrast_regression'</code>. Default is <code>0.001</code>.</p></dd>
 
 
 <dt id="arg-tune">tune<a class="anchor" aria-label="anchor" href="#arg-tune"></a></dt>
 <dd><p>A vector of 2 numerical values &gt; 0 specifying tuning parameters for the
 Newton Raphson algorithm. <code>tune[1]</code> is the step size, <code>tune[2]</code> specifies a
 quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if <code>score.method = 'contrastReg'</code>. Default is <code>c(0.5, 2)</code>.</p></dd>
+Used only if <code>benefit_method = 'contrast_regression'</code>. Default is <code>c(0.5, 2)</code>.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -257,7 +240,12 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+<dd><p>The legacy <code>init.model</code> argument specifies a separate initial
+outcome formula under the previous interface; it cannot be combined with
+<code>benefit_model</code>. The legacy <code>initial.predictor.method</code> is also
+accepted with a deprecation warning; do not supply it with
+<code>outcome_method</code>.
+Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -325,7 +313,7 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The legacy arguments <code>score.method</code> and <code>cate.model</code> are accepted through <code>...</code>; see <code><a href="catefit.html">catefit</a></code>.</p>
-<p>The CATE score represents an individual-level treatment effect, estimated with
+<p>The CATE score estimates a covariate-conditional average treatment effect, estimated with
 either linear regression, boosting, random forest and generalized additive model applied separately by
 treatment group or with two doubly robust estimators, two regressions and contrast regression
 (Yadlowsky, 2020) applied to the entire dataset.</p>

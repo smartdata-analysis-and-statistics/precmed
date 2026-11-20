@@ -64,6 +64,7 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
 <span>  <span class="va">data</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">ps_model</span>,</span>
 <span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
@@ -78,7 +79,6 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
 <span>  tree.depth <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">200</span>,</span>
 <span>  plot.gbmperf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -88,20 +88,32 @@ subgroups. This is the binary-outcome interface used by <code><a href="catefit.h
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame containing the variables in the outcome, treatment,
-and censoring models (if specified); a data frame with <code>n</code> rows (1 row per observation).</p></dd>
+<dd><p>A data frame containing the variables in the outcome and treatment models; a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 
 
 <dt id="arg-outcome-model">outcome_model<a class="anchor" aria-label="anchor" href="#arg-outcome-model"></a></dt>
-<dd><p>Outcome and score covariate formula; replaces <code>cate.model</code>.</p></dd>
+<dd><p>Formula for the outcome and outcome-model covariates; replaces <code>cate.model</code>.</p></dd>
 
 
 <dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
-<dd><p>Outcome-model methods paired with <code>benefit_method</code>; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
+<dd><p>Outcome-model method paired with <code>benefit_method</code>.
+For a T-learner, <code>"logistic"</code> (default) or <code>"boosting"</code>;
+for two-regression, <code>"logistic"</code>.</p></dd>
+
+
+<dt id="arg-benefit-model">benefit_model<a class="anchor" aria-label="anchor" href="#arg-benefit-model"></a></dt>
+<dd><p>Optional one-sided formula specifying the covariates and
+terms for the two-regression or contrast-regression score. The default
+<code>NULL</code> uses the covariates and terms of <code>outcome_model</code>.
+An intercept is required and offsets are not supported. T-learner scores use
+the outcome model directly and do not use this formula. In a mixed fit it
+applies only to two-regression and contrast regression. Continuous-outcome
+fitting is not implemented.</p></dd>
 
 
 <dt id="arg-benefit-method">benefit_method<a class="anchor" aria-label="anchor" href="#arg-benefit-method"></a></dt>
-<dd><p>Score-construction methods; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
+<dd><p>Score-construction methods; defaults to <code>"t_learner"</code>.
+See <code><a href="catefit.html">catefit</a></code>.</p></dd>
 
 
 <dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
@@ -138,7 +150,7 @@ lower (<code>FALSE</code>) values of the outcome are more desirable. Default is 
 
 <dt id="arg-prop-cutoff">prop.cutoff<a class="anchor" aria-label="anchor" href="#arg-prop-cutoff"></a></dt>
 <dd><p>A vector of numerical values (in `(0, 1]`) specifying percentiles of the
-estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
+estimated risk-difference CATE scores to define nested subgroups. Each element represents the cutoff to
 separate observations in nested subgroups (below vs above cutoff).
 The length of <code>prop.cutoff</code> is the number of nested subgroups.
 An equally-spaced sequence of proportions ending with 1 is recommended.
@@ -159,43 +171,37 @@ interaction selection rule are unchanged. Kept separate from boosting's
 
 
 <dt id="arg-b">B<a class="anchor" aria-label="anchor" href="#arg-b"></a></dt>
-<dd><p>A positive integer specifying the number of time cross-fitting is repeated in
-<code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>. Default is <code>3</code>.</p></dd>
+<dd><p>Number of repetitions of cross-fitting for <code>benefit_method =
+'two_regression'</code> or <code>'contrast_regression'</code>. Default is <code>3</code>.</p></dd>
 
 
 <dt id="arg-kfold">Kfold<a class="anchor" aria-label="anchor" href="#arg-kfold"></a></dt>
 <dd><p>A positive integer specifying the number of folds used in cross-fitting
-to partition the data in <code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>.
+to partition the data in <code>benefit_method = 'two_regression'</code> and <code>'contrast_regression'</code>.
 Default is <code>5</code>.</p></dd>
 
 
 <dt id="arg-tree-depth">tree.depth<a class="anchor" aria-label="anchor" href="#arg-tree-depth"></a></dt>
-<dd><p>A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if <code>score.method = 'boosting'</code> or
-if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 'twoReg'</code> or
-<code>'contrastReg'</code>. Default is 2.</p></dd>
+<dd><p>A positive integer specifying the maximum depth of boosting trees.
+Used when <code>outcome_method = 'boosting'</code>. Default is <code>2</code>.</p></dd>
 
 
 <dt id="arg-n-trees-boosting">n.trees.boosting<a class="anchor" aria-label="anchor" href="#arg-n-trees-boosting"></a></dt>
-<dd><p>A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if <code>score.method = 'boosting'</code> or
-if <code>initial.predictor.method = 'boosting'</code> with <code>score.method = 'twoReg'</code> or
-<code>'contrastReg'</code>. Default is <code>200</code>.</p></dd>
+<dd><p>The maximum number of boosting trees, used when
+<code>outcome_method = 'boosting'</code>. Default is <code>200</code>.</p></dd>
 
 
 <dt id="arg-plot-gbmperf">plot.gbmperf<a class="anchor" aria-label="anchor" href="#arg-plot-gbmperf"></a></dt>
-<dd><p>A logical value indicating whether to plot the performance measures in
-boosting. Used only if <code>score.method = 'boosting'</code> or if <code>score.method = 'twoReg'</code>
-or <code>'contrastReg'</code> and <code>initial.predictor.method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
-
-
-<dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
-<dd><p>Optional formula for the initial logistic outcome models
-used by <code>twoReg</code>; <code>NULL</code> uses <code>outcome_model</code>.</p></dd>
+<dd><p>Whether to plot boosting performance measures when
+<code>outcome_method = 'boosting'</code>. Default is <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+<dd><p>The legacy <code>init.model</code> argument specifies a separate initial
+outcome formula under the previous interface; it cannot be combined with
+<code>benefit_model</code>. The legacy <code>initial.predictor.method</code> is accepted
+with a deprecation warning and cannot be combined with <code>outcome_method</code>.
+Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

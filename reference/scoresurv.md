@@ -10,7 +10,8 @@ scoresurv(
   fit,
   x.cate,
   tau0,
-  score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg")
+  score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg"),
+  x.benefit = x.cate
 )
 ```
 
@@ -34,7 +35,12 @@ scoresurv(
 
   A vector of one or multiple methods to estimate the CATE score.
   Allowed values are: `'randomForest'`, `'boosting'`, `'poisson'`,
-  `'twoReg'`, `'contrastReg'`. Default specifies all 5 methods.
+  `'twoReg'`, `'contrastReg'`, `'coxph'`, `'weibull'`, and
+  `'log_normal'`. Default specifies all 5 methods.
+
+- x.benefit:
+
+  Benefit-score covariate matrix; defaults to `x.cate`.
 
 ## Value
 

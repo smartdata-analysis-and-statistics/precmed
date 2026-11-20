@@ -35,6 +35,9 @@ intxsurv(
   ps.control = list(),
   rf.control = list(),
   x.init = x.cate,
+  x.benefit = x.cate,
+  rmst.control = list(),
+  initial.methods = NULL,
   ...
 )
 ```
@@ -120,8 +123,8 @@ intxsurv(
   A character vector for the method used to get initial outcome
   predictions conditional on the covariates in `x.init` in
   `score.method = 'twoReg'` and `'contrastReg'`. Allowed values include
-  one of `'randomForest'`, `'boosting'` and `'logistic'` (fastest).
-  Default is `'randomForest'`.
+  one of `'randomForest'`, `'boosting'` and `'fractional_logit'`
+  (fastest). Default is `'randomForest'`.
 
 - tree.depth:
 
@@ -211,6 +214,19 @@ intxsurv(
 - x.init:
 
   Initial outcome-model covariate matrix; defaults to `x.cate`.
+
+- x.benefit:
+
+  Benefit-score covariate matrix; defaults to `x.cate`.
+
+- rmst.control:
+
+  Named options for Cox restricted mean survival integration.
+
+- initial.methods:
+
+  Named initial outcome methods for the doubly robust scores; `NULL`
+  uses `initial.predictor.method` for both.
 
 - ...:
 

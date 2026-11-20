@@ -4,6 +4,15 @@
 
 ### Major changes
 
+- Survival
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  T-learners support `outcome_method = "coxph"`, `"weibull"`, and
+  `"log_normal"` to compare arm-specific restricted mean time lost at
+  the selected horizon. These methods are available for score fitting,
+  not yet for
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  validation or the doubly robust score methods.
+
 - Count
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
   now always fits separate outcome models by treatment arm, without the
@@ -83,6 +92,40 @@
 
 ### Minor changes
 
+- `initial.predictor.method` is no longer shown in
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  or its outcome-specific signatures. Use `outcome_method` to select
+  initial outcome models; existing calls using the dotted argument
+  remain supported through `...` with a deprecation warning. Supplying
+  it together with `outcome_method` now produces an error, including
+  when the values match. Legacy calls can pair the dotted argument with
+  `benefit_method`; the
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  interface is unchanged.
+
+- [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  and its outcome-specific interfaces now default to a T-learner:
+  logistic for binary, Poisson for count, and Cox proportional hazards
+  for survival outcomes. Specify `outcome_method` for the doubly robust
+  methods.
+
+- [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  and its outcome-specific interfaces accept a one-sided `benefit_model`
+  formula for two-regression and contrast-regression scores. It defaults
+  to the terms of `outcome_model`, which defines the outcome prediction
+  models. T-learners continue to use `outcome_model`. The previous
+  `init.model` argument remains accepted through `...` under its
+  original meaning, but cannot be combined with `benefit_model`.
+  Coefficient tables for mixed models may contain missing entries for
+  terms a score does not use.
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  does not yet support a separate `benefit_model`.
+
+- Use `fractional_logit` for survival initial outcome models in
+  two-regression and contrast regression. The former value `logistic`
+  remains accepted with a deprecation warning, including in
+  `initial.predictor.method`. The underlying calculation is unchanged.
+
 - Reorganized the binary, count and survival CATE vignettes to introduce
   model formulas, score-construction methods and fitted examples in
   sequence.
@@ -137,9 +180,10 @@
   `score.method` and `cate.model` arguments remain available through
   `...` with warnings, and earlier positional calls remain supported.
   The new arguments follow `response` and `data` in the order
-  `outcome_model`, `outcome_method`, and `benefit_method`. The two
-  doubly robust procedures continue to share one initial outcome-model
-  method in a call.
+  `outcome_model`, `outcome_method`, `benefit_model`, and
+  `benefit_method`. The two doubly robust procedures can use different
+  initial outcome methods; identical methods share cross-fitted
+  predictions, and treatment-model predictions are shared across both.
 
 - Binary
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
@@ -397,6 +441,13 @@
   attribution.
 
 ### Bug fixes
+
+- Corrected and reordered the CATE fitting help arguments to match the
+  function signatures.
+
+- Survival
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  now reports a clear error when a treatment arm is missing.
 
 - Fixed
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)

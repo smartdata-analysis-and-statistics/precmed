@@ -11,10 +11,10 @@ catefitcount(
   data,
   outcome_model = NULL,
   outcome_method = NULL,
+  benefit_model = NULL,
   benefit_method = NULL,
   ps_model,
   ps_method = "glm",
-  initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -32,7 +32,6 @@ catefitcount(
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
-  init.model = NULL,
   ...
 )
 ```
@@ -46,24 +45,36 @@ catefitcount(
 
 - outcome_model:
 
-  Outcome and score covariate formula; replaces `cate.model`.
+  Formula for the outcome and outcome-model covariates; replaces
+  `cate.model`.
 
 - outcome_method:
 
-  Outcome-model methods paired with `benefit_method`; see
+  Outcome-model method paired with `benefit_method`. For a T-learner,
+  `"poisson"` (default), `"negative_binomial"`, or `"boosting"`; for
+  two-regression or contrast regression, `"poisson"`, `"boosting"`, or
+  `"gam"`. Two-regression and contrast regression may use different
+  initial outcome methods; matching methods share cross-fitted outcome
+  predictions.
+
+- benefit_model:
+
+  Optional one-sided formula for the two-regression or
+  contrast-regression score covariates. Defaults to the covariates and
+  terms in `outcome_model`; T-learner scores do not use it. See
   [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - benefit_method:
 
-  Score-construction methods; see
+  Score-construction methods; defaults to `"t_learner"`. See
   [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps_model:
 
-  A formula describing the treatment model (propensity-score model) to
-  be fitted. The treatment must appear on the left-hand side. The
-  treatment must be a numeric vector coded as 0/1. If data are from a
-  randomized trial, specify `ps_model` as an intercept-only model.
+  A formula for the treatment model, which estimates propensity scores.
+  Put the treatment variable on the left-hand side; for an
+  intercept-only treatment model, use for example `trt ~ 1`. See
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 - ps_method:
 
@@ -73,15 +84,6 @@ catefitcount(
   with main effects and LASSO penalization on two-way interactions
   (added to the model if interactions are not specified in `ps_model`).
   Relevant only when `ps_model` has more than one variable.
-
-- initial.predictor.method:
-
-  A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `init.model` (or
-  `outcome_model` when omitted). Only applies when `score.method`
-  includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'poisson'` (fastest), `'boosting'` and `'gam'`. Default is
-  `'boosting'`.
 
 - minPS:
 
@@ -111,56 +113,51 @@ catefitcount(
 - xvar.smooth:
 
   A vector of characters indicating the name of the variables used as
-  the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `init.model` (or
-  `outcome_model` when omitted). Default is `NULL`, which uses all
-  initial outcome-model covariates.
+  the smooth terms if `outcome_method = 'gam'`. The variables must be
+  selected from the variables listed in `outcome_model`. Default is
+  `NULL`, which uses all initial outcome-model covariates.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  A positive integer specifying the maximum depth of boosting trees.
+  Used when `outcome_method = 'boosting'`. Default is `2`.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  The maximum number of boosting trees, used when
+  `outcome_method = 'boosting'`. Default is `200`.
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of repetitions of cross-fitting for
+  `benefit_method = 'two_regression'` or `'contrast_regression'`.
+  Default is `3`.
 
 - Kfold:
 
   A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  cross-fitting to partition the data in
+  `benefit_method = 'two_regression'` and `'contrast_regression'`.
+  Default is `5`.
 
 - error.maxNR:
 
-  A numerical value \> 0 indicating the minimum value of the mean
-  absolute error in Newton Raphson algorithm. Used only if
-  `score.method = 'contrastReg'`. Default is `0.001`.
+  Convergence tolerance for the Newton-Raphson algorithm used by
+  `benefit_method = 'contrast_regression'`. Default is `0.001`.
 
 - max.iterNR:
 
   A positive integer indicating the maximum number of iterations in the
-  Newton Raphson algorithm. Used only if `score.method = 'contrastReg'`.
-  Default is `150`.
+  Newton Raphson algorithm. Used only if
+  `benefit_method = 'contrast_regression'`. Default is `150`.
 
 - tune:
 
   A vector of 2 numerical values \> 0 specifying tuning parameters for
   the Newton Raphson algorithm. `tune[1]` is the step size, `tune[2]`
   specifies a quantity to be added to diagonal of the slope matrix to
-  prevent singularity. Used only if `score.method = 'contrastReg'`.
-  Default is `c(0.5, 2)`.
+  prevent singularity. Used only if
+  `benefit_method = 'contrast_regression'`. Default is `c(0.5, 2)`.
 
 - seed:
 
@@ -169,10 +166,8 @@ catefitcount(
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+  Whether to plot boosting performance measures when
+  `outcome_method = 'boosting'`. Default is `FALSE`.
 
 - verbose:
 
@@ -200,20 +195,21 @@ catefitcount(
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
-- init.model:
-
-  Optional formula for initial outcome predictions in `twoReg` and
-  `contrastReg`; defaults to `outcome_model`. The outcome must match.
-
 - ...:
 
-  Legacy arguments `ps.model` and `ps.method` are accepted with
-  warnings. Additional boosting arguments; see
+  The legacy `init.model` argument specifies a separate initial outcome
+  formula under the previous interface; it cannot be combined with
+  `benefit_model`. The legacy `initial.predictor.method` is also
+  accepted with a deprecation warning; do not supply it with
+  `outcome_method`. Legacy arguments `ps.model` and `ps.method` are
+  accepted with warnings. Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value
 
-Returns a list containing the following components:
+Returns a list containing the following components: When the doubly
+robust scores use distinct outcome methods, `outcome_methods` records
+the method selected for each score.
 
 - `ate.poisson`: A vector of numerical values of length `prop.cutoff`
   containing the estimated ATE in nested subgroups (defined by
@@ -286,11 +282,11 @@ The legacy arguments `score.method` and `cate.model` are accepted
 through `...`; see
 [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
-The CATE score represents an individual-level treatment effect,
-estimated with either Poisson regression, boosting or negative binomial
-regression applied separately by treatment group or with two doubly
-robust estimators, two regressions and contrast regression (Yadlowsky,
-2020) applied to the entire dataset.
+The CATE score estimates a covariate-conditional average treatment
+effect, estimated with either Poisson regression, boosting or negative
+binomial regression applied separately by treatment group or with two
+doubly robust estimators, two regressions and contrast regression
+(Yadlowsky, 2020) applied to the entire dataset.
 
 `catefitcount()` provides the coefficients of the CATE score for each
 scoring method requested through `score.method`. Currently, contrast
@@ -336,5 +332,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.18 secs 
+#> Total runtime : 0.08 secs 
 ```

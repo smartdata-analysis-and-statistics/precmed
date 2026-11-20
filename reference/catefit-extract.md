@@ -32,12 +32,13 @@ confint(object, parm, level = 0.95, method = "contrastReg", ...)
   A single score to extract from the fitted object. Use
   `"two_regression"` or `"contrast_regression"` for those procedures, or
   the outcome method (such as `"logistic"`, `"boosting"`, `"poisson"`,
-  `"negative_binomial"`, or `"random_forest"`) for a T-learner. The
-  established stored names `"twoReg"`, `"contrastReg"`, `"negBin"`, and
-  `"randomForest"` are also accepted; contrast regression can also be
-  selected with `"contrastreg"`. If exactly one T-learner score is
-  present, `"t_learner"` selects it. If exactly one score of any kind is
-  present, `method` may be omitted from
+  `"coxph"`, `"weibull"`, `"log_normal"`, `"negative_binomial"`, or
+  `"random_forest"`) for a T-learner. The established stored names
+  `"twoReg"`, `"contrastReg"`, `"negBin"`, and `"randomForest"` are also
+  accepted; contrast regression can also be selected with
+  `"contrastreg"`. If exactly one T-learner score is present,
+  `"t_learner"` selects it. If exactly one score of any kind is present,
+  `method` may be omitted from
   [`predict()`](https://rdrr.io/r/stats/predict.html). For
   [`coef()`](https://rdrr.io/r/stats/coef.html), omission returns the
   coefficient table. For
@@ -62,9 +63,11 @@ confint(object, parm, level = 0.95, method = "contrastReg", ...)
 [`predict()`](https://rdrr.io/r/stats/predict.html) returns a numeric
 vector of stored scores. [`coef()`](https://rdrr.io/r/stats/coef.html)
 returns the stored coefficient table or a named numeric vector for a
-selected method. [`confint()`](https://rdrr.io/r/stats/confint.html)
-returns a matrix of Wald confidence limits for the selected
-coefficients.
+selected method. When score models use different covariates, the table
+has the union of coefficient names and missing entries for terms not
+used by a method; selecting a method returns only its terms.
+[`confint()`](https://rdrr.io/r/stats/confint.html) returns a matrix of
+Wald confidence limits for the selected coefficients.
 
 ## Details
 
@@ -77,8 +80,8 @@ T-learners are fitted, select one by its outcome method. Confidence
 intervals require stored coefficient standard errors, currently
 available for contrast regression in count and continuous fits only.
 They are not available for survival or binary fits. Methods that do not
-fit linear scores, such as random forests and boosting, do not provide
-score coefficients.
+fit linear scores, such as random forests, boosting, Cox, Weibull and
+log-normal T-learners, do not provide linear score coefficients.
 
 ## Author
 

@@ -29,6 +29,8 @@ intxcount(
   contrast.control = list(),
   ps.control = list(),
   x.init = x.cate,
+  x.benefit = x.cate,
+  initial.methods = NULL,
   ...
 )
 ```
@@ -173,6 +175,15 @@ intxcount(
 - x.init:
 
   Initial outcome-model covariate matrix; defaults to `x.cate`.
+
+- x.benefit:
+
+  Benefit-score covariate matrix; defaults to `x.cate`.
+
+- initial.methods:
+
+  Named initial outcome methods for the doubly robust scores; `NULL`
+  uses `initial.predictor.method` for both.
 
 - ...:
 

@@ -86,6 +86,9 @@
 <span>  ps.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  rf.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  x.init <span class="op">=</span> <span class="va">x.cate</span>,</span>
+<span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span>,</span>
+<span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  initial.methods <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -163,7 +166,7 @@ truncated. Default is <code>0.01</code>.</p></dd>
 <dd><p>A character vector for the method used to get initial
 outcome predictions conditional on the covariates in <code>x.init</code>
 in <code>score.method = 'twoReg'</code> and <code>'contrastReg'</code>. Allowed values include
-one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'logistic'</code> (fastest). Default is <code>'randomForest'</code>.</p></dd>
+one of <code>'randomForest'</code>, <code>'boosting'</code> and <code>'fractional_logit'</code> (fastest). Default is <code>'randomForest'</code>.</p></dd>
 
 
 <dt id="arg-tree-depth">tree.depth<a class="anchor" aria-label="anchor" href="#arg-tree-depth"></a></dt>
@@ -248,6 +251,19 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 <dt id="arg-x-init">x.init<a class="anchor" aria-label="anchor" href="#arg-x-init"></a></dt>
 <dd><p>Initial outcome-model covariate matrix; defaults to <code>x.cate</code>.</p></dd>
+
+
+<dt id="arg-x-benefit">x.benefit<a class="anchor" aria-label="anchor" href="#arg-x-benefit"></a></dt>
+<dd><p>Benefit-score covariate matrix; defaults to <code>x.cate</code>.</p></dd>
+
+
+<dt id="arg-rmst-control">rmst.control<a class="anchor" aria-label="anchor" href="#arg-rmst-control"></a></dt>
+<dd><p>Named options for Cox restricted mean survival integration.</p></dd>
+
+
+<dt id="arg-initial-methods">initial.methods<a class="anchor" aria-label="anchor" href="#arg-initial-methods"></a></dt>
+<dd><p>Named initial outcome methods for the doubly robust
+scores; <code>NULL</code> uses <code>initial.predictor.method</code> for both.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -133,6 +133,9 @@ treatment model can reflect a common assignment probability.</p>
 <div class="section level3">
 <h3 id="choose-how-to-construct-scores">Choose how to construct scores<a class="anchor" aria-label="anchor" href="#choose-how-to-construct-scores"></a>
 </h3>
+<p>If both method arguments are omitted, <code><a href="../reference/catefit.html">catefit()</a></code> defaults
+to a T-learner with <code>outcome_method = "logistic"</code> for this
+outcome.</p>
 <p><code>benefit_method</code> chooses how to construct the score, while
 <code>outcome_method</code> chooses the outcome-model method for that
 score:</p>
@@ -177,6 +180,27 @@ addressed below.</p>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  n.trees.boosting <span class="op">=</span> <span class="fl">100</span>, n.cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>To fit a more concise two-regression or contrast-regression score,
+you can supply a separate one-sided benefit formula. For example, adding
+<code>benefit_model = ~ age + previous_treatment</code> to the
+<code><a href="../reference/catefit.html">catefit()</a></code> call above uses those covariates for the doubly
+robust score, while the initial outcome models still use all the
+covariates in <code>outcome_formula</code>. If omitted, the benefit
+score uses the terms in <code>outcome_formula</code>. T-learner scores
+in a mixed fit continue to use the outcome formula and do not use
+<code>benefit_model</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_cate_reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
+<span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>, outcome_method <span class="op">=</span> <span class="st">"logistic"</span>,</span>
+<span>  benefit_model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="st">"two_regression"</span>, ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/catecv.html">catecv()</a></code> does not currently accept a separate benefit
+formula, so its validation below applies to the default score
+specification used in this example, not to a fit with a different
+<code>benefit_model</code>.</p>
 </div>
 </div>
 <div class="section level2">
@@ -196,7 +220,7 @@ retrieve.</p>
 analysis sample, in its original row order; prediction for new patients
 is not currently supported. Below are the first six two-regression
 scores.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"two_regression"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span></span>
 <span><span class="co">#&gt;             1             2             3             4             5 </span></span>
@@ -208,9 +232,9 @@ scores.</p>
 <p>Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to compare fitted score distributions. Scores
 are on the risk difference scale, with zero indicating no difference in
 relapse probability.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cate</span>, type <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
 <p>Differences between the score distributions can reflect model
 flexibility, estimation noise or overfitting. The plot alone cannot
 establish that treatment effects differ or that scores will perform well
@@ -221,7 +245,7 @@ linear projection of the risk difference. The logistic models’
 coefficients are on the log-odds scale, and boosting does not have a
 linear score coefficient vector. Confidence intervals for binary score
 coefficients are not currently available.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"two_regression"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              (Intercept)                      age                   female </span></span>
 <span><span class="co">#&gt;              -0.16042803              -0.00747815               0.11779453 </span></span>
@@ -234,7 +258,7 @@ differences in nested subgroups ranked by the two-regression score.
 These estimates use the same data as the score fit; the validation
 section below assesses the score in held-out data. The contrast is drug
 1 minus drug 0, so a negative value favors drug 1.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subgroup_estimates.html">subgroup_estimates</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"two_regression"</span>, measure <span class="op">=</span> <span class="st">"risk_difference"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    prop0.5   prop0.75      prop1 </span></span>
 <span><span class="co">#&gt; -0.1792806 -0.1474149 -0.1079285</span></span></code></pre></div>
@@ -264,7 +288,7 @@ and the full set, and the mutually exclusive groups split each set in
 half. These larger subgroups avoid the rank-deficient fits observed with
 smaller groups in this example; check support and model fit when
 choosing cutoffs for other data.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>, score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span><span class="op">)</span>,</span>
 <span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>, higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -272,11 +296,11 @@ choosing cutoffs for other data.</p>
 <span>  cv.n <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">102</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-5-2.png" class="r-plt" alt="" width="700"></p>
+<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Binary-CATE_files/figure-html/unnamed-chunk-6-2.png" class="r-plt" alt="" width="700"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                 cv1        cv2        cv3         cv4        cv5        cv6</span></span>
 <span><span class="co">#&gt; logistic 0.02997601 0.01402678 0.03633474 0.004732452 0.01140305 0.01547006</span></span>
