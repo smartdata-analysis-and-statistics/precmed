@@ -106,10 +106,10 @@ fewer relapses are better, we set `higher.y = FALSE`.
 fit_cv <- catecv(
   response = "count",
   data = countExample,
-  score.method = "poisson",
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
+  outcome_method = "poisson",
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
   cv.n = 5,
   seed = 999

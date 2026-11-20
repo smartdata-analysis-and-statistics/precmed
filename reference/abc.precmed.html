@@ -126,10 +126,10 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># The result was created with:</span></span></span>
 <span class="r-in"><span><span class="co"># catecvCountExample &lt;- catecv(</span></span></span>
-<span class="r-in"><span><span class="co">#   response = "count", data = countExample, score.method = "poisson",</span></span></span>
-<span class="r-in"><span><span class="co">#   cate.model = y ~ age + female + previous_treatment + previous_cost +</span></span></span>
+<span class="r-in"><span><span class="co">#   response = "count", data = countExample, outcome_method = "poisson",</span></span></span>
+<span class="r-in"><span><span class="co">#   outcome_model = y ~ age + female + previous_treatment + previous_cost +</span></span></span>
 <span class="r-in"><span><span class="co">#     previous_number_relapses + offset(log(years)),</span></span></span>
-<span class="r-in"><span><span class="co">#   ps.model = trt ~ age + previous_treatment, higher.y = FALSE,</span></span></span>
+<span class="r-in"><span><span class="co">#   ps_model = trt ~ age + previous_treatment, higher.y = FALSE,</span></span></span>
 <span class="r-in"><span><span class="co">#   cv.n = 5, seed = 999, verbose = 0)</span></span></span>
 <span class="r-in"><span><span class="co"># Load the pre-fitted result instead of repeating the calculation.</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">catecvCountExample</span><span class="op">)</span></span></span>

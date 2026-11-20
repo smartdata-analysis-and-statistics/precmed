@@ -1,25 +1,24 @@
-# Cross-validation of the conditional average treatment effect (CATE) score for survival outcomes
+# Cross-validation of conditional average treatment-effect scores for survival outcomes
 
-Provides doubly robust estimation of the average treatment effect (ATE)
-by the RMTL (restricted mean time lost) ratio in nested and mutually
-exclusive subgroups of patients defined by an estimated conditional
-average treatment effect (CATE) score via cross-validation (CV). The
-CATE score can be estimated with up to 5 methods among the following:
-Random forest, boosting, poisson regression, two regressions, and
-contrast regression (see `score.method`).
+Repeatedly fits scores on training data and applies them to validation
+data. Subgroup effects include restricted mean time lost ratios and
+marginal cumulative hazard ratios at the specified horizon. Cox, Weibull
+and log-normal T-learners use training-arm outcome models to predict
+restricted mean time lost in both sets.
 
 ## Usage
 
 ``` r
 catecvsurv(
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  initial.predictor.method = "randomForest",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  outcome_model,
+  outcome_method = "coxph",
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -48,7 +47,7 @@ catecvsurv(
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
-  init.model = NULL
+  ...
 )
 ```
 
@@ -60,60 +59,58 @@ catecvsurv(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'randomForest'`, `'boosting'`, `'poisson'`,
-  `'twoReg'`, and `'contrastReg'`.
+  A formula specifying the outcome and baseline covariates. Use a `Surv`
+  response for survival and include an exposure offset for count
+  outcomes.
 
-- cate.model:
+- outcome_method:
 
-  A standard `Surv` formula describing the outcome model to be fitted.
-  The outcome must appear on the left-hand side.
+  Outcome-model method for each `benefit_method`. For a T-learner, the
+  default is `'coxph'`. Other options include `'weibull'`,
+  `'log_normal'`, `'poisson'`, `'boosting'`, and `'random_forest'`. For
+  two-regression or contrast regression, choose `'fractional_logit'`,
+  `'boosting'`, or `'random_forest'`.
 
-- ps.model:
+- benefit_model:
 
-  A formula describing the treatment model (propensity-score model) to
-  be fitted. The treatment must appear on the left-hand side. The
-  treatment must be a numeric vector coded as 0/1. If data are from a
-  randomized controlled trial, specify `ps.model = ~1` as an
-  intercept-only model.
+  Optional one-sided formula for the covariates and terms used in
+  two-regression and contrast-regression scores. The default uses the
+  terms in `outcome_model`. T-learners use `outcome_model` directly.
 
-- ps.method:
+- benefit_method:
 
-  A character value for the method to estimate the propensity score.
-  Allowed values include one of: `'glm'` for logistic regression with
-  main effects only (default), or `'lasso'` for a logistic regression
-  with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  Score-construction method, with one entry per `outcome_method`. The
+  default is `'t_learner'`. See
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  for supported combinations.
 
-- initial.predictor.method:
+- ps_model:
 
-  A character vector for the method used to get initial outcome
-  predictions conditional on the covariates specified in `init.model`
-  (or `cate.model` when omitted). Only applies when `score.method`
-  includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'randomForest'`, `'boosting'` and `'fractional_logit'` (fastest). The
-  older value `'logistic'` is accepted with a deprecation warning.
-  Default is `'randomForest'`.
+  A formula for the treatment model, with treatment on the left. It
+  estimates propensity scores. For a common randomization probability,
+  use an intercept-only formula such as `trt ~ 1`.
 
-- ipcw.model:
+- ps_method:
 
-  A formula describing the censoring model used for inverse probability
-  of censoring weighting (IPCW). The left-hand side must be empty.
-  Default is `ipcw.model = NULL`, which corresponds to specifying the
-  censoring model with the same covariates as the outcome model
-  `cate.model` plus the treatment.
+  Treatment-model fitting method. The default `'glm'` uses logistic
+  regression. `'lasso'` uses a logistic model with LASSO screening for
+  two-way interactions.
 
-- ipcw.method:
+- censoring_model:
 
-  A character value for the censoring model. Allowed values are:
-  `'breslow'` (Cox regression with Breslow estimator of the baseline
-  survivor function), `'aft (exponential)'`, `'aft (weibull)'`,
-  `'aft (lognormal)'` or `'aft (loglogistic)'` (accelerated failure time
-  model with different distributions for y variable). Default is
-  `'breslow'`.
+  Survival only. A one-sided formula for the model that estimates
+  probabilities of remaining uncensored for inverse probability of
+  censoring weighting (IPCW). The default uses the outcome-model
+  covariates and treatment.
+
+- censoring_method:
+
+  Survival only. `'breslow'` (default) uses Cox regression with the
+  Breslow estimator. Accelerated failure time options are
+  `'aft (exponential)'`, `'aft (weibull)'`, `'aft (lognormal)'`, and
+  `'aft (loglogistic)'`.
 
 - minPS:
 
@@ -166,7 +163,7 @@ catecvsurv(
 
   A logical value indicating whether the area between curves (ABC)
   should be calculated at each cross-validation iterations, for each
-  `score.method`. Default is `TRUE`.
+  scoring method. Default is `TRUE`.
 
 - train.prop:
 
@@ -194,63 +191,45 @@ catecvsurv(
 
 - surv.min:
 
-  Lower truncation limit for the probability of being censored. It must
-  be a positive value and should be chosen close to 0. Default is
-  `0.025`.
+  Lower bound for the estimated probability of remaining uncensored.
+  Defaults to 0.025.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  Maximum depth of boosting trees. Defaults to 2.
 
 - n.trees.rf:
 
-  A positive integer specifying the number of trees in random forest.
-  Used if `score.method = 'randomForest'` or if
-  `initial.predictor.method = 'randomForest'` with
-  `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
-  survival outcomes. Default is `1000`.
+  Number of trees for survival random forests. Defaults to 1000.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  Maximum number of trees for boosting. Defaults to 200.
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of cross-fitting repetitions used by two-regression and
+  contrast regression. Defaults to 3.
 
 - Kfold:
 
-  A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  Number of folds used for cross-fitting within each training set.
+  Defaults to 5.
 
 - error.maxNR:
 
-  A numerical value \> 0 indicating the minimum value of the mean
-  absolute error in Newton Raphson algorithm. Used only if
-  `score.method = 'contrastReg'`. Default is `0.001`.
+  Newton–Raphson convergence tolerance for contrast regression. Defaults
+  to 0.001.
 
 - max.iterNR:
 
-  A positive integer indicating the maximum number of iterations in the
-  Newton Raphson algorithm. Used only if `score.method = 'contrastReg'`.
-  Default is `150`.
+  Maximum number of Newton–Raphson iterations for contrast regression.
+  Defaults to 150.
 
 - tune:
 
-  A vector of 2 numerical values \> 0 specifying tuning parameters for
-  the Newton Raphson algorithm. `tune[1]` is the step size, `tune[2]`
-  specifies a quantity to be added to diagonal of the slope matrix to
-  prevent singularity. Used only if `score.method = 'contrastReg'`.
-  Default is `c(0.5, 2)`.
+  Two positive Newton–Raphson tuning values for contrast regression.
+  Defaults to `c(0.5, 2)`.
 
 - seed:
 
@@ -259,10 +238,7 @@ catecvsurv(
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+  Whether to plot boosting performance. Defaults to FALSE.
 
 - verbose:
 
@@ -294,7 +270,7 @@ catecvsurv(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
@@ -305,18 +281,19 @@ catecvsurv(
   survival initial-predictor forests. Use `n.trees.rf` for the number of
   trees.
 
-- init.model:
+- ...:
 
-  Optional formula for initial outcome predictions in `twoReg` and
-  `contrastReg`; defaults to `cate.model`. The outcome must match.
+  Additional arguments. Deprecated argument names from precmed 1.1.0
+  remain supported for backward compatibility and emit warnings.
 
 ## Value
 
-Returns a list containing the following components saved as a
-`"precmed"` object:
+A `"precmed"` object with the components below. When doubly robust
+scores use different outcome methods, `outcome_methods` records the
+method used for each score.
 
 - `ate.randomForest`: A list of ATE output measured by the RMTL ratio if
-  `score.method` includes `'randomForest'`:
+  the selected scoring methods includes `'randomForest'`:
 
   - `ate.est.train.high.cv`: A matrix of numerical values with
     `length(prop.cutoff)` rows and `cv.n` columns. The ith column/jth
@@ -354,17 +331,17 @@ Returns a list containing the following components saved as a
     cross-validation iteration. Only returned if `abc = TRUE`.
 
 - `ate.boosting`: A list of results similar to `ate.randomForest` output
-  if `score.method` includes `'boosting'`.
+  if the selected scoring methods includes `'boosting'`.
 
 - `ate.poisson`: A list of results similar to `ate.randomForest` output
-  if `score.method` includes `'poisson'`.
+  if the selected scoring methods includes `'poisson'`.
 
 - `ate.twoReg`: A list of results similar to `ate.randomForest` output
-  if `score.method` includes `'twoReg'`.
+  if the selected scoring methods includes `'twoReg'`.
 
 - `ate.contrastReg`: A list of results similar to `ate.randomForest`
-  output if `score.method` includes `'contrastReg'`. This method has an
-  additional element in the list of results:
+  output if the selected scoring methods includes `'contrastReg'`. This
+  method has an additional element in the list of results:
 
   - `converge.contrastReg.cv`: A vector of logical value of length
     `cv.n`. The ith element indicates whether the algorithm converged in
@@ -383,8 +360,8 @@ Returns a list containing the following components saved as a
   contain the corresponding overall fold estimates. Existing `hr.*`
   results are conditional Cox HRs.
 
-- `hr.randomForest`: A list of adjusted hazard ratio if `score.method`
-  includes `'randomForest'`:
+- `hr.randomForest`: A list of adjusted hazard ratio if the selected
+  scoring methods includes `'randomForest'`:
 
   - `hr.est.train.high.cv`: A matrix of numerical values with
     `length(prop.cutoff)` rows and `cv.n` columns. The ith column/jth
@@ -418,16 +395,16 @@ Returns a list containing the following components saved as a
     validation set.
 
 - `hr.boosting`: A list of results similar to `hr.randomForest` output
-  if `score.method` includes `'boosting'`.
+  if the selected scoring methods includes `'boosting'`.
 
 - `hr.poisson`: A list of results similar to `hr.randomForest` output if
-  `score.method` includes `'poisson'`.
+  the selected scoring methods includes `'poisson'`.
 
 - `hr.twoReg`: A list of results similar to `hr.randomForest` output if
-  `score.method` includes `'twoReg'`.
+  the selected scoring methods includes `'twoReg'`.
 
 - `hr.contrastReg`: A list of results similar to `hr.randomForest`
-  output if `score.method` includes `'contrastReg'`.
+  output if the selected scoring methods includes `'contrastReg'`.
 
 - `props`: A list of 3 elements:
 
@@ -460,7 +437,7 @@ Returns a list containing the following components saved as a
 
 - `errors/warnings`: A nested list of errors and warnings that were
   wrapped during the calculation of ATE. Errors and warnings are
-  organized by `score.method` and position in the CV flow.
+  organized by scoring method and position in the CV flow.
 
 - `higher.y`: The original `higher.y` argument.
 
@@ -470,9 +447,9 @@ Returns a list containing the following components saved as a
 
 - `response`: The type of response. Always 'survival' for this function.
 
-- `formulas`:A list of 3 elements: (1) `cate.model` argument, (2)
-  `ps.model` argument and (3) original labels of the left-hand side
-  variable in `ps.model` (treatment) if it was not 0/1.
+- `formulas`:A list of 3 elements: (1) `outcome_model` argument, (2)
+  `ps_model` argument and (3) original labels of the left-hand side
+  variable in `ps_model` (treatment) if it was not 0/1.
 
 ## Details
 
@@ -551,12 +528,11 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 catecv <- catecvsurv(data = survivalExample,
-                     score.method = "poisson",
-                     cate.model = Surv(y, d) ~ age + female + previous_cost +
+                     outcome_method = "poisson",
+                     outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                                previous_number_relapses,
-                     ps.model = trt ~ age + previous_treatment,
-                     initial.predictor.method = "fractional_logit",
-                     ipcw.model = ~ age + previous_cost + previous_treatment,
+                     ps_model = trt ~ age + previous_treatment,
+                     censoring_model = ~ age + previous_cost + previous_treatment,
                      tau0 = tau0,
                      higher.y = TRUE,
                      cv.n = 5, seed = 999, verbose = 1)
@@ -566,33 +542,33 @@ catecv <- catecvsurv(data = survivalExample,
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 20:57:17 2026 
+#>    Fri Nov 20 21:46:51 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 20:57:22 2026 
+#>    Fri Nov 20 21:46:55 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 20:57:26 2026 
+#>    Fri Nov 20 21:46:58 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 20:57:31 2026 
+#>    Fri Nov 20 21:47:01 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
-#>    Fri Nov 20 20:57:36 2026 
+#>    Fri Nov 20 21:47:05 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 23.17 secs 
+#> Total runtime : 16.61 secs 
 
 # Try:
 plot(catecv, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")

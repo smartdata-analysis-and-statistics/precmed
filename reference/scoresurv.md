@@ -11,7 +11,8 @@ scoresurv(
   x.cate,
   tau0,
   score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg"),
-  x.benefit = x.cate
+  x.benefit = x.cate,
+  prediction_rows = seq_len(nrow(x.cate))
 )
 ```
 
@@ -41,6 +42,11 @@ scoresurv(
 - x.benefit:
 
   Benefit-score covariate matrix; defaults to `x.cate`.
+
+- prediction_rows:
+
+  Rows of the stored restricted mean survival predictions to use for the
+  requested observations.
 
 ## Value
 

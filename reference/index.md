@@ -90,17 +90,19 @@
 - [`catecvCountExample`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvCountExample.md)
   : Pre-fitted count outcome validation example
 
+- [`catecvbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvbinary.md)
+  : Cross-validation of conditional risk-difference scores
+
 - [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)
   : Cross-validation of the conditional average treatment effect (CATE)
   score for count outcomes
 
 - [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md)
-  : Cross-validation of the conditional average treatment effect (CATE)
-  score for continuous outcomes
+  : Cross-validation for continuous outcomes
 
 - [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md)
-  : Cross-validation of the conditional average treatment effect (CATE)
-  score for survival outcomes
+  : Cross-validation of conditional average treatment-effect scores for
+  survival outcomes
 
 - [`predict(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)
   [`coef(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)

@@ -107,11 +107,10 @@ al. 2021</a>)</span>.</p>
 <p>The treatment model estimates propensity scores, and the censoring
 model provides probabilities used for inverse probability of censoring
 weighting (IPCW). Use <code>ps_model</code> for the treatment formula in
-<code><a href="../reference/atefit.html">atefit()</a></code> and <code><a href="../reference/catefit.html">catefit()</a></code>. For survival outcomes,
-use <code>censoring_model</code> for the censoring formula and
-<code>censoring_method</code> to choose how it is fitted. The validation
-interface <code><a href="../reference/catecv.html">catecv()</a></code> uses <code>ps.model</code>,
-<code>ipcw.model</code>, and <code>ipcw.method</code>.</p>
+<code><a href="../reference/atefit.html">atefit()</a></code>, <code><a href="../reference/catefit.html">catefit()</a></code>, and
+<code><a href="../reference/catecv.html">catecv()</a></code>. For survival outcomes, use
+<code>censoring_model</code> for the censoring formula and
+<code>censoring_method</code> to choose how it is fitted.</p>
 <p>For background on marginal and conditional treatment effects, see
 Chapter 5 <span class="citation">(<a href="#ref-nguyen2026causaleffects">Nguyen et al. 2026</a>)</span>.
 Chapter 17 introduces CATE prediction and model development <span class="citation">(<a href="#ref-hoogland2026introduction">Hoogland et
@@ -183,8 +182,7 @@ are generated, visualizing the estimated average treatment effects in a
 series of nested subgroups. On the left side the curve is shown for the
 training set, and on the right side the curve is shown for the
 validation set. Each line in the plots represents one scoring method
-(e.g., boosting, randomForest) specified under the argument
-<code>score.method</code>.</li>
+(e.g., boosting, randomForest) included in the fit.</li>
 <li>The area between curves (ABC) using <code><a href="../reference/abc.html">abc()</a></code> quantifies a
 model’s ability to capture treatment effect heterogeneity. Higher ABC
 values are preferable as they indicate that more treatment effect
@@ -225,12 +223,11 @@ previous_treatment)</li>
 <code>outcome_method</code>
 </li>
 <li>
-<code>ps.model</code>: a formula describing the treatment model to
+<code>ps_model</code>: a formula describing the treatment model to
 adjust for confounding (e.g., treatment ~ age + previous_treatment)</li>
 </ul>
-<p>For cross-validation, <code><a href="../reference/catecv.html">catecv()</a></code> currently uses
-<code>score.method</code> and <code>cate.model</code> for its
-corresponding score methods and formula.</p>
+<p>Use the same model arguments in <code><a href="../reference/catecv.html">catecv()</a></code> to validate a
+score.</p>
 </div>
 </div>
 <div class="section level2">

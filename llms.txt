@@ -164,8 +164,7 @@ ATE and develops and validates a CATE model:
       average treatment effects in a series of nested subgroups. On the
       left side the curve is shown for the training set, and on the
       right side the curve is shown for the validation set. Each line in
-      the plots represents one scoring method (e.g., boosting,
-      randomForest) specified under the argument `score.method`.
+      the plots represents one scoring method included in the fit.
     - The area between curves (ABC) using
       [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)
       quantifies a model’s ability to capture treatment effect
@@ -348,17 +347,19 @@ Study.” *Journal of the American Statistical Association* 108 (502):
 - [`catecvCountExample`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvCountExample.md)
   : Pre-fitted count outcome validation example
 
+- [`catecvbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvbinary.md)
+  : Cross-validation of conditional risk-difference scores
+
 - [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)
   : Cross-validation of the conditional average treatment effect (CATE)
   score for count outcomes
 
 - [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md)
-  : Cross-validation of the conditional average treatment effect (CATE)
-  score for continuous outcomes
+  : Cross-validation for continuous outcomes
 
 - [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md)
-  : Cross-validation of the conditional average treatment effect (CATE)
-  score for survival outcomes
+  : Cross-validation of conditional average treatment-effect scores for
+  survival outcomes
 
 - [`predict(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)
   [`coef(`*`<catefit>`*`)`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit-extract.md)

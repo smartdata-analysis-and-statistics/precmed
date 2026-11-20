@@ -171,9 +171,9 @@ catefitcount(
 - verbose:
 
   An integer value indicating what kind of intermediate progress
-  messages should be printed. `0` means no outputs. `1` means only
-  progress and run time. `2` means progress, run time, and all errors
-  and warnings. Default is `0`.
+  messages should be printed. `0` means no outputs. `1` means progress
+  messages. `2` means progress messages and all errors and warnings.
+  Default is `0`.
 
 - contrast.control:
 
@@ -311,15 +311,26 @@ Statistical Association, 1-18.* DOI: 10.1080/01621459.2020.1772080.
 ## Examples
 
 ``` r
-fit <- catefitcount(data = countExample,
-                    outcome_model = y ~ age + female + previous_treatment +
-                                 previous_cost + previous_number_relapses +
-                                 offset(log(years)),
-                    outcome_method = "poisson",
-                    benefit_method = "t_learner",
-                    ps_model = trt ~ age + previous_treatment,
-                    higher.y = FALSE,
-                    seed = 999, verbose = 1)
+catefitcount(data = countExample,
+             outcome_model = y ~ age + female + previous_treatment +
+               previous_cost + previous_number_relapses + offset(log(years)),
+             outcome_method = "poisson",
+             benefit_method = "t_learner",
+             ps_model = trt ~ age + previous_treatment,
+             higher.y = FALSE,
+             seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.18 secs 
+#> Estimated ATE in the nested subgroups:
+#> 
+#>            prop0.5   prop0.6   prop0.7   prop0.8   prop0.9    prop1
+#> poisson 0.5837325 0.6672973 0.7454395 0.8750012 0.9438596 1.064058
+#> 
+#>                              poisson
+#> (Intercept)              -0.58185218
+#> age                      -0.01117701
+#> female                    0.58829733
+#> previous_treatmentdrugB   0.73724361
+#> previous_treatmentdrugC   0.15545985
+#> previous_cost            -0.13035642
+#> previous_number_relapses -0.05339112
 ```

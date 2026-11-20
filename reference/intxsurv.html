@@ -89,7 +89,8 @@
 <span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span>,</span>
 <span>  rmst.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  initial.methods <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  x.predict <span class="op">=</span> <span class="va">x.cate</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -268,6 +269,11 @@ scores; <code>NULL</code> uses <code>initial.predictor.method</code> for both.</
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+
+
+<dt id="arg-x-predict">x.predict<a class="anchor" aria-label="anchor" href="#arg-x-predict"></a></dt>
+<dd><p>Covariate matrix for arm-specific restricted mean survival
+predictions. Defaults to the training covariates.</p></dd>
 
 </dl></div>
     <div class="section level2">

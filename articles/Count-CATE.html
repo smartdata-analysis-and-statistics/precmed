@@ -141,9 +141,9 @@ treatment model can reflect a common assignment probability.</p>
 <p>If both method arguments are omitted, <code><a href="../reference/catefit.html">catefit()</a></code> defaults
 to a T-learner with <code>outcome_method = "poisson"</code> for this
 outcome.</p>
-<p><code>benefit_method</code> selects the score-construction approach;
-<code>outcome_method</code> selects the outcome-model method for each
-score:</p>
+<p><code>outcome_method</code> selects how the outcome model is fitted,
+and <code>benefit_method</code> selects how the score is
+constructed.</p>
 <ul>
 <li>A <strong>T-learner</strong> fits an outcome model in each treatment
 arm and compares predicted relapse rates. The available outcome methods
@@ -162,23 +162,6 @@ relies on causal identification, positivity and appropriate model
 assumptions; propensity-score truncation can affect robustness. See
 Chapter 17 for more on treatment effect heterogeneity and CATE
 prediction <span class="citation">(Hoogland et al. 2026)</span>.</p>
-<p>Two-regression and contrast regression may use different outcome
-methods in the same call. They share the treatment-model predictions;
-matching outcome methods also share cross-fitted outcome predictions.
-T-learner models are fitted on the full fitting sample and are not
-reused for the cross-fitted predictions. The <code><a href="../reference/catecv.html">catecv()</a></code>
-interface continues to use a single initial outcome method.</p>
-<p>For example, this fits two-regression with Poisson initial models and
-contrast regression with GAM initial models, smoothing age in the
-latter:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_different</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
-<span>  response <span class="op">=</span> <span class="st">"count"</span>, data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>, ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
-<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two_regression"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
-<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"gam"</span><span class="op">)</span>, xvar.smooth <span class="op">=</span> <span class="st">"age"</span>,</span>
-<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
-<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fit-five-scores">Fit five scores<a class="anchor" aria-label="anchor" href="#fit-five-scores"></a>
@@ -192,7 +175,7 @@ as greater benefit. We set <code>n.cores = 1</code> for boosting and a
 seed for reproducibility. The scores and subgroup effects are fitted on
 the full dataset; they do not on their own establish performance in new
 patients.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
@@ -215,7 +198,7 @@ covariates in <code>outcome_formula</code>. If omitted, the benefit
 score uses the terms in <code>outcome_formula</code>. T-learner scores
 in a mixed fit continue to use the outcome formula and do not use
 <code>benefit_model</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cate_reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>, data <span class="op">=</span> <span class="va">countExample</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>, outcome_method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
@@ -223,10 +206,8 @@ in a mixed fit continue to use the outcome formula and do not use
 <span>  benefit_method <span class="op">=</span> <span class="st">"two_regression"</span>, ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/catecv.html">catecv()</a></code> does not currently accept a separate benefit
-formula, so its validation below applies to the default score
-specification used in this example, not to a fit with a different
-<code>benefit_model</code>.</p>
+<p>Pass the same <code>benefit_model</code> to <code><a href="../reference/catecv.html">catecv()</a></code> to
+validate that score specification.</p>
 </div>
 </div>
 <div class="section level2">
@@ -247,14 +228,14 @@ method. Here, lower scores indicate greater estimated benefit from drug
 the doubly robust procedures. The returned scores correspond to the
 original analysis sample; prediction for new data is not currently
 supported. Below are the first six contrast-regression scores.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"contrast_regression"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  0.1223985  0.2463684  0.5284533 -0.8525778 -0.1547064 -0.3700220</span></span></code></pre></div>
 <p>Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to compare the fitted score distributions
 across methods. Scores are on the log rate-ratio scale, with zero
 indicating a rate ratio of 1.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cate</span>, type <span class="op">=</span> <span class="st">"density"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-CATE_files/figure-html/plot_score-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>Differences in the score distributions can reflect model flexibility,
@@ -267,7 +248,7 @@ discusses score distributions alongside validation curves <span class="citation"
 contrast-regression coefficients. Boosting scores do not have linear
 coefficients. The coefficients describe the fitted log rate-ratio score
 and are not themselves a validation of that score.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"contrast_regression"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              (Intercept)                      age                   female </span></span>
 <span><span class="co">#&gt;              -0.60435660              -0.03586527               0.75637775 </span></span>
@@ -288,7 +269,7 @@ and are not themselves a validation of that score.</p>
 ratios for nested subgroups ranked by the contrast-regression score.
 These estimates use the same data as the score fit; the validation
 section below assesses the score in held-out data.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subgroup_estimates.html">subgroup_estimates</a></span><span class="op">(</span><span class="va">fit_cate</span>, method <span class="op">=</span> <span class="st">"contrast_regression"</span>, measure <span class="op">=</span> <span class="st">"rate_ratio"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   prop0.5   prop0.6   prop0.7   prop0.8   prop0.9     prop1 </span></span>
 <span><span class="co">#&gt; 0.5802533 0.6538656 0.7709702 0.8185615 0.9570745 1.0640579</span></span></code></pre></div>
@@ -362,31 +343,12 @@ estimated CATE scores according to prop.multi.</p></li>
 <p>Now we can use the <code><a href="../reference/catecv.html">catecv()</a></code> function to run internal
 validation to compare the different scoring methods. The mandatory
 arguments are similar to <code><a href="../reference/atefit.html">atefit()</a></code> and
-<code><a href="../reference/catefit.html">catefit()</a></code>: The mandatory arguments are:
-<code>response</code>, <code>data</code>, <code>score.method</code>,
-<code>cate.model</code>, and <code>ps.model</code>. For this toy example
-we selected <code>poisson</code>, <code>contrastReg</code> and
-<code>negBin</code> to limit run time.</p>
-<p>We also specified the following non-mandatory arguments to fit with
-the data and problem at hand: <code>initial.predictor.method</code>,
-<code>higher.y</code>, <code>cv.n</code> and <code>seed</code>.</p>
-<ul>
-<li>
-<code>initial.predictor.method</code> specifies how predictions of
-the outcome are estimated in two regressions and contrast regression.
-Flexible models can be used such as GBM (“boosting”) or generalized
-additive models (“gam”). Both methods are computationally intensive so
-we choose “poisson” to obtain predictions from a Poisson regression,
-which reduces the computational time at the expense of stricter
-parametric assumptions and less flexibility.</li>
-</ul>
-<p>For <code>twoReg</code> and <code>contrastReg</code>, the initial
-outcome models use the covariates in <code>cate.model</code> by default.
-To use additional outcome predictors while keeping a simpler CATE score,
-specify, for example,
-<code>init.model = y ~ age + female + previous_treatment + previous_cost</code>.
-The outcome must match <code>cate.model</code>; the exposure offset is
-taken from <code>cate.model</code>.</p>
+<code><a href="../reference/catefit.html">catefit()</a></code>: Supply <code>response</code>, <code>data</code>,
+<code>outcome_model</code>, and <code>ps_model</code>. The example pairs
+T-learners using Poisson and negative binomial outcome models with
+contrast regression using Poisson initial outcome models. Use
+<code>benefit_model</code> to validate a simpler score based on a subset
+of the outcome predictors.</p>
 <ul>
 <li><p><code>higher.y</code> was set to FALSE because lower number of
 relapses are more desirable in our example. Hence, we are telling the
@@ -412,17 +374,17 @@ description</a> section for details. If you run into errors or warnings
 with your data, it might be helpful to go over the descriptions to see
 if you need to alter the default values. In this toy example, we keep
 the default values of the remaining arguments.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span>, <span class="st">"negBin"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>, </span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"poisson"</span>, <span class="st">"negative_binomial"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  cv.n <span class="op">=</span> <span class="fl">5</span>, </span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span></code></pre></div>
@@ -433,14 +395,14 @@ the default values of the remaining arguments.</p>
 <p>The output of <code><a href="../reference/catecv.html">catecv()</a></code> is an object of class “precmed”
 and here we named it <code>fit_cv</code>. It carries the relevant
 information to use in the next step of the workflow which selects the
-method (among those specified in the argument <code>score.method</code>)
-capturing the highest level of treatment effect heterogeneity. The
-output, which is described below, will be used in the functions
-<code><a href="../reference/abc.html">abc()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>.</p>
-<p>For each method specified in the argument <code>score.method</code>,
-the following 3 groups of outputs are generated: <code>high</code>,
-<code>low</code> and <code>group</code>. We use the results from
-<code>contrastReg</code> as an example.</p>
+method (among those fitted in the call) capturing the highest level of
+treatment effect heterogeneity. The output, which is described below,
+will be used in the functions <code><a href="../reference/abc.html">abc()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>
+and <code><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot()</a></code>.</p>
+<p>For each method fitted in the call, the following 3 groups of outputs
+are generated: <code>high</code>, <code>low</code> and
+<code>group</code>. We use the results from <code>contrastReg</code> as
+an example.</p>
 <div class="section level4">
 <h4 id="nested-subgroups-of-high-responders">Nested subgroups of high responders<a class="anchor" aria-label="anchor" href="#nested-subgroups-of-high-responders"></a>
 </h4>
@@ -454,7 +416,7 @@ correspond to high responders to drug1. When <code>higher.y</code> =
 FALSE, lower CATE scores correspond to high responders to drug1. Note
 that this is different for survival outcomes. The direction of CATE
 scores depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.high.cv</span></span>
 <span><span class="co">#&gt;               cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.5 0.6125203 0.6352505 0.5639550 0.6292319 0.5745308</span></span>
@@ -500,7 +462,7 @@ correspond to low responders to drug1. When <code>higher.y</code> =
 FALSE, higher CATE scores correspond to low responders to drug1. Again,
 this is different for survival outcomes. The direction of CATE scores
 depends on both <code>higher.y</code> and outcome type.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.low.cv</span></span>
 <span><span class="co">#&gt;              cv1      cv2      cv3      cv4      cv5</span></span>
 <span><span class="co">#&gt; prop0.5 1.620139 1.602498 1.697586 1.567210 1.711755</span></span>
@@ -529,7 +491,7 @@ subgroups of patients in the training
 (<code>$ate.est.train.group.cv</code>) and validation
 (<code>$ate.est.valid.group.cv</code>) sets across all CV
 iterations.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.train.group.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.33 1.8256926 1.6013361 1.8965411 1.6739862 1.6308308</span></span>
@@ -567,7 +529,7 @@ warnings, unavailable ABC values and contrast-regression convergence
 across methods, splits and iterations. An empty table means no such
 messages were recorded; it does not establish that the models fit
 well.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/diagnostics.html">diagnostics</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] method    split     iteration group     subgroup  type      measure  </span></span>
 <span><span class="co">#&gt; [8] message  </span></span>
@@ -577,7 +539,7 @@ well.</p>
 <code>events1</code>) in each treatment arm for each reported subgroup.
 For example, inspect the first six validation-set support records for
 contrast regression with:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">$</span><span class="va">subgroup.support</span>,</span>
 <span>            <span class="va">split</span> <span class="op">==</span> <span class="st">"validation"</span> <span class="op">&amp;</span> <span class="va">method</span> <span class="op">==</span> <span class="st">"contrastReg"</span>,</span>
 <span>            select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">iteration</span>, <span class="va">group</span>, <span class="va">subgroup</span>, <span class="va">n0</span>, <span class="va">n1</span>, <span class="va">events0</span>, <span class="va">events1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -610,17 +572,17 @@ greater separation in the expected direction for this example. Chapter
 statistics</a> section for a detailed illustration of the relationship
 between <code>higher.y</code>, <code>abc</code>, and the validation
 curves.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                    cv1       cv2        cv3        cv4       cv5</span></span>
 <span><span class="co">#&gt; poisson     0.13758995 0.2236276 0.06938081 0.09647510 0.1304204</span></span>
 <span><span class="co">#&gt; contrastReg 0.06273854 0.1762192 0.09212742 0.15117033 0.1386554</span></span>
 <span><span class="co">#&gt; negBin      0.14517127 0.2203584 0.08899030 0.09382214 0.1395976</span></span></code></pre></div>
 <p>The output is a matrix with columns corresponding to the CV
-iterations and rows corresponding to the scoring methods specified in
-<code>score.method</code>. Individual iterations can differ; summarize
-across iterations to compare methods:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+iterations and rows corresponding to the scoring methods included in the
+fit. Individual iterations can differ; summarize across iterations to
+compare methods:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/abc.html">abc</a></span><span class="op">(</span><span class="va">fit_cv</span>, combine <span class="op">=</span> <span class="st">"mean"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     poisson contrastReg      negBin </span></span>
 <span><span class="co">#&gt;   0.1314988   0.1241822   0.1375879</span></span></code></pre></div>
@@ -656,7 +618,7 @@ heterogeneity is present. The method that has the steepest slope in the
 validation results would be selected because it captures the most
 treatment effect heterogeneity while generalizing well to unseen
 data.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-CATE_files/figure-html/example_plot_lineplot1-1.png" class="r-plt" alt="" width="700"></p>
 <p>For this toy example, the methods are performing well in the training
@@ -672,14 +634,14 @@ description</a> section.</p>
 <p>The plot’s legend includes the ABC statistics in the validation set.
 The user can choose to mute the ABC annotations by specifying
 <code>show.abc</code> = FALSE.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-CATE_files/figure-html/example_plot_lineplot1.1-1.png" class="r-plt" alt="" width="700"></p>
 <p>To compare training and validation curves directly for each scoring
 method, use <code>layout = "method"</code>. Each panel shows one method,
 with a solid training curve and a dashed validation curve. The dotted
 lines mark the corresponding overall treatment effects.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span>, layout <span class="op">=</span> <span class="st">"method"</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-CATE_files/figure-html/example_plot_by_method-1.png" class="r-plt" alt="" width="960"></p>
 <p>To plot validation curves for a single CV iteration instead of the
@@ -711,7 +673,7 @@ middle 33% (33-66%), and highest 33% (66-100%) estimated CATE scores.
 The box plot shows the distribution of the ATEs over all
 <code>cv.n</code> CV iterations, instead of a summary statistics like
 mean or median in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Count-CATE_files/figure-html/example_plot_boxplot-1.png" class="r-plt" alt="" width="700"></p>
 <p>The box plots compare estimated rate ratios across mutually exclusive

@@ -38,7 +38,8 @@ intxsurv(
   x.benefit = x.cate,
   rmst.control = list(),
   initial.methods = NULL,
-  ...
+  ...,
+  x.predict = x.cate
 )
 ```
 
@@ -232,6 +233,11 @@ intxsurv(
 
   Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+
+- x.predict:
+
+  Covariate matrix for arm-specific restricted mean survival
+  predictions. Defaults to the training covariates.
 
 ## Value
 

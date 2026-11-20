@@ -159,7 +159,7 @@ outputs from
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 and generates two plots of validation curves side-by-side, one for the
 training set and one for validation set. Separate validation curves are
-produced for each scoring method specified via `score.method` in
+produced for each fitted scoring method in
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 or
 [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md).

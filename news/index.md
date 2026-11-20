@@ -4,14 +4,25 @@
 
 ### Major changes
 
-- Survival
+- Survival T-learners in
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-  T-learners support `outcome_method = "coxph"`, `"weibull"`, and
-  `"log_normal"` to compare arm-specific restricted mean time lost at
-  the selected horizon. These methods are available for score fitting,
-  not yet for
+  and
   [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-  validation or the doubly robust score methods.
+  support `outcome_method = "coxph"`, `"weibull"`, and `"log_normal"` to
+  compare arm-specific restricted mean time lost at the selected
+  horizon.
+
+- [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  and its outcome-specific functions use the same model and method
+  arguments as
+  [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+  Defaults are logistic, Poisson, and Cox T-learners for binary, count,
+  and survival outcomes. Two-regression and contrast regression can use
+  a separate `benefit_model` and different outcome methods within one
+  call. Deprecated argument names and positional calls remain supported
+  with warnings.
+  [`catecvbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvbinary.md)
+  is now exported.
 
 - Count
   [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
@@ -92,6 +103,9 @@
 
 ### Minor changes
 
+- [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md)
+  no longer measures or prints runtime when verbose output is enabled.
+
 - `initial.predictor.method` is no longer shown in
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
   or its outcome-specific signatures. Use `outcome_method` to select
@@ -99,9 +113,7 @@
   remain supported through `...` with a deprecation warning. Supplying
   it together with `outcome_method` now produces an error, including
   when the values match. Legacy calls can pair the dotted argument with
-  `benefit_method`; the
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-  interface is unchanged.
+  `benefit_method`.
 
 - [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
   [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md),
@@ -122,8 +134,6 @@
   original meaning and emits a deprecation warning. It cannot be
   combined with `benefit_model`. Coefficient tables for mixed models may
   contain missing entries for terms a score does not use.
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-  does not yet support a separate `benefit_model`.
 
 - Use `fractional_logit` for survival initial outcome models in
   two-regression and contrast regression. The former value `logistic`
@@ -447,6 +457,12 @@
   attribution.
 
 ### Bug fixes
+
+- Count and survival preprocessing warnings no longer print internal
+  calls that expose deprecated argument names in vignette output.
+
+- Validation accepts `prop.cutoff = 1` with `abc = FALSE` when only the
+  overall nested subgroup estimate is requested.
 
 - Corrected and reordered the CATE fitting help arguments to match the
   function signatures.

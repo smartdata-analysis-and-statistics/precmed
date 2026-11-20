@@ -62,7 +62,8 @@
 <span>  <span class="va">x.cate</span>,</span>
 <span>  <span class="va">tau0</span>,</span>
 <span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"boosting"</span>, <span class="st">"poisson"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span></span>
+<span>  x.benefit <span class="op">=</span> <span class="va">x.cate</span>,</span>
+<span>  prediction_rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x.cate</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,6 +91,11 @@ Allowed values are: <code>'randomForest'</code>, <code>'boosting'</code>, <code>
 
 <dt id="arg-x-benefit">x.benefit<a class="anchor" aria-label="anchor" href="#arg-x-benefit"></a></dt>
 <dd><p>Benefit-score covariate matrix; defaults to <code>x.cate</code>.</p></dd>
+
+
+<dt id="arg-prediction-rows">prediction_rows<a class="anchor" aria-label="anchor" href="#arg-prediction-rows"></a></dt>
+<dd><p>Rows of the stored restricted mean survival predictions
+to use for the requested observations.</p></dd>
 
 </dl></div>
     <div class="section level2">

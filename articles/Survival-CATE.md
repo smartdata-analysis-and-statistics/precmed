@@ -95,8 +95,8 @@ If both method arguments are omitted,
 defaults to a T-learner with `outcome_method = "coxph"` for this
 outcome.
 
-`benefit_method` selects the score-construction approach, while
-`outcome_method` selects the outcome-model method for each score:
+`outcome_method` selects how the outcome model is fitted, and
+`benefit_method` selects how the score is constructed.
 
 - A **T-learner** fits an outcome model in each treatment arm and
   compares predicted restricted mean time lost. Available outcome
@@ -106,9 +106,9 @@ outcome.
   `"log_normal"` in
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md);
   they compare arm-specific predicted RMTL at `tau0` and rely on the
-  corresponding survival-model assumptions. They are not yet available
-  for T-learner validation in
-  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
+  corresponding survival-model assumptions.
+  [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+  also supports these methods.
 - **Two-regression** combines initial outcome predictions with
   propensity scores and fits separate augmented outcome regressions
   before comparing arms.
@@ -124,29 +124,6 @@ Two-regression and contrast regression are doubly robust methods
 (Yadlowsky et al. 2021). Their interpretation requires causal
 identification, positivity and suitable outcome, treatment and censoring
 model assumptions; truncation can affect robustness.
-
-Two-regression and contrast regression may use different outcome methods
-in the same call. They share the treatment-model predictions; matching
-outcome methods also share cross-fitted outcome predictions. T-learner
-models are fitted on the full fitting sample and are not reused for the
-cross-fitted predictions. The
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-interface continues to use a single initial outcome method.
-
-For example, this fits two-regression using fractional logit and
-contrast regression using random forests for their respective initial
-outcome models:
-
-``` r
-
-fit_different <- catefit(
-  response = "survival", data = survival_data,
-  outcome_model = outcome_formula, ps_model = ps_formula,
-  benefit_method = c("two_regression", "contrast_regression"),
-  outcome_method = c("fractional_logit", "random_forest"),
-  tau0 = tau0, higher.y = TRUE, seed = 999
-)
-```
 
 ### Fit two scores
 
@@ -195,10 +172,9 @@ fit_cate_reduced <- catefit(
 )
 ```
 
+Pass the same `benefit_model` to
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-does not currently accept a separate benefit formula, so its validation
-below applies to the default score specification used in this example,
-not to a fit with a different `benefit_model`.
+to validate that score specification.
 
 ## Inspect CATE scores and subgroup estimates
 
@@ -371,36 +347,21 @@ also returns `chr.<method>` matrices for nested and disjoint subgroups
 in the training and validation folds. `overall.chr.train` and
 `overall.chr.valid` report the corresponding overall fold estimates.
 
-Now we can use the
+Use
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-function to run internal validation to compare the different scoring
-methods. The mandatory arguments are similar to
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
-and
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md):
-The mandatory arguments are: `response`, `data`, `score.method`,
-`cate.model`, and `ps.model`. See above for more details on these
-arguments. For this toy example we again selected `randomForest` and
-`contrastReg` limit run time.
-
-We also specified the following non-mandatory arguments to fit with the
-data and problem at hand: `initial.predictor.method`, `ipcw.model`,
-`verbose`, `followup.time`, `tau0`, `higher.y`, `cv.n`, `surv.min` and
-`seed`.
-
-- `initial.predictor.method` specifies how predictions of the outcome
-  are estimated in two regressions and contrast regression. Flexible
-  models can be used such as GBM (“boosting”), random forests
-  (“randomForest”) or fractional logit (“fractional_logit”). We chose
-  “fractional_logit” because it is relatively faster than boosting
-  methods and random forest.
+with `response`, `data`, `outcome_model`, and `ps_model`. Pair each
+`outcome_method` with its `benefit_method` in the same order. Here,
+`"t_learner"` uses `"random_forest"`, and `"contrast_regression"` uses
+`"fractional_logit"`. The example uses the default censoring model and
+fitting method. Set `censoring_model` to change its formula or
+`censoring_method` to change how it is fitted.
 
 - `followup.time` specifies the maximum follow-up time in the data. We
   set it default as `NULL`, which indicates unknown potential censoring
   time.
 
-- `tau0` is the horizon for RMTL, chosen as described above; assess
-  follow-up support near this horizon in both treatment groups.
+- `tau0` is the horizon for RMTL. Assess follow-up support near this
+  horizon in both treatment groups.
 
 - `higher.y` was set to `TRUE` because relapse is a negative event and
   longer time to first relapse is more desirable in our example. Hence,
@@ -412,11 +373,9 @@ data and problem at hand: `initial.predictor.method`, `ipcw.model`,
   affect how the subgroups are defined by the CATE scores and the
   performance metrics.
 
-- `surv.min` truncates the censoring probability estimated from the
-  censoring model with a lower limit to prevent extremely small
-  censoring probabilities. It is recommended to choose a small positive
-  value close to 0. We chose `0.025` in the example, which corresponds
-  to the default value.
+- `surv.min` sets a lower bound on the estimated probability of
+  remaining uncensored used for inverse probability of censoring
+  weighting. The example uses the default of `0.025`.
 
 - We performed 5 CV iterations by specifying `cv.n` = 5. Typically, more
   CV iterations are desirable although associated with longer
@@ -455,18 +414,18 @@ group may be smaller and should be checked.
 fit_cv <- catecv(
   response = "survival",
   data = survival_data,
-  score.method = c("randomForest", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
+  outcome_method = c("random_forest", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
   followup.time = NULL,
   tau0 = tau0,
   higher.y = TRUE,
-  surv.min = 0.025,
   prop.cutoff = c(0.6, 0.7, 0.8, 1),
   prop.multi = c(0, 0.4, 0.7, 1),
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
@@ -479,17 +438,16 @@ The output of
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 is an object of class “precmed” and here we named it `fit_cv`. It
 carries the relevant information to use in the next step of the workflow
-which selects the method (among those specified in the argument
-`score.method`) capturing the highest level of treatment effect
-heterogeneity. The output, which is described below, will be used in the
-functions
+which selects the method (among those fitted in the call) capturing the
+highest level of treatment effect heterogeneity. The output, which is
+described below, will be used in the functions
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md),
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
 [`boxplot()`](https://rdrr.io/r/graphics/boxplot.html).
 
-For each method specified in the argument `score.method`, the following
-3 groups of outputs are generated: `high`, `low` and `group`. We use the
-results from `randomForest` as an example.
+For each method fitted in the call, the following 3 groups of outputs
+are generated: `high`, `low` and `group`. We use the results from
+`randomForest` as an example.
 
 #### Nested subgroups of high responders
 
@@ -655,9 +613,9 @@ abc(fit_cv)
 ```
 
 The output is a matrix with columns corresponding to the CV iterations
-and rows corresponding to the scoring methods specified in
-`score.method`. Individual iterations can differ; summarize across
-iterations to compare methods:
+and rows corresponding to the scoring methods included in the fit.
+Individual iterations can differ; summarize across iterations to compare
+methods:
 
 ``` r
 

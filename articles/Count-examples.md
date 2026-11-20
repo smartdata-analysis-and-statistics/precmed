@@ -341,10 +341,14 @@ fit_ate_negbin <- atefit(
   verbose = 0
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning: 2 bootstrap replicate(s) failed or had undefined estimates; inference
+#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+#> control$trace > : estimate truncated at zero
+#> Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =
+#> control$trace > : iteration limit reached
+#> Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference
 #> for affected measures is unavailable. Reasons by measure: rate0: missing value
-#> where TRUE/FALSE needed (2); rate1: missing value where TRUE/FALSE needed (2);
-#> log.rate.ratio: missing value where TRUE/FALSE needed (2). See
+#> where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);
+#> log.rate.ratio: missing value where TRUE/FALSE needed (1). See
 #> bootstrap.diagnostics for replicate details.
 ```
 

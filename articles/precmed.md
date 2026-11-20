@@ -24,14 +24,12 @@ non-randomized study ([Yadlowsky et al.
 The treatment model estimates propensity scores, and the censoring model
 provides probabilities used for inverse probability of censoring
 weighting (IPCW). Use `ps_model` for the treatment formula in
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
 and
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
 For survival outcomes, use `censoring_model` for the censoring formula
-and `censoring_method` to choose how it is fitted. The validation
-interface
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-uses `ps.model`, `ipcw.model`, and `ipcw.method`.
+and `censoring_method` to choose how it is fitted.
 
 For background on marginal and conditional treatment effects, see
 Chapter 5 ([Nguyen et al. 2026](#ref-nguyen2026causaleffects)). Chapter
@@ -112,7 +110,7 @@ ATE and develops and validates a CATE model:
       left side the curve is shown for the training set, and on the
       right side the curve is shown for the validation set. Each line in
       the plots represents one scoring method (e.g., boosting,
-      randomForest) specified under the argument `score.method`.
+      randomForest) included in the fit.
     - The area between curves (ABC) using
       [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md)
       quantifies a model’s ability to capture treatment effect
@@ -151,13 +149,12 @@ the user has to (at least) input:
 - `outcome_method`: outcome-model fitting methods
 - `benefit_method`: score-construction methods paired with
   `outcome_method`
-- `ps.model`: a formula describing the treatment model to adjust for
+- `ps_model`: a formula describing the treatment model to adjust for
   confounding (e.g., treatment ~ age + previous_treatment)
 
-For cross-validation,
+Use the same model arguments in
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-currently uses `score.method` and `cate.model` for its corresponding
-score methods and formula.
+to validate a score.
 
 ## Overview of the vignettes
 

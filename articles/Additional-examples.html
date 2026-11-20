@@ -146,36 +146,41 @@ other 2 non-linear and more flexible options. Below, we use
 to <code><a href="../reference/catefitcount.html">catefitcount()</a></code> as well.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># An example of using GBM as the initial predictor method</span></span>
-<span><span class="fu"><a href="../reference/catecvcount.html">catecvcount</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>       score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span>, <span class="st">"negBin"</span><span class="op">)</span>,</span>
-<span>       n.cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>       cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>       ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>, </span>
-<span>       higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>       initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>,       <span class="co"># NEW</span></span>
-<span>       cv.n <span class="op">=</span> <span class="fl">5</span>, </span>
-<span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/catecvcount.html">catecvcount</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"boosting"</span>, <span class="st">"boosting"</span>, <span class="st">"negative_binomial"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"contrast_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  n.cores <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An example of using GAM as the initial predictor method</span></span>
-<span><span class="fu"><a href="../reference/catecvcount.html">catecvcount</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>       score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span>, <span class="st">"negBin"</span><span class="op">)</span>,</span>
-<span>       n.cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>       cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>       ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>, </span>
-<span>       higher.y <span class="op">=</span> <span class="cn">FALSE</span>, </span>
-<span>       initial.predictor.method <span class="op">=</span> <span class="st">"gam"</span>,        <span class="co"># NEW</span></span>
-<span>       xvar.smooth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"previous_cost"</span><span class="op">)</span>, <span class="co"># NEW</span></span>
-<span>       cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/catecvcount.html">catecvcount</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"gam"</span>, <span class="st">"gam"</span>, <span class="st">"negative_binomial"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"contrast_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  xvar.smooth <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"previous_cost"</span><span class="op">)</span>, <span class="co"># NEW</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  n.cores <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Note that for the GAM method, there is an additional argument called
 <code>xvar.smooth</code>. If left as default (which is NULL), GAM will
-include all independent variables in <code>cate.model</code> as smooth
-terms with function <code>s()</code> in the linear predictor. You can
-choose to specify only a subset of the dependent variables as the smooth
-terms. In the example above, the specifications <code>cate.model</code>
-and <code>xvar.smooth</code> lead to the following GAM formula:
+include all independent variables in <code>outcome_model</code> as
+smooth terms with function <code>s()</code> in the linear predictor. You
+can choose to specify only a subset of the dependent variables as the
+smooth terms. In the example above, the specifications
+<code>outcome_model</code> and <code>xvar.smooth</code> lead to the
+following GAM formula:
 <code>y ~ female + previous_treatment + previous_number_relapses + s(age) + s(previous_cost)</code>,
 where only age and previous medical costs are wrapped in the smooth
 function and the remaining 3 independent variables are not.</p>
@@ -237,14 +242,14 @@ reflected in the results.</p></li>
 <span><span class="va">fit_cv_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span>, <span class="st">"negBin"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"poisson"</span>, <span class="st">"negative_binomial"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">11</span><span class="op">)</span>, <span class="co"># NEW</span></span>
-<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>,    <span class="co"># NEW</span></span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">2</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">3</span><span class="op">/</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
@@ -310,11 +315,11 @@ estimates.</p>
 <span><span class="va">fit_cv_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"count"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">countExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span>, <span class="st">"negBin"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="va">y</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_treatment</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"poisson"</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"poisson"</span>, <span class="st">"negative_binomial"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.01</span>, <span class="fl">0.30</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -322,8 +327,7 @@ estimates.</p>
 <span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt; Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model =</span></span>
-<span><span class="co">#&gt; ps.model, : The first element of prop.cutoff cannot be 0 and has been removed.</span></span>
+<span><span class="co">#&gt; Warning: The first element of prop.cutoff cannot be 0 and has been removed.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%</span></span>
 <span><span class="co">#&gt; cv = 1 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -336,14 +340,14 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 1: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Nov 20 20:59:01 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:48:04 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Nov 20 20:59:04 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:48:06 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -354,7 +358,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.contrastReg, validation iteration 3: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Nov 20 20:59:09 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:48:09 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -365,7 +369,7 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 4: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Nov 20 20:59:14 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:48:12 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
@@ -378,9 +382,9 @@ estimates.</p>
 <span><span class="co">#&gt; Warning: score.negBin, validation iteration 5: ABC unavailable because a</span></span>
 <span><span class="co">#&gt; required estimate is not finite; returning NA.</span></span>
 <span><span class="co">#&gt;   convergence TRUE </span></span>
-<span><span class="co">#&gt;    Fri Nov 20 20:59:19 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:48:15 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 24.61 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 14.94 secs</span></span>
 <span><span class="va">fit_cv_3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1        cv2       cv3          cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.01        NA 0.09705963        NA 2.447035e+06        NA</span></span>
@@ -449,7 +453,8 @@ package)
 outcome as Gaussian distributed, slow</li>
 </ul>
 </li>
-<li>“randomForest” (random survival forest model from the
+<li>
+<code>"random_forest"</code> (random survival forest model from the
 <code>randomForestSRC</code> package)
 <ul>
 <li>ensemble method, tree-based, non-parametric, can be slow</li>
@@ -465,52 +470,57 @@ other 2 non-linear and more flexible options. Below, we use
 <span><span class="va">tau0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">survivalExample</span>,</span>
 <span>             <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug1"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">y</span><span class="op">[</span><span class="va">trt</span> <span class="op">==</span> <span class="st">"drug0"</span><span class="op">]</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
-<span>       data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>       score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"randomForest"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>       cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>       ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>       ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>       followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>       tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>       surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
-<span>       higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>       prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
-<span>       prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>       cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>       initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>, <span class="co"># NEW</span></span>
-<span>       tree.depth <span class="op">=</span> <span class="fl">3</span>,                        <span class="co"># NEW</span></span>
-<span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
+<span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"random_forest"</span>, <span class="st">"boosting"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  tree.depth <span class="op">=</span> <span class="fl">3</span>, <span class="co"># NEW</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An example of using random forest as the initial predictor method</span></span>
-<span><span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span>response <span class="op">=</span> <span class="st">"survival"</span>,</span>
-<span>       data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>       score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"randomForest"</span>, <span class="st">"twoReg"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>       cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>       ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>       ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>       followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>       tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>       surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
-<span>       higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>       prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
-<span>       prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>       cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>       initial.predictor.method <span class="op">=</span> <span class="st">"randomForest"</span>, <span class="co"># NEW</span></span>
-<span>       n.trees.rf <span class="op">=</span> <span class="fl">500</span>,                          <span class="co"># NEW</span></span>
-<span>       seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>       verbose <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
+<span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"random_forest"</span>, <span class="st">"random_forest"</span>, <span class="st">"random_forest"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
+<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
+<span>  n.trees.rf <span class="op">=</span> <span class="fl">500</span>, <span class="co"># NEW</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>For boosting, <code>tree.depth</code> and
 <code>n.trees.boosting</code> control tree depth and the maximum number
 of trees. For random forests, <code>n.trees.rf</code> sets the number of
 trees, and <code>rf.control</code> can set forest options, for example
 <code>rf.control = list(mtry = 3, nodesize = 15)</code>. These options
 also apply when random forest is the initial predictor.</p>
-<p>Generally speaking, the “fractional_logit” initial predictor method
-is the fastest and “boosting” is the slowest among the 3 methods, while
-“randomForest” is often somewhere in between; computation time depends
-on the data and forest settings.</p>
+<p>Fractional logit (<code>"fractional_logit"</code>) is generally the
+fastest of the three outcome methods. Boosting (<code>"boosting"</code>)
+is usually slower, and random forests (<code>"random_forest"</code>)
+often fall in between. Run time depends on the data and model
+settings.</p>
 </div>
 <div class="section level3">
 <h3 id="subgroup-proportion-1">Subgroup proportion<a class="anchor" aria-label="anchor" href="#subgroup-proportion-1"></a>
@@ -559,19 +569,19 @@ reflected in the results.</p>
 <span><span class="va">fit_cv_2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"randomForest"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"random_forest"</span>, <span class="st">"fractional_logit"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">9</span><span class="op">)</span>, <span class="co"># NEW</span></span>
-<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,   <span class="co"># NEW</span></span>
+<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
@@ -638,63 +648,61 @@ estimates.</p>
 <span><span class="va">fit_cv_3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="st">"contrast_regression"</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.1</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, <span class="co"># NEW</span></span>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model</span></span>
-<span><span class="co">#&gt; = ps.model, : The first element of prop.cutoff cannot be 0 and has been</span></span>
-<span><span class="co">#&gt; removed.</span></span>
+<span><span class="co">#&gt; Warning: The first element of prop.cutoff cannot be 0 and has been removed.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%</span></span>
 <span><span class="co">#&gt; cv = 1 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 20 21:00:49 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:49:20 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==============                                                        |  20%</span></span>
 <span><span class="co">#&gt; cv = 2 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 20 21:00:53 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:49:23 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |============================                                          |  40%</span></span>
 <span><span class="co">#&gt; cv = 3 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 20 21:00:58 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:49:26 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |==========================================                            |  60%</span></span>
 <span><span class="co">#&gt; cv = 4 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 20 21:01:02 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:49:28 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |========================================================              |  80%</span></span>
 <span><span class="co">#&gt; cv = 5 </span></span>
 <span><span class="co">#&gt;   splitting the data..</span></span>
 <span><span class="co">#&gt;   training..</span></span>
 <span><span class="co">#&gt;   validating..</span></span>
 <span><span class="co">#&gt;   Contrast regression converged.</span></span>
-<span><span class="co">#&gt;    Fri Nov 20 21:01:06 2026 </span></span>
+<span><span class="co">#&gt;    Fri Nov 20 21:49:31 2026 </span></span>
 <span><span class="co">#&gt;   |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Total runtime : 20.55 secs</span></span>
+<span><span class="co">#&gt; Total runtime : 14.3 secs</span></span>
 <span><span class="va">fit_cv_3</span><span class="op">$</span><span class="va">ate.contrastReg</span><span class="op">$</span><span class="va">ate.est.valid.high.cv</span></span>
 <span><span class="co">#&gt;                cv1       cv2       cv3       cv4       cv5</span></span>
 <span><span class="co">#&gt; prop0.1         NA        NA        NA        NA        NA</span></span>
@@ -732,7 +740,7 @@ increase the length as needed.</li>
 </h3>
 <p>The censoring model estimates the probabilities used for inverse
 probability of censoring weighting (IPCW). The default censoring model
-uses the same covariates as the outcome model <code>cate.model</code>
+uses the same covariates as the outcome model <code>outcome_model</code>
 plus the treatment. The default IPCW method is a Cox regression with
 Breslow estimator of the baseline survivor function from
 <code><a href="https://rdrr.io/pkg/survival/man/coxph.html" class="external-link">coxph()</a></code> function in the <code>survival</code> package.
@@ -748,20 +756,20 @@ model.</p>
 <span><span class="va">fit_cv_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">previous_number_symptoms</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>, <span class="co"># NEW</span></span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"aft (weibull)"</span>, <span class="co"># NEW</span></span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"fractional_logit"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="op">~</span> <span class="va">previous_number_symptoms</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>, <span class="co"># NEW</span></span>
+<span>  censoring_method <span class="op">=</span> <span class="st">"aft (weibull)"</span>, <span class="co"># NEW</span></span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="va">tau0</span>,</span>
-<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -784,26 +792,25 @@ show how setting different values of the truncation time.</p>
 <span><span class="va">fit_cv_5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
 <span>  response <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>  data <span class="op">=</span> <span class="va">survivalExample</span>,</span>
-<span>  score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"contrastReg"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
+<span>  outcome_model <span class="op">=</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>    <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
-<span>  initial.predictor.method <span class="op">=</span> <span class="st">"fractional_logit"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">previous_number_symptoms</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"aft (weibull)"</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"fractional_logit"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"contrast_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="op">~</span> <span class="va">previous_number_symptoms</span> <span class="op">+</span> <span class="va">previous_number_relapses</span>,</span>
+<span>  censoring_method <span class="op">=</span> <span class="st">"aft (weibull)"</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tau0 <span class="op">=</span> <span class="cn">NULL</span>, <span class="co"># NEW</span></span>
 <span>  higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="fl">1</span>, length <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>,</span>
 <span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  surv.min <span class="op">=</span> <span class="fl">0.025</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model</span></span>
-<span><span class="co">#&gt; = ps.model, : No value supplied for tau0. Default sets tau0 to the maximum</span></span>
-<span><span class="co">#&gt; survival time.</span></span>
+<span><span class="co">#&gt; Warning: No value supplied for tau0. Default sets tau0 to the maximum survival</span></span>
+<span><span class="co">#&gt; time.</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv_5</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Additional-examples_files/figure-html/time-1.png" class="r-plt" alt="" width="700"></p>

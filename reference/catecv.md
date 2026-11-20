@@ -1,10 +1,9 @@
 # Cross-validation of the conditional average treatment effect (CATE) score
 
-Provides (doubly robust) estimation of the average treatment effect
-(ATE) for binary, count, survival or continuous outcomes in nested and
-mutually exclusive subgroups of patients defined by an estimated
-conditional average treatment effect (CATE) score via cross-validation
-(CV).
+Provides doubly robust estimation of average treatment effects for
+binary, count, and survival outcomes in nested and mutually exclusive
+subgroups of patients defined by an estimated conditional average
+treatment effect (CATE) score via cross-validation (CV).
 
 ## Usage
 
@@ -12,14 +11,14 @@ conditional average treatment effect (CATE) score via cross-validation
 catecv(
   response,
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  init.model = NULL,
-  initial.predictor.method = NULL,
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  outcome_model,
+  outcome_method = NULL,
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -49,7 +48,9 @@ catecv(
   contrast.control = list(),
   rmst.control = list(),
   ps.control = list(),
-  rf.control = list()
+  rf.control = list(),
+  ...,
+  xvar.smooth = NULL
 )
 ```
 
@@ -61,10 +62,8 @@ catecv(
   include "binary", "count" (see
   [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md)),
   "survival" (see
-  [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md))
-  and "continuous" (see
-  [`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md))
-  .
+  [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md)).
+  Continuous outcomes are not implemented.
 
 - data:
 
@@ -72,79 +71,57 @@ catecv(
   censoring models (if specified); a data frame with `n` rows (1 row per
   observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'boosting'`, `'twoReg'`, `'contrastReg'`,
-  `'poisson'` (count and survival outcomes only), `'randomForest'`
-  (survival, continuous outcomes only), `negBin` (count outcomes only),
-  `'gam'` (continuous outcomes only), `'gaussian'` (continuous outcomes
-  only). Binary outcomes support `'logistic'`, `'twoReg'`, and
-  `'boosting'`.
+  A formula specifying the outcome and baseline covariates. Use a `Surv`
+  response for survival and include an exposure offset for count
+  outcomes.
 
-- cate.model:
+- outcome_method:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side. For survival outcomes, a `Surv` object
-  must be used to describe the outcome.
+  Outcome-model method for each `benefit_method`. The default for a
+  T-learner is `'logistic'` for binary, `'poisson'` for count, and
+  `'coxph'` for survival outcomes. Supply the method for each doubly
+  robust score explicitly.
 
-- ps.model:
+- benefit_model:
 
-  A formula describing the treatment model (propensity-score model) to
-  be fitted. The treatment must appear on the left-hand side. For binary
-  outcomes, logical and two-valued treatment labels are also supported;
-  the effect is the risk under the second label minus that under the
-  first. For randomized trials, an intercept-only treatment model can be
-  specified as `trt ~ 1`.
+  Optional one-sided formula for the covariates and terms used in
+  two-regression and contrast-regression scores. The default uses the
+  terms in `outcome_model`. T-learners use `outcome_model` directly.
 
-- ps.method:
+- benefit_method:
 
-  A character value for the method to estimate the propensity score.
-  Allowed values include one of: `'glm'` for logistic regression with
-  main effects only (default), or `'lasso'` for a logistic regression
-  with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  Score-construction method, with one entry per `outcome_method`. The
+  default is `'t_learner'`. See
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  for supported combinations.
 
-- init.model:
+- ps_model:
 
-  Optional formula for the initial treatment-specific outcome models
-  used by `twoReg` and `contrastReg` (binary outcomes support `twoReg`
-  only). The outcome must match `cate.model`. The default `NULL` uses
-  `cate.model`. For count outcomes the exposure offset is taken from
-  `cate.model`; an offset in `init.model`, if supplied, must match it.
-  Other score methods do not use this argument. Continuous-outcome
-  fitting and validation are not currently implemented.
+  A formula for the treatment model, with treatment on the left. It
+  estimates propensity scores. For a common randomization probability,
+  use an intercept-only formula such as `trt ~ 1`.
 
-- initial.predictor.method:
+- ps_method:
 
-  A character vector for the method used to get initial outcome
-  predictions conditional on the covariates specified in `init.model`
-  (or `cate.model` when omitted). Only applies when `score.method`
-  includes `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'randomForest'` (survival outcomes only), `'boosting'`,
-  `'fractional_logit'` (survival outcomes only, fast), `'poisson'`
-  (count outcomes only, fast), `'gaussian'` (continuous outcomes only)
-  and `'gam'` (count and continuous outcomes only). Default is `NULL`,
-  which assigns `'boosting'` for count outcomes and `'randomForest'` for
-  survival outcomes.
+  Treatment-model fitting method. The default `'glm'` uses logistic
+  regression. `'lasso'` uses a logistic model with LASSO screening for
+  two-way interactions.
 
-- ipcw.model:
+- censoring_model:
 
-  A formula describing the censoring model used for inverse probability
-  of censoring weighting (IPCW). The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which uses a
-  censoring model with the same covariates as the outcome model
-  `cate.model`, plus the treatment.
+  Survival only. A one-sided formula for the model that estimates
+  probabilities of remaining uncensored for inverse probability of
+  censoring weighting (IPCW). The default uses the outcome-model
+  covariates and treatment.
 
-- ipcw.method:
+- censoring_method:
 
-  A character value for the censoring model. Only applies for survival
-  outcomes. Allowed values are: `'breslow'` (Cox regression with Breslow
-  estimator of t he baseline survivor function), `'aft (exponential)'`,
-  `'aft (weibull)'`, `'aft (lognormal)'` or `'aft (loglogistic)'`
-  (accelerated failure time model with different distributions for y
-  variable). Default is `'breslow'`.
+  Survival only. `'breslow'` (default) uses Cox regression with the
+  Breslow estimator. Accelerated failure time options are
+  `'aft (exponential)'`, `'aft (weibull)'`, `'aft (lognormal)'`, and
+  `'aft (loglogistic)'`.
 
 - minPS:
 
@@ -197,7 +174,7 @@ catecv(
 
   A logical value indicating whether the area between curves (ABC)
   should be calculated at each cross-validation iterations, for each
-  `score.method`. Default is `TRUE`. Binary ABC requires at least two
+  scoring method. Default is `TRUE`. Binary ABC requires at least two
   distinct `prop.cutoff` values.
 
 - train.prop:
@@ -228,76 +205,54 @@ catecv(
 
 - surv.min:
 
-  Lower truncation limit for the probability of being censored. It must
-  be a positive value and should be chosen close to 0. Only applies for
-  survival outcomes. Default is `0.025`.
+  Lower bound for the estimated probability of remaining uncensored.
+  Defaults to 0.025.
 
 - xvar.smooth.score:
 
-  A vector of characters indicating the name of the variables used as
-  the smooth terms if `score.method = 'gam'`. The variables must be
-  selected from the variables listed in `cate.model`.
+  Reserved for continuous-outcome scores.
 
 - xvar.smooth.init:
 
-  A vector of characters indicating the name of the variables used as
-  the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `init.model`. Default is
-  `NULL`, which uses all variables in `init.model`.
+  Names of outcome-model variables to smooth for count GAMs. Equivalent
+  to `xvar.smooth` for count outcomes.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  Maximum depth of boosting trees. Defaults to 2.
 
 - n.trees.rf:
 
-  A positive integer specifying the number of trees in random forest.
-  Used if `score.method = 'randomForest'` or if
-  `initial.predictor.method = 'randomForest'` with
-  `score.method = 'twoReg'` or `'contrastReg'`. Only applies for
-  survival outcomes. Default is `1000`.
+  Number of trees for survival random forests. Defaults to 1000.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  Maximum number of trees for boosting. Defaults to 200.
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of cross-fitting repetitions used by two-regression and
+  contrast regression. Defaults to 3.
 
 - Kfold:
 
-  A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  Number of folds used for cross-fitting within each training set.
+  Defaults to 5.
 
 - error.maxNR:
 
-  A numerical value \> 0 indicating the minimum value of the mean
-  absolute error in Newton Raphson algorithm. Used only if
-  `score.method = 'contrastReg'`. Default is `0.001`.
+  Newton–Raphson convergence tolerance for contrast regression. Defaults
+  to 0.001.
 
 - max.iterNR:
 
-  A positive integer indicating the maximum number of iterations in the
-  Newton Raphson algorithm. Used only if `score.method = 'contrastReg'`.
-  Default is `150`.
+  Maximum number of Newton–Raphson iterations for contrast regression.
+  Defaults to 150.
 
 - tune:
 
-  A vector of 2 numerical values \> 0 specifying tuning parameters for
-  the Newton Raphson algorithm. `tune[1]` is the step size, `tune[2]`
-  specifies a quantity to be added to diagonal of the slope matrix to
-  prevent singularity. Used only if `score.method = 'contrastReg'`.
-  Default is `c(0.5, 2)`.
+  Two positive Newton–Raphson tuning values for contrast regression.
+  Defaults to `c(0.5, 2)`.
 
 - seed:
 
@@ -306,10 +261,7 @@ catecv(
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+  Whether to plot boosting performance. Defaults to FALSE.
 
 - verbose:
 
@@ -342,7 +294,7 @@ catecv(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
@@ -352,6 +304,16 @@ catecv(
   `nodedepth`, and `splitrule`. Applies to both treatment arms and
   survival initial-predictor forests. Use `n.trees.rf` for the number of
   trees.
+
+- ...:
+
+  Additional arguments. Deprecated argument names from precmed 1.1.0
+  remain supported for backward compatibility and emit warnings.
+
+- xvar.smooth:
+
+  Names of variables used as smooth terms for count GAM outcome models.
+  By default, all eligible outcome-model variables are used.
 
 ## Value
 
@@ -366,10 +328,14 @@ For count response, see description of outputs in
 [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md).
 For survival response, see description of outputs in
 [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md).
-For continuous response, see description of outputs in
-[`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md).
 
 ## Details
+
+Each iteration fits scores on the training split using the same
+score-fitting routines as
+[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+The fitted score is applied to the held-out split before its subgroup
+effects are estimated.
 
 For binary outcomes, each iteration randomly splits each treatment arm
 into training and validation sets. The score is fitted on training data
@@ -393,8 +359,6 @@ For count response, see details in
 [`catecvcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvcount.md).
 For survival response, see details in
 [`catecvsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvsurv.md).
-For continuous response, see details in
-[`catecvmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecvmean.md).
 
 ## References
 
@@ -431,11 +395,11 @@ methods for `"precmed"` objects.
 # \donttest{
 cate_1 <- catecv(response = "count",
                  data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
+                 outcome_method = "poisson",
+                 outcome_model = y ~ age + female + previous_treatment +
                               previous_cost + previous_number_relapses +
                               offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  higher.y = FALSE, cv.n = 5, seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 #>   |                                                                              |                                                                      |   0%
@@ -464,7 +428,7 @@ cate_1 <- catecv(response = "count",
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 11.11 secs 
+#> Total runtime : 8.64 secs 
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
 
@@ -481,12 +445,12 @@ tau0 <- with(survivalExample,
 
 cate_2 <- catecv(response = "survival",
                  data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
+                 outcome_method = c("poisson", "random_forest"),
+                 benefit_method = rep("t_learner", 2),
+                 outcome_model = Surv(y, d) ~ age + female + previous_cost +
                               previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "randomForest",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
+                 censoring_model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0,
                  higher.y = TRUE,
                  surv.min = 0.025,

@@ -55,38 +55,42 @@ as well.
 ``` r
 
 # An example of using GBM as the initial predictor method
-catecvcount(data = countExample,
-       score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
-       n.cores = 1,
-       cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-       ps.model = trt ~ age + previous_treatment, 
-       higher.y = FALSE,
-       initial.predictor.method = "boosting",       # NEW
-       cv.n = 5, 
-       seed = 999,
-       verbose = 0)
+catecvcount(
+  data = countExample,
+  outcome_model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "boosting", "boosting", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  cv.n = 5,
+  seed = 999,
+  verbose = 0,
+  n.cores = 1
+)
 
 # An example of using GAM as the initial predictor method
-catecvcount(data = countExample,
-       score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
-       n.cores = 1,
-       cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-       ps.model = trt ~ age + previous_treatment, 
-       higher.y = FALSE, 
-       initial.predictor.method = "gam",        # NEW
-       xvar.smooth = c("age", "previous_cost"), # NEW
-       cv.n = 5,
-       seed = 999,
-       verbose = 0)
+catecvcount(
+  data = countExample,
+  outcome_model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "gam", "gam", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  cv.n = 5,
+  xvar.smooth = c("age", "previous_cost"), # NEW
+  seed = 999,
+  verbose = 0,
+  n.cores = 1
+)
 ```
 
 Note that for the GAM method, there is an additional argument called
 `xvar.smooth`. If left as default (which is NULL), GAM will include all
-independent variables in `cate.model` as smooth terms with function
+independent variables in `outcome_model` as smooth terms with function
 `s()` in the linear predictor. You can choose to specify only a subset
 of the dependent variables as the smooth terms. In the example above,
-the specifications `cate.model` and `xvar.smooth` lead to the following
-GAM formula:
+the specifications `outcome_model` and `xvar.smooth` lead to the
+following GAM formula:
 `y ~ female + previous_treatment + previous_number_relapses + s(age) + s(previous_cost)`,
 where only age and previous medical costs are wrapped in the smooth
 function and the remaining 3 independent variables are not.
@@ -148,14 +152,14 @@ ATE results. Here is a recap:
 fit_cv_2 <- catecv(
   response = "count",
   data = countExample,
-  score.method = c("poisson", "contrastReg", "negBin"),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
+  outcome_method = c("poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
   prop.cutoff = seq(0.5, 1, length = 11), # NEW
-  prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
-  initial.predictor.method = "poisson",
+  prop.multi = c(0, 1/4, 2/4, 3/4, 1), # NEW
   cv.n = 5,
   seed = 999,
   verbose = 0
@@ -240,11 +244,11 @@ validation curves become useless due to the extreme ATE estimates.
 fit_cv_3 <- catecv(
   response = "count",
   data = countExample,
-  score.method = c("poisson", "contrastReg", "negBin"),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "poisson",
+  outcome_method = c("poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
   prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
   cv.n = 5,
@@ -252,8 +256,7 @@ fit_cv_3 <- catecv(
   verbose = 1
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning in data.preproc(fun = "crossv", cate.model = cate.model, ps.model =
-#> ps.model, : The first element of prop.cutoff cannot be 0 and has been removed.
+#> Warning: The first element of prop.cutoff cannot be 0 and has been removed.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
@@ -266,14 +269,14 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 1: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 20:59:01 2026 
+#>    Fri Nov 20 21:48:04 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   convergence TRUE 
-#>    Fri Nov 20 20:59:04 2026 
+#>    Fri Nov 20 21:48:06 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
@@ -284,7 +287,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.contrastReg, validation iteration 3: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 20:59:09 2026 
+#>    Fri Nov 20 21:48:09 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
@@ -295,7 +298,7 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 4: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 20:59:14 2026 
+#>    Fri Nov 20 21:48:12 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
@@ -308,9 +311,9 @@ fit_cv_3 <- catecv(
 #> Warning: score.negBin, validation iteration 5: ABC unavailable because a
 #> required estimate is not finite; returning NA.
 #>   convergence TRUE 
-#>    Fri Nov 20 20:59:19 2026 
+#>    Fri Nov 20 21:48:15 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 24.61 secs
+#> Total runtime : 14.94 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1        cv2       cv3          cv4       cv5
 #> prop0.01        NA 0.09705963        NA 2.447035e+06        NA
@@ -369,7 +372,7 @@ options:
 - “boosting” (gradient boosting machine from the `gbm3` R package)
   - ensemble method, typically tree-based, assume the time-to-event
     outcome as Gaussian distributed, slow
-- “randomForest” (random survival forest model from the
+- `"random_forest"` (random survival forest model from the
   `randomForestSRC` package)
   - ensemble method, tree-based, non-parametric, can be slow
 
@@ -386,42 +389,46 @@ as well.
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-catecv(response = "survival",
-       data = survivalExample,
-       score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-       ps.model = trt ~ age + previous_treatment,
-       ipcw.model = NULL,
-       followup.time = NULL,
-       tau0 = tau0,
-       surv.min = 0.025,
-       higher.y = TRUE,
-       prop.cutoff = seq(0.6, 1, length = 5),
-       prop.multi = c(0, 0.5, 0.6, 1),
-       cv.n = 5,
-       initial.predictor.method = "boosting", # NEW
-       tree.depth = 3,                        # NEW
-       seed = 999,
-       verbose = 0)
+catecv(
+  response = "survival",
+  data = survivalExample,
+  outcome_model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
+  outcome_method = c("poisson", "boosting", "random_forest", "boosting", "boosting"),
+  benefit_method = c("t_learner", "t_learner", "t_learner", "two_regression", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
+  tree.depth = 3, # NEW
+  seed = 999,
+  verbose = 0
+)
 
 # An example of using random forest as the initial predictor method
-catecv(response = "survival",
-       data = survivalExample,
-       score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-       ps.model = trt ~ age + previous_treatment,
-       ipcw.model = NULL,
-       followup.time = NULL,
-       tau0 = tau0,
-       surv.min = 0.025,
-       higher.y = TRUE,
-       prop.cutoff = seq(0.6, 1, length = 5),
-       prop.multi = c(0, 0.5, 0.6, 1),
-       cv.n = 5,
-       initial.predictor.method = "randomForest", # NEW
-       n.trees.rf = 500,                          # NEW
-       seed = 999,
-       verbose = 0)
+catecv(
+  response = "survival",
+  data = survivalExample,
+  outcome_model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
+  outcome_method = c("poisson", "boosting", "random_forest", "random_forest", "random_forest"),
+  benefit_method = c("t_learner", "t_learner", "t_learner", "two_regression", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
+  n.trees.rf = 500, # NEW
+  seed = 999,
+  verbose = 0
+)
 ```
 
 For boosting, `tree.depth` and `n.trees.boosting` control tree depth and
@@ -430,10 +437,10 @@ number of trees, and `rf.control` can set forest options, for example
 `rf.control = list(mtry = 3, nodesize = 15)`. These options also apply
 when random forest is the initial predictor.
 
-Generally speaking, the “fractional_logit” initial predictor method is
-the fastest and “boosting” is the slowest among the 3 methods, while
-“randomForest” is often somewhere in between; computation time depends
-on the data and forest settings.
+Fractional logit (`"fractional_logit"`) is generally the fastest of the
+three outcome methods. Boosting (`"boosting"`) is usually slower, and
+random forests (`"random_forest"`) often fall in between. Run time
+depends on the data and model settings.
 
 ### Subgroup proportion
 
@@ -481,19 +488,19 @@ tau0 <- with(survivalExample,
 fit_cv_2 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("randomForest", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = NULL,
+  outcome_method = c("random_forest", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = seq(0.6, 1, length = 9), # NEW
-  prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
+  prop.multi = c(0, 0.4, 0.5, 0.6, 1), # NEW
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
@@ -579,63 +586,61 @@ validation curves become useless due to the extreme ATE estimates.
 fit_cv_3 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = NULL,
+  outcome_method = "fractional_logit",
+  benefit_method = "contrast_regression",
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 1
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
-#> = ps.model, : The first element of prop.cutoff cannot be 0 and has been
-#> removed.
+#> Warning: The first element of prop.cutoff cannot be 0 and has been removed.
 #>   |                                                                              |                                                                      |   0%
 #> cv = 1 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 21:00:49 2026 
+#>    Fri Nov 20 21:49:20 2026 
 #>   |                                                                              |==============                                                        |  20%
 #> cv = 2 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 21:00:53 2026 
+#>    Fri Nov 20 21:49:23 2026 
 #>   |                                                                              |============================                                          |  40%
 #> cv = 3 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 21:00:58 2026 
+#>    Fri Nov 20 21:49:26 2026 
 #>   |                                                                              |==========================================                            |  60%
 #> cv = 4 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 21:01:02 2026 
+#>    Fri Nov 20 21:49:28 2026 
 #>   |                                                                              |========================================================              |  80%
 #> cv = 5 
 #>   splitting the data..
 #>   training..
 #>   validating..
 #>   Contrast regression converged.
-#>    Fri Nov 20 21:01:06 2026 
+#>    Fri Nov 20 21:49:31 2026 
 #>   |                                                                              |======================================================================| 100%
-#> Total runtime : 20.55 secs
+#> Total runtime : 14.3 secs
 fit_cv_3$ate.contrastReg$ate.est.valid.high.cv
 #>                cv1       cv2       cv3       cv4       cv5
 #> prop0.1         NA        NA        NA        NA        NA
@@ -677,7 +682,7 @@ and `prop.multi`:
 
 The censoring model estimates the probabilities used for inverse
 probability of censoring weighting (IPCW). The default censoring model
-uses the same covariates as the outcome model `cate.model` plus the
+uses the same covariates as the outcome model `outcome_model` plus the
 treatment. The default IPCW method is a Cox regression with Breslow
 estimator of the baseline survivor function from
 [`coxph()`](https://rdrr.io/pkg/survival/man/coxph.html) function in the
@@ -695,20 +700,20 @@ the `survival` package was used to fit the AFT model.
 fit_cv_4 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("poisson", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
-  ipcw.method = "aft (weibull)", # NEW
+  outcome_method = c("poisson", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = ~ previous_number_symptoms + previous_number_relapses, # NEW
+  censoring_method = "aft (weibull)", # NEW
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
@@ -733,26 +738,25 @@ setting different values of the truncation time.
 fit_cv_5 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("poisson", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
-  ipcw.method = "aft (weibull)",
+  outcome_method = c("poisson", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = ~ previous_number_symptoms + previous_number_relapses,
+  censoring_method = "aft (weibull)",
   followup.time = NULL,
   tau0 = NULL, # NEW
   higher.y = TRUE,
-  cv.n = 5,
-  surv.min = 0.025,
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
-#> Warning in data.preproc.surv(fun = "crossv", cate.model = cate.model, ps.model
-#> = ps.model, : No value supplied for tau0. Default sets tau0 to the maximum
-#> survival time.
+#> Warning: No value supplied for tau0. Default sets tau0 to the maximum survival
+#> time.
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
 plot(fit_cv_5)
 ```

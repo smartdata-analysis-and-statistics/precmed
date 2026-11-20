@@ -136,9 +136,9 @@ treatment model can reflect a common assignment probability.</p>
 <p>If both method arguments are omitted, <code><a href="../reference/catefit.html">catefit()</a></code> defaults
 to a T-learner with <code>outcome_method = "logistic"</code> for this
 outcome.</p>
-<p><code>benefit_method</code> chooses how to construct the score, while
-<code>outcome_method</code> chooses the outcome-model method for that
-score:</p>
+<p><code>outcome_method</code> selects how the outcome model is fitted,
+and <code>benefit_method</code> selects how the score is
+constructed.</p>
 <ul>
 <li>A <strong>T-learner</strong> fits an outcome model in each treatment
 arm and subtracts predicted relapse probabilities. Here we can use
@@ -172,13 +172,17 @@ use the fitting data and may be optimistic; their validation is
 addressed below.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catefit.html">catefit</a></span><span class="op">(</span></span>
-<span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
+<span>  response <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"logistic"</span>, <span class="st">"boosting"</span><span class="op">)</span>,</span>
 <span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"two_regression"</span>, <span class="st">"t_learner"</span><span class="op">)</span>,</span>
 <span>  ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
-<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  n.trees.boosting <span class="op">=</span> <span class="fl">100</span>, n.cores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  n.trees.boosting <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  n.cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>To fit a more concise two-regression or contrast-regression score,
 you can supply a separate one-sided benefit formula. For example, adding
@@ -197,10 +201,8 @@ in a mixed fit continue to use the outcome formula and do not use
 <span>  benefit_method <span class="op">=</span> <span class="st">"two_regression"</span>, ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
 <span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>, seed <span class="op">=</span> <span class="fl">999</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/catecv.html">catecv()</a></code> does not currently accept a separate benefit
-formula, so its validation below applies to the default score
-specification used in this example, not to a fit with a different
-<code>benefit_model</code>.</p>
+<p>Pass the same <code>benefit_model</code> to <code><a href="../reference/catecv.html">catecv()</a></code> to
+validate that score specification.</p>
 </div>
 </div>
 <div class="section level2">
@@ -212,10 +214,8 @@ patients with different baseline covariates. Pass the complete
 <code>method</code> to select a score. This fit contains three scores:
 use <code>"logistic"</code> for the logistic T-learner,
 <code>"two_regression"</code> for two-regression, or
-<code>"boosting"</code> for the boosting T-learner. The established name
-<code>"twoReg"</code> is also accepted. Because two T-learners are
-present, their outcome-method names identify which score to
-retrieve.</p>
+<code>"boosting"</code> for the boosting T-learner. Use the
+outcome-method names to distinguish the two T-learners.</p>
 <p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> returns the stored scores for the original
 analysis sample, in its original row order; prediction for new patients
 is not currently supported. Below are the first six two-regression
@@ -290,10 +290,18 @@ smaller groups in this example; check support and model fit when
 choosing cutoffs for other data.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catecv.html">catecv</a></span><span class="op">(</span></span>
-<span>  response <span class="op">=</span> <span class="st">"binary"</span>, data <span class="op">=</span> <span class="va">binaryExample</span>, score.method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"twoReg"</span><span class="op">)</span>,</span>
-<span>  cate.model <span class="op">=</span> <span class="va">outcome_formula</span>, ps.model <span class="op">=</span> <span class="va">ps_formula</span>, higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>, prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  cv.n <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">102</span></span>
+<span>  response <span class="op">=</span> <span class="st">"binary"</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">binaryExample</span>,</span>
+<span>  outcome_model <span class="op">=</span> <span class="va">outcome_formula</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"logistic"</span>, <span class="st">"logistic"</span><span class="op">)</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="st">"two_regression"</span><span class="op">)</span>,</span>
+<span>  ps_model <span class="op">=</span> <span class="va">ps_formula</span>,</span>
+<span>  higher.y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  prop.cutoff <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  prop.multi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cv.n <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  B <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">102</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_cv</span>, show.abc <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Binary-CATE_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="700"></p>

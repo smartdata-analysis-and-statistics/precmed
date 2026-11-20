@@ -6,18 +6,19 @@ estimated conditional average treatment effect (CATE) score via
 cross-validation (CV). The CATE score can be estimated with up to 5
 methods among the following: Poisson regression, boosting, two
 regressions, contrast regression, and negative binomial (see
-`score.method`).
+`outcome_method`).
 
 ## Usage
 
 ``` r
 catecvcount(
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  initial.predictor.method = "boosting",
+  outcome_model,
+  outcome_method = "poisson",
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -41,7 +42,6 @@ catecvcount(
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
-  init.model = NULL,
   ...
 )
 ```
@@ -53,41 +53,43 @@ catecvcount(
   A data frame containing the variables in the outcome and treatment
   model; a data frame with `n` rows (1 row per observation).
 
-- score.method:
+- outcome_model:
 
-  A vector of one or multiple methods to estimate the CATE score.
-  Allowed values are: `'boosting'`, `'poisson'`, `'twoReg'`,
-  `'contrastReg'`, and `'negBin'`.
+  A formula specifying the outcome and baseline covariates. Use a `Surv`
+  response for survival and include an exposure offset for count
+  outcomes.
 
-- cate.model:
+- outcome_method:
 
-  A formula describing the outcome model to be fitted. The outcome must
-  appear on the left-hand side.
+  Outcome-model method for each `benefit_method`. For a T-learner,
+  choose `'poisson'` (default), `'negative_binomial'`, or `'boosting'`.
+  For two-regression or contrast regression, choose `'poisson'`,
+  `'gam'`, or `'boosting'`.
 
-- ps.model:
+- benefit_model:
 
-  A formula describing the treatment model (propensity-score model) to
-  be fitted. The treatment must appear on the left-hand side. The
-  treatment must be a numeric vector coded as 0 or 1. If data are from a
-  randomized trial, specify `ps.model` as an intercept-only model.
+  Optional one-sided formula for the covariates and terms used in
+  two-regression and contrast-regression scores. The default uses the
+  terms in `outcome_model`. T-learners use `outcome_model` directly.
 
-- ps.method:
+- benefit_method:
 
-  A character value for the method to estimate the propensity score.
-  Allowed values include one of: `'glm'` for logistic regression with
-  main effects only (default), or `'lasso'` for a logistic regression
-  with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  Score-construction method, with one entry per `outcome_method`. The
+  default is `'t_learner'`. See
+  [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  for supported combinations.
 
-- initial.predictor.method:
+- ps_model:
 
-  A character vector for the method used to get initial outcome
-  predictions conditional on the covariates in `init.model` (or
-  `cate.model` when omitted). Only applies when `score.method` includes
-  `'twoReg'` or `'contrastReg'`. Allowed values include one of
-  `'poisson'` (fastest), `'boosting'` and `'gam'`. Default is
-  `'boosting'`.
+  A formula for the treatment model, with treatment on the left. It
+  estimates propensity scores. For a common randomization probability,
+  use an intercept-only formula such as `trt ~ 1`.
+
+- ps_method:
+
+  Treatment-model fitting method. The default `'glm'` uses logistic
+  regression. `'lasso'` uses a logistic model with LASSO screening for
+  two-way interactions.
 
 - minPS:
 
@@ -127,7 +129,7 @@ catecvcount(
 
   A logical value indicating whether the area between curves (ABC)
   should be calculated at each cross-validation iterations, for each
-  `score.method`. Default is `TRUE`.
+  scoring method. Default is `TRUE`.
 
 - train.prop:
 
@@ -155,57 +157,41 @@ catecvcount(
 
 - xvar.smooth:
 
-  A vector of characters indicating the name of the variables used as
-  the smooth terms if `initial.predictor.method = 'gam'`. The variables
-  must be selected from the variables listed in `init.model` (or
-  `cate.model` when omitted). Default is `NULL`, which uses all initial
-  outcome-model covariates.
+  Names of outcome-model variables to use as smooth terms with
+  `outcome_method = 'gam'`. Defaults to all eligible variables.
 
 - tree.depth:
 
-  A positive integer specifying the depth of individual trees in
-  boosting (usually 2-3). Used only if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is 2.
+  Maximum depth of boosting trees. Defaults to 2.
 
 - n.trees.boosting:
 
-  A positive integer specifying the maximum number of trees in boosting
-  (usually 100-1000). Used if `score.method = 'boosting'` or if
-  `initial.predictor.method = 'boosting'` with `score.method = 'twoReg'`
-  or `'contrastReg'`. Default is `200`.
+  Maximum number of trees for boosting. Defaults to 200.
 
 - B:
 
-  A positive integer specifying the number of time cross-fitting is
-  repeated in `score.method = 'twoReg'` and `'contrastReg'`. Default is
-  `3`.
+  Number of cross-fitting repetitions used by two-regression and
+  contrast regression. Defaults to 3.
 
 - Kfold:
 
-  A positive integer specifying the number of folds used in
-  cross-fitting to partition the data in `score.method = 'twoReg'` and
-  `'contrastReg'`. Default is `5`.
+  Number of folds used for cross-fitting within each training set.
+  Defaults to 5.
 
 - error.maxNR:
 
-  A numerical value \> 0 indicating the minimum value of the mean
-  absolute error in Newton Raphson algorithm. Used only if
-  `score.method = 'contrastReg'`. Default is `0.001`.
+  Newton–Raphson convergence tolerance for contrast regression. Defaults
+  to 0.001.
 
 - max.iterNR:
 
-  A positive integer indicating the maximum number of iterations in the
-  Newton Raphson algorithm. Used only if `score.method = 'contrastReg'`.
-  Default is `150`.
+  Maximum number of Newton–Raphson iterations for contrast regression.
+  Defaults to 150.
 
 - tune:
 
-  A vector of 2 numerical values \> 0 specifying tuning parameters for
-  the Newton Raphson algorithm. `tune[1]` is the step size, `tune[2]`
-  specifies a quantity to be added to diagonal of the slope matrix to
-  prevent singularity. Used only if `score.method = 'contrastReg'`.
-  Default is `c(0.5, 2)`.
+  Two positive Newton–Raphson tuning values for contrast regression.
+  Defaults to `c(0.5, 2)`.
 
 - seed:
 
@@ -214,10 +200,7 @@ catecvcount(
 
 - plot.gbmperf:
 
-  A logical value indicating whether to plot the performance measures in
-  boosting. Used only if `score.method = 'boosting'` or if
-  `score.method = 'twoReg'` or `'contrastReg'` and
-  `initial.predictor.method = 'boosting'`. Default is `FALSE`.
+  Whether to plot boosting performance. Defaults to FALSE.
 
 - verbose:
 
@@ -241,27 +224,23 @@ catecvcount(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
-- init.model:
-
-  Optional formula for initial outcome predictions in `twoReg` and
-  `contrastReg`; defaults to `cate.model`. The outcome must match.
-
 - ...:
 
-  Additional boosting arguments; see
-  [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  Additional arguments. Deprecated argument names from precmed 1.1.0
+  remain supported for backward compatibility and emit warnings.
 
 ## Value
 
-Returns a list containing the following components saved as a
-`"precmed"` object:
+A `"precmed"` object with the components below. When doubly robust
+scores use different outcome methods, `outcome_methods` records the
+method used for each score.
 
-- `ate.poisson`: A list of results output if `score.method` includes
-  `'poisson'`:
+- `ate.poisson`: A list of results output if the selected scoring
+  methods includes `'poisson'`:
 
   - `ate.est.train.high.cv`: A matrix of numerical values with
     `length(prop.cutoff)` rows and `cv.n` columns. The ith row/jth
@@ -299,14 +278,14 @@ Returns a list containing the following components saved as a
     cross-validation iteration. Only returned if `abc = TRUE`.
 
 - `ate.boosting`: A list of results similar to `ate.poisson` output if
-  `score.method` includes `'boosting'`.
+  the selected scoring methods includes `'boosting'`.
 
-- `ate.twoReg`: A list of results similar to `ate.poisson` output if
-  `score.method` includes `'twoReg'`.
+- `ate.twoReg`: A list of results similar to `ate.poisson` output if the
+  selected scoring methods includes `'twoReg'`.
 
 - `ate.contrastReg`: A list of results similar to `ate.poisson` output
-  if `score.method` includes `'contrastReg'`. This method has additional
-  convergence information:
+  if the selected scoring methods includes `'contrastReg'`. This method
+  has additional convergence information:
 
   - `converge.contrastReg.cv`: A vector of logical value of length
     `cv.n`. The ith element is true if at least one cross-fitting
@@ -315,8 +294,8 @@ Returns a list containing the following components saved as a
   - `converge.repetitions.cv`: A list of logical vectors recording
     convergence of each cross-fitting repetition in each CV iteration.
 
-- `ate.negBin`: A list of results similar to `ate.poisson` output if
-  `score.method` includes `'negBin'`.
+- `ate.negBin`: A list of results similar to `ate.poisson` output if the
+  selected scoring methods includes `'negBin'`.
 
 - `props`: A list of 3 elements:
 
@@ -339,7 +318,7 @@ Returns a list containing the following components saved as a
   cross-validation iteration, estimated with the doubly robust
   estimator.
 
-- `fgam`: The formula used in GAM if `initial.predictor.method = 'gam'`.
+- `fgam`: The formula used in GAM if `outcome_method = 'gam'`.
 
 - `higher.y`: The original `higher.y` argument.
 
@@ -349,9 +328,9 @@ Returns a list containing the following components saved as a
 
 - `response`: The type of response. Always 'count' for this function.
 
-- `formulas`:A list of 3 elements: (1) `cate.model` argument, (2)
-  `ps.model` argument and (3) original labels of the left-hand side
-  variable in `ps.model` (treatment) if it was not 0/1.
+- `formulas`:A list of 3 elements: (1) `outcome_model` argument, (2)
+  `ps_model` argument and (3) original labels of the left-hand side
+  variable in `ps_model` (treatment) if it was not 0/1.
 
 ## Details
 
@@ -426,11 +405,11 @@ function.
 ``` r
 # \donttest{
 catecv <- catecvcount(data = countExample,
-                      score.method = "poisson",
-                      cate.model = y ~ age + female + previous_treatment +
+                      outcome_method = "poisson",
+                      outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
-                      ps.model = trt ~ age + previous_treatment,
+                      ps_model = trt ~ age + previous_treatment,
                       higher.y = FALSE,
                       cv.n = 5,
                       seed = 999,
@@ -463,7 +442,7 @@ catecv <- catecvcount(data = countExample,
 #>   training..
 #>   validating..
 #> 
-#> Total runtime : 9.83 secs 
+#> Total runtime : 6.21 secs 
 
 plot(catecv, ylab = "Rate ratio of drug1 vs drug0 in each subgroup")
 

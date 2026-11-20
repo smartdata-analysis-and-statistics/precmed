@@ -65,8 +65,8 @@ If both method arguments are omitted,
 defaults to a T-learner with `outcome_method = "poisson"` for this
 outcome.
 
-`benefit_method` selects the score-construction approach;
-`outcome_method` selects the outcome-model method for each score:
+`outcome_method` selects how the outcome model is fitted, and
+`benefit_method` selects how the score is constructed.
 
 - A **T-learner** fits an outcome model in each treatment arm and
   compares predicted relapse rates. The available outcome methods
@@ -82,29 +82,6 @@ interpretation relies on causal identification, positivity and
 appropriate model assumptions; propensity-score truncation can affect
 robustness. See Chapter 17 for more on treatment effect heterogeneity
 and CATE prediction (Hoogland et al. 2026).
-
-Two-regression and contrast regression may use different outcome methods
-in the same call. They share the treatment-model predictions; matching
-outcome methods also share cross-fitted outcome predictions. T-learner
-models are fitted on the full fitting sample and are not reused for the
-cross-fitted predictions. The
-[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-interface continues to use a single initial outcome method.
-
-For example, this fits two-regression with Poisson initial models and
-contrast regression with GAM initial models, smoothing age in the
-latter:
-
-``` r
-
-fit_different <- catefit(
-  response = "count", data = countExample,
-  outcome_model = outcome_formula, ps_model = ps_formula,
-  benefit_method = c("two_regression", "contrast_regression"),
-  outcome_method = c("poisson", "gam"), xvar.smooth = "age",
-  higher.y = FALSE, seed = 999
-)
-```
 
 ### Fit five scores
 
@@ -155,10 +132,9 @@ fit_cate_reduced <- catefit(
 )
 ```
 
+Pass the same `benefit_model` to
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-does not currently accept a separate benefit formula, so its validation
-below applies to the default score specification used in this example,
-not to a fit with a different `benefit_model`.
+to validate that score specification.
 
 ## Inspect CATE scores and subgroup estimates
 
@@ -322,28 +298,11 @@ methods. The mandatory arguments are similar to
 [`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
 and
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md):
-The mandatory arguments are: `response`, `data`, `score.method`,
-`cate.model`, and `ps.model`. For this toy example we selected
-`poisson`, `contrastReg` and `negBin` to limit run time.
-
-We also specified the following non-mandatory arguments to fit with the
-data and problem at hand: `initial.predictor.method`, `higher.y`, `cv.n`
-and `seed`.
-
-- `initial.predictor.method` specifies how predictions of the outcome
-  are estimated in two regressions and contrast regression. Flexible
-  models can be used such as GBM (“boosting”) or generalized additive
-  models (“gam”). Both methods are computationally intensive so we
-  choose “poisson” to obtain predictions from a Poisson regression,
-  which reduces the computational time at the expense of stricter
-  parametric assumptions and less flexibility.
-
-For `twoReg` and `contrastReg`, the initial outcome models use the
-covariates in `cate.model` by default. To use additional outcome
-predictors while keeping a simpler CATE score, specify, for example,
-`init.model = y ~ age + female + previous_treatment + previous_cost`.
-The outcome must match `cate.model`; the exposure offset is taken from
-`cate.model`.
+Supply `response`, `data`, `outcome_model`, and `ps_model`. The example
+pairs T-learners using Poisson and negative binomial outcome models with
+contrast regression using Poisson initial outcome models. Use
+`benefit_model` to validate a simpler score based on a subset of the
+outcome predictors.
 
 - `higher.y` was set to FALSE because lower number of relapses are more
   desirable in our example. Hence, we are telling the function that
@@ -381,13 +340,13 @@ values of the remaining arguments.
 fit_cv <- catecv(
   response = "count",
   data = countExample,
-  score.method = c("poisson", "contrastReg", "negBin"),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment, 
-  initial.predictor.method = "poisson",
+  outcome_method = c("poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
-  cv.n = 5, 
+  cv.n = 5,
   seed = 999
 )
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -399,17 +358,16 @@ The output of
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
 is an object of class “precmed” and here we named it `fit_cv`. It
 carries the relevant information to use in the next step of the workflow
-which selects the method (among those specified in the argument
-`score.method`) capturing the highest level of treatment effect
-heterogeneity. The output, which is described below, will be used in the
-functions
+which selects the method (among those fitted in the call) capturing the
+highest level of treatment effect heterogeneity. The output, which is
+described below, will be used in the functions
 [`abc()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.md),
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) and
 [`boxplot()`](https://rdrr.io/r/graphics/boxplot.html).
 
-For each method specified in the argument `score.method`, the following
-3 groups of outputs are generated: `high`, `low` and `group`. We use the
-results from `contrastReg` as an example.
+For each method fitted in the call, the following 3 groups of outputs
+are generated: `high`, `low` and `group`. We use the results from
+`contrastReg` as an example.
 
 #### Nested subgroups of high responders
 
@@ -601,9 +559,9 @@ abc(fit_cv)
 ```
 
 The output is a matrix with columns corresponding to the CV iterations
-and rows corresponding to the scoring methods specified in
-`score.method`. Individual iterations can differ; summarize across
-iterations to compare methods:
+and rows corresponding to the scoring methods included in the fit.
+Individual iterations can differ; summarize across iterations to compare
+methods:
 
 ``` r
 

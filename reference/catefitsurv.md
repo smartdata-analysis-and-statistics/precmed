@@ -69,8 +69,6 @@ catefitsurv(
   and estimates a baseline cumulative hazard; Weibull and log-normal are
   parametric accelerated failure time models. Causal interpretation
   requires appropriate model, identification and censoring assumptions.
-  These three T-learners are not yet available in
-  [`catecv`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md).
   Two-regression and contrast regression may use different initial
   outcome methods; matching methods share cross-fitted outcome
   predictions.

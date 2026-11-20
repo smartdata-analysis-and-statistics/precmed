@@ -698,10 +698,14 @@ treatment models are refitted in each bootstrap sample.</p>
 <span>  verbose <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span></span>
-<span><span class="co">#&gt; Warning: 2 bootstrap replicate(s) failed or had undefined estimates; inference</span></span>
+<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
+<span><span class="co">#&gt; control$trace &gt; : estimate truncated at zero</span></span>
+<span><span class="co">#&gt; Warning in theta.ml(Y, mu, sum(w), w, limit = control$maxit, trace =</span></span>
+<span><span class="co">#&gt; control$trace &gt; : iteration limit reached</span></span>
+<span><span class="co">#&gt; Warning: 1 bootstrap replicate(s) failed or had undefined estimates; inference</span></span>
 <span><span class="co">#&gt; for affected measures is unavailable. Reasons by measure: rate0: missing value</span></span>
-<span><span class="co">#&gt; where TRUE/FALSE needed (2); rate1: missing value where TRUE/FALSE needed (2);</span></span>
-<span><span class="co">#&gt; log.rate.ratio: missing value where TRUE/FALSE needed (2). See</span></span>
+<span><span class="co">#&gt; where TRUE/FALSE needed (1); rate1: missing value where TRUE/FALSE needed (1);</span></span>
+<span><span class="co">#&gt; log.rate.ratio: missing value where TRUE/FALSE needed (1). See</span></span>
 <span><span class="co">#&gt; bootstrap.diagnostics for replicate details.</span></span></code></pre></div>
 <p>The table below compares the ATE estimated using a Poisson and a
 negative binomial outcome model. The estimates can differ because the

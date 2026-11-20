@@ -60,8 +60,8 @@ If both method arguments are omitted,
 defaults to a T-learner with `outcome_method = "logistic"` for this
 outcome.
 
-`benefit_method` chooses how to construct the score, while
-`outcome_method` chooses the outcome-model method for that score:
+`outcome_method` selects how the outcome model is fitted, and
+`benefit_method` selects how the score is constructed.
 
 - A **T-learner** fits an outcome model in each treatment arm and
   subtracts predicted relapse probabilities. Here we can use logistic
@@ -93,13 +93,17 @@ validation is addressed below.
 ``` r
 
 fit_cate <- catefit(
-  response = "binary", data = binaryExample,
+  response = "binary",
+  data = binaryExample,
   outcome_model = outcome_formula,
   outcome_method = c("logistic", "logistic", "boosting"),
   benefit_method = c("t_learner", "two_regression", "t_learner"),
   ps_model = ps_formula,
-  higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
-  n.trees.boosting = 100, n.cores = 1
+  higher.y = FALSE,
+  prop.cutoff = c(0.5, 0.75, 1),
+  n.trees.boosting = 100,
+  seed = 999,
+  n.cores = 1
 )
 ```
 
@@ -124,10 +128,9 @@ fit_cate_reduced <- catefit(
 )
 ```
 
+Pass the same `benefit_model` to
 [`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
-does not currently accept a separate benefit formula, so its validation
-below applies to the default score specification used in this example,
-not to a fit with a different `benefit_model`.
+to validate that score specification.
 
 ## Inspect CATE scores and subgroup estimates
 
@@ -136,9 +139,8 @@ patients with different baseline covariates. Pass the complete
 `fit_cate` object to [`predict()`](https://rdrr.io/r/stats/predict.html)
 and use `method` to select a score. This fit contains three scores: use
 `"logistic"` for the logistic T-learner, `"two_regression"` for
-two-regression, or `"boosting"` for the boosting T-learner. The
-established name `"twoReg"` is also accepted. Because two T-learners are
-present, their outcome-method names identify which score to retrieve.
+two-regression, or `"boosting"` for the boosting T-learner. Use the
+outcome-method names to distinguish the two T-learners.
 
 [`predict()`](https://rdrr.io/r/stats/predict.html) returns the stored
 scores for the original analysis sample, in its original row order;
@@ -235,10 +237,18 @@ check support and model fit when choosing cutoffs for other data.
 ``` r
 
 fit_cv <- catecv(
-  response = "binary", data = binaryExample, score.method = c("logistic", "twoReg"),
-  cate.model = outcome_formula, ps.model = ps_formula, higher.y = FALSE,
-  prop.cutoff = c(0.5, 1), prop.multi = c(0, 0.5, 1),
-  cv.n = 10, B = 1, seed = 102
+  response = "binary",
+  data = binaryExample,
+  outcome_model = outcome_formula,
+  outcome_method = c("logistic", "logistic"),
+  benefit_method = c("t_learner", "two_regression"),
+  ps_model = ps_formula,
+  higher.y = FALSE,
+  prop.cutoff = c(0.5, 1),
+  prop.multi = c(0, 0.5, 1),
+  cv.n = 10,
+  B = 1,
+  seed = 102
 )
 plot(fit_cv, show.abc = FALSE)
 ```
