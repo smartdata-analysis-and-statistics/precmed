@@ -58,53 +58,66 @@ tau0
 This choice uses observed times, including censoring, and does not guarantee adequate follow-up. In practice, choose a clinically meaningful horizon and inspect numbers at risk and censoring near it in both groups.
 
 
-The mandatory arguments in `catefit()` are:
+### Specify the outcome, treatment and censoring models
 
-* `response`: "survival" in this example because we use have data with a survival outcome (e.g., number of days until the first relapse or censoring))
+The outcome formula uses `Surv(y, d)` for observed follow-up and the event
+indicator, with baseline covariates on the right. Outcome models are fitted
+separately by treatment arm, so treatment is not included in this formula. The
+treatment-model formula puts treatment on the left and baseline covariates on
+the right; it estimates propensity scores, the conditional probabilities of
+receiving treatment. The treatment labels `drug0` and `drug1` are recoded to
+0 and 1. In a randomized trial, an intercept-only treatment model can reflect
+a common assignment probability.
 
-* `data`: the name of the data set. (survival_data)
+Both formulas are needed because the doubly robust scores and subgroup effect
+estimates combine outcome predictions and propensity scores. T-learner scores
+use outcome predictions alone, but the treatment model is still used for the
+subgroup estimates reported by `catefit()`. Survival estimation also uses a
+censoring model to supply probabilities for inverse probability of censoring
+weighting (IPCW). Here the default censoring model uses the outcome-model
+covariates; see `?catefit` for alternatives.
 
-* `benefit_method` and `outcome_method` specify paired score-construction and outcome-model methods. The following existing score labels are returned:
+```{r}
+outcome_formula <- survival::Surv(y, d) ~ age + female +
+  previous_cost + previous_number_relapses
+ps_formula <- trt ~ age + previous_treatment
+```
 
-    *   `poisson` fits a Poisson model separately by treatment group.
+### Choose how to construct scores
 
-    *   `boosting` uses gradient boosted regression models (GBM) separately by treatment group.
-        
-    *   `randomForest` fits a random forest model by treatment group.
+`benefit_method` selects the score-construction approach, while
+`outcome_method` selects the outcome-model method for each score:
 
-    *   `twoReg` implements the doubly robust two regressions estimator in [@yadlowsky2020estimation].
+* A **T-learner** fits an outcome model in each treatment arm and compares
+  predicted restricted mean time lost. Available outcome methods include
+  Poisson, boosting and random forests.
+* **Two-regression** combines initial outcome predictions with propensity
+  scores and fits separate augmented outcome regressions before comparing arms.
+* **Contrast regression** combines initial outcome predictions with propensity
+  scores to fit a treatment-contrast model directly.
 
-    *   `contrastReg` implements the doubly robust contrast regression estimator from [@yadlowsky2020estimation].
+Two-regression and contrast regression are doubly robust methods
+[@yadlowsky2020estimation]. Their interpretation requires causal identification,
+positivity and suitable outcome, treatment and censoring model assumptions;
+truncation can affect robustness.
 
-* `outcome_model`: A formula describing the outcome model to be fitted. The outcome must appear on the left-hand side. In the example, we choose to specify to outcome model as a linear combination of the following covariates: age, sex, medical costs in the year prior to treatment initiation, and number of relapses in the year prior to treatment initiation. Non-linear or interaction terms could also be included. Note that the treatment variable is not supplied in `outcome_model` since this is an outcome model.
+### Fit two scores
 
-* `ps.model`: A formula describing the treatment model to be fitted. The treatment must appear on the left-hand side and the covariates (age and previous treatment in this example) on the right-hand side. The variable `trt` must be supplied as a numeric variable taking only 2 values, 1 for active treatment and 0 for control or comparator. If it is not the case, the function will stop with error if  `trt` takes more than 2 distinct values or will automatically transform `trt` into a numeric variable. In this example, `trt` (a factor variable taking values "drug0" and "drug1") was transformed and an informational message is shown (see output below): `Variable trt was recoded to 0/1 with drug0->0 and drug1->1`. If the data are from a RCT, it suffices to specify `ps.model` = trt ~ 1. The treatment model is used to estimate overall and subgroup average treatment effects. It is also used to fit the doubly robust two-regression and contrast-regression CATE scores; other scoring methods need not use it to construct their scores.  
+The entries in `outcome_method` and `benefit_method` are paired in order. To
+limit runtime, this example fits a random forest T-learner and contrast
+regression using logistic initial outcome models. `tau0` sets the RMTL horizon;
+`higher.y = TRUE` indicates that longer time to relapse is preferable, and the
+seed makes the fit reproducible. The fitted scores and subgroup effects use
+the full dataset; the validation section evaluates scores in held-out data.
 
-We also specified the following non-mandatory arguments to fit with the data and problem at hand: `initial.predictor.method`, `tau0`, `higher.y` and `seed`.
-
-* `initial.predictor.method` specifies how predictions of the outcome are estimated in two regressions and contrast regression. Flexible models can be used such as GBM ("boosting"), random forests ("randomForest") or logistic regression ("logistic"). We chose "logistic" because it is relatively faster than boosting methods and random forest.
-
-* `tau0` is the horizon for RMTL, chosen as described above; assess follow-up support near this horizon in both treatment groups. 
-
-* `higher.y` was set to `TRUE` because relapse is a negative event and longer time to first relapse is more desirable in our example. Hence, we are telling the function that subgroups of high responders to drug1 vs drug0 should have later onset of the first relapse. For a positive event such as discharge, a shorter time may instead be preferable, so `higher.y = FALSE` may be appropriate. It is important for this argument to match with the nature of `y` outcome because it will affect how the subgroups are defined by the CATE scores and the performance metrics.
-
-* We set a random seed `seed` = 999 to reproduce the results.
-
-* Boosting performance plots are hidden by default; set `plot.gbmperf = TRUE` to display them.
-
-Please see the [Function description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.html) section for details. 
-
-If you run into errors or warnings with your data, it might be helpful to go over the descriptions to see if you need to alter the default values. In this toy example, we keep the default values of the remaining arguments.
-For this toy example we selected `randomForest` and `contrastReg` to limit run time. 
 ```{r example_catefit, eval = T, echo = T, cache = F}
 fit_cate <- catefit(
   response = "survival",
   data = survival_data,
-  outcome_model = survival::Surv(y, d) ~ age + female +
-    previous_cost + previous_number_relapses,
+  outcome_model = outcome_formula,
   outcome_method = c("random_forest", "logistic"),
   benefit_method = c("t_learner", "contrast_regression"),
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = ps_formula,
   initial.predictor.method = "logistic",
   tau0 = tau0,
   higher.y = TRUE,

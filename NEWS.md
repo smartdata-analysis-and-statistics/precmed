@@ -56,8 +56,16 @@
 
 ## Minor changes
 
+* Reorganized the binary, count and survival CATE vignettes to introduce model
+  formulas, score-construction methods and fitted examples in sequence.
+
+* `catefit()` and its outcome-specific interfaces now expose `ps_model` and
+  `ps_method` after `benefit_method`. The dotted names
+  remain accepted through `...` with deprecation warnings; existing positional
+  CATE calls remain supported.
+
 * Outcome-specific `catefitbinary()`, `catefitcount()`, `catefitsurv()`, and
-  `catefitmean()` accept `outcome_model`, `benefit_method`, and `outcome_method`
+  `catefitmean()` accept `outcome_model`, `outcome_method`, and `benefit_method`
   in the same order as `catefit()`. Existing dotted arguments and positional calls remain supported.
   Continuous-outcome fitting remains unimplemented.
 

@@ -9,8 +9,8 @@ catefitcount(
   outcome_model = NULL,
   outcome_method = NULL,
   benefit_method = NULL,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   initial.predictor.method = "boosting",
   minPS = 0.01,
   maxPS = 0.99,
@@ -43,16 +43,16 @@ catefitcount(
 
 \item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side. The treatment must be a numeric vector
-coded as 0/1. If data are from a randomized trial, specify \code{ps.model} as an intercept-only model.}
+coded as 0/1. If data are from a randomized trial, specify \code{ps_model} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+Relevant only when \code{ps_model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on the covariates in \code{init.model} (or \code{outcome_model} when omitted). Only applies
@@ -132,14 +132,14 @@ outcomes support this list; continuous outcomes retain their existing solver.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
 and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 Returns a list containing the following components:
@@ -231,7 +231,7 @@ fit <- catefitcount(data = countExample,
                                  offset(log(years)),
                     outcome_method = "poisson",
                     benefit_method = "t_learner",
-                    ps.model = trt ~ age + previous_treatment,
+                    ps_model = trt ~ age + previous_treatment,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 }

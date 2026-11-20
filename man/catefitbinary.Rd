@@ -9,8 +9,8 @@ catefitbinary(
   outcome_model = NULL,
   outcome_method = NULL,
   benefit_method = NULL,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -36,18 +36,18 @@ and censoring models (if specified); a data frame with \code{n} rows (1 row per 
 
 \item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
 \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
 Numeric 0/1 values or two distinct treatment labels are also accepted.
-If data are from a randomized controlled trial, specify \code{ps.model = trt ~ 1} as an intercept-only model.}
+If data are from a randomized controlled trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+Relevant only when \code{ps_model} has more than one variable.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -70,7 +70,7 @@ Default is \code{NULL}, corresponding to no seed.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -98,7 +98,7 @@ or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Defaul
 \item{init.model}{Optional formula for the initial logistic outcome models
 used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 A \code{catefit} object containing treatment labels, fitted models,
@@ -124,7 +124,7 @@ fit <- catefitbinary(data = dat,
                      outcome_model = y ~ age + previous_treatment,
                      outcome_method = "logistic",
                      benefit_method = "t_learner",
-                     ps.model = trt ~ age + previous_treatment,
+                     ps_model = trt ~ age + previous_treatment,
                      seed = 2026)
 }
 }

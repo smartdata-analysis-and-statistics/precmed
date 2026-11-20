@@ -26,13 +26,23 @@ The binary outcome indicates at least one relapse within one year; treatment ass
 
 ## Estimate CATE scores
 
-CATE scores estimate the difference in relapse probability under drug1 versus
-drug0 for patients with given baseline covariates. We specify an outcome formula
-with the outcome and covariates used to fit the scores, and a treatment-model
-formula with treatment on the left. The treatment model estimates propensity
-scores: the probabilities of receiving each treatment given the covariates.
-It is used by the doubly robust `twoReg` score and subgroup estimators; the
-direct logistic and boosting scores are constructed from outcome predictions.
+CATE scores estimate the difference in relapse probability under drug 1 versus
+drug 0 for patients with given baseline covariates. A negative score favors drug 1.
+
+### Specify the outcome and treatment models
+
+The outcome formula puts the binary relapse outcome on the left and covariates
+used to model the outcome and score on the right. `catefit()` fits outcome
+models separately by treatment arm, so treatment does not need to appear in
+this formula. The treatment-model formula puts treatment on the left and
+baseline covariates on the right. It estimates propensity scores, the
+probabilities of receiving treatment conditional on those covariates.
+
+We supply both formulas because the doubly robust score and subgroup effect
+estimates use both outcome predictions and propensity scores. The T-learner
+scores themselves use outcome predictions; the treatment model is still used
+for the subgroup estimates reported by `catefit()`. In a randomized trial an
+intercept-only treatment model can reflect a common assignment probability.
 
 ```{r}
 outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
@@ -40,22 +50,35 @@ outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
 ps_formula <- trt ~ age + previous_treatment
 ```
 
-The `logistic` method fits a separate logistic
-outcome model in each treatment arm and subtracts their predicted risks;
-`twoReg` cross-fits separate logistic
-outcome models and a treatment model, then projects augmented outcomes for each
-arm onto the outcome-model design. The difference is a doubly robust linear
-projection of the risk difference if either the treatment model or both outcome
-models are correct, subject to identification, positivity and truncation.
-It need not lie between -1 and 1. The `boosting` method fits a Bernoulli gradient
-boosting model in each treatment arm and subtracts the predicted relapse
-probabilities. Five-fold cross-validation selects the number of trees in each
-arm; `tree.depth` and `n.trees.boosting` control the fitted trees. These scores
-are estimated on the training data; the subgroup ATEs shown by
-`catefit()` use the doubly robust estimator and the same data used to build the
-scores, so they may be optimistic. Chapter 17, "Introduction to methods for
-personalizing medicine," discusses treatment effect heterogeneity and CATE
-prediction [@hoogland2026introduction].
+### Choose how to construct scores
+
+`benefit_method` chooses how to construct the score, while `outcome_method`
+chooses the outcome-model method for that score:
+
+* A **T-learner** fits an outcome model in each treatment arm and subtracts
+  predicted relapse probabilities. Here we can use logistic regression or
+  Bernoulli gradient boosting. Five-fold cross-validation selects the number
+  of trees for boosting in each arm.
+* **Two-regression** cross-fits logistic outcome models and a treatment model,
+  then projects augmented outcomes for each arm onto the outcome-model design.
+  Their difference is a linear projection of the risk difference, which need
+  not lie between -1 and 1. Subject to causal identification, positivity and
+  the effect of propensity-score truncation, it is doubly robust if either the
+  treatment model or both outcome models are correct.
+
+Contrast regression is another score-construction method available for count
+and survival outcomes, but it is not implemented for binary outcomes. Chapter
+17 discusses treatment effect heterogeneity and CATE prediction
+[@hoogland2026introduction].
+
+### Fit three scores
+
+The entries of `outcome_method` and `benefit_method` are paired in order. The
+following call fits three scores: a logistic T-learner, two-regression with
+logistic outcome models, and a boosting T-learner. `higher.y = FALSE` ranks
+patients with lower predicted risk differences as greater responders, because
+relapse is undesirable. The fitted scores and subgroup effects use the fitting
+data and may be optimistic; their validation is addressed below.
 
 ```{r}
 fit_cate <- catefit(
@@ -63,7 +86,7 @@ fit_cate <- catefit(
   outcome_model = outcome_formula,
   outcome_method = c("logistic", "logistic", "boosting"),
   benefit_method = c("t_learner", "two_regression", "t_learner"),
-  ps.model = ps_formula,
+  ps_model = ps_formula,
   higher.y = FALSE, prop.cutoff = c(0.5, 0.75, 1), seed = 999,
   n.trees.boosting = 100, n.cores = 1
 )

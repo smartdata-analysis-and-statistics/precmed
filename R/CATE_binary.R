@@ -43,7 +43,7 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
 #' @param init.model Optional formula for the initial logistic outcome models
 #' used by \code{twoReg}; \code{NULL} uses \code{outcome_model}.
-#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @param ... Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 #' @return A \code{catefit} object containing treatment labels, fitted models,
 #'   predicted risk-difference scores and nested subgroup risk differences for
 #'   each requested method. Linear \code{twoReg} score coefficients are stored
@@ -59,15 +59,21 @@ binary_boosting <- function(d, tree.depth, n.trees.boosting, plot.gbmperf, ...) 
 #'                      outcome_model = y ~ age + previous_treatment,
 #'                      outcome_method = "logistic",
 #'                      benefit_method = "t_learner",
-#'                      ps.model = trt ~ age + previous_treatment,
+#'                      ps_model = trt ~ age + previous_treatment,
 #'                      seed = 2026)
 #' }
 #' @author Thomas Debray \email{tdebray@fromdatatowisdom.com}
 #' @export
-catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_method = NULL, ps.model, ps.method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
+catefitbinary <- function(data, outcome_model = NULL, outcome_method = NULL, benefit_method = NULL, ps_model, ps_method = "glm", minPS = 0.01, maxPS = 0.99, higher.y = TRUE, prop.cutoff = seq(0.5, 1, length = 6), seed = NULL, ps.control = list(), B = 3, Kfold = 5,
                           tree.depth = 2, n.trees.boosting = 200, plot.gbmperf = FALSE, init.model = NULL, ...) {
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
+  .args <- as.list(match.call())[-1L]
+  aliases <- intersect(names(.args), c("ps.model", "ps.method"))
+  .args <- resolve_cate_ps_aliases(.args)
+  if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
+  if (!missing(ps_model)) ps.model <- ps_model
+  ps.method <- ps_method
   config <- resolve_catefit_arguments("binary", outcome_model, outcome_method, benefit_method, NULL, NULL)
   cate.model <- config$outcome_model
   score.method <- config$scores

@@ -10,8 +10,8 @@ catefit(
   outcome_model,
   outcome_method = NULL,
   benefit_method,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   init.model = NULL,
   initial.predictor.method = NULL,
   ipcw.model = NULL,
@@ -75,18 +75,18 @@ The previous method names \code{"twoReg"} and \code{"contrastReg"} are
 accepted as aliases for \code{"two_regression"} and
 \code{"contrast_regression"}, respectively.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
 \code{FALSE} and \code{TRUE} are mapped to 0 and 1, respectively.
 Numeric 0/1 values or two distinct treatment labels are also accepted.
-If data are from a randomized controlled trial, specify \code{ps.model = trt ~ 1} as an intercept-only model.}
+If data are from a randomized controlled trial, specify \code{ps_model = trt ~ 1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+Relevant only when \code{ps_model} has more than one variable.}
 
 \item{init.model}{Optional formula for the initial treatment-specific outcome models
 used by \code{twoReg} and \code{contrastReg} (binary outcomes support
@@ -213,7 +213,7 @@ for survival outcomes; independent of \code{contrast.control}.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -221,7 +221,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.
+\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 The old named arguments \code{score.method} and \code{cate.model} are
 accepted with deprecation warnings. Legacy score names and positional calls
 remain supported when \code{outcome_method} is omitted.}
@@ -316,7 +316,7 @@ fit_1 <- catefit(response = "count",
                                   offset(log(years)),
                  outcome_method = "poisson",
                  benefit_method = "t_learner",
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  higher.y = TRUE,
                  seed = 999)
 
@@ -334,7 +334,7 @@ fit_2 <- catefit(response = "survival",
                                            previous_number_relapses,
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)

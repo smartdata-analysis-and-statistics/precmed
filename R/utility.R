@@ -740,3 +740,17 @@ legacy_ate_positional_call <- function(call, fun, caller) {
   matched <- match.call(definition = old_signature, call = call)
   do.call(fun, as.list(matched)[-1L], envir = caller)
 }
+
+# Author: Thomas Debray
+resolve_cate_ps_aliases <- function(args) {
+  for (old in c("ps.model", "ps.method")) {
+    new <- if (old == "ps.model") "ps_model" else "ps_method"
+    indices <- which(names(args) == old)
+    if (!length(indices)) next
+    if (length(indices) > 1L || new %in% names(args))
+      stop("Specify only ", new, "; ", old, " is deprecated.", call. = FALSE)
+    warning(old, " is deprecated for catefit(); use ", new, " instead.", call. = FALSE)
+    names(args)[indices] <- new
+  }
+  args
+}

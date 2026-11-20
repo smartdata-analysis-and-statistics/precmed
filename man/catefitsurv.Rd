@@ -9,8 +9,8 @@ catefitsurv(
   outcome_model = NULL,
   outcome_method = NULL,
   benefit_method = NULL,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   initial.predictor.method = "randomForest",
   ipcw.model = NULL,
   ipcw.method = "breslow",
@@ -50,16 +50,16 @@ and censoring models (if specified); a data frame with \code{n} rows (1 row per 
 
 \item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+If data are from a randomized controlled trial, specify \code{ps_model = ~1} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of:
 \code{'glm'} for logistic regression with main effects only (default), or
 \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+Relevant only when \code{ps_model} has more than one variable.}
 
 \item{initial.predictor.method}{A character vector for the method used to get initial
 outcome predictions conditional on \code{init.model} (or \code{outcome_model} when omitted). Only applies
@@ -165,7 +165,7 @@ integration, and is not passed to boosting via \code{...}.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -176,7 +176,7 @@ and survival initial-predictor forests. Use \code{n.trees.rf} for the number of 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
 and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 Returns an object of the class \code{catefit} containing the following components:
@@ -298,7 +298,7 @@ fit <- catefitsurv(data = survivalExample,
                                              previous_number_relapses,
                    outcome_method = "random_forest",
                    benefit_method = "t_learner",
-                   ps.model = trt ~ age + previous_treatment,
+                   ps_model = trt ~ age + previous_treatment,
                    ipcw.model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,
                    seed = 999)

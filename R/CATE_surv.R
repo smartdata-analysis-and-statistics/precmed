@@ -9,9 +9,9 @@
 #' @param outcome_model Outcome and score covariate formula; replaces \code{cate.model}.
 #' @param outcome_method Outcome-model methods paired with \code{benefit_method}; see \code{\link{catefit}}.
 #' @param benefit_method Score-construction methods; see \code{\link{catefit}}.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
+#' @param ps_model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 #' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
+#' If data are from a randomized controlled trial, specify \code{ps_model = ~1} as an intercept-only model.
 #' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
 #' and \code{contrastReg}; defaults to \code{outcome_model}. The outcome must match.
 #' @details The legacy arguments \code{score.method} and \code{cate.model} are accepted through \code{...}; see \code{\link{catefit}}.
@@ -39,12 +39,12 @@
 #' The length of \code{prop.cutoff} is the number of nested subgroups.
 #' An equally-spaced sequence of proportions ending with 1 is recommended.
 #' Default is \code{seq(0.5, 1, length = 6)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
+#' @param ps_method A character value for the method to estimate the propensity score.
 #' Allowed values include one of:
 #' \code{'glm'} for logistic regression with main effects only (default), or
 #' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
+#' two-way interactions (added to the model if interactions are not specified in \code{ps_model}).
+#' Relevant only when \code{ps_model} has more than one variable.
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
@@ -92,7 +92,7 @@
 #' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
 #' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
 #' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
-#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @param ... Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @return Returns an object of the class \code{catefit} containing the following components:
 #' \itemize{
@@ -211,7 +211,7 @@
 #'                                              previous_number_relapses,
 #'                    outcome_method = "random_forest",
 #'                    benefit_method = "t_learner",
-#'                    ps.model = trt ~ age + previous_treatment,
+#'                    ps_model = trt ~ age + previous_treatment,
 #'                    ipcw.model = ~ age + previous_cost + previous_treatment,
 #'                    tau0 = tau0,
 #'                    seed = 999)
@@ -232,7 +232,7 @@
 #' integration, and is not passed to boosting via \code{...}.
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
 #' @export
@@ -241,8 +241,8 @@ catefitsurv <- function(data,
                         outcome_model = NULL,
                         outcome_method = NULL,
                         benefit_method = NULL,
-                        ps.model,
-                        ps.method = "glm",
+                        ps_model,
+                        ps_method = "glm",
                         initial.predictor.method = "randomForest",
                         ipcw.model = NULL,
                         ipcw.method = "breslow",
@@ -267,6 +267,12 @@ catefitsurv <- function(data,
                         rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL, ...) {
   old_call <- rematch_catefit_legacy_call(sys.function(), sys.call(), parent.frame())
   if (!is.null(old_call)) return(do.call(sys.function(), old_call, envir = parent.frame()))
+  .args <- as.list(match.call())[-1L]
+  aliases <- intersect(names(.args), c("ps.model", "ps.method"))
+  .args <- resolve_cate_ps_aliases(.args)
+  if (length(aliases)) return(do.call(sys.function(), .args, envir = parent.frame()))
+  if (!missing(ps_model)) ps.model <- ps_model
+  ps.method <- ps_method
   config <- resolve_catefit_arguments("survival", outcome_model, outcome_method, benefit_method, NULL, NULL, initial.predictor.method, missing(initial.predictor.method))
   cate.model <- config$outcome_model
   score.method <- config$scores

@@ -9,8 +9,8 @@ catefitmean(
   outcome_model = NULL,
   outcome_method = NULL,
   benefit_method = NULL,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   init.model = NULL,
   initial.predictor.method = "boosting",
   minPS = 0.01,
@@ -44,15 +44,15 @@ a data frame with \code{n} rows (1 row per observation).}
 
 \item{benefit_method}{Score-construction methods; see \code{\link{catefit}}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
+\item{ps_model}{A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side.
 The treatment must be a numeric vector coded as 0/1.
-If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
+If data are from a RCT, specify \code{ps_model} as an intercept-only model.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
+\item{ps_method}{A character value for the method to estimate the propensity score.
 Allowed values include one of: \code{'glm'} for logistic regression with main effects only
 (default), or \code{'lasso'} for a logistic regression with main effects and LASSO penalization
-on two-way interactions (added to the model if not specified in \code{ps.model}).}
+on two-way interactions (added to the model if not specified in \code{ps_model}).}
 
 \item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
 and \code{contrastReg}. The outcome must match \code{cate.model}; the default
@@ -133,7 +133,7 @@ be printed. \code{0} means no outputs. \code{1} means only progress and run time
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -141,7 +141,7 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Legacy arguments \code{ps.model} and \code{ps.method} are accepted with warnings. Additional boosting arguments; see \code{\link{boosting-control}}.}
 }
 \value{
 Returns a list containing the following components:

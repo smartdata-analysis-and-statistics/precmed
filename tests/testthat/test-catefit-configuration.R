@@ -1,6 +1,6 @@
 test_that("paired CATE configurations retain existing score calculations", {
   d <- simulate_count(n = 500, seed = 202)
-  args <- list(response = "count", data = d, ps.model = trt ~ age,
+  args <- list(response = "count", data = d, ps_model = trt ~ age,
                prop.cutoff = 1, B = 1, Kfold = 2, seed = 203)
   outcome <- y ~ age + offset(log(years))
   modern <- suppressWarnings(do.call(catefit, c(args, list(
@@ -32,7 +32,7 @@ test_that("paired CATE configurations retain existing score calculations", {
     local_formula <- outcome
     catefit("count", local_data, benefit_method = "t_learner",
             outcome_method = "poisson", outcome_model = local_formula,
-            ps.model = trt ~ age, prop.cutoff = 1, seed = 203)
+            ps_model = trt ~ age, prop.cutoff = 1, seed = 203)
   }
   expect_equal(local_fit()$score.poisson, modern$score.poisson)
 })
@@ -42,14 +42,14 @@ test_that("CATE configuration checks supported pairs and compatibility aliases",
     "count", c("twoReg", "contrastReg"), c("poisson", "poisson")))
   expect_identical(config$scores, c("twoReg", "contrastReg"))
   d <- simulate_binary(n = 300, seed = 204)
-  expect_identical(names(formals(catefit))[1:5],
-                   c("response", "data", "outcome_model", "outcome_method", "benefit_method"))
+  expect_identical(names(formals(catefit))[1:7],
+                   c("response", "data", "outcome_model", "outcome_method", "benefit_method", "ps_model", "ps_method"))
   args <- list(response = "binary", data = d, outcome_model = y ~ age,
-               ps.model = trt ~ age, prop.cutoff = 1, B = 1, Kfold = 2, seed = 205)
+               ps_model = trt ~ age, prop.cutoff = 1, B = 1, Kfold = 2, seed = 205)
   fit <- do.call(catefit, c(args, list(benefit_method = c("t_learner", "two_regression"),
                                       outcome_method = c("logistic", "logistic"))))
   legacy <- suppressWarnings(catefit("binary", d, score.method = c("logistic", "twoReg"),
-                                      cate.model = y ~ age, ps.model = trt ~ age,
+                                      cate.model = y ~ age, ps_model = trt ~ age,
                                       prop.cutoff = 1, B = 1, Kfold = 2, seed = 205))
   expect_equal(fit, legacy)
   positional <- catefit("binary", d, y ~ age, c("logistic", "logistic"),
@@ -83,7 +83,7 @@ test_that("CATE configuration checks supported pairs and compatibility aliases",
 
 test_that("survival configurations preserve cross-fitted outcome models", {
   d <- simulate_survival(n = 500, seed = 206)
-  args <- list(response = "survival", data = d, ps.model = trt ~ age,
+  args <- list(response = "survival", data = d, ps_model = trt ~ age,
                tau0 = median(d$y) * 1.1, prop.cutoff = c(.8, 1), B = 1, Kfold = 2, seed = 207)
   formula <- survival::Surv(y, d) ~ age
   modern <- suppressWarnings(suppressMessages(do.call(catefit, c(args, list(
