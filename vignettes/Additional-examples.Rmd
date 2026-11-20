@@ -21,13 +21,15 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
 options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not match vignette title
 doc.cache <- TRUE
-# Recompute cached results after R or dependency updates.
+# Recompute cached results after changes to the installed package, R, or dependencies.
+package_code <- system.file("R", "precmed.rdb", package = "precmed")
 vignette.packages <- c("precmed", tools::package_dependencies(
   "precmed", db = utils::installed.packages(),
   which = c("Depends", "Imports"), recursive = TRUE
 )[["precmed"]])
 knitr::opts_chunk$set(cache.extra = list(
   R = R.version.string,
+  package_code = if (nzchar(package_code)) unname(tools::md5sum(package_code)),
   packages = vapply(setdiff(vignette.packages, "R"), function(pkg) {
     as.character(utils::packageVersion(pkg))
   }, character(1))
@@ -60,32 +62,36 @@ The main example above used a Poisson regression but you can try the other 2 non
 
 ```{r initial_predictor_gbm_gam_count, eval = F, echo = T, cache = doc.cache}
 # An example of using GBM as the initial predictor method
-catecvcount(data = countExample,
-       score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
-       n.cores = 1,
-       cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-       ps.model = trt ~ age + previous_treatment, 
-       higher.y = FALSE,
-       initial.predictor.method = "boosting",       # NEW
-       cv.n = 5, 
-       seed = 999,
-       verbose = 0)
+catecvcount(
+  data = countExample,
+  outcome_model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "boosting", "boosting", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  cv.n = 5,
+  seed = 999,
+  verbose = 0,
+  n.cores = 1
+)
 
 # An example of using GAM as the initial predictor method
-catecvcount(data = countExample,
-       score.method = c("poisson", "boosting", "twoReg", "contrastReg", "negBin"),
-       n.cores = 1,
-       cate.model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
-       ps.model = trt ~ age + previous_treatment, 
-       higher.y = FALSE, 
-       initial.predictor.method = "gam",        # NEW
-       xvar.smooth = c("age", "previous_cost"), # NEW
-       cv.n = 5,
-       seed = 999,
-       verbose = 0)
+catecvcount(
+  data = countExample,
+  outcome_model = y ~ age + female + previous_treatment + previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_method = c("poisson", "boosting", "gam", "gam", "negative_binomial"),
+  benefit_method = c("t_learner", "t_learner", "two_regression", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
+  higher.y = FALSE,
+  cv.n = 5,
+  xvar.smooth = c("age", "previous_cost"), # NEW
+  seed = 999,
+  verbose = 0,
+  n.cores = 1
+)
 ```
 
-Note that for the GAM method, there is an additional argument called `xvar.smooth`. If left as default (which is NULL), GAM will include all independent variables in `cate.model` as smooth terms with function `s()` in the linear predictor. You can choose to specify only a subset of the dependent variables as the smooth terms. In the example above, the specifications `cate.model` and `xvar.smooth` lead to the following GAM formula: `y ~ female + previous_treatment + previous_number_relapses + s(age) + s(previous_cost)`, where only age and previous medical costs are wrapped in the smooth function and the remaining 3 independent variables are not. 
+Note that for the GAM method, there is an additional argument called `xvar.smooth`. If left as default (which is NULL), GAM will include all independent variables in `outcome_model` as smooth terms with function `s()` in the linear predictor. You can choose to specify only a subset of the dependent variables as the smooth terms. In the example above, the specifications `outcome_model` and `xvar.smooth` lead to the following GAM formula: `y ~ female + previous_treatment + previous_number_relapses + s(age) + s(previous_cost)`, where only age and previous medical costs are wrapped in the smooth function and the remaining 3 independent variables are not.
 
 Generally speaking, the "poisson" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "gam" is somewhere in between with longer computational time as the number of smooth terms increases.
 
@@ -105,14 +111,14 @@ Now we show more examples of different cutoffs and how they are reflected in the
 fit_cv_2 <- catecv(
   response = "count",
   data = countExample,
-  score.method = c("poisson", "contrastReg", "negBin"),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
+  outcome_method = c("poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
   prop.cutoff = seq(0.5, 1, length = 11), # NEW
-  prop.multi = c(0, 1/4, 2/4, 3/4, 1),    # NEW
-  initial.predictor.method = "poisson",
+  prop.multi = c(0, 1/4, 2/4, 3/4, 1), # NEW
   cv.n = 5,
   seed = 999,
   verbose = 0
@@ -153,11 +159,11 @@ In this next example, `prop.cutoff` includes 0.01, which is very close to 0. Con
 fit_cv_3 <- catecv(
   response = "count",
   data = countExample,
-  score.method = c("poisson", "contrastReg", "negBin"),
-  cate.model = y ~ age + female + previous_treatment +
+  outcome_model = y ~ age + female + previous_treatment +
     previous_cost + previous_number_relapses + offset(log(years)),
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "poisson",
+  outcome_method = c("poisson", "poisson", "negative_binomial"),
+  benefit_method = c("t_learner", "contrast_regression", "t_learner"),
+  ps_model = trt ~ age + previous_treatment,
   higher.y = FALSE,
   prop.cutoff = c(0, 0.01, 0.30, 0.75, 1), # NEW
   cv.n = 5,
@@ -191,7 +197,7 @@ If you choose two and/or contrast regression as the scoring method, there is an 
 -   "boosting" (gradient boosting machine from the `gbm3` R package)
     -   ensemble method, typically tree-based, assume the time-to-event
         outcome as Gaussian distributed, slow
--   "randomForest" (random survival forest model from the
+-   `"random_forest"` (random survival forest model from the
     `randomForestSRC` package)
     -   ensemble method, tree-based, non-parametric, can be slow
 
@@ -204,47 +210,53 @@ as the example code but this can be applied to `catefit()` as well.
 tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
-catecv(response = "survival",
-       data = survivalExample,
-       score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-       ps.model = trt ~ age + previous_treatment,
-       ipcw.model = NULL,
-       followup.time = NULL,
-       tau0 = tau0,
-       surv.min = 0.025,
-       higher.y = TRUE,
-       prop.cutoff = seq(0.6, 1, length = 5),
-       prop.multi = c(0, 0.5, 0.6, 1),
-       cv.n = 5,
-       initial.predictor.method = "boosting", # NEW
-       tree.depth = 3,                        # NEW
-       seed = 999,
-       verbose = 0)
+catecv(
+  response = "survival",
+  data = survivalExample,
+  outcome_model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
+  outcome_method = c("poisson", "boosting", "random_forest", "boosting", "boosting"),
+  benefit_method = c("t_learner", "t_learner", "t_learner", "two_regression", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
+  tree.depth = 3, # NEW
+  seed = 999,
+  verbose = 0
+)
 
 # An example of using random forest as the initial predictor method
-catecv(response = "survival",
-       data = survivalExample,
-       score.method = c("poisson", "boosting", "randomForest", "twoReg", "contrastReg"),
-       cate.model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
-       ps.model = trt ~ age + previous_treatment,
-       ipcw.model = NULL,
-       followup.time = NULL,
-       tau0 = tau0,
-       surv.min = 0.025,
-       higher.y = TRUE,
-       prop.cutoff = seq(0.6, 1, length = 5),
-       prop.multi = c(0, 0.5, 0.6, 1),
-       cv.n = 5,
-       initial.predictor.method = "randomForest", # NEW
-       n.trees.rf = 500,                          # NEW
-       seed = 999,
-       verbose = 0)
+catecv(
+  response = "survival",
+  data = survivalExample,
+  outcome_model = survival::Surv(y, d) ~ age + female + previous_cost + previous_number_relapses,
+  outcome_method = c("poisson", "boosting", "random_forest", "random_forest", "random_forest"),
+  benefit_method = c("t_learner", "t_learner", "t_learner", "two_regression", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
+  followup.time = NULL,
+  tau0 = tau0,
+  higher.y = TRUE,
+  prop.cutoff = seq(0.6, 1, length = 5),
+  prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
+  n.trees.rf = 500, # NEW
+  seed = 999,
+  verbose = 0
+)
 ```
 
 For boosting, `tree.depth` and `n.trees.boosting` control tree depth and the maximum number of trees. For random forests, `n.trees.rf` sets the number of trees, and `rf.control` can set forest options, for example `rf.control = list(mtry = 3, nodesize = 15)`. These options also apply when random forest is the initial predictor.
 
-Generally speaking, the "fractional_logit" initial predictor method is the fastest and "boosting" is the slowest among the 3 methods, while "randomForest" is often somewhere in between; computation time depends on the data and forest settings.
+Fractional logit (`"fractional_logit"`) is generally the fastest of the three
+outcome methods. Boosting (`"boosting"`) is usually slower, and random forests
+(`"random_forest"`) often fall in between. Run time depends on the data and model settings.
 
 ### Subgroup proportion
 
@@ -264,19 +276,19 @@ tau0 <- with(survivalExample,
 fit_cv_2 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("randomForest", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = NULL,
+  outcome_method = c("random_forest", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = seq(0.6, 1, length = 9), # NEW
-  prop.multi = c(0, 0.4, 0.5, 0.6, 1),   # NEW
+  prop.multi = c(0, 0.4, 0.5, 0.6, 1), # NEW
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
@@ -314,19 +326,19 @@ In this example, `prop.cutoff` includes 0.01, which is very close to 0. Conseque
 fit_cv_3 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = NULL,
+  outcome_method = "fractional_logit",
+  benefit_method = "contrast_regression",
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = NULL,
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = c(0, 0.1, 0.75, 1), # NEW
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 1
 )
@@ -346,27 +358,27 @@ Below are some general recommendations on the choice of `prop.cutoff` and `prop.
 
 ### Censoring model and method
 
-The censoring model estimates the probabilities used for inverse probability of censoring weighting (IPCW). The default censoring model uses the same covariates as the outcome model `cate.model` plus the treatment. The default IPCW method is a Cox regression with Breslow estimator of the baseline survivor function from `coxph()` function in the `survival` package. Different variables or different method can be specified in the censoring model. In the example below, we changed the covariates to the number of symptoms and number relapses in the pre-index period and specified the Weibull accelerated failure time (AFT) regression model using the location-scale parameterization. The `survreg()` function in the `survival` package was used to fit the AFT model.
+The censoring model estimates the probabilities used for inverse probability of censoring weighting (IPCW). The default censoring model uses the same covariates as the outcome model `outcome_model` plus the treatment. The default IPCW method is a Cox regression with Breslow estimator of the baseline survivor function from `coxph()` function in the `survival` package. Different variables or different method can be specified in the censoring model. In the example below, we changed the covariates to the number of symptoms and number relapses in the pre-index period and specified the Weibull accelerated failure time (AFT) regression model using the location-scale parameterization. The `survreg()` function in the `survival` package was used to fit the AFT model.
 
 ```{r ipcw, eval = F, echo = T, cache = doc.cache}
 # An example of a different censoring model with different covariates from default
 fit_cv_4 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("poisson", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = ~ previous_number_symptoms + previous_number_relapses, # NEW
-  ipcw.method = "aft (weibull)", # NEW
+  outcome_method = c("poisson", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = ~ previous_number_symptoms + previous_number_relapses, # NEW
+  censoring_method = "aft (weibull)", # NEW
   followup.time = NULL,
   tau0 = tau0,
-  surv.min = 0.025,
   higher.y = TRUE,
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
   cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )
@@ -383,20 +395,20 @@ In the main example, we used the minimum of the 95th percentile of survival time
 fit_cv_5 <- catecv(
   response = "survival",
   data = survivalExample,
-  score.method = c("poisson", "contrastReg"),
-  cate.model = survival::Surv(y, d) ~ age + female +
+  outcome_model = survival::Surv(y, d) ~ age + female +
     previous_cost + previous_number_relapses,
-  ps.model = trt ~ age + previous_treatment,
-  initial.predictor.method = "fractional_logit",
-  ipcw.model = ~ previous_number_symptoms + previous_number_relapses,
-  ipcw.method = "aft (weibull)",
+  outcome_method = c("poisson", "fractional_logit"),
+  benefit_method = c("t_learner", "contrast_regression"),
+  ps_model = trt ~ age + previous_treatment,
+  censoring_model = ~ previous_number_symptoms + previous_number_relapses,
+  censoring_method = "aft (weibull)",
   followup.time = NULL,
   tau0 = NULL, # NEW
   higher.y = TRUE,
-  cv.n = 5,
-  surv.min = 0.025,
   prop.cutoff = seq(0.6, 1, length = 5),
   prop.multi = c(0, 0.5, 0.6, 1),
+  cv.n = 5,
+  surv.min = 0.025,
   seed = 999,
   verbose = 0
 )

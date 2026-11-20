@@ -42,8 +42,7 @@ test_that("survival T-learners handle intercept-only and reject unsupported comb
   expect_true(all(is.finite(suppressWarnings(suppressMessages(do.call(catefitsurv, args)))$score.weibull)))
   args$benefit_method <- "contrast_regression"
   expect_error(do.call(catefitsurv, args), "not supported")
-  expect_error(catecvsurv(d, score.method = "coxph", cate.model = survival::Surv(y, d) ~ age,
-                          ps.model = trt ~ age, tau0 = tau), "only by catefit")
+  expect_error(do.call(catecvsurv, args), "not supported")
   args$benefit_method <- "t_learner"; args$outcome_method <- "coxph"
   one_arm <- d[d$trt == d$trt[1], , drop = FALSE]
   args$data <- one_arm

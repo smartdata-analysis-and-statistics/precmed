@@ -116,8 +116,8 @@ Default is \code{NULL}, corresponding to no seed.}
 \code{outcome_method = 'boosting'}. Default is \code{FALSE}.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
-be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-\code{2} means progress, run time, and all errors and warnings. Default is \code{0}.}
+be printed. \code{0} means no outputs. \code{1} means progress messages.
+\code{2} means progress messages and all errors and warnings. Default is \code{0}.}
 
 \item{contrast.control}{A named list of options for count or survival contrast
 regression. Supported names are \code{solver} (\code{"C"}, the default, or
@@ -212,15 +212,14 @@ suitable to inspect the estimated ATEs across scoring methods as it implements i
 validation to reduce optimism.
 }
 \examples{
-fit <- catefitcount(data = countExample,
-                    outcome_model = y ~ age + female + previous_treatment +
-                                 previous_cost + previous_number_relapses +
-                                 offset(log(years)),
-                    outcome_method = "poisson",
-                    benefit_method = "t_learner",
-                    ps_model = trt ~ age + previous_treatment,
-                    higher.y = FALSE,
-                    seed = 999, verbose = 1)
+catefitcount(data = countExample,
+             outcome_model = y ~ age + female + previous_treatment +
+               previous_cost + previous_number_relapses + offset(log(years)),
+             outcome_method = "poisson",
+             benefit_method = "t_learner",
+             ps_model = trt ~ age + previous_treatment,
+             higher.y = FALSE,
+             seed = 999, verbose = 1)
 }
 \references{
 Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).

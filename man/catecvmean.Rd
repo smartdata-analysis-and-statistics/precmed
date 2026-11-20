@@ -2,16 +2,16 @@
 % Please edit documentation in R/crossv.R
 \name{catecvmean}
 \alias{catecvmean}
-\title{Cross-validation of the conditional average treatment effect (CATE) score for continuous outcomes}
+\title{Cross-validation for continuous outcomes}
 \usage{
 catecvmean(
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  init.model = NULL,
-  initial.predictor.method = "boosting",
+  outcome_model,
+  outcome_method = NULL,
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -43,33 +43,26 @@ catecvmean(
 \item{data}{A data frame containing the variables in the outcome and treatment models;
 a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code{'contrastReg'},
-\code{'randomForest'}, \code{'gam'}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates. Use a
+\code{Surv} response for survival and include an exposure offset for count outcomes.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model method. Continuous-outcome cross-validation is not
+implemented.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
-The treatment must appear on the left-hand side. The treatment must be a numeric vector
-coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.}
+\item{benefit_model}{Optional one-sided formula for the covariates and terms used in
+two-regression and contrast-regression scores. The default uses the terms in
+\code{outcome_model}. T-learners use \code{outcome_model} directly.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+\item{benefit_method}{Score-construction method. Continuous-outcome cross-validation is
+not implemented.}
 
-\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-\code{NULL} uses \code{cate.model}.}
+\item{ps_model}{A formula for the treatment model, with treatment on the left. It
+estimates propensity scores. For a common randomization probability, use an intercept-only
+formula such as \code{trt ~ 1}.}
 
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates in \code{cate.model}
-in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
-one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-Default is \code{'boosting'}.}
+\item{ps_method}{Treatment-model fitting method. The default \code{'glm'} uses logistic
+regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+interactions.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -95,7 +88,7 @@ Each element represents the cutoff to separate the observations into
 Default is \code{c(0, 1/3, 2/3, 1)}.}
 
 \item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
+at each cross-validation iterations, for each scoring method. Default is \code{TRUE}.}
 
 \item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
@@ -111,50 +104,30 @@ to define a balanced training-validation splitting. Default is \code{0.1}.}
 \item{max.iter}{A positive integer value indicating the maximum number of iterations when
 searching for a balanced training-validation split. Default is \code{5,000}.}
 
-\item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-from the variables listed in \code{cate.model}.
-Default is \code{NULL}, which uses all variables in \code{cate.model}.}
+\item{xvar.smooth.score}{Reserved for continuous-outcome scores.}
 
-\item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{init.model}.
-Default is \code{NULL}, which uses all variables in \code{init.model}.}
+\item{xvar.smooth.init}{Reserved for continuous-outcome validation. Use \code{xvar.smooth}
+for count outcomes.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{2}.}
+\item{tree.depth}{Maximum depth of boosting trees. Defaults to 2.}
 
-\item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-Default is \code{1000}.}
+\item{n.trees.rf}{Number of trees for survival random forests. Defaults to 1000.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used only if \code{score.method = 'boosting'} or
-if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-\code{initial.predictor.method = 'boosting'}. Default is \code{200}.}
+\item{n.trees.boosting}{Maximum number of trees for boosting. Defaults to 200.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of cross-fitting repetitions used by two-regression and contrast
+regression. Defaults to 3.}
 
-\item{Kfold}{A positive integer specifying the number of folds (parts) used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-Default is \code{6}.}
+\item{Kfold}{Number of folds used for cross-fitting within each training set. Defaults to
+6.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance. Defaults to FALSE.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Newton–Raphson convergence tolerance for contrast regression. Defaults
+to 0.001.}
 
-\item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
-Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+\item{tune}{Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+\code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
@@ -165,7 +138,7 @@ be printed. \code{0} means no outputs. \code{1} means only progress bar and run 
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -173,130 +146,12 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+supported for backward compatibility and emit warnings.}
 }
 \value{
-Returns a list containing the following components saved as a \code{"precmed"} object:
-\itemize{
- \item{\code{ate.gaussian}: }A list of results output if \code{score.method} includes
- \code{'gaussian'}:
- \itemize{
-    \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
-    \code{length(prop.cutoff)} rows and \code{cv.n} columns.
-    The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
-    defined by CATE score above (if \code{higher.y = TRUE}) or below (if \code{higher.y = FALSE}) the
-    \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.
-    \item{\code{ate.est.train.low.cv}: }A matrix of numerical values with
-    \code{length(prop.cutoff) - 1} rows and \code{cv.n} columns.
-    The ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
-    defined by CATE score below (if \code{higher.y = TRUE}) or above (if \code{higher.y = FALSE}) the
-    \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-    cross-validation iteration.
-    \item{\code{ate.est.valid.high.cv}: }Same as \code{ate.est.train.high.cv},
-    but in the validation set.
-    \item{\code{ate.est.valid.low.cv}: }Same as \code{ate.est.train.low.cv},
-    but in the validation set.
-    \item{\code{ate.est.train.group.cv}: }A matrix of numerical values with
-    \code{length(prop.multi) - 1} rows and \code{cv.n} columns.
-    The ith column contains the estimated ATE in \code{length(prop.multi) - 1}
-    mutually exclusive subgroups defined by \code{prop.multi} in the training set in ith
-    cross-validation iteration.
-    \item{\code{ate.est.valid.group.cv}: }Same as \code{ate.est.train.group.cv}, but in the
-    validation set.
-    \item{\code{abc.valid}: }A vector of numerical values of length \code{cv.n},
-    The ith element returns the ABC of the validation curve in the ith cross-validation
-    iteration. Only returned if \code{abc = TRUE}.
- }
- \item{\code{ate.boosting}: }A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'boosting'}.
- \item{\code{ate.twoReg}: }A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'twoReg'}.
- \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.gaussian} output
- if \code{score.method} includes \code{'contrastReg'}.
-\item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
-\code{score.method} includes \code{'randomForest'}:
-\item{\code{ate.gam}: }A list of results similar to \code{ate.gaussian} output
-if \code{score.method} includes \code{'gam'}.
- \item{\code{props}: }A list of 3 elements:
- \itemize{
-    \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
-    reformatted as necessary.
-    \item{\code{prop.bi}: }The original argument \code{prop.cutoff},
-    similar to \code{prop.onlyhigh} but reformatted to exclude 1.
-    \item{\code{prop.multi}: }The original argument \code{prop.multi},
-    reformatted as necessary.
- }
- \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
- The ith element contains the ATE in the training set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.
- \item{\code{overall.ate.valid}: }A vector of numerical values of length \code{cv.n}.
- The ith element contains the ATE in the validation set of the ith cross-validation
- iteration, estimated with the doubly robust estimator.
- \item{\code{higher.y}: }The original \code{higher.y} argument.
- \item{\code{abc}: }The original \code{abc} argument.
- \item{\code{cv.n}: }The original \code{cv.n} argument.
- \item{\code{response}: }The type of response. Always 'continuous' for this function.
- \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
- (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
- \code{ps.model} (treatment) if it was not 0/1.
-}
+This function stops with an error.
 }
 \description{
-Provides doubly robust estimation of the average treatment effect (ATE) in nested and
-mutually exclusive subgroups of patients defined by an estimated conditional average
-treatment effect (CATE) score via cross-validation (CV). The CATE score can be estimated
-with up to 6 methods among the following: Linear regression, boosting, two regressions,
-contrast regression, random forest and generalized additive model (see \code{score.method}).
-}
-\details{
-The CATE score represents an individual-level treatment effect for continuous data,
-estimated with boosting, linear regression, random forest, generalized additive model and the doubly
-robust estimator (two regressions, Yadlowsky, 2020) applied separately by treatment group
-or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
-to the entire data set.
-
-Internal CV is applied to reduce optimism in choosing the CATE estimation method that
-captures the most treatment effect heterogeneity. The CV is applied by repeating the
-following steps \code{cv.n} times:
-
-\enumerate{
- \item Split the data into a training and validation set according to \code{train.prop}.
- The training and validation sets must be balanced with respect to covariate distributions
- and doubly robust rate ratio estimates (see \code{error.max}).
- \item Estimate the CATE score in the training set with the specified scoring method.
- \item Predict the CATE score in the validation set using the scoring model fitted from
- the training set.
- \item Build nested subgroups of treatment responders in the training and validation sets,
- separately, and estimate the ATE within each nested subgroup. For each element i of
- \code{prop.cutoff} (e.g., \code{prop.cutoff[i]} = 0.6), take the following steps:
- \enumerate{
-   \item Identify high responders as observations with the 60\%
-   (i.e., \code{prop.cutoff[i]}x100\%) highest (if \code{higher.y = TRUE}) or
-   lowest (if \code{higher.y = FALSE}) estimated CATE scores.
-   \item Estimate the ATE in the subgroup of high responders using a doubly robust estimator.
-   \item Conversely, identify low responders as observations with the 40\%
-   (i.e., 1 - \code{prop.cutoff[i]}x100\%) lowest (if \code{higher.y} = TRUE) or
-   highest (if \code{higher.y} = FALSE) estimated CATE scores.
-   \item Estimate the ATE in the subgroup of low responders using a doubly robust estimator.
- }
- \item Build mutually exclusive subgroups of treatment responders in the training and
- validation sets, separately, and estimate the ATE within each subgroup. Mutually exclusive
- subgroups are built by splitting the estimated CATE scores according to \code{prop.multi}.
- \item If \code{abc} = TRUE, calculate the area between the ATE and the series of ATEs in
- nested subgroups of high responders in the validation set.
-}
-}
-\examples{
-# Not implemented yet!
-
-}
-\references{
-Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
-\emph{Estimation and validation of ratio-based conditional average treatment effects using
-observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
-}
-\seealso{
-\code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
-and \code{\link{catefitmean}()} function.
+Continuous-outcome cross-validation is not implemented.
 }

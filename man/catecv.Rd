@@ -7,14 +7,14 @@
 catecv(
   response,
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  init.model = NULL,
-  initial.predictor.method = NULL,
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  outcome_model,
+  outcome_method = NULL,
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -44,67 +44,49 @@ catecv(
   contrast.control = list(),
   rmst.control = list(),
   ps.control = list(),
-  rf.control = list()
+  rf.control = list(),
+  ...,
+  xvar.smooth = NULL
 )
 }
 \arguments{
 \item{response}{A string describing the type of outcome in the data.
 Allowed values include "binary", "count" (see \code{\link{catecvcount}()}), "survival"
-(see \code{\link{catecvsurv}()}) and "continuous" (see
-\code{\link{catecvmean}()}) .}
+(see \code{\link{catecvsurv}()}). Continuous outcomes are not implemented.}
 
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
-\code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-\code{'gaussian'} (continuous outcomes only). Binary outcomes support
-\code{'logistic'}, \code{'twoReg'}, and \code{'boosting'}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates. Use a
+\code{Surv} response for survival and include an exposure offset for count outcomes.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side. For survival outcomes, a
-\code{Surv} object must be used to describe the outcome.}
+\item{outcome_method}{Outcome-model method for each \code{benefit_method}. The default for
+a T-learner is \code{'logistic'} for binary, \code{'poisson'} for count, and
+\code{'coxph'} for survival outcomes. Supply the method for each doubly robust score
+explicitly.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-appear on the left-hand side. For binary outcomes, logical and two-valued treatment
-labels are also supported; the effect is the risk under the second label minus
-that under the first. For randomized trials, an intercept-only treatment model
-can be specified as \code{trt ~ 1}.}
+\item{benefit_model}{Optional one-sided formula for the covariates and terms used in
+two-regression and contrast-regression scores. The default uses the terms in
+\code{outcome_model}. T-learners use \code{outcome_model} directly.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+\item{benefit_method}{Score-construction method, with one entry per \code{outcome_method}.
+The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.}
 
-\item{init.model}{Optional formula for the initial treatment-specific outcome models
-used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-\code{twoReg} only). The outcome must match \code{cate.model}. The default
-\code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
-is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
-must match it. Other score methods do not use this argument. Continuous-outcome
-fitting and validation are not currently implemented.}
+\item{ps_model}{A formula for the treatment model, with treatment on the left. It
+estimates propensity scores. For a common randomization probability, use an intercept-only
+formula such as \code{trt ~ 1}.}
 
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-\code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'fractional_logit'}
-(survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-\code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-for count outcomes and \code{'randomForest'} for survival outcomes.}
+\item{ps_method}{Treatment-model fitting method. The default \code{'glm'} uses logistic
+regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+interactions.}
 
-\item{ipcw.model}{A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
-Default is \code{NULL}, which uses a censoring model with the same covariates
-as the outcome model \code{cate.model}, plus the treatment.}
+\item{censoring_model}{Survival only. A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring weighting
+(IPCW). The default uses the outcome-model covariates and treatment.}
 
-\item{ipcw.method}{A character value for the censoring model. Only applies for survival
-outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-\code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-with different distributions for y variable). Default is \code{'breslow'}.}
+\item{censoring_method}{Survival only. \code{'breslow'} (default) uses Cox regression with
+the Breslow estimator. Accelerated failure time options are \code{'aft (exponential)'},
+\code{'aft (weibull)'}, \code{'aft (lognormal)'}, and \code{'aft (loglogistic)'}.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -138,7 +120,7 @@ Each element represents the cutoff to separate the observations into
 Default is \code{c(0, 1/3, 2/3, 1)}.}
 
 \item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.}
+at each cross-validation iterations, for each scoring method. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.}
 
 \item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
@@ -154,60 +136,39 @@ to define a balanced training-validation splitting. Default is \code{0.1}. Not a
 \item{max.iter}{A positive integer value indicating the maximum number of iterations when
 searching for a balanced training-validation split. Default is \code{5,000}. Not available for binary outcomes.}
 
-\item{surv.min}{Lower truncation limit for the probability of being censored.
-It must be a positive value and should be chosen close to 0. Only applies for survival
-outcomes. Default is \code{0.025}.}
+\item{surv.min}{Lower bound for the estimated probability of remaining uncensored.
+Defaults to 0.025.}
 
-\item{xvar.smooth.score}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-from the variables listed in \code{cate.model}.}
+\item{xvar.smooth.score}{Reserved for continuous-outcome scores.}
 
-\item{xvar.smooth.init}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{init.model}.
-Default is \code{NULL}, which uses all variables in \code{init.model}.}
+\item{xvar.smooth.init}{Names of outcome-model variables to smooth for count
+GAMs. Equivalent to \code{xvar.smooth} for count outcomes.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is 2.}
+\item{tree.depth}{Maximum depth of boosting trees. Defaults to 2.}
 
-\item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-Default is \code{1000}.}
+\item{n.trees.rf}{Number of trees for survival random forests. Defaults to 1000.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is \code{200}.}
+\item{n.trees.boosting}{Maximum number of trees for boosting. Defaults to 200.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of cross-fitting repetitions used by two-regression and contrast
+regression. Defaults to 3.}
 
-\item{Kfold}{A positive integer specifying the number of folds used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-Default is \code{5}.}
+\item{Kfold}{Number of folds used for cross-fitting within each training set. Defaults to
+5.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Newton–Raphson convergence tolerance for contrast regression. Defaults
+to 0.001.}
 
-\item{max.iterNR}{A positive integer indicating the maximum number of iterations in the
-Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{150}.}
+\item{max.iterNR}{Maximum number of Newton–Raphson iterations for contrast regression.
+Defaults to 150.}
 
-\item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
-Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+\item{tune}{Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+\code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance. Defaults to FALSE.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
@@ -229,13 +190,19 @@ for survival outcomes; independent of \code{contrast.control}.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
 \item{rf.control}{Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
+
+\item{...}{Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+supported for backward compatibility and emit warnings.}
+
+\item{xvar.smooth}{Names of variables used as smooth terms for count GAM outcome
+models. By default, all eligible outcome-model variables are used.}
 }
 \value{
 For binary response, a \code{"precmed"} object with one \code{ate.*}
@@ -246,14 +213,17 @@ training and validation effects, \code{props}, \code{splits} (row indices),
 \code{subgroup.support}, and messages accessible with \code{diagnostics()}.
 For count response, see description of outputs in \code{\link{catecvcount}()}.
 For survival response, see description of outputs in \code{\link{catecvsurv}()}.
-For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 }
 \description{
-Provides (doubly robust) estimation of the average treatment effect (ATE) for binary, count, survival or continuous
+Provides doubly robust estimation of average treatment effects for binary, count, and survival
 outcomes in nested and mutually exclusive subgroups of patients defined by an estimated conditional
 average treatment effect (CATE) score via cross-validation (CV).
 }
 \details{
+Each iteration fits scores on the training split using the same
+score-fitting routines as \code{\link{catefit}}. The fitted score is applied
+to the held-out split before its subgroup effects are estimated.
+
 For binary outcomes, each iteration randomly splits each treatment
 arm into training and validation sets. The score is fitted on training data
 only and applied to both sets. Percentile cutoffs are calculated separately
@@ -273,17 +243,16 @@ are not supported for binary splits. The binary score methods are described
 in \code{\link{catefit}()}.
 For count response, see details in \code{\link{catecvcount}()}.
 For survival response, see details in \code{\link{catecvsurv}()}.
-For continuous response, see details in \code{\link{catecvmean}()}.
 }
 \examples{
 \donttest{
 cate_1 <- catecv(response = "count",
                  data = countExample,
-                 score.method = "poisson",
-                 cate.model = y ~ age + female + previous_treatment +
+                 outcome_method = "poisson",
+                 outcome_model = y ~ age + female + previous_treatment +
                               previous_cost + previous_number_relapses +
                               offset(log(years)),
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  higher.y = FALSE, cv.n = 5, seed = 999, verbose = 1)
 
 plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -297,12 +266,12 @@ tau0 <- with(survivalExample,
 
 cate_2 <- catecv(response = "survival",
                  data = survivalExample,
-                 score.method = c("poisson", "randomForest"),
-                 cate.model = Surv(y, d) ~ age + female + previous_cost +
+                 outcome_method = c("poisson", "random_forest"),
+                 benefit_method = rep("t_learner", 2),
+                 outcome_model = Surv(y, d) ~ age + female + previous_cost +
                               previous_number_relapses,
-                 ps.model = trt ~ age + previous_treatment,
-                 initial.predictor.method = "randomForest",
-                 ipcw.model = ~ age + previous_cost + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
+                 censoring_model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0,
                  higher.y = TRUE,
                  surv.min = 0.025,

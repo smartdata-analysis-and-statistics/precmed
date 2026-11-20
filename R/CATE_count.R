@@ -66,8 +66,8 @@
 #' @param plot.gbmperf Whether to plot boosting performance measures when
 #' \code{outcome_method = 'boosting'}. Default is \code{FALSE}.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
-#' be printed. \code{0} means no outputs. \code{1} means only progress and run time.
-#' \code{2} means progress, run time, and all errors and warnings. Default is \code{0}.
+#' be printed. \code{0} means no outputs. \code{1} means progress messages.
+#' \code{2} means progress messages and all errors and warnings. Default is \code{0}.
 #' @param contrast.control A named list of options for count or survival contrast
 #' regression. Supported names are \code{solver} (\code{"C"}, the default, or
 #' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
@@ -158,15 +158,14 @@
 #' @seealso \code{\link{catecvcount}()}
 #'
 #' @examples
-#' fit <- catefitcount(data = countExample,
-#'                     outcome_model = y ~ age + female + previous_treatment +
-#'                                  previous_cost + previous_number_relapses +
-#'                                  offset(log(years)),
-#'                     outcome_method = "poisson",
-#'                     benefit_method = "t_learner",
-#'                     ps_model = trt ~ age + previous_treatment,
-#'                     higher.y = FALSE,
-#'                     seed = 999, verbose = 1)
+#' catefitcount(data = countExample,
+#'              outcome_model = y ~ age + female + previous_treatment +
+#'                previous_cost + previous_number_relapses + offset(log(years)),
+#'              outcome_method = "poisson",
+#'              benefit_method = "t_learner",
+#'              ps_model = trt ~ age + previous_treatment,
+#'              higher.y = FALSE,
+#'              seed = 999, verbose = 1)
 #' @export
 
 catefitcount <- function(data,
@@ -227,7 +226,6 @@ catefitcount <- function(data,
   # Set seed once for reproducibility
   set.seed(seed)
 
-  if (verbose >= 1) t.start <- Sys.time()
 
   #### CHECK ARGUMENTS ####
   arg.checks(
@@ -355,12 +353,6 @@ catefitcount <- function(data,
   }
   result$diagnostic.messages <- count.diagnostics$messages
   result$subgroup.support <- count.diagnostics$support
-
-  if (verbose >= 1) {
-    t.end <- Sys.time()
-    t.diff <- round(difftime(t.end, t.start),2)
-    cat('Total runtime :',as.numeric(t.diff), attributes(t.diff)$units, '\n')
-  }
 
   if (length(unique(config$initial_methods)) > 1L) {
     result$outcome_methods <- config$initial_methods

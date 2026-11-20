@@ -9,7 +9,8 @@ scoresurv(
   x.cate,
   tau0,
   score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg"),
-  x.benefit = x.cate
+  x.benefit = x.cate,
+  prediction_rows = seq_len(nrow(x.cate))
 )
 }
 \arguments{
@@ -24,6 +25,9 @@ Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, 
 \code{'contrastReg'}, \code{'coxph'}, \code{'weibull'}, and \code{'log_normal'}. Default specifies all 5 methods.}
 
 \item{x.benefit}{Benefit-score covariate matrix; defaults to \code{x.cate}.}
+
+\item{prediction_rows}{Rows of the stored restricted mean survival predictions
+to use for the requested observations.}
 }
 \value{
 score.randomForest: Estimated log CATE score for all \code{n} observations with the random forest method; vector of size \code{n}

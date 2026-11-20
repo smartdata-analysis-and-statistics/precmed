@@ -18,8 +18,7 @@
 #' at \code{tau0}. Cox assumes proportional hazards and estimates a baseline
 #' cumulative hazard; Weibull and log-normal are parametric accelerated failure
 #' time models. Causal interpretation requires appropriate model, identification
-#' and censoring assumptions. These three T-learners are not yet available in
-#' \code{\link{catecv}}.
+#' and censoring assumptions.
 #' Two-regression and contrast regression may use different initial outcome
 #' methods; matching methods share cross-fitted outcome predictions.
 #' @param benefit_model Optional one-sided formula for the two-regression or
@@ -738,6 +737,8 @@ twoarmsurv.dr <- function(ynew, dnew, trt, x.cate, tau0, weightsurv,
 #' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
 #'
 #' @param rmst.control Named options for Cox restricted mean survival integration.
+#' @param x.predict Covariate matrix for arm-specific restricted mean survival
+#' predictions. Defaults to the training covariates.
 #' @param initial.methods Named initial outcome methods for the doubly robust
 #' scores; \code{NULL} uses \code{initial.predictor.method} for both.
 #' @param contrast.control A named list of contrast-regression options:
@@ -770,7 +771,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
                      tree.depth = 3, n.trees.rf = 1000, n.trees.boosting = 150,
                      B = 3, Kfold = 5, plot.gbmperf = FALSE,
                      error.maxNR = 1e-3, max.iterNR = 100,
-                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), rf.control = list(), x.init = x.cate, x.benefit = x.cate, rmst.control = list(), initial.methods = NULL, ...) {
+                     tune = c(0.5, 2), contrast.control = list(), ps.control = list(), rf.control = list(), x.init = x.cate, x.benefit = x.cate, rmst.control = list(), initial.methods = NULL, ..., x.predict = x.cate) {
   rf.control <- resolve_rf_control(rf.control)
   ps.args <- resolve_ps_control(ps.control)
 
@@ -983,7 +984,7 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
     predictions <- lapply(0:1, function(arm) {
       selected <- trt == arm
       cate_survival_rmst(y[selected], d[selected], x.cate[selected, , drop = FALSE],
-                         x.cate, tau0, method, rmst.control)
+                         x.predict, tau0, method, rmst.control)
     })
     loss0 <- tau0 - predictions[[1L]]
     loss1 <- tau0 - predictions[[2L]]
@@ -1090,6 +1091,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
 #' @param fit List of objects generated from intxsurv: outputs of random forest, boosting, naive Poisson, two regression, contrast regression
 #' @param x.cate Matrix of \code{p.cate} baseline covariates specified in the outcome model; dimension \code{n} by \code{p.cate}.
 #' @param x.benefit Benefit-score covariate matrix; defaults to \code{x.cate}.
+#' @param prediction_rows Rows of the stored restricted mean survival predictions
+#' to use for the requested observations.
 #' @param tau0 The truncation time for defining restricted mean time lost.
 #' @param score.method A vector of one or multiple methods to estimate the CATE score.
 #' Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'},
@@ -1104,7 +1107,8 @@ intxsurv <- function(y, d, trt, x.cate, x.ps, x.ipcw, yf = NULL, tau0,
 #'
 
 scoresurv <- function(fit, x.cate, tau0,
-                      score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg"), x.benefit = x.cate) {
+                      score.method = c("randomForest", "boosting", "poisson", "twoReg", "contrastReg"), x.benefit = x.cate,
+                      prediction_rows = seq_len(nrow(x.cate))) {
 
   result <- vector("list", length(score.method))
   names(result) <- paste0("score.", score.method)
@@ -1116,7 +1120,7 @@ scoresurv <- function(fit, x.cate, tau0,
 
   for (method in intersect(score.method, c("coxph", "weibull", "log_normal"))) {
     prediction <- fit[[paste0("result.", method)]]
-    result[[paste0("score.", method)]] <- log(tau0 - prediction$rmst1) - log(tau0 - prediction$rmst0)
+    result[[paste0("score.", method)]] <- log(tau0 - prediction$rmst1[prediction_rows]) - log(tau0 - prediction$rmst0[prediction_rows])
   }
 
   if ("randomForest" %in% score.method) {

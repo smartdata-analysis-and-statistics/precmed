@@ -503,14 +503,14 @@ estsurv.bilevel.subgroups <- function(y, d, x.cate, x.ps, x.ipcw, trt, yf, tau0 
   ate.rmtl.high <- hr.high <- chr.high <- rd.high <- rep(NA_real_, n.subgroup)
   risk0.high <- risk1.high <- rmst0.high <- rmst1.high <- rep(NA_real_, n.subgroup)
   warn.high <- err.high <- vector("list", length = n.subgroup)
-  names(warn.high) <- names(err.high) <- paste("prop", round(prop, 2))
+  if (n.subgroup) names(warn.high) <- names(err.high) <- paste("prop", round(prop, 2))
   if (onlyhigh == FALSE) {
     ate.rmtl.low <- hr.low <- chr.low <- rd.low <- rep(NA_real_, n.subgroup)
     warn.low <- err.low <- vector("list", length = n.subgroup)
-    names(warn.low) <- names(err.low) <- paste("prop", round(1 - prop, 2))
+    if (n.subgroup) names(warn.low) <- names(err.low) <- paste("prop", round(1 - prop, 2))
   }
 
-  for (b in seq(n.subgroup)) {
+  for (b in seq_len(n.subgroup)) {
     idsub1 <- (score >= cut[b])
     fit.high <- survCatch(drsurv(y = y[idsub1], d = d[idsub1], x.cate = as.matrix(x.cate[idsub1, ]), x.ps = x.ps[idsub1, , drop = FALSE], x.ipcw = as.matrix(x.ipcw[idsub1, ]),
                                  trt = trt[idsub1], yf = yf[idsub1],

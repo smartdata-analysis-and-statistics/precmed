@@ -2,10 +2,16 @@
 
 ## Major changes
 
-* Survival `catefit()` T-learners support `outcome_method = "coxph"`,
-  `"weibull"`, and `"log_normal"` to compare arm-specific restricted mean time
-  lost at the selected horizon. These methods are available for score fitting,
-  not yet for `catecv()` validation or the doubly robust score methods.
+* Survival T-learners in `catefit()` and `catecv()` support
+  `outcome_method = "coxph"`, `"weibull"`, and `"log_normal"` to compare
+  arm-specific restricted mean time lost at the selected horizon.
+
+* `catecv()` and its outcome-specific functions use the same model and method
+  arguments as `catefit()`. Defaults are logistic, Poisson, and Cox T-learners
+  for binary, count, and survival outcomes. Two-regression and contrast
+  regression can use a separate `benefit_model` and different outcome methods
+  within one call. Deprecated argument names and positional calls remain
+  supported with warnings. `catecvbinary()` is now exported.
 
 * Count `atefit()` now always fits separate outcome models by treatment arm,
   without the previous fallback to a pooled model for small arms. The
@@ -61,12 +67,14 @@
 
 ## Minor changes
 
+* `catefitcount()` no longer measures or prints runtime when verbose output is enabled.
+
 * `initial.predictor.method` is no longer shown in `catefit()` or its
   outcome-specific signatures. Use `outcome_method` to select initial outcome
   models; existing calls using the dotted argument remain supported through
   `...` with a deprecation warning. Supplying it together with `outcome_method`
   now produces an error, including when the values match. Legacy calls can pair
-  the dotted argument with `benefit_method`; the `catecv()` interface is unchanged.
+  the dotted argument with `benefit_method`.
 
 * `catefit()`, `catefitbinary()`, `catefitcount()`, and `catefitsurv()`
   now show `benefit_method = "t_learner"` in their signatures. The
@@ -82,7 +90,6 @@
   meaning and emits a deprecation warning. It cannot be combined with
   `benefit_model`. Coefficient tables
   for mixed models may contain missing entries for terms a score does not use.
-  `catecv()` does not yet support a separate `benefit_model`.
 
 * Use `fractional_logit` for survival initial outcome models in two-regression
   and contrast regression. The former value `logistic` remains accepted with
@@ -317,6 +324,12 @@
 
 
 ## Bug fixes
+
+* Count and survival preprocessing warnings no longer print internal calls
+  that expose deprecated argument names in vignette output.
+
+* Validation accepts `prop.cutoff = 1` with `abc = FALSE`
+  when only the overall nested subgroup estimate is requested.
 
 * Corrected and reordered the CATE fitting help arguments to match the function signatures.
 

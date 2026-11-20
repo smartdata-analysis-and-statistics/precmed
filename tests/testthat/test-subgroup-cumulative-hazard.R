@@ -32,8 +32,8 @@ test_that("subgroup fitting failures preserve all result fields", {
 
 test_that("survival cross-validation stores risk differences for the full subgroup", {
   d <- simulate_survival(n = 600, seed = 81)
-  expect_message(fit <- catecvsurv(data = d, score.method = "poisson",
-    cate.model = survival::Surv(y, d) ~ age, ps.model = trt ~ age,
+  expect_message(fit <- catecvsurv(data = d, outcome_method = "poisson",
+    outcome_model = survival::Surv(y, d) ~ age, ps_model = trt ~ age,
     tau0 = 300, prop.cutoff = c(.5, 1), prop.multi = c(0, .5, 1),
     cv.n = 2, abc = FALSE, seed = 12, verbose = 0), "recoded")
   expect_equal(as.numeric(fit$rd.poisson$rd.est.valid.high.cv[2, ]), fit$overall.rd.valid)

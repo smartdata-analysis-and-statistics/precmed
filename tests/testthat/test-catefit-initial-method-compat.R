@@ -1,7 +1,7 @@
 test_that("initial predictor method is hidden from CATE fitting signatures", {
-  for (fun in list(catefit, catefitbinary, catefitcount, catefitsurv, catefitmean))
+  for (fun in list(catefit, catefitbinary, catefitcount, catefitsurv, catefitmean,
+                   catecv, catecvbinary, catecvcount, catecvsurv, catecvmean))
     expect_false("initial.predictor.method" %in% names(formals(fun)))
-  expect_true("initial.predictor.method" %in% names(formals(catecv)))
 })
 
 test_that("legacy count initial method is preserved in named and positional calls", {

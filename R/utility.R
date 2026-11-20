@@ -627,7 +627,7 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
   time <- model.offset(cate.mat)
   if (is.null(time) == TRUE) { # Eventually some outcomes will not need an offset
     time <- rep(0, nrow(data))
-    warning("No offset supplied. Offset set to 0.")
+    warning("No offset supplied. Offset set to 0.", call. = FALSE)
   }
 
   ## Check missing data
@@ -667,7 +667,7 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
     prop <- sort(prop.cutoff) # sort the proportions from small to large
     if (prop[1] == 0) {
       prop <- prop[-1] # if first element is 0, remove it because this means we leave out 0% of individuals
-      warning("The first element of prop.cutoff cannot be 0 and has been removed.")
+      warning("The first element of prop.cutoff cannot be 0 and has been removed.", call. = FALSE)
     }
 
     return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time, prop = prop, treatment.labels = treatment.labels))
@@ -677,7 +677,7 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
     prop.multi <- sort(prop.multi)
     if (prop.onlyhigh[1] == 0) {
       prop.onlyhigh <- prop.onlyhigh[-1]
-      warning("The first element of prop.cutoff cannot be 0 and has been removed.") # only need to show once so no warning in the prop.bi check below
+      warning("The first element of prop.cutoff cannot be 0 and has been removed.", call. = FALSE) # only need to show once so no warning in the prop.bi check below
     }
     if (prop.bi[1] == 0) {
       prop.bi <- prop.bi[-1]
@@ -687,11 +687,11 @@ data.preproc <- function(fun, cate.model, ps.model, data, prop.cutoff = NULL,
     }
     if (prop.multi[1] != 0) {
       prop.multi <- c(0, prop.multi)
-      warning("The first element of prop.multi must be 0 and has been added.")
+      warning("The first element of prop.multi must be 0 and has been added.", call. = FALSE)
     }
     if (prop.multi[length(prop.multi)] != 1) {
       prop.multi <- c(prop.multi, 1)
-      warning("The last element of prop.multi must be 1 and has been added.")
+      warning("The last element of prop.multi must be 1 and has been added.", call. = FALSE)
     }
 
     return(list(y = y, trt = trt, x.cate = x.cate, x.ps = x.ps, time = time,
@@ -853,7 +853,7 @@ legacy_ate_positional_call <- function(call, fun, caller) {
 }
 
 # Author: Thomas Debray
-resolve_cate_aliases <- function(args, censoring = FALSE) {
+resolve_cate_aliases <- function(args, censoring = FALSE, caller = "catefit()") {
   aliases <- c(ps.model = "ps_model", ps.method = "ps_method")
   if (censoring)
     aliases <- c(aliases, ipcw.model = "censoring_model", ipcw.method = "censoring_method")
@@ -863,7 +863,7 @@ resolve_cate_aliases <- function(args, censoring = FALSE) {
     if (!length(indices)) next
     if (length(indices) > 1L || new %in% names(args))
       stop("Specify only ", new, "; ", old, " is deprecated.", call. = FALSE)
-    warning(old, " is deprecated for catefit(); use ", new, " instead.", call. = FALSE)
+    warning(old, " is deprecated for ", caller, "; use ", new, " instead.", call. = FALSE)
     names(args)[indices] <- new
   }
   args

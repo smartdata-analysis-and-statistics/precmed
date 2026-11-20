@@ -36,7 +36,8 @@ intxsurv(
   x.benefit = x.cate,
   rmst.control = list(),
   initial.methods = NULL,
-  ...
+  ...,
+  x.predict = x.cate
 )
 }
 \arguments{
@@ -148,6 +149,9 @@ and survival initial-predictor forests. Use \code{n.trees.rf} for the number of 
 scores; \code{NULL} uses \code{initial.predictor.method} for both.}
 
 \item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+
+\item{x.predict}{Covariate matrix for arm-specific restricted mean survival
+predictions. Defaults to the training covariates.}
 }
 \value{
 Depending on what score.method is, the outputs is a combination of the following:

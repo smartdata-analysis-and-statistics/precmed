@@ -199,8 +199,7 @@ ATE and develops and validates a CATE model:
       a series of nested subgroups. On the left side the curve is shown
       for the training set, and on the right side the curve is shown for
       the validation set. Each line in the plots represents one scoring
-      method (e.g., boosting, randomForest) specified under the argument
-      `score.method`.
+      method included in the fit.
     - The area between curves (ABC) using
       [abc](https://smartdata-analysis-and-statistics.github.io/precmed/reference/abc.html)
       quantifies a model’s ability to capture treatment effect

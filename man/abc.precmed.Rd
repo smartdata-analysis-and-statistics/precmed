@@ -43,10 +43,10 @@ the validation curves in the validation set in \code{\link{plot}()}.
 \examples{
 # The result was created with:
 # catecvCountExample <- catecv(
-#   response = "count", data = countExample, score.method = "poisson",
-#   cate.model = y ~ age + female + previous_treatment + previous_cost +
+#   response = "count", data = countExample, outcome_method = "poisson",
+#   outcome_model = y ~ age + female + previous_treatment + previous_cost +
 #     previous_number_relapses + offset(log(years)),
-#   ps.model = trt ~ age + previous_treatment, higher.y = FALSE,
+#   ps_model = trt ~ age + previous_treatment, higher.y = FALSE,
 #   cv.n = 5, seed = 999, verbose = 0)
 # Load the pre-fitted result instead of repeating the calculation.
 data(catecvCountExample)

@@ -1,57 +1,37 @@
 #' Cross-validation of the conditional average treatment effect (CATE) score
 #'
-#' Provides (doubly robust) estimation of the average treatment effect (ATE) for binary, count, survival or continuous
+#' Provides doubly robust estimation of average treatment effects for binary, count, and survival
 #' outcomes in nested and mutually exclusive subgroups of patients defined by an estimated conditional
 #' average treatment effect (CATE) score via cross-validation (CV).
 #'
 #' @param response A string describing the type of outcome in the data.
 #' Allowed values include "binary", "count" (see \code{\link{catecvcount}()}), "survival"
-#' (see \code{\link{catecvsurv}()}) and "continuous" (see
-#' \code{\link{catecvmean}()}) .
+#' (see \code{\link{catecvsurv}()}). Continuous outcomes are not implemented.
 #' @param data A data frame containing the variables in the outcome, treatment,
 #' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'boosting'}, \code{'twoReg'}, \code{'contrastReg'}, \code{'poisson'} (count and survival outcomes only),
-#' \code{'randomForest'} (survival, continuous outcomes only), \code{negBin} (count outcomes only), \code{'gam'} (continuous outcomes only),
-#' \code{'gaussian'} (continuous outcomes only). Binary outcomes support
-#' \code{'logistic'}, \code{'twoReg'}, and \code{'boosting'}.
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side. For survival outcomes, a
-#' \code{Surv} object must be used to describe the outcome.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-#' appear on the left-hand side. For binary outcomes, logical and two-valued treatment
-#' labels are also supported; the effect is the risk under the second label minus
-#' that under the first. For randomized trials, an intercept-only treatment model
-#' can be specified as \code{trt ~ 1}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param init.model Optional formula for the initial treatment-specific outcome models
-#' used by \code{twoReg} and \code{contrastReg} (binary outcomes support
-#' \code{twoReg} only). The outcome must match \code{cate.model}. The default
-#' \code{NULL} uses \code{cate.model}. For count outcomes the exposure offset
-#' is taken from \code{cate.model}; an offset in \code{init.model}, if supplied,
-#' must match it. Other score methods do not use this argument. Continuous-outcome
-#' fitting and validation are not currently implemented.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-#' \code{'randomForest'} (survival outcomes only), \code{'boosting'}, \code{'fractional_logit'}
-#' (survival outcomes only, fast), \code{'poisson'} (count outcomes only, fast), \code{'gaussian'} (continuous outcomes only) and
-#' \code{'gam'} (count and continuous outcomes only). Default is \code{NULL}, which assigns \code{'boosting'}
-#' for count outcomes and \code{'randomForest'} for survival outcomes.
-#' @param ipcw.model A formula describing the censoring model used for inverse
-#' probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
-#' Default is \code{NULL}, which uses a censoring model with the same covariates
-#' as the outcome model \code{cate.model}, plus the treatment.
-#' @param ipcw.method A character value for the censoring model. Only applies for survival
-#' outcomes. Allowed values are: \code{'breslow'} (Cox regression with Breslow estimator of t
-#' he baseline survivor function), \code{'aft (exponential)'}, \code{'aft (weibull)'},
-#' \code{'aft (lognormal)'} or \code{'aft (loglogistic)'} (accelerated failure time model
-#' with different distributions for y variable). Default is \code{'breslow'}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates. Use a
+#' \code{Surv} response for survival and include an exposure offset for count outcomes.
+#' @param outcome_method Outcome-model method for each \code{benefit_method}. The default for
+#' a T-learner is \code{'logistic'} for binary, \code{'poisson'} for count, and
+#' \code{'coxph'} for survival outcomes. Supply the method for each doubly robust score
+#' explicitly.
+#' @param benefit_model Optional one-sided formula for the covariates and terms used in
+#' two-regression and contrast-regression scores. The default uses the terms in
+#' \code{outcome_model}. T-learners use \code{outcome_model} directly.
+#' @param benefit_method Score-construction method, with one entry per \code{outcome_method}.
+#' The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.
+#' @param ps_model A formula for the treatment model, with treatment on the left. It
+#' estimates propensity scores. For a common randomization probability, use an intercept-only
+#' formula such as \code{trt ~ 1}.
+#' @param ps_method Treatment-model fitting method. The default \code{'glm'} uses logistic
+#' regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+#' interactions.
+#' @param censoring_model Survival only. A one-sided formula for the model that estimates
+#' probabilities of remaining uncensored for inverse probability of censoring weighting
+#' (IPCW). The default uses the outcome-model covariates and treatment.
+#' @param censoring_method Survival only. \code{'breslow'} (default) uses Cox regression with
+#' the Breslow estimator. Accelerated failure time options are \code{'aft (exponential)'},
+#' \code{'aft (weibull)'}, \code{'aft (lognormal)'}, and \code{'aft (loglogistic)'}.
 #' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 #' truncated. Default is \code{0.01}.
 #' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
@@ -77,7 +57,7 @@
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
 #' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.
+#' at each cross-validation iterations, for each scoring method. Default is \code{TRUE}. Binary ABC requires at least two distinct \code{prop.cutoff} values.
 #' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
@@ -88,54 +68,54 @@
 #' to define a balanced training-validation splitting. Default is \code{0.1}. Not available for binary outcomes, which use treatment-stratified random splits.
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
 #' searching for a balanced training-validation split. Default is \code{5,000}. Not available for binary outcomes.
-#' @param surv.min Lower truncation limit for the probability of being censored.
-#' It must be a positive value and should be chosen close to 0. Only applies for survival
-#' outcomes. Default is \code{0.025}.
-#' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
-#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{init.model}.
-#' Default is \code{NULL}, which uses all variables in \code{init.model}.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is 2.
-#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
-#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
-#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
-#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
-#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-#' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-#' Default is \code{1000}.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
-#' @param Kfold A positive integer specifying the number of folds used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-#' Default is \code{5}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
-#' @param max.iterNR A positive integer indicating the maximum number of iterations in the
-#' Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{150}.
-#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
-#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-#' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param surv.min Lower bound for the estimated probability of remaining uncensored.
+#' Defaults to 0.025.
+#' @param xvar.smooth.score Reserved for continuous-outcome scores.
+#' @param xvar.smooth.init Names of outcome-model variables to smooth for count
+#' GAMs. Equivalent to \code{xvar.smooth} for count outcomes.
+#' @param tree.depth Maximum depth of boosting trees. Defaults to 2.
+#' @param n.trees.rf Number of trees for survival random forests. Defaults to 1000.
+#' @param n.trees.boosting Maximum number of trees for boosting. Defaults to 200.
+#' @param B Number of cross-fitting repetitions used by two-regression and contrast
+#' regression. Defaults to 3.
+#' @param Kfold Number of folds used for cross-fitting within each training set. Defaults to
+#' 5.
+#' @param error.maxNR Newton–Raphson convergence tolerance for contrast regression. Defaults
+#' to 0.001.
+#' @param max.iterNR Maximum number of Newton–Raphson iterations for contrast regression.
+#' Defaults to 150.
+#' @param tune Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+#' \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
-#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
+#' @param plot.gbmperf Whether to plot boosting performance. Defaults to FALSE.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
+#' @param contrast.control A named list of options for count or survival contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param ... Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+#' supported for backward compatibility and emit warnings.
+#' @param xvar.smooth Names of variables used as smooth terms for count GAM outcome
+#' models. By default, all eligible outcome-model variables are used.
 #'
 #' @return For binary response, a \code{"precmed"} object with one \code{ate.*}
 #' list per method, containing matrices of training and validation risk differences
@@ -145,9 +125,12 @@
 #' \code{subgroup.support}, and messages accessible with \code{diagnostics()}.
 #' For count response, see description of outputs in \code{\link{catecvcount}()}.
 #' For survival response, see description of outputs in \code{\link{catecvsurv}()}.
-#' For continuous response, see description of outputs in \code{\link{catecvmean}()}.
 #'
-#' @details For binary outcomes, each iteration randomly splits each treatment
+#' @details Each iteration fits scores on the training split using the same
+#' score-fitting routines as \code{\link{catefit}}. The fitted score is applied
+#' to the held-out split before its subgroup effects are estimated.
+#'
+#' For binary outcomes, each iteration randomly splits each treatment
 #' arm into training and validation sets. The score is fitted on training data
 #' only and applied to both sets. Percentile cutoffs are calculated separately
 #' in each set using its scores, without using validation outcomes. Ties may make
@@ -166,7 +149,6 @@
 #' in \code{\link{catefit}()}.
 #' For count response, see details in \code{\link{catecvcount}()}.
 #' For survival response, see details in \code{\link{catecvsurv}()}.
-#' For continuous response, see details in \code{\link{catecvmean}()}.
 #'
 #' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
 #' \emph{Estimation and validation of ratio-based conditional average treatment effects using
@@ -193,11 +175,11 @@
 #' \donttest{
 #' cate_1 <- catecv(response = "count",
 #'                  data = countExample,
-#'                  score.method = "poisson",
-#'                  cate.model = y ~ age + female + previous_treatment +
+#'                  outcome_method = "poisson",
+#'                  outcome_model = y ~ age + female + previous_treatment +
 #'                               previous_cost + previous_number_relapses +
 #'                               offset(log(years)),
-#'                  ps.model = trt ~ age + previous_treatment,
+#'                  ps_model = trt ~ age + previous_treatment,
 #'                  higher.y = FALSE, cv.n = 5, seed = 999, verbose = 1)
 #'
 #' plot(cate_1, ylab = "RMTL ratio of drug1 vs drug0 in each subgroup")
@@ -211,12 +193,12 @@
 #'
 #' cate_2 <- catecv(response = "survival",
 #'                  data = survivalExample,
-#'                  score.method = c("poisson", "randomForest"),
-#'                  cate.model = Surv(y, d) ~ age + female + previous_cost +
+#'                  outcome_method = c("poisson", "random_forest"),
+#'                  benefit_method = rep("t_learner", 2),
+#'                  outcome_model = Surv(y, d) ~ age + female + previous_cost +
 #'                               previous_number_relapses,
-#'                  ps.model = trt ~ age + previous_treatment,
-#'                  initial.predictor.method = "randomForest",
-#'                  ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                  ps_model = trt ~ age + previous_treatment,
+#'                  censoring_model = ~ age + previous_cost + previous_treatment,
 #'                  tau0 = tau0,
 #'                  higher.y = TRUE,
 #'                  surv.min = 0.025,
@@ -237,34 +219,17 @@
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom survival Surv coxph coxph.detail survreg
-#' @param contrast.control A named list of options for count or survival contrast
-#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
-#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
-#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
-#' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
-#' outcomes support this list; continuous outcomes retain their existing solver.
-#' @param rmst.control Named options for Cox restricted mean survival integration.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of \code{contrast.control}.
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 
 catecv <- function(response,
                    data,
-                   score.method,  # Mandatory arguments (count & survival & continuous)
-                   cate.model,
-                   ps.model,
-                   ps.method = "glm",
-                   init.model = NULL,
-                   initial.predictor.method = NULL,
-                   ipcw.model = NULL,
-                   ipcw.method = "breslow",
+                   outcome_model,
+                   outcome_method = NULL,
+                   benefit_model = NULL,
+                   benefit_method = "t_learner",
+                   ps_model,
+                   ps_method = "glm",
+                   censoring_model = NULL,
+                   censoring_method = "breslow",
                    minPS = 0.01,
                    maxPS = 0.99,
                    followup.time = NULL,
@@ -291,88 +256,94 @@ catecv <- function(response,
                    seed = NULL,
                    plot.gbmperf = FALSE,
                    verbose = 0,
-                   contrast.control = list(), rmst.control = list(), ps.control = list(), rf.control = list()) {
+                   contrast.control = list(), rmst.control = list(), ps.control = list(),
+                   rf.control = list(), ..., xvar.smooth = NULL) {
   check_response(response)
-  if (identical(response, "survival") && any(score.method %in% c("coxph", "weibull", "log_normal")))
-    stop("These survival T-learner scores are currently supported only by catefit().", call. = FALSE)
-  check_score_method(response, score.method)
-  resolve_ps_control(ps.control)
+  fun <- switch(response, binary = catecvbinary, count = catecvcount,
+                survival = catecvsurv, continuous = catecvmean)
+  previous <- as.list(formals(sys.function()))
+  controls <- previous[seq.int(match("minPS", names(previous)), length(previous))]
+  legacy <- as.list(formals(catecv_surv))[c("data", "score.method", "cate.model", "ps.model", "ps.method")]
+  legacy <- c(previous["response"], legacy, list(init.model = NULL, initial.predictor.method = NULL,
+                ipcw.model = NULL, ipcw.method = "breslow"), controls)
+  previous_signature <- eval(call("function", as.pairlist(legacy), quote(NULL)))
+  args <- match_catecv_call(sys.function(), sys.call(), parent.frame(), previous_signature)
+  args$response <- NULL
+
+  rf.control <- if ("rf.control" %in% names(args)) eval(args$rf.control, parent.frame()) else list()
+  contrast.control <- if ("contrast.control" %in% names(args)) eval(args$contrast.control, parent.frame()) else list()
+  rmst.control <- if ("rmst.control" %in% names(args)) eval(args$rmst.control, parent.frame()) else list()
   resolve_rf_control(rf.control)
-  if (length(rf.control) && response == "count") stop("rf.control is supported only for survival or continuous outcomes.")
-
-
-
+  if (length(rf.control) && response == "count")
+    stop("rf.control is supported only for survival or continuous outcomes.")
   if (length(contrast.control) && response == "continuous")
     stop("contrast.control is supported only for count or survival outcomes.")
   if (length(rmst.control) && response != "survival")
     stop("rmst.control is currently supported only for survival outcomes.")
-  .args <- as.list(match.call())[-1]
-  .args$response <- NULL
-  if (response == "binary") {
-    supported <- c("data", "score.method", "cate.model", "init.model", "ps.model", "ps.method", "minPS", "maxPS", "higher.y", "prop.cutoff", "prop.multi", "abc", "train.prop", "cv.n", "tree.depth", "n.trees.boosting", "B", "Kfold", "seed", "plot.gbmperf", "verbose", "ps.control")
-    unused <- setdiff(names(.args), supported)
-    if (length(unused)) stop("Unsupported binary catecv argument(s): ", paste(unused, collapse = ", "), ".")
-    return(do.call(catecvbinary, .args, envir = parent.frame()))
-  }
-  if (response == "count") .args$rf.control <- NULL
-  if (response != "survival") .args$rmst.control <- NULL
-  if (response == "continuous") .args$contrast.control <- NULL
 
-  switch(response,
-         count = {
-           cvout <- do.call(catecvcount, .args)
-         },
-         survival = {
-           cvout <- do.call(catecvsurv, .args)
-         },
-         continuous = {
-           cvout <- do.call(catecvmean, .args)
-         }
-  )
-  return(cvout)
+  if (response == "binary") {
+    supported <- c(names(formals(fun)), "score.method", "cate.model", "init.model",
+                   "ps.model", "ps.method", "initial.predictor.method")
+    unused <- setdiff(names(args), supported)
+    if (length(unused)) stop("Unsupported binary catecv argument(s): ", paste(unused, collapse = ", "), ".")
+  }
+  if (response == "count") {
+    args$rf.control <- NULL
+    if ("xvar.smooth.init" %in% names(args)) {
+      if ("xvar.smooth" %in% names(args))
+        stop("Specify only one of xvar.smooth and xvar.smooth.init.", call. = FALSE)
+      names(args)[names(args) == "xvar.smooth.init"] <- "xvar.smooth"
+    }
+  }
+  if (response != "survival") args$rmst.control <- NULL
+  if (response == "continuous") args$contrast.control <- NULL
+  do.call(fun, args, envir = parent.frame())
 }
 
-#' Cross-validation of the conditional average treatment effect (CATE) score for survival outcomes
+#' Cross-validation of conditional average treatment-effect scores for survival outcomes
 #'
-#' Provides doubly robust estimation of the average treatment effect (ATE) by the
-#' RMTL (restricted mean time lost) ratio in nested and mutually exclusive subgroups of patients
-#' defined by an estimated conditional average treatment effect (CATE) score via
-#' cross-validation (CV). The CATE score can be estimated with up to 5 methods among the following:
-#' Random forest, boosting, poisson regression, two regressions, and contrast regression
-#' (see \code{score.method}).
+#' Repeatedly fits scores on training data and applies them to validation data.
+#' Subgroup effects include restricted mean time lost ratios and marginal cumulative
+#' hazard ratios at the specified horizon. Cox, Weibull and log-normal T-learners
+#' use training-arm outcome models to predict restricted mean time lost in both sets.
 #'
-#' @param cate.model A standard \code{Surv} formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-#' appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-#' If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome, treatment,
 #' and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
-#' \code{'contrastReg'}.
-#' @param ipcw.model A formula describing the censoring model used for inverse
-#' probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-#' which corresponds to specifying the censoring model with the same covariates as the outcome model
-#' \code{cate.model} plus the treatment.
+#' @param outcome_model A formula specifying the outcome and baseline covariates. Use a
+#' \code{Surv} response for survival and include an exposure offset for count outcomes.
+#' @param outcome_method Outcome-model method for each \code{benefit_method}. For a
+#' T-learner, the default is \code{'coxph'}. Other options include \code{'weibull'},
+#' \code{'log_normal'}, \code{'poisson'}, \code{'boosting'}, and \code{'random_forest'}. For
+#' two-regression or contrast regression, choose \code{'fractional_logit'},
+#' \code{'boosting'}, or \code{'random_forest'}.
+#' @param benefit_model Optional one-sided formula for the covariates and terms used in
+#' two-regression and contrast-regression scores. The default uses the terms in
+#' \code{outcome_model}. T-learners use \code{outcome_model} directly.
+#' @param benefit_method Score-construction method, with one entry per \code{outcome_method}.
+#' The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.
+#' @param ps_model A formula for the treatment model, with treatment on the left. It
+#' estimates propensity scores. For a common randomization probability, use an intercept-only
+#' formula such as \code{trt ~ 1}.
+#' @param ps_method Treatment-model fitting method. The default \code{'glm'} uses logistic
+#' regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+#' interactions.
+#' @param censoring_model Survival only. A one-sided formula for the model that estimates
+#' probabilities of remaining uncensored for inverse probability of censoring weighting
+#' (IPCW). The default uses the outcome-model covariates and treatment.
+#' @param censoring_method Survival only. \code{'breslow'} (default) uses Cox regression with
+#' the Breslow estimator. Accelerated failure time options are \code{'aft (exponential)'},
+#' \code{'aft (weibull)'}, \code{'aft (lognormal)'}, and \code{'aft (loglogistic)'}.
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param followup.time A column name in \code{data} specifying the maximum follow-up time,
 #' interpreted as the potential censoring time. Default is \code{followup.time = NULL},
 #' which corresponds to unknown potential censoring time.
 #' @param tau0 The truncation time for defining restricted mean time lost. Default is \code{NULL},
 #' which corresponds to setting the truncation time as the maximum survival time in the data.
-#' @param surv.min Lower truncation limit for the probability of being censored.
-#' It must be a positive value and should be chosen close to 0. Default is \code{0.025}.
-#' @param ipcw.method A character value for the censoring model. Allowed values are:
-#' \code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
-#' \code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
-#' or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
-#' y variable). Default is \code{'breslow'}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated log CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
@@ -385,16 +356,8 @@ catecv <- function(response,
 #' Each element represents the cutoff to separate the observations into
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
+#' at each cross-validation iterations, for each scoring method. Default is \code{TRUE}.
 #' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
@@ -405,55 +368,55 @@ catecv <- function(response,
 #' to define a balanced training-validation splitting. Default is \code{0.1}.
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
 #' searching for a balanced training-validation split. Default is \code{5,000}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
-#' when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
-#' one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest).
-#' The older value \code{'logistic'} is accepted with a deprecation warning.
-#' Default is \code{'randomForest'}.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is 2.
-#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
-#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
-#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
-#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
-#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-#' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-#' Default is \code{1000}.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
-#' @param Kfold A positive integer specifying the number of folds used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-#' Default is \code{5}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
-#' @param max.iterNR A positive integer indicating the maximum number of iterations in the
-#' Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{150}.
-#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
-#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-#' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param surv.min Lower bound for the estimated probability of remaining uncensored.
+#' Defaults to 0.025.
+#' @param tree.depth Maximum depth of boosting trees. Defaults to 2.
+#' @param n.trees.rf Number of trees for survival random forests. Defaults to 1000.
+#' @param n.trees.boosting Maximum number of trees for boosting. Defaults to 200.
+#' @param B Number of cross-fitting repetitions used by two-regression and contrast
+#' regression. Defaults to 3.
+#' @param Kfold Number of folds used for cross-fitting within each training set. Defaults to
+#' 5.
+#' @param error.maxNR Newton–Raphson convergence tolerance for contrast regression. Defaults
+#' to 0.001.
+#' @param max.iterNR Maximum number of Newton–Raphson iterations for contrast regression.
+#' Defaults to 150.
+#' @param tune Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+#' \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
-#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
+#' @param plot.gbmperf Whether to plot boosting performance. Defaults to FALSE.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
+#' @param rmst.control Named options for Cox restricted mean survival integration.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' The C backend accumulates each patient's integral without allocating a
+#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
+#' for survival outcomes; independent of \code{contrast.control}.
+#' @param contrast.control A named list of contrast-regression options:
+#' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
+#' \code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
+#' to \code{stats::optim} on fallback). List entries override top-level NR
+#' arguments. This is independent of \code{rmst.control}, which selects RMST
+#' integration, and is not passed to boosting via \code{...}.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param ... Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+#' supported for backward compatibility and emit warnings.
 #'
-#' @return Returns a list containing the following components saved as a \code{"precmed"} object:
+#' @return A \code{"precmed"} object with the components below. When doubly
+#' robust scores use different outcome methods, \code{outcome_methods}
+#' records the method used for each score.
 #' \itemize{
 #'  \item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
-#'  \code{score.method} includes \code{'randomForest'}:
+#'  the selected scoring methods includes \code{'randomForest'}:
 #'  \itemize{
 #'     \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
 #'     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
@@ -483,13 +446,13 @@ catecv <- function(response,
 #'     iteration. Only returned if \code{abc = TRUE}.
 #'  }
 #'  \item{\code{ate.boosting}: }A list of results similar to \code{ate.randomForest} output
-#'  if \code{score.method} includes \code{'boosting'}.
+#'  if the selected scoring methods includes \code{'boosting'}.
 #'  \item{\code{ate.poisson}: }A list of results similar to \code{ate.randomForest} output
-#'  if \code{score.method} includes \code{'poisson'}.
+#'  if the selected scoring methods includes \code{'poisson'}.
 #'  \item{\code{ate.twoReg}: }A list of results similar to \code{ate.randomForest} output
-#'  if \code{score.method} includes \code{'twoReg'}.
+#'  if the selected scoring methods includes \code{'twoReg'}.
 #'  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.randomForest} output
-#'  if \code{score.method} includes \code{'contrastReg'}.
+#'  if the selected scoring methods includes \code{'contrastReg'}.
 #'  This method has an additional element in the list of results:
 #'  \itemize{
 #'     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
@@ -502,7 +465,7 @@ catecv <- function(response,
 #'  Matrix names use the prefix \code{chr.est.}; undefined estimates are \code{NA}.
 #'  \code{overall.chr.train} and \code{overall.chr.valid} contain the corresponding
 #'  overall fold estimates. Existing \code{hr.*} results are conditional Cox HRs.
-#'  \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if \code{score.method} includes
+#'  \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if the selected scoring methods includes
 #'  \code{'randomForest'}:
 #'  \itemize{
 #'     \item{\code{hr.est.train.high.cv}: }A matrix of numerical values with
@@ -530,13 +493,13 @@ catecv <- function(response,
 #'     validation set.
 #'  }
 #'  \item{\code{hr.boosting}: }A list of results similar to \code{hr.randomForest} output
-#'  if \code{score.method} includes \code{'boosting'}.
+#'  if the selected scoring methods includes \code{'boosting'}.
 #'  \item{\code{hr.poisson}: }A list of results similar to \code{hr.randomForest} output
-#'  if \code{score.method} includes \code{'poisson'}.
+#'  if the selected scoring methods includes \code{'poisson'}.
 #'  \item{\code{hr.twoReg}: }A list of results similar to \code{hr.randomForest} output
-#'  if \code{score.method} includes \code{'twoReg'}.
+#'  if the selected scoring methods includes \code{'twoReg'}.
 #'  \item{\code{hr.contrastReg}: }A list of results similar to \code{hr.randomForest} output
-#'  if \code{score.method} includes \code{'contrastReg'}.
+#'  if the selected scoring methods includes \code{'contrastReg'}.
 #'  \item{\code{props}: }A list of 3 elements:
 #'  \itemize{
 #'     \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
@@ -559,15 +522,15 @@ catecv <- function(response,
 #' The ith element contains the ATE (HR) in the validation set of the ith cross-validation
 #' iteration.
 #'  \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
-#'  calculation of ATE. Errors and warnings are organized by \code{score.method} and
+#'  calculation of ATE. Errors and warnings are organized by scoring method and
 #'  position in the CV flow.
 #'  \item{\code{higher.y}: }The original \code{higher.y} argument.
 #'  \item{\code{abc}: }The original \code{abc} argument.
 #'  \item{\code{cv.n}: }The original \code{cv.n} argument.
 #'  \item{\code{response}: }The type of response. Always 'survival' for this function.
-#'  \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
-#'  (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
-#'  \code{ps.model} (treatment) if it was not 0/1.
+#'  \item{\code{formulas}:}A list of 3 elements: (1) \code{outcome_model} argument,
+#'  (2) \code{ps_model} argument and (3) original labels of the left-hand side variable in
+#'  \code{ps_model} (treatment) if it was not 0/1.
 #' }
 #' @details The CATE score represents an individual-level treatment effect expressed as the
 #' restricted mean survival time (RMTL) ratio) for survival outcomes. It can be estimated with boosting,
@@ -621,12 +584,11 @@ catecv <- function(response,
 #'              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 #'
 #' catecv <- catecvsurv(data = survivalExample,
-#'                      score.method = "poisson",
-#'                      cate.model = Surv(y, d) ~ age + female + previous_cost +
+#'                      outcome_method = "poisson",
+#'                      outcome_model = Surv(y, d) ~ age + female + previous_cost +
 #'                                                previous_number_relapses,
-#'                      ps.model = trt ~ age + previous_treatment,
-#'                      initial.predictor.method = "fractional_logit",
-#'                      ipcw.model = ~ age + previous_cost + previous_treatment,
+#'                      ps_model = trt ~ age + previous_treatment,
+#'                      censoring_model = ~ age + previous_cost + previous_treatment,
 #'                      tau0 = tau0,
 #'                      higher.y = TRUE,
 #'                      cv.n = 5, seed = 999, verbose = 1)
@@ -642,25 +604,44 @@ catecv <- function(response,
 #' @importFrom survival Surv coxph coxph.detail survreg
 #' @importFrom gam gam
 #' @importFrom stringr str_replace
-#' @param rmst.control Named options for Cox restricted mean survival integration.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' The C backend accumulates each patient's integral without allocating a
-#' patient-by-event-time matrix. Cox model fitting is unchanged. Available only
-#' for survival outcomes; independent of \code{contrast.control}.
-#' @param contrast.control A named list of contrast-regression options:
-#' \code{solver} (\code{"C"}, the default, or \code{"R"}), \code{error.maxNR},
-#' \code{max.iterNR}, \code{tune}, and \code{optim.control} (a named list passed
-#' to \code{stats::optim} on fallback). List entries override top-level NR
-#' arguments. This is independent of \code{rmst.control}, which selects RMST
-#' integration, and is not passed to boosting via \code{...}.
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 #' @importFrom dplyr %>%
 #'
 catecvsurv <- function(data,
+                       outcome_model, outcome_method = "coxph",
+                       benefit_model = NULL, benefit_method = "t_learner", ps_model, ps_method = "glm",
+                       censoring_model = NULL,
+                       censoring_method = "breslow",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       followup.time = NULL,
+                       tau0 = NULL,
+                       higher.y = TRUE,
+                       prop.cutoff = seq(0.5, 1, length = 6),
+                       prop.multi = c(0, 1/3, 2/3, 1),
+                       abc = TRUE,
+                       train.prop = 3/4,
+                       cv.n = 10,
+                       error.max = 0.1,
+                       max.iter = 5000,
+                       surv.min = 0.025,
+                       tree.depth = 2,
+                       n.trees.rf = 1000,
+                       n.trees.boosting = 200,
+                       B = 3,
+                       Kfold = 5,
+                       error.maxNR = 1e-3,
+                       max.iterNR = 150,
+                       tune = c(0.5, 2),
+                       seed = NULL,
+                       plot.gbmperf = FALSE,
+                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), ...) {
+  args <- match_catecv_call(sys.function(), sys.call(), parent.frame(), catecv_surv)
+  args <- resolve_catecv_call(args, "survival", parent.frame())
+  do.call(catecv_surv, args, envir = parent.frame())
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+catecv_surv <- function(data,
                        score.method,
                        cate.model,
                        ps.model,
@@ -691,9 +672,7 @@ catecvsurv <- function(data,
                        tune = c(0.5, 2),
                        seed = NULL,
                        plot.gbmperf = FALSE,
-                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL) {
-  if (any(score.method %in% c("coxph", "weibull", "log_normal")))
-    stop("These survival T-learner scores are currently supported only by catefit().", call. = FALSE)
+                       verbose = 0, rmst.control = list(), contrast.control = list(), ps.control = list(), rf.control = list(), init.model = NULL, ..., benefit_model = NULL, initial.methods = NULL) {
   initial.predictor.method <- normalize_survival_initial_method(initial.predictor.method)
   resolve_ps_control(ps.control)
 
@@ -733,6 +712,7 @@ catecvsurv <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  if (!any(score.method %in% c("twoReg", "contrastReg"))) benefit_model <- NULL
   x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   x.ipcw <- out$x.ipcw
   prop.onlyhigh <- out$prop.onlyhigh
@@ -782,7 +762,7 @@ catecvsurv <- function(data,
     rownames(result[[name]][[paste0(name1, "est.train.high.cv")]]) <-
       rownames(result[[name]][[paste0(name1, "est.valid.high.cv")]]) <- paste0("prop", round(prop.onlyhigh, 2))
     rownames(result[[name]][[paste0(name1, "est.train.low.cv")]]) <-
-      rownames(result[[name]][[paste0(name1, "est.valid.low.cv")]]) <- paste0("prop", round(1 - prop.bi, 2))
+      rownames(result[[name]][[paste0(name1, "est.valid.low.cv")]]) <- if (n.subgroup.bi) paste0("prop", round(1 - prop.bi, 2)) else NULL
     rownames(result[[name]][[paste0(name1, "est.train.group.cv")]]) <-
       rownames(result[[name]][[paste0(name1, "est.valid.group.cv")]]) <- paste0("prop", round(prop.multi[-1], 2))
   }
@@ -808,18 +788,7 @@ catecvsurv <- function(data,
 
   if ("contrastReg" %in% score.method) converge.contrastReg.cv <- rep(NA, cv.n)
 
-  # Save coefficients
-  if (sum(score.method %in% c("poisson", "twoReg", "contrastReg")) > 0) {
-    cf <- vector("list", length = 3)
-
-    cf <- lapply(1:length(cf), function(x) {
-      cf[[x]] <- matrix(NA, nrow = ncol(x.cate) + 1, ncol = cv.n)
-      colnames(cf[[x]]) <- paste0("cv", seq(1, cv.n))
-      rownames(cf[[x]]) <- c("(Intercept)", colnames(x.cate))
-      return(cf[[x]])
-    })
-    names(cf) <- c("poisson", "twoReg", "contrastReg")
-  }
+  cf <- list()
 
   # Set progress bar
   if (verbose >= 1) pb <- utils::txtProgressBar(min = 0, max = cv.n, style = 3)
@@ -848,6 +817,7 @@ catecvsurv <- function(data,
     d.valid <- datacv$d.valid
     trt.valid <- datacv$trt.valid
     x.cate.valid <- datacv$x.cate.valid
+    benefit <- cv_benefit_design(data, datacv$bestid.valid, benefit_model, x.cate.train, x.cate.valid)
     x.ps.valid <- datacv$x.ps.valid
     x.ipcw.valid <- datacv$x.ipcw.valid
     yf.valid <- datacv$yf.valid
@@ -873,7 +843,8 @@ catecvsurv <- function(data,
 
     ####### Fit the interaction model --------------------------------------------------------------
     if (verbose >= 1) cat("  training..\n")
-    fit <- intxsurv(y = y.train, d = d.train, trt = trt.train, x.cate = x.cate.train, x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train, x.ipcw = x.ipcw.train,
+    fit <- intxsurv(y = y.train, d = d.train, trt = trt.train, x.cate = x.cate.train, x.benefit = benefit$train, initial.methods = initial.methods,
+                    x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train, x.ipcw = x.ipcw.train,
                     yf = yf.train, tau0 = tau0, surv.min = surv.min,
                     score.method = score.method,
                     ps.method = ps.method, minPS = minPS, maxPS = maxPS, ipcw.method = ipcw.method,
@@ -881,29 +852,41 @@ catecvsurv <- function(data,
                     tree.depth = tree.depth, n.trees.rf = n.trees.rf, n.trees.boosting = n.trees.boosting,
                     B = B, Kfold = Kfold, plot.gbmperf = plot.gbmperf,
                     error.maxNR = error.maxNR, max.iterNR = max.iterNR, tune = tune,
-                    contrast.control = contrast.control, ps.control = ps.control, rf.control = rf.control)
+                    contrast.control = contrast.control, ps.control = ps.control, rf.control = rf.control,
+                    rmst.control = rmst.control, x.predict = rbind(x.cate.train, x.cate.valid), ...)
 
 
     if ("contrastReg" %in% score.method) {
-      cf$contrastReg[, cv.i] <- fit$result.contrastReg$delta.contrastReg
+      coefficients <- fit$result.contrastReg$delta.contrastReg
+      if (cv.i == 1L) cf$contrastReg <- matrix(NA_real_, nrow = length(coefficients), ncol = cv.n,
+        dimnames = list(names(coefficients), paste0("cv", seq_len(cv.n))))
+      cf$contrastReg[, cv.i] <- coefficients
       converge.contrastReg.cv[cv.i] <- fit$result.contrastReg$converge.contrastReg
     }
 
     if ("twoReg" %in% score.method) {
-      cf$twoReg[, cv.i] <- fit$result.twoReg
+      coefficients <- fit$result.twoReg
+      if (cv.i == 1L) cf$twoReg <- matrix(NA_real_, nrow = length(coefficients), ncol = cv.n,
+        dimnames = list(names(coefficients), paste0("cv", seq_len(cv.n))))
+      cf$twoReg[, cv.i] <- coefficients
     }
 
     if ("poisson" %in% score.method) {
-      cf$poisson[, cv.i] <- fit$result.poisson
+      coefficients <- fit$result.poisson
+      if (cv.i == 1L) cf$poisson <- matrix(NA_real_, nrow = length(coefficients), ncol = cv.n,
+        dimnames = list(names(coefficients), paste0("cv", seq_len(cv.n))))
+      cf$poisson[, cv.i] <- coefficients
     }
 
-    if ((initial.predictor.method == "boosting") & (fit$best.iter == n.trees.boosting) & (verbose == 2)) {
+    if (verbose == 2 && "boosting" %in% c(initial.predictor.method, initial.methods) &&
+        isTRUE(fit$best.iter == n.trees.boosting)) {
       warning(paste("The best boosting iteration was iteration number", n.trees.boosting, " out of ", n.trees.boosting, ". Consider increasing the maximum number of trees and turning on boosting performance plot (plot.gbmperf = TRUE).", sep = ""))
     }
 
 
     ####### Construct the score in training set ------------------------------------------
-    fit.score.train <- scoresurv(fit = fit, x.cate = x.cate.train, tau0 = tau0, score.method = score.method)
+    fit.score.train <- scoresurv(fit = fit, x.cate = x.cate.train, x.benefit = benefit$train,
+                                 tau0 = tau0, score.method = score.method)
 
     ####### Estimate the treatment effect in training set --------------------------------
     errors.train <- warnings.train <- c()
@@ -939,14 +922,14 @@ catecvsurv <- function(data,
       result[[str_replace(name, "score", "rd")]]$rd.est.train.low.cv[, cv.i] <- est.bi$rd.low
 
       est.bi$err.high$`prop 1.0` <- est.prop1$errors
-      err.bi.high <- est.bi$err.high[!sapply(est.bi$err.high, is.null)]
-      err.bi.low <- est.bi$err.low[!sapply(est.bi$err.low, is.null)]
+      err.bi.high <- est.bi$err.high[!vapply(est.bi$err.high, is.null, logical(1))]
+      err.bi.low <- est.bi$err.low[!vapply(est.bi$err.low, is.null, logical(1))]
       if (length(err.bi.high) == 0) err.bi.high <- NULL
       if (length(err.bi.low) == 0) err.bi.low <- NULL
 
       est.bi$warn.high$`prop 1.0` <- est.prop1$warnings
-      warn.bi.high <- est.bi$warn.high[!sapply(est.bi$warn.high, is.null)]
-      warn.bi.low <- est.bi$warn.low[!sapply(est.bi$warn.low, is.null)]
+      warn.bi.high <- est.bi$warn.high[!vapply(est.bi$warn.high, is.null, logical(1))]
+      warn.bi.low <- est.bi$warn.low[!vapply(est.bi$warn.low, is.null, logical(1))]
       if (length(warn.bi.high) == 0) warn.bi.high <- NULL
       if (length(warn.bi.low) == 0) warn.bi.low <- NULL
       result[['errors/warnings']][[name.method]]$est.train.high.cv[[paste0("cv", cv.i)]]$errors <- err.bi.high
@@ -991,7 +974,9 @@ catecvsurv <- function(data,
     ####### Construct the score in validation set ------------------------------------------
     if (verbose >= 1) cat("  validating..\n")
 
-    fit.score.valid <- scoresurv(fit = fit, x.cate = x.cate.valid, tau0 = tau0, score.method = score.method)
+    fit.score.valid <- scoresurv(fit = fit, x.cate = x.cate.valid, x.benefit = benefit$valid,
+                                 tau0 = tau0, score.method = score.method,
+                                 prediction_rows = nrow(x.cate.train) + seq_len(nrow(x.cate.valid)))
 
     ####### Estimate the treatment effect in validation set --------------------------------
     errors.valid <- warnings.valid  <- c()
@@ -1029,14 +1014,14 @@ catecvsurv <- function(data,
 
 
       est.bi$err.high$`prop 1.0` <- est.prop1$errors
-      err.bi.high <- est.bi$err.high[!sapply(est.bi$err.high, is.null)]
-      err.bi.low <- est.bi$err.low[!sapply(est.bi$err.low, is.null)]
+      err.bi.high <- est.bi$err.high[!vapply(est.bi$err.high, is.null, logical(1))]
+      err.bi.low <- est.bi$err.low[!vapply(est.bi$err.low, is.null, logical(1))]
       if (length(err.bi.high) == 0) err.bi.high <- NULL
       if (length(err.bi.low) == 0) err.bi.low <- NULL
 
       est.bi$warn.high$`prop 1.0` <- est.prop1$warnings
-      warn.bi.high <- est.bi$warn.high[!sapply(est.bi$warn.high, is.null)]
-      warn.bi.low <- est.bi$warn.low[!sapply(est.bi$warn.low, is.null)]
+      warn.bi.high <- est.bi$warn.high[!vapply(est.bi$warn.high, is.null, logical(1))]
+      warn.bi.low <- est.bi$warn.low[!vapply(est.bi$warn.low, is.null, logical(1))]
       if (length(warn.bi.high) == 0) warn.bi.high <- NULL
       if (length(warn.bi.low) == 0) warn.bi.low <- NULL
       result[['errors/warnings']][[name.method]]$est.valid.high.cv[[paste0("cv", cv.i)]]$errors <- err.bi.high
@@ -1145,6 +1130,7 @@ catecvsurv <- function(data,
   result$abc <- abc
   result$cv.n <- cv.n
   result$response <- "survival"
+  if (length(unique(initial.methods)) > 1L) result$outcome_methods <- initial.methods
   result$formulas <- list(cate.model = cate.model, ps.model = ps.model, trt_labels = out$cat.trt)
 
   class(result) <- "precmed"
@@ -1161,28 +1147,36 @@ catecvsurv <- function(data,
 #' conditional average treatment effect (CATE) score via cross-validation (CV).
 #' The CATE score can be estimated with up to 5 methods among the following:
 #' Poisson regression, boosting, two regressions, contrast regression, and
-#' negative binomial (see \code{score.method}).
+#' negative binomial (see \code{outcome_method}).
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
-#' The treatment must appear on the left-hand side. The treatment must be a
-#' numeric vector coded as 0 or 1. If data are from a randomized trial, specify
-#' \code{ps.model} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and
 #' treatment model; a data frame with \code{n} rows (1 row per
 #' observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE
-#' score. Allowed values are: \code{'boosting'}, \code{'poisson'},
-#' \code{'twoReg'}, \code{'contrastReg'}, and \code{'negBin'}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates. Use a
+#' \code{Surv} response for survival and include an exposure offset for count outcomes.
+#' @param outcome_method Outcome-model method for each \code{benefit_method}. For a
+#' T-learner, choose \code{'poisson'} (default), \code{'negative_binomial'}, or
+#' \code{'boosting'}. For two-regression or contrast regression, choose \code{'poisson'},
+#' \code{'gam'}, or \code{'boosting'}.
+#' @param benefit_model Optional one-sided formula for the covariates and terms used in
+#' two-regression and contrast-regression scores. The default uses the terms in
+#' \code{outcome_model}. T-learners use \code{outcome_model} directly.
+#' @param benefit_method Score-construction method, with one entry per \code{outcome_method}.
+#' The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.
+#' @param ps_model A formula for the treatment model, with treatment on the left. It
+#' estimates propensity scores. For a common randomization probability, use an intercept-only
+#' formula such as \code{trt ~ 1}.
+#' @param ps_method Treatment-model fitting method. The default \code{'glm'} uses logistic
+#' regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+#' interactions.
+#' @param minPS A numerical value between 0 and 1 below which estimated
+#' propensity scores should be truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value between 0 and 1 above which estimated
+#' propensity scores should be truncated. Must be strictly greater than
+#' \code{minPS}. Default is \code{0.99}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or
 #' lower (\code{FALSE}) values of the outcome are more desirable. Default is
 #' \code{TRUE}.
-#' @param abc A logical value indicating whether the area between curves (ABC)
-#' should be calculated at each cross-validation iterations, for each
-#' \code{score.method}. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values between 0 and 1 specifying
 #' percentiles of the estimated log CATE scores to define nested subgroups. Each
 #' element represents the cutoff to separate observations in nested subgroups
@@ -1195,17 +1189,9 @@ catecvsurv <- function(data,
 #' \code{length(prop.multi) > 2}. Each element represents the cutoff to separate
 #' the observations into \code{length(prop.multi) - 1} mutually exclusive
 #' subgroups. Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param ps.method A character value for the method to estimate the propensity
-#' score. Allowed values include one of: \code{'glm'} for logistic regression
-#' with main effects only (default), or \code{'lasso'} for a logistic regression
-#' with main effects and LASSO penalization on two-way interactions (added to
-#' the model if interactions are not specified in \code{ps.model}). Relevant
-#' only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value between 0 and 1 below which estimated
-#' propensity scores should be truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value between 0 and 1 above which estimated
-#' propensity scores should be truncated. Must be strictly greater than
-#' \code{minPS}. Default is \code{0.99}.
+#' @param abc A logical value indicating whether the area between curves (ABC)
+#' should be calculated at each cross-validation iterations, for each
+#' scoring method. Default is \code{TRUE}.
 #' @param train.prop A numerical value between 0 and 1 indicating the proportion
 #' of total data used for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of
@@ -1218,52 +1204,46 @@ catecvsurv <- function(data,
 #' @param max.iter A positive integer value indicating the maximum number of
 #' iterations when searching for a balanced training-validation split. Default
 #' is \code{5,000}.
-#' @param initial.predictor.method A character vector for the method used to get
-#' initial outcome predictions conditional on the covariates in
-#' \code{init.model} (or \code{cate.model} when omitted). Only applies when \code{score.method} includes
-#' \code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-#' \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
-#' \code{'boosting'}.
-#' @param xvar.smooth A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
-#' Default is \code{NULL}, which uses all initial outcome-model covariates.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is 2.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used if \code{score.method = 'boosting'} or
-#' if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-#' \code{'contrastReg'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
-#' @param Kfold A positive integer specifying the number of folds used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-#' Default is \code{5}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
-#' @param max.iterNR A positive integer indicating the maximum number of iterations in the
-#' Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{150}.
-#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
-#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-#' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param xvar.smooth Names of outcome-model variables to use as smooth terms with
+#' \code{outcome_method = 'gam'}. Defaults to all eligible variables.
+#' @param tree.depth Maximum depth of boosting trees. Defaults to 2.
+#' @param n.trees.boosting Maximum number of trees for boosting. Defaults to 200.
+#' @param B Number of cross-fitting repetitions used by two-regression and contrast
+#' regression. Defaults to 3.
+#' @param Kfold Number of folds used for cross-fitting within each training set. Defaults to
+#' 5.
+#' @param error.maxNR Newton–Raphson convergence tolerance for contrast regression. Defaults
+#' to 0.001.
+#' @param max.iterNR Maximum number of Newton–Raphson iterations for contrast regression.
+#' Defaults to 150.
+#' @param tune Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+#' \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
-#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
+#' @param plot.gbmperf Whether to plot boosting performance. Defaults to FALSE.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
+#' @param contrast.control A named list of options for count or survival contrast
+#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
+#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
+#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
+#' List entries override the corresponding top-level NR arguments. Options are
+#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
+#' outcomes support this list; continuous outcomes retain their existing solver.
+#' @param ps.control Named options for LASSO propensity-score interaction screening.
+#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
+#' interaction selection rule are unchanged. Kept separate from boosting's
+#' \code{...} and other numerical controls.
+#' @param ... Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+#' supported for backward compatibility and emit warnings.
 #'
-#' @return Returns a list containing the following components saved as a \code{"precmed"} object:
+#' @return A \code{"precmed"} object with the components below. When doubly
+#' robust scores use different outcome methods, \code{outcome_methods}
+#' records the method used for each score.
 #' \itemize{
-#'  \item{\code{ate.poisson}: }A list of results output if \code{score.method} includes
+#'  \item{\code{ate.poisson}: }A list of results output if the selected scoring methods includes
 #'  \code{'poisson'}:
 #'  \itemize{
 #'     \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
@@ -1294,11 +1274,11 @@ catecvsurv <- function(data,
 #'     iteration. Only returned if \code{abc = TRUE}.
 #'  }
 #'  \item{\code{ate.boosting}: }A list of results similar to \code{ate.poisson} output
-#'  if \code{score.method} includes \code{'boosting'}.
+#'  if the selected scoring methods includes \code{'boosting'}.
 #'  \item{\code{ate.twoReg}: }A list of results similar to \code{ate.poisson} output
-#'  if \code{score.method} includes \code{'twoReg'}.
+#'  if the selected scoring methods includes \code{'twoReg'}.
 #'  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.poisson} output
-#'  if \code{score.method} includes \code{'contrastReg'}.
+#'  if the selected scoring methods includes \code{'contrastReg'}.
 #'  This method has additional convergence information:
 #'  \itemize{
 #'     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
@@ -1308,7 +1288,7 @@ catecvsurv <- function(data,
 #'     convergence of each cross-fitting repetition in each CV iteration.
 #'  }
 #'  \item{\code{ate.negBin}: }A list of results similar to \code{ate.poisson} output
-#'  if \code{score.method} includes \code{'negBin'}.
+#'  if the selected scoring methods includes \code{'negBin'}.
 #'  \item{\code{props}: }A list of 3 elements:
 #'  \itemize{
 #'     \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
@@ -1324,14 +1304,14 @@ catecvsurv <- function(data,
 #' \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
 #' The ith element contains the ATE in the training set of the ith cross-validation
 #' iteration, estimated with the doubly robust estimator.
-#'  \item{\code{fgam}: }The formula used in GAM if \code{initial.predictor.method = 'gam'}.
+#'  \item{\code{fgam}: }The formula used in GAM if \code{outcome_method = 'gam'}.
 #'  \item{\code{higher.y}: }The original \code{higher.y} argument.
 #'  \item{\code{abc}: }The original \code{abc} argument.
 #'  \item{\code{cv.n}: }The original \code{cv.n} argument.
 #'  \item{\code{response}: }The type of response. Always 'count' for this function.
-#'  \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
-#'  (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
-#'  \code{ps.model} (treatment) if it was not 0/1.
+#'  \item{\code{formulas}:}A list of 3 elements: (1) \code{outcome_model} argument,
+#'  (2) \code{ps_model} argument and (3) original labels of the left-hand side variable in
+#'  \code{ps_model} (treatment) if it was not 0/1.
 #' }
 #'
 #' @details The CATE score represents an individual-level treatment effect expressed as a
@@ -1385,11 +1365,11 @@ catecvsurv <- function(data,
 #' @examples
 #' \donttest{
 #' catecv <- catecvcount(data = countExample,
-#'                       score.method = "poisson",
-#'                       cate.model = y ~ age + female + previous_treatment +
+#'                       outcome_method = "poisson",
+#'                       outcome_model = y ~ age + female + previous_treatment +
 #'                                    previous_cost + previous_number_relapses +
 #'                                    offset(log(years)),
-#'                       ps.model = trt ~ age + previous_treatment,
+#'                       ps_model = trt ~ age + previous_treatment,
 #'                       higher.y = FALSE,
 #'                       cv.n = 5,
 #'                       seed = 999,
@@ -1406,20 +1386,40 @@ catecvsurv <- function(data,
 #' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
 #' @importFrom stringr str_replace str_extract str_detect
 #' @importFrom dplyr %>%
-#' @param contrast.control A named list of options for count or survival contrast
-#' regression. Supported names are \code{solver} (\code{"C"}, the default, or
-#' \code{"R"}), \code{error.maxNR}, \code{max.iterNR}, \code{tune}, and
-#' \code{optim.control} (a named list passed to \code{stats::optim} on fallback).
-#' List entries override the corresponding top-level NR arguments. Options are
-#' kept separate from \code{...}, which is forwarded to boosting. Count and survival
-#' outcomes support this list; continuous outcomes retain their existing solver.
-#' @param ps.control Named options for LASSO propensity-score interaction screening.
-#' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
-#' interaction selection rule are unchanged. Kept separate from boosting's
-#' \code{...} and other numerical controls.
 
 catecvcount <- function(data,
+                        outcome_model, outcome_method = "poisson",
+                        benefit_model = NULL, benefit_method = "t_learner", ps_model, ps_method = "glm",
+                        minPS = 0.01,
+                        maxPS = 0.99,
+                        higher.y = TRUE,
+                        prop.cutoff = seq(0.5, 1, length = 6),
+                        prop.multi = c(0, 1/3, 2/3, 1),
+                        abc = TRUE,
+                        train.prop = 3/4,
+                        cv.n = 10,
+                        error.max = 0.1,
+                        max.iter = 5000,
+                        xvar.smooth = NULL,
+                        tree.depth = 2,
+                        n.trees.boosting = 200,
+                        B = 3,
+                        Kfold = 5,
+                        error.maxNR = 1e-3,
+                        max.iterNR = 150,
+                        tune = c(0.5, 2),
+                        seed = NULL,
+                        plot.gbmperf = FALSE,
+                        verbose = 0,
+                        contrast.control = list(),
+                        ps.control = list(), ...) {
+  args <- match_catecv_call(sys.function(), sys.call(), parent.frame(), catecv_count)
+  args <- resolve_catecv_call(args, "count", parent.frame())
+  do.call(catecv_count, args, envir = parent.frame())
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+catecv_count <- function(data,
                         score.method, # Mandatory argument that needs to be specified
                         cate.model,
                         ps.model,
@@ -1447,7 +1447,7 @@ catecvcount <- function(data,
                         plot.gbmperf = FALSE,
                         verbose = 0,
                         contrast.control = list(),
-                        ps.control = list(), init.model = NULL, ...) {
+                        ps.control = list(), init.model = NULL, ..., benefit_model = NULL, initial.methods = NULL) {
   resolve_ps_control(ps.control)
 
 
@@ -1480,6 +1480,7 @@ catecvcount <- function(data,
   trt <- out$trt
   x.ps <- out$x.ps
   x.cate <- out$x.cate
+  if (!any(score.method %in% c("twoReg", "contrastReg"))) benefit_model <- NULL
   x.init <- if (any(score.method %in% c("twoReg", "contrastReg"))) initial_outcome_design(data, cate.model, init.model) else x.cate
   time <- out$time
   prop.onlyhigh <- out$prop.onlyhigh
@@ -1519,7 +1520,7 @@ catecvcount <- function(data,
     rownames(result[[name]]$ate.est.train.high.cv) <-
       rownames(result[[name]]$ate.est.valid.high.cv) <- paste0("prop", round(prop.onlyhigh, 2))
     rownames(result[[name]]$ate.est.train.low.cv) <-
-      rownames(result[[name]]$ate.est.valid.low.cv) <- paste0("prop", round(1 - prop.bi, 2))
+      rownames(result[[name]]$ate.est.valid.low.cv) <- if (n.subgroup.bi) paste0("prop", round(1 - prop.bi, 2)) else NULL
     rownames(result[[name]]$ate.est.train.group.cv) <-
       rownames(result[[name]]$ate.est.valid.group.cv) <- paste0("prop", round(prop.multi[-1], 2))
   }
@@ -1558,6 +1559,7 @@ catecvcount <- function(data,
     y.valid <- datacv$y.valid
     trt.valid <- datacv$trt.valid
     x.cate.valid <- datacv$x.cate.valid
+    benefit <- cv_benefit_design(data, datacv$bestid.valid, benefit_model, x.cate.train, x.cate.valid)
     x.ps.valid <- datacv$x.ps.valid
     time.valid <- datacv$time.valid
 
@@ -1577,7 +1579,8 @@ catecvcount <- function(data,
     ####### Fit the interaction model --------------------------------------------------------------
     if (verbose >= 1) cat("  training..\n")
     fit <- intxcount(y = y.train, trt = trt.train,
-                     x.cate = x.cate.train, x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train,
+                     x.cate = x.cate.train, x.benefit = benefit$train, initial.methods = initial.methods,
+                    x.init = x.init[-datacv$bestid.valid, , drop = FALSE], x.ps = x.ps.train,
                      time = time.train,
                      score.method = score.method,
                      initial.predictor.method = initial.predictor.method,
@@ -1624,7 +1627,7 @@ catecvcount <- function(data,
 
     ####### Construct the score in training set ------------------------------------------
     fit.score.train <- scorecount(fit = fit, x.cate = x.cate.train,
-                                  time = time.train, score.method = score.method)
+                                  time = time.train, score.method = score.method, x.benefit = benefit$train)
 
     ####### Estimate the treatment effect in training set --------------------------------
     # if prop.onlyhigh ends with 1, estimate ATE once across all methods in the training
@@ -1671,7 +1674,7 @@ catecvcount <- function(data,
 
     fit.score.valid <- scorecount(fit = fit,
                                   x.cate = x.cate.valid, time = time.valid,
-                                  score.method = score.method)
+                                  score.method = score.method, x.benefit = benefit$valid)
 
     ####### Estimate the treatment effect in validation set --------------------------------------
     # if prop.onlyhigh ends with 1, estimate ATE once across all methods in the validation
@@ -1784,6 +1787,7 @@ catecvcount <- function(data,
   result$abc <- abc
   result$cv.n <- cv.n
   result$response <- "count"
+  if (length(unique(initial.methods)) > 1L) result$outcome_methods <- initial.methods
   result$formulas <- list(cate.model = cate.model, ps.model = ps.model, trt_labels = out$cat.trt)
 
   class(result) <- "precmed"
@@ -1791,31 +1795,33 @@ catecvcount <- function(data,
   return(result)
 }
 
-#' Cross-validation of the conditional average treatment effect (CATE) score for continuous outcomes
+#' Cross-validation for continuous outcomes
 #'
-#' Provides doubly robust estimation of the average treatment effect (ATE) in nested and
-#' mutually exclusive subgroups of patients defined by an estimated conditional average
-#' treatment effect (CATE) score via cross-validation (CV). The CATE score can be estimated
-#' with up to 6 methods among the following: Linear regression, boosting, two regressions,
-#' contrast regression, random forest and generalized additive model (see \code{score.method}).
+#' Continuous-outcome cross-validation is not implemented.
 #'
-#' @param cate.model A formula describing the outcome model to be fitted.
-#' The outcome must appear on the left-hand side.
-#' @param init.model Optional formula for initial outcome predictions in \code{twoReg}
-#' and \code{contrastReg}. The outcome must match \code{cate.model}; the default
-#' \code{NULL} uses \code{cate.model}.
-#' @param ps.model A formula describing the treatment model (propensity-score model) to be fitted.
-#' The treatment must appear on the left-hand side. The treatment must be a numeric vector
-#' coded as 0/1. If data are from a RCT, specify \code{ps.model} as an intercept-only model.
 #' @param data A data frame containing the variables in the outcome and treatment models;
 #' a data frame with \code{n} rows (1 row per observation).
-#' @param score.method A vector of one or multiple methods to estimate the CATE score.
-#' Allowed values are: \code{'boosting'}, \code{'gaussian'}, \code{'twoReg'}, \code{'contrastReg'},
-#' \code{'randomForest'}, \code{'gam'}.
+#' @param outcome_model A formula specifying the outcome and baseline covariates. Use a
+#' \code{Surv} response for survival and include an exposure offset for count outcomes.
+#' @param outcome_method Outcome-model method. Continuous-outcome cross-validation is not
+#' implemented.
+#' @param benefit_model Optional one-sided formula for the covariates and terms used in
+#' two-regression and contrast-regression scores. The default uses the terms in
+#' \code{outcome_model}. T-learners use \code{outcome_model} directly.
+#' @param benefit_method Score-construction method. Continuous-outcome cross-validation is
+#' not implemented.
+#' @param ps_model A formula for the treatment model, with treatment on the left. It
+#' estimates propensity scores. For a common randomization probability, use an intercept-only
+#' formula such as \code{trt ~ 1}.
+#' @param ps_method Treatment-model fitting method. The default \code{'glm'} uses logistic
+#' regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+#' interactions.
+#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
+#' truncated. Default is \code{0.01}.
+#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
+#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
 #' @param higher.y A logical value indicating whether higher (\code{TRUE}) or lower (\code{FALSE})
 #' values of the outcome are more desirable. Default is \code{TRUE}.
-#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
-#' at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.
 #' @param prop.cutoff A vector of numerical values (in `(0, 1]`) specifying percentiles of the
 #' estimated CATE scores to define nested subgroups. Each element represents the cutoff to
 #' separate observations in nested subgroups (below vs above cutoff).
@@ -1828,16 +1834,8 @@ catecvcount <- function(data,
 #' Each element represents the cutoff to separate the observations into
 #' \code{length(prop.multi) - 1} mutually exclusive subgroups.
 #' Default is \code{c(0, 1/3, 2/3, 1)}.
-#' @param ps.method A character value for the method to estimate the propensity score.
-#' Allowed values include one of:
-#' \code{'glm'} for logistic regression with main effects only (default), or
-#' \code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-#' two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-#' Relevant only when \code{ps.model} has more than one variable.
-#' @param minPS A numerical value (in `[0, 1]`) below which estimated propensity scores should be
-#' truncated. Default is \code{0.01}.
-#' @param maxPS A numerical value (in `(0, 1]`) above which estimated propensity scores should be
-#' truncated. Must be strictly greater than \code{minPS}. Default is \code{0.99}.
+#' @param abc A logical value indicating whether the area between curves (ABC) should be calculated
+#' at each cross-validation iterations, for each scoring method. Default is \code{TRUE}.
 #' @param train.prop A numerical value (in `(0, 1)`) indicating the proportion of total data used
 #' for training. Default is \code{3/4}.
 #' @param cv.n A positive integer value indicating the number of cross-validation iterations.
@@ -1848,180 +1846,72 @@ catecvcount <- function(data,
 #' to define a balanced training-validation splitting. Default is \code{0.1}.
 #' @param max.iter A positive integer value indicating the maximum number of iterations when
 #' searching for a balanced training-validation split. Default is \code{5,000}.
-#' @param initial.predictor.method A character vector for the method used to get initial
-#' outcome predictions conditional on the covariates in \code{cate.model}
-#' in \code{score.method = 'twoReg'} and \code{'contrastReg'}. Allowed values include
-#' one of \code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}.
-#' Default is \code{'boosting'}.
-#' @param xvar.smooth.init A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{init.model}.
-#' Default is \code{NULL}, which uses all variables in \code{init.model}.
-#' @param xvar.smooth.score A vector of characters indicating the name of the variables used as
-#' the smooth terms if \code{score.method = 'gam'}. The variables must be selected
-#' from the variables listed in \code{cate.model}.
-#' Default is \code{NULL}, which uses all variables in \code{cate.model}.
-#' @param tree.depth A positive integer specifying the depth of individual trees in boosting
-#' (usually 2-3). Used only if \code{score.method = 'boosting'} or
-#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{2}.
-#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
-#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
-#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
-#' @param n.trees.rf A positive integer specifying the number of trees in random forest.
-#' Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-#' with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-#' Default is \code{1000}.
-#' @param n.trees.boosting A positive integer specifying the maximum number of trees in boosting
-#' (usually 100-1000). Used only if \code{score.method = 'boosting'} or
-#' if \code{score.method = 'twoReg'} or \code{'contrastReg'} and
-#' \code{initial.predictor.method = 'boosting'}. Default is \code{200}.
-#' @param B A positive integer specifying the number of time cross-fitting is repeated in
-#' \code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.
-#' @param Kfold A positive integer specifying the number of folds (parts) used in cross-fitting
-#' to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-#' Default is \code{6}.
-#' @param plot.gbmperf A logical value indicating whether to plot the performance measures in
-#' boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-#' or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.
-#' @param error.maxNR A numerical value > 0 indicating the minimum value of the mean absolute
-#' error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-#' Default is \code{0.001}.
-#' @param tune A vector of 2 numerical values > 0 specifying tuning parameters for the
-#' Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-#' quantity to be added to diagonal of the slope matrix to prevent singularity.
-#' Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.
+#' @param xvar.smooth.score Reserved for continuous-outcome scores.
+#' @param xvar.smooth.init Reserved for continuous-outcome validation. Use \code{xvar.smooth}
+#' for count outcomes.
+#' @param tree.depth Maximum depth of boosting trees. Defaults to 2.
+#' @param n.trees.rf Number of trees for survival random forests. Defaults to 1000.
+#' @param n.trees.boosting Maximum number of trees for boosting. Defaults to 200.
+#' @param B Number of cross-fitting repetitions used by two-regression and contrast
+#' regression. Defaults to 3.
+#' @param Kfold Number of folds used for cross-fitting within each training set. Defaults to
+#' 6.
+#' @param plot.gbmperf Whether to plot boosting performance. Defaults to FALSE.
+#' @param error.maxNR Newton–Raphson convergence tolerance for contrast regression. Defaults
+#' to 0.001.
+#' @param tune Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+#' \code{c(0.5, 2)}.
 #' @param seed An optional integer specifying an initial randomization seed for reproducibility.
 #' Default is \code{NULL}, corresponding to no seed.
 #' @param verbose An integer value indicating what kind of intermediate progress messages should
 #' be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
 #' \code{2} means progress bar, run time, and all errors and warnings. Default is \code{0}.
-#' @param ... Additional boosting arguments; see \code{\link{boosting-control}}.
-#'
-#' @return Returns a list containing the following components saved as a \code{"precmed"} object:
-#' \itemize{
-#'  \item{\code{ate.gaussian}: }A list of results output if \code{score.method} includes
-#'  \code{'gaussian'}:
-#'  \itemize{
-#'     \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
-#'     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
-#'     The ith column/jth row cell contains the estimated ATE in the nested subgroup of high responders
-#'     defined by CATE score above (if \code{higher.y = TRUE}) or below (if \code{higher.y = FALSE}) the
-#'     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-#'     cross-validation iteration.
-#'     \item{\code{ate.est.train.low.cv}: }A matrix of numerical values with
-#'     \code{length(prop.cutoff) - 1} rows and \code{cv.n} columns.
-#'     The ith column/jth row cell contains the estimated ATE in the nested subgroup of low responders
-#'     defined by CATE score below (if \code{higher.y = TRUE}) or above (if \code{higher.y = FALSE}) the
-#'     \code{prop.cutoff[j]}x100\% percentile of the estimated CATE score in the training set in the ith
-#'     cross-validation iteration.
-#'     \item{\code{ate.est.valid.high.cv}: }Same as \code{ate.est.train.high.cv},
-#'     but in the validation set.
-#'     \item{\code{ate.est.valid.low.cv}: }Same as \code{ate.est.train.low.cv},
-#'     but in the validation set.
-#'     \item{\code{ate.est.train.group.cv}: }A matrix of numerical values with
-#'     \code{length(prop.multi) - 1} rows and \code{cv.n} columns.
-#'     The ith column contains the estimated ATE in \code{length(prop.multi) - 1}
-#'     mutually exclusive subgroups defined by \code{prop.multi} in the training set in ith
-#'     cross-validation iteration.
-#'     \item{\code{ate.est.valid.group.cv}: }Same as \code{ate.est.train.group.cv}, but in the
-#'     validation set.
-#'     \item{\code{abc.valid}: }A vector of numerical values of length \code{cv.n},
-#'     The ith element returns the ABC of the validation curve in the ith cross-validation
-#'     iteration. Only returned if \code{abc = TRUE}.
-#'  }
-#'  \item{\code{ate.boosting}: }A list of results similar to \code{ate.gaussian} output
-#'  if \code{score.method} includes \code{'boosting'}.
-#'  \item{\code{ate.twoReg}: }A list of results similar to \code{ate.gaussian} output
-#'  if \code{score.method} includes \code{'twoReg'}.
-#'  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.gaussian} output
-#'  if \code{score.method} includes \code{'contrastReg'}.
-#' \item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
-#' \code{score.method} includes \code{'randomForest'}:
-#' \item{\code{ate.gam}: }A list of results similar to \code{ate.gaussian} output
-#' if \code{score.method} includes \code{'gam'}.
-#'  \item{\code{props}: }A list of 3 elements:
-#'  \itemize{
-#'     \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
-#'     reformatted as necessary.
-#'     \item{\code{prop.bi}: }The original argument \code{prop.cutoff},
-#'     similar to \code{prop.onlyhigh} but reformatted to exclude 1.
-#'     \item{\code{prop.multi}: }The original argument \code{prop.multi},
-#'     reformatted as necessary.
-#'  }
-#'  \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
-#'  The ith element contains the ATE in the training set of the ith cross-validation
-#'  iteration, estimated with the doubly robust estimator.
-#'  \item{\code{overall.ate.valid}: }A vector of numerical values of length \code{cv.n}.
-#'  The ith element contains the ATE in the validation set of the ith cross-validation
-#'  iteration, estimated with the doubly robust estimator.
-#'  \item{\code{higher.y}: }The original \code{higher.y} argument.
-#'  \item{\code{abc}: }The original \code{abc} argument.
-#'  \item{\code{cv.n}: }The original \code{cv.n} argument.
-#'  \item{\code{response}: }The type of response. Always 'continuous' for this function.
-#'  \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
-#'  (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
-#'  \code{ps.model} (treatment) if it was not 0/1.
-#' }
-#'
-#' @details The CATE score represents an individual-level treatment effect for continuous data,
-#' estimated with boosting, linear regression, random forest, generalized additive model and the doubly
-#' robust estimator (two regressions, Yadlowsky, 2020) applied separately by treatment group
-#' or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
-#' to the entire data set.
-#'
-#' Internal CV is applied to reduce optimism in choosing the CATE estimation method that
-#' captures the most treatment effect heterogeneity. The CV is applied by repeating the
-#' following steps \code{cv.n} times:
-#'
-#' \enumerate{
-#'  \item Split the data into a training and validation set according to \code{train.prop}.
-#'  The training and validation sets must be balanced with respect to covariate distributions
-#'  and doubly robust rate ratio estimates (see \code{error.max}).
-#'  \item Estimate the CATE score in the training set with the specified scoring method.
-#'  \item Predict the CATE score in the validation set using the scoring model fitted from
-#'  the training set.
-#'  \item Build nested subgroups of treatment responders in the training and validation sets,
-#'  separately, and estimate the ATE within each nested subgroup. For each element i of
-#'  \code{prop.cutoff} (e.g., \code{prop.cutoff[i]} = 0.6), take the following steps:
-#'  \enumerate{
-#'    \item Identify high responders as observations with the 60\%
-#'    (i.e., \code{prop.cutoff[i]}x100\%) highest (if \code{higher.y = TRUE}) or
-#'    lowest (if \code{higher.y = FALSE}) estimated CATE scores.
-#'    \item Estimate the ATE in the subgroup of high responders using a doubly robust estimator.
-#'    \item Conversely, identify low responders as observations with the 40\%
-#'    (i.e., 1 - \code{prop.cutoff[i]}x100\%) lowest (if \code{higher.y} = TRUE) or
-#'    highest (if \code{higher.y} = FALSE) estimated CATE scores.
-#'    \item Estimate the ATE in the subgroup of low responders using a doubly robust estimator.
-#'  }
-#'  \item Build mutually exclusive subgroups of treatment responders in the training and
-#'  validation sets, separately, and estimate the ATE within each subgroup. Mutually exclusive
-#'  subgroups are built by splitting the estimated CATE scores according to \code{prop.multi}.
-#'  \item If \code{abc} = TRUE, calculate the area between the ATE and the series of ATEs in
-#'  nested subgroups of high responders in the validation set.
-#' }
-#'
-#' @references Yadlowsky, S., Pellegrini, F., Lionetto, F., Braune, S., & Tian, L. (2020).
-#' \emph{Estimation and validation of ratio-based conditional average treatment effects using
-#' observational data. Journal of the American Statistical Association, 1-18.} DOI: 10.1080/01621459.2020.1772080.
-#'
-#' @seealso \code{\link{plot.precmed}()}, \code{\link{boxplot.precmed}()}, \code{\link{abc}()} methods for \code{"precmed"} objects,
-#' and \code{\link{catefitmean}()} function.
-#'
-#' @examples
-#' # Not implemented yet!
-#'
-#' @importFrom graphics hist lines
-#' @importFrom stats as.formula coef glm median model.frame model.matrix model.offset model.response na.omit optim pchisq predict qnorm quantile sd var
-#' @importFrom stringr str_replace str_extract str_detect
-#' @importFrom dplyr %>%
 #' @param ps.control Named options for LASSO propensity-score interaction screening.
 #' Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-#' Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+#' Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 #' interaction selection rule are unchanged. Kept separate from boosting's
 #' \code{...} and other numerical controls.
-
+#' @param rf.control Named list of randomForestSRC options: \code{mtry}, \code{nodesize},
+#' \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
+#' and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.
+#' @param ... Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+#' supported for backward compatibility and emit warnings.
+#'
+#' @return This function stops with an error.
+#'
 catecvmean <- function(data,
+                       outcome_model, outcome_method = NULL,
+                       benefit_model = NULL, benefit_method = "t_learner", ps_model, ps_method = "glm",
+                       minPS = 0.01,
+                       maxPS = 0.99,
+                       higher.y = TRUE,
+                       prop.cutoff = seq(0.5, 1, length = 6),
+                       prop.multi = c(0, 1/3, 2/3, 1),
+                       abc = TRUE,
+                       train.prop = 3/4,
+                       cv.n = 10,
+                       error.max = 0.1,
+                       max.iter = 5000,
+                       xvar.smooth.score = NULL,
+                       xvar.smooth.init = NULL,
+                       tree.depth = 2,
+                       n.trees.rf = 1000,
+                       n.trees.boosting = 200,
+                       B = 3,
+                       Kfold = 6,
+                       plot.gbmperf = FALSE,
+                       error.maxNR = 1e-3,
+                       tune = c(0.5, 2),
+                       seed = NULL,
+                       verbose = 0,
+                       ps.control = list(), rf.control = list(), ...) {
+  args <- match_catecv_call(sys.function(), sys.call(), parent.frame(), catecv_mean)
+  args <- resolve_catecv_call(args, "continuous", parent.frame())
+  do.call(catecv_mean, args, envir = parent.frame())
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+catecv_mean <- function(data,
                        score.method,
                        cate.model,
                        ps.model,
@@ -2479,7 +2369,7 @@ catecvmean <- function(data,
 #'
 #' @details \code{\link{plot}()} takes in outputs from \code{\link{catecv}()} and generates two plots
 #' of validation curves side-by-side, one for the training set and one for validation set.
-#' Separate validation curves are produced for each scoring method specified via \code{score.method}
+#' Separate validation curves are produced for each fitted scoring method
 #' in \code{\link{catecv}()} or \code{\link{catecvmean}()}.
 #'
 #' The validation curves (and ABC statistics, if applicable) can help compare the performance of
@@ -2693,6 +2583,9 @@ plot.precmed <- function(x,
 
   # Detect the number of score methods
   map <- c("randomForest" = "Random Forest",
+           "coxph" = "Cox proportional hazards",
+           "weibull" = "Weibull",
+           "log_normal" = "Log-normal",
            "boosting" = "Boosting",
            "poisson" = "Naive Poisson",
            "twoReg" = "Two Regressions",
@@ -2846,6 +2739,9 @@ plot.precmed <- function(x,
   scorevars <- unique(dat$score)
 
   map.color <- c("randomForest" = "magenta4",
+                 "coxph" = "steelblue4",
+                 "weibull" = "darkorange3",
+                 "log_normal" = "darkcyan",
                  "boosting" = "orangered2",
                  "poisson" = "gray30",
                  "logistic" = "gray30",
@@ -3054,6 +2950,9 @@ boxplot.precmed <- function(x, ylab = NULL,
 
   # Detect the number of score methods
   map <- c("randomForest" = "Random Forest",
+           "coxph" = "Cox proportional hazards",
+           "weibull" = "Weibull",
+           "log_normal" = "Log-normal",
            "boosting" = "Boosting",
            "poisson" = "Naive Poisson",
            "gaussian" = "Linear Regression",

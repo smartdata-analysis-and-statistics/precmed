@@ -2,17 +2,18 @@
 % Please edit documentation in R/crossv.R
 \name{catecvsurv}
 \alias{catecvsurv}
-\title{Cross-validation of the conditional average treatment effect (CATE) score for survival outcomes}
+\title{Cross-validation of conditional average treatment-effect scores for survival outcomes}
 \usage{
 catecvsurv(
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  initial.predictor.method = "randomForest",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  outcome_model,
+  outcome_method = "coxph",
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -41,48 +42,44 @@ catecvsurv(
   contrast.control = list(),
   ps.control = list(),
   rf.control = list(),
-  init.model = NULL
+  ...
 )
 }
 \arguments{
 \item{data}{A data frame containing the variables in the outcome, treatment,
 and censoring models (if specified); a data frame with \code{n} rows (1 row per observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE score.
-Allowed values are: \code{'randomForest'}, \code{'boosting'}, \code{'poisson'}, \code{'twoReg'}, and
-\code{'contrastReg'}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates. Use a
+\code{Surv} response for survival and include an exposure offset for count outcomes.}
 
-\item{cate.model}{A standard \code{Surv} formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model method for each \code{benefit_method}. For a
+T-learner, the default is \code{'coxph'}. Other options include \code{'weibull'},
+\code{'log_normal'}, \code{'poisson'}, \code{'boosting'}, and \code{'random_forest'}. For
+two-regression or contrast regression, choose \code{'fractional_logit'},
+\code{'boosting'}, or \code{'random_forest'}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
-appear on the left-hand side. The treatment must be a numeric vector coded as 0/1.
-If data are from a randomized controlled trial, specify \code{ps.model = ~1} as an intercept-only model.}
+\item{benefit_model}{Optional one-sided formula for the covariates and terms used in
+two-regression and contrast-regression scores. The default uses the terms in
+\code{outcome_model}. T-learners use \code{outcome_model} directly.}
 
-\item{ps.method}{A character value for the method to estimate the propensity score.
-Allowed values include one of:
-\code{'glm'} for logistic regression with main effects only (default), or
-\code{'lasso'} for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in \code{ps.model}).
-Relevant only when \code{ps.model} has more than one variable.}
+\item{benefit_method}{Score-construction method, with one entry per \code{outcome_method}.
+The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.}
 
-\item{initial.predictor.method}{A character vector for the method used to get initial
-outcome predictions conditional on the covariates specified in \code{init.model} (or \code{cate.model} when omitted). Only applies
-when \code{score.method} includes \code{'twoReg'} or \code{'contrastReg'}. Allowed values include
-one of \code{'randomForest'}, \code{'boosting'} and \code{'fractional_logit'} (fastest).
-The older value \code{'logistic'} is accepted with a deprecation warning.
-Default is \code{'randomForest'}.}
+\item{ps_model}{A formula for the treatment model, with treatment on the left. It
+estimates propensity scores. For a common randomization probability, use an intercept-only
+formula such as \code{trt ~ 1}.}
 
-\item{ipcw.model}{A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Default is \code{ipcw.model = NULL},
-which corresponds to specifying the censoring model with the same covariates as the outcome model
-\code{cate.model} plus the treatment.}
+\item{ps_method}{Treatment-model fitting method. The default \code{'glm'} uses logistic
+regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+interactions.}
 
-\item{ipcw.method}{A character value for the censoring model. Allowed values are:
-\code{'breslow'} (Cox regression with Breslow estimator of the baseline survivor function),
-\code{'aft (exponential)'}, \code{'aft (weibull)'}, \code{'aft (lognormal)'}
-or \code{'aft (loglogistic)'} (accelerated failure time model with different distributions for
-y variable). Default is \code{'breslow'}.}
+\item{censoring_model}{Survival only. A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring weighting
+(IPCW). The default uses the outcome-model covariates and treatment.}
+
+\item{censoring_method}{Survival only. \code{'breslow'} (default) uses Cox regression with
+the Breslow estimator. Accelerated failure time options are \code{'aft (exponential)'},
+\code{'aft (weibull)'}, \code{'aft (lognormal)'}, and \code{'aft (loglogistic)'}.}
 
 \item{minPS}{A numerical value (in `[0, 1]`) below which estimated propensity scores should be
 truncated. Default is \code{0.01}.}
@@ -115,7 +112,7 @@ Each element represents the cutoff to separate the observations into
 Default is \code{c(0, 1/3, 2/3, 1)}.}
 
 \item{abc}{A logical value indicating whether the area between curves (ABC) should be calculated
-at each cross-validation iterations, for each \code{score.method}. Default is \code{TRUE}.}
+at each cross-validation iterations, for each scoring method. Default is \code{TRUE}.}
 
 \item{train.prop}{A numerical value (in `(0, 1)`) indicating the proportion of total data used
 for training. Default is \code{3/4}.}
@@ -131,50 +128,34 @@ to define a balanced training-validation splitting. Default is \code{0.1}.}
 \item{max.iter}{A positive integer value indicating the maximum number of iterations when
 searching for a balanced training-validation split. Default is \code{5,000}.}
 
-\item{surv.min}{Lower truncation limit for the probability of being censored.
-It must be a positive value and should be chosen close to 0. Default is \code{0.025}.}
+\item{surv.min}{Lower bound for the estimated probability of remaining uncensored.
+Defaults to 0.025.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is 2.}
+\item{tree.depth}{Maximum depth of boosting trees. Defaults to 2.}
 
-\item{n.trees.rf}{A positive integer specifying the number of trees in random forest.
-Used if \code{score.method = 'randomForest'} or if \code{initial.predictor.method = 'randomForest'}
-with \code{score.method = 'twoReg'} or \code{'contrastReg'}. Only applies for survival outcomes.
-Default is \code{1000}.}
+\item{n.trees.rf}{Number of trees for survival random forests. Defaults to 1000.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is \code{200}.}
+\item{n.trees.boosting}{Maximum number of trees for boosting. Defaults to 200.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of cross-fitting repetitions used by two-regression and contrast
+regression. Defaults to 3.}
 
-\item{Kfold}{A positive integer specifying the number of folds used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-Default is \code{5}.}
+\item{Kfold}{Number of folds used for cross-fitting within each training set. Defaults to
+5.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Newton–Raphson convergence tolerance for contrast regression. Defaults
+to 0.001.}
 
-\item{max.iterNR}{A positive integer indicating the maximum number of iterations in the
-Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{150}.}
+\item{max.iterNR}{Maximum number of Newton–Raphson iterations for contrast regression.
+Defaults to 150.}
 
-\item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
-Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+\item{tune}{Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+\code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance. Defaults to FALSE.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
@@ -195,7 +176,7 @@ integration, and is not passed to boosting via \code{...}.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
@@ -203,14 +184,16 @@ interaction selection rule are unchanged. Kept separate from boosting's
 \code{nsplit}, \code{nodedepth}, and \code{splitrule}. Applies to both treatment arms
 and survival initial-predictor forests. Use \code{n.trees.rf} for the number of trees.}
 
-\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
+\item{...}{Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+supported for backward compatibility and emit warnings.}
 }
 \value{
-Returns a list containing the following components saved as a \code{"precmed"} object:
+A \code{"precmed"} object with the components below. When doubly
+robust scores use different outcome methods, \code{outcome_methods}
+records the method used for each score.
 \itemize{
  \item{\code{ate.randomForest}: }A list of ATE output measured by the RMTL ratio if
- \code{score.method} includes \code{'randomForest'}:
+ the selected scoring methods includes \code{'randomForest'}:
  \itemize{
     \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
     \code{length(prop.cutoff)} rows and \code{cv.n} columns.
@@ -240,13 +223,13 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     iteration. Only returned if \code{abc = TRUE}.
  }
  \item{\code{ate.boosting}: }A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'boosting'}.
+ if the selected scoring methods includes \code{'boosting'}.
  \item{\code{ate.poisson}: }A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'poisson'}.
+ if the selected scoring methods includes \code{'poisson'}.
  \item{\code{ate.twoReg}: }A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'twoReg'}.
+ if the selected scoring methods includes \code{'twoReg'}.
  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.randomForest} output
- if \code{score.method} includes \code{'contrastReg'}.
+ if the selected scoring methods includes \code{'contrastReg'}.
  This method has an additional element in the list of results:
  \itemize{
     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
@@ -259,7 +242,7 @@ Returns a list containing the following components saved as a \code{"precmed"} o
  Matrix names use the prefix \code{chr.est.}; undefined estimates are \code{NA}.
  \code{overall.chr.train} and \code{overall.chr.valid} contain the corresponding
  overall fold estimates. Existing \code{hr.*} results are conditional Cox HRs.
- \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if \code{score.method} includes
+ \item{\code{hr.randomForest}: }A list of adjusted hazard ratio if the selected scoring methods includes
  \code{'randomForest'}:
  \itemize{
     \item{\code{hr.est.train.high.cv}: }A matrix of numerical values with
@@ -287,13 +270,13 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     validation set.
  }
  \item{\code{hr.boosting}: }A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'boosting'}.
+ if the selected scoring methods includes \code{'boosting'}.
  \item{\code{hr.poisson}: }A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'poisson'}.
+ if the selected scoring methods includes \code{'poisson'}.
  \item{\code{hr.twoReg}: }A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'twoReg'}.
+ if the selected scoring methods includes \code{'twoReg'}.
  \item{\code{hr.contrastReg}: }A list of results similar to \code{hr.randomForest} output
- if \code{score.method} includes \code{'contrastReg'}.
+ if the selected scoring methods includes \code{'contrastReg'}.
  \item{\code{props}: }A list of 3 elements:
  \itemize{
     \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
@@ -316,24 +299,22 @@ Returns a list containing the following components saved as a \code{"precmed"} o
 The ith element contains the ATE (HR) in the validation set of the ith cross-validation
 iteration.
  \item{\code{errors/warnings}: }A nested list of errors and warnings that were wrapped during the
- calculation of ATE. Errors and warnings are organized by \code{score.method} and
+ calculation of ATE. Errors and warnings are organized by scoring method and
  position in the CV flow.
  \item{\code{higher.y}: }The original \code{higher.y} argument.
  \item{\code{abc}: }The original \code{abc} argument.
  \item{\code{cv.n}: }The original \code{cv.n} argument.
  \item{\code{response}: }The type of response. Always 'survival' for this function.
- \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
- (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
- \code{ps.model} (treatment) if it was not 0/1.
+ \item{\code{formulas}:}A list of 3 elements: (1) \code{outcome_model} argument,
+ (2) \code{ps_model} argument and (3) original labels of the left-hand side variable in
+ \code{ps_model} (treatment) if it was not 0/1.
 }
 }
 \description{
-Provides doubly robust estimation of the average treatment effect (ATE) by the
-RMTL (restricted mean time lost) ratio in nested and mutually exclusive subgroups of patients
-defined by an estimated conditional average treatment effect (CATE) score via
-cross-validation (CV). The CATE score can be estimated with up to 5 methods among the following:
-Random forest, boosting, poisson regression, two regressions, and contrast regression
-(see \code{score.method}).
+Repeatedly fits scores on training data and applies them to validation data.
+Subgroup effects include restricted mean time lost ratios and marginal cumulative
+hazard ratios at the specified horizon. Cox, Weibull and log-normal T-learners
+use training-arm outcome models to predict restricted mean time lost in both sets.
 }
 \details{
 The CATE score represents an individual-level treatment effect expressed as the
@@ -381,12 +362,11 @@ tau0 <- with(survivalExample,
              min(quantile(y[trt == "drug1"], 0.95), quantile(y[trt == "drug0"], 0.95)))
 
 catecv <- catecvsurv(data = survivalExample,
-                     score.method = "poisson",
-                     cate.model = Surv(y, d) ~ age + female + previous_cost +
+                     outcome_method = "poisson",
+                     outcome_model = Surv(y, d) ~ age + female + previous_cost +
                                                previous_number_relapses,
-                     ps.model = trt ~ age + previous_treatment,
-                     initial.predictor.method = "fractional_logit",
-                     ipcw.model = ~ age + previous_cost + previous_treatment,
+                     ps_model = trt ~ age + previous_treatment,
+                     censoring_model = ~ age + previous_cost + previous_treatment,
                      tau0 = tau0,
                      higher.y = TRUE,
                      cv.n = 5, seed = 999, verbose = 1)

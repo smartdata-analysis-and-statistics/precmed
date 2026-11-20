@@ -19,10 +19,10 @@ test_that("score methods match the outcome and are nonempty character values", {
   for (response in names(valid)) {
     invalid <- switch(response, count = "randomForest", survival = "negBin", continuous = "poisson")
     expect_error(catefit(response, benefit_method = invalid), paste0("score.method for ", response))
-    expect_error(catecv(response, score.method = invalid), paste0("score.method for ", response))
+    expect_error(catecv(response, benefit_method = invalid), paste0("score.method for ", response))
   }
   expect_error(catefitmean(data = data.frame(), benefit_method = "poisson"), "score.method for continuous")
-  expect_error(catecvmean(data = data.frame(), score.method = character()), "score.method for continuous")
+  expect_error(catecvmean(data = data.frame(), benefit_method = character()), "score.method for continuous")
   expect_error(catefitcount(data = data.frame(), benefit_method = "randomForest"), "score.method for count")
-  expect_error(catecvsurv(data = data.frame(), score.method = "negBin"), "score.method for survival")
+  expect_error(catecvsurv(data = data.frame(), benefit_method = "negBin"), "score.method for survival")
 })

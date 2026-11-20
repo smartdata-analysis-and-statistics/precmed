@@ -18,12 +18,18 @@ binary_score_new <- function(fit, x, method) {
 
 # Build both design matrices using terms and transformation parameters learned in training.
 # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-binary_cv_design <- function(data, train, formula) {
+binary_cv_design <- function(data, train, formula, benefit = FALSE, valid_rows = which(!train)) {
+  if (benefit && (!inherits(formula, "formula") || length(formula) != 2L))
+    stop("benefit_model must be a one-sided formula.", call. = FALSE)
   frame <- stats::model.frame(formula, data = data[train, , drop = FALSE], na.action = stats::na.pass)
   terms <- attr(frame, "terms")
   xtrain <- stats::model.matrix(terms, frame)
+  if (benefit && !is.null(stats::model.offset(frame)))
+    stop("benefit_model cannot include an offset.", call. = FALSE)
+  if (benefit && !"(Intercept)" %in% colnames(xtrain))
+    stop("benefit_model must include an intercept.", call. = FALSE)
   xlevels <- stats::.getXlevels(terms, frame)
-  valid <- stats::model.frame(stats::delete.response(terms), data = data[!train, , drop = FALSE],
+  valid <- stats::model.frame(stats::delete.response(terms), data = data[valid_rows, , drop = FALSE],
                               na.action = stats::na.pass, xlev = xlevels)
   xvalid <- stats::model.matrix(stats::delete.response(terms), valid, contrasts.arg = attr(xtrain, "contrasts"))
   if (!identical(colnames(xtrain), colnames(xvalid)) || any(!is.finite(xtrain)) || any(!is.finite(xvalid)))
@@ -31,15 +37,41 @@ binary_cv_design <- function(data, train, formula) {
   list(train = xtrain, valid = xvalid)
 }
 
-# Repeated treatment-stratified validation for binary risk-difference scores.
-# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
-catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "glm",
+#' Cross-validation of conditional risk-difference scores
+#'
+#' Repeatedly fits binary treatment-effect scores on treatment-stratified
+#' training splits and applies them to the held-out observations.
+#'
+#' @inheritParams catecv
+#' @param outcome_method Outcome-model method for each \code{benefit_method}.
+#' Choose \code{"logistic"} (default) or \code{"boosting"} for a T-learner.
+#' Two-regression uses \code{"logistic"}.
+#' @return A \code{"precmed"} object with training and validation subgroup risk
+#' differences, split indices, and diagnostics. See \code{\link{catecv}}.
+#' @author Thomas Debray <tdebray@fromdatatowisdom.com>
+#' @export
+catecvbinary <- function(data, outcome_model, outcome_method = "logistic",
+                         benefit_model = NULL, benefit_method = "t_learner",
+                         ps_model, ps_method = "glm",
                          minPS = 0.01, maxPS = 0.99, higher.y = TRUE,
                          prop.cutoff = seq(0.5, 1, length = 6),
                          prop.multi = c(0, 1/3, 2/3, 1), abc = TRUE,
                          train.prop = 3/4, cv.n = 10, tree.depth = 2,
                          n.trees.boosting = 200, B = 3, Kfold = 5,
-                         seed = NULL, plot.gbmperf = FALSE, verbose = 0, ps.control = list(), init.model = NULL) {
+                         seed = NULL, plot.gbmperf = FALSE, verbose = 0, ps.control = list(), ...) {
+  args <- match_catecv_call(sys.function(), sys.call(), parent.frame(), catecv_binary)
+  args <- resolve_catecv_call(args, "binary", parent.frame())
+  do.call(catecv_binary, args, envir = parent.frame())
+}
+
+# Author: Thomas Debray <tdebray@fromdatatowisdom.com>
+catecv_binary <- function(data, score.method, cate.model, ps.model, ps.method = "glm",
+                         minPS = 0.01, maxPS = 0.99, higher.y = TRUE,
+                         prop.cutoff = seq(0.5, 1, length = 6),
+                         prop.multi = c(0, 1/3, 2/3, 1), abc = TRUE,
+                         train.prop = 3/4, cv.n = 10, tree.depth = 2,
+                         n.trees.boosting = 200, B = 3, Kfold = 5,
+                         seed = NULL, plot.gbmperf = FALSE, verbose = 0, ps.control = list(), init.model = NULL, ..., benefit_model = NULL) {
   check_score_method("binary", score.method)
   if (anyDuplicated(score.method)) stop("score.method must not contain duplicates.")
   if (length(ps.method) != 1L || is.na(ps.method) || !ps.method %in% c("glm", "lasso") ||
@@ -68,6 +100,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
   result <- stats::setNames(vector("list", length(score.method)), paste0("ate.", score.method))
   # Author: Thomas Debray <tdebray@fromdatatowisdom.com>
   matrix_cv <- function(rows, labels) {
+    if (!rows) labels <- NULL
     matrix(NA_real_, rows, cv.n, dimnames = list(labels, paste0("cv", seq_len(cv.n))))
   }
   for (method in score.method) {
@@ -116,7 +149,9 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
     }
     result$splits[[i]] <- list(train = which(train), valid = which(!train))
     parts <- list(train = binary_subset(d, train), valid = binary_subset(d, !train))
-    designs <- tryCatch(list(x = binary_cv_design(data, train, cate.model), z = binary_cv_design(data, train, ps.model), init = binary_cv_design(data, train, if ("twoReg" %in% score.method && !is.null(init.model)) init.model else cate.model)), error = function(e) {
+    designs <- tryCatch(list(x = binary_cv_design(data, train, cate.model), z = binary_cv_design(data, train, ps.model), init = binary_cv_design(data, train, if ("twoReg" %in% score.method && !is.null(init.model)) init.model else cate.model),
+                             benefit = if ("twoReg" %in% score.method && !is.null(benefit_model))
+                               binary_cv_design(data, train, benefit_model, benefit = TRUE)), error = function(e) {
       msg <- paste0("Binary validation iteration ", i, ": design construction failed: ", conditionMessage(e))
       record(NA_character_, "train", i, "design", NA_character_, "error", msg)
       warning(msg, call. = FALSE)
@@ -126,13 +161,21 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
     for (s in c("train", "valid")) {
       parts[[s]]$x <- designs$x[[s]]
       parts[[s]]$x.init <- designs$init[[s]]
+      parts[[s]]$x.benefit <- if (is.null(designs$benefit)) designs$x[[s]] else designs$benefit[[s]]
       parts[[s]]$z <- designs$z[[s]]
     }
     for (s in c("train", "valid")) result[[paste0("overall.ate.", s)]][i] <- effect(parts[[s]], rep(TRUE, length(parts[[s]]$y)), NA_character_, s, i, "overall", "1")
     for (method in score.method) {
       fitted <- tryCatch({
         tr <- parts$train
-        if (method == "twoReg") binary_tworeg_dr(tr, ps.method, minPS, maxPS, ps.control, B, Kfold)$fit else if (method == "logistic") binary_predictions(tr$y, tr$trt, tr$x, "logistic_arms")$fit else binary_boosting(tr, tree.depth, n.trees.boosting, plot.gbmperf)$fit
+        if (method == "twoReg") {
+          tr$x <- tr$x.benefit
+          binary_tworeg_dr(tr, ps.method, minPS, maxPS, ps.control, B, Kfold)$fit
+        } else if (method == "logistic") {
+          binary_predictions(tr$y, tr$trt, tr$x, "logistic_arms")$fit
+        } else {
+          binary_boosting(tr, tree.depth, n.trees.boosting, plot.gbmperf, ...)$fit
+        }
       }, error = function(e) {
         msg <- paste0(method, ", training iteration ", i, ": score fitting failed: ", conditionMessage(e))
         record(method, "train", i, "score", NA_character_, "error", msg)
@@ -142,7 +185,7 @@ catecvbinary <- function(data, score.method, cate.model, ps.model, ps.method = "
       if (is.null(fitted)) next
       for (s in c("train", "valid")) {
         part <- parts[[s]]
-        score <- binary_score_new(fitted, part$x, method)
+        score <- binary_score_new(fitted, if (method == "twoReg") part$x.benefit else part$x, method)
         if (any(!is.finite(score))) { record(method, s, i, "score", NA_character_, "error", "Non-finite score."); warning("Non-finite binary score; returning NA.", call. = FALSE); next }
         rankscore <- if (higher.y) score else -score
         entry <- result[[paste0("ate.", method)]]

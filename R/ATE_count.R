@@ -445,7 +445,7 @@ estcount.bilevel.subgroups <- function(y, x.cate, x.ps, time, trt, score, higher
   n.subgroup <- length(prop)
   ate.est.high <- rep(0, n.subgroup)
   if (onlyhigh == FALSE) ate.est.low <- rep(0, n.subgroup)
-  for (b in 1:n.subgroup) {
+  for (b in seq_len(n.subgroup)) {
       idsub1 <- (score >= cut[b])
       ate.est.high[b] <- count_subgroup_log_effect(idsub1, y, x.cate, x.ps, time, trt, ps.method, minPS, maxPS, ps.control,
                                                    paste0(context, ", high subgroup ", prop[b]), diagnostic, "high", as.character(prop[b]))

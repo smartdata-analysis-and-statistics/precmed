@@ -29,10 +29,9 @@ options(rmarkdown.html_vignette.check_title = FALSE) #title of doc does not matc
 
 The treatment model estimates propensity scores, and the censoring model
 provides probabilities used for inverse probability of censoring weighting
-(IPCW). Use `ps_model` for the treatment formula in `atefit()` and `catefit()`.
+(IPCW). Use `ps_model` for the treatment formula in `atefit()`, `catefit()`, and `catecv()`.
 For survival outcomes, use `censoring_model` for the censoring formula and
-`censoring_method` to choose how it is fitted. The validation interface
-`catecv()` uses `ps.model`, `ipcw.model`, and `ipcw.method`.
+`censoring_method` to choose how it is fitted.
 
 For background on marginal and conditional treatment effects, see Chapter 5 [@nguyen2026causaleffects]. Chapter 17 introduces CATE prediction and model development [@hoogland2026introduction].
 
@@ -72,7 +71,7 @@ For count and survival outcomes, the following workflow estimates the ATE and de
 1. Use `atefit()` to estimate the overall ATE between two treatment groups and its uncertainty using bootstrap resampling.
 2. Compare up to five modelling approaches (e.g., Poisson regression, boosting) for estimating the CATE using cross-validation through `catecv()`.
 3. Select the best modelling approach using 3 metrics:
-    * Compare the steepness of the validation curves in the validation samples across methods using `plot()`. Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) specified under the argument `score.method`.
+    * Compare the steepness of the validation curves in the validation samples across methods using `plot()`. Two side-by-side plots are generated, visualizing the estimated average treatment effects in a series of nested subgroups. On the left side the curve is shown for the training set, and on the right side the curve is shown for the validation set. Each line in the plots represents one scoring method (e.g., boosting, randomForest) included in the fit.
     * The area between curves (ABC) using `abc()` quantifies a model’s ability to capture treatment effect heterogeneity. Higher ABC values are preferable as they indicate that more treatment effect heterogeneity is captured by the scoring method.
     * Compare the distribution of the estimated ATE across different levels of the CATE score percentiles using `boxplot()`. 
 4. Fit the chosen approach using `catefit()` and assess it in an independent dataset where possible.
@@ -90,10 +89,9 @@ When applying `catefit()`, the user has to (at least) input:
 - `outcome_model`: a formula describing the outcome and score covariates (e.g., outcome ~ age + gender + previous_treatment)
 - `outcome_method`: outcome-model fitting methods
 - `benefit_method`: score-construction methods paired with `outcome_method`
-- `ps.model`: a formula describing the treatment model to adjust for confounding (e.g., treatment ~ age + previous_treatment)
+- `ps_model`: a formula describing the treatment model to adjust for confounding (e.g., treatment ~ age + previous_treatment)
 
-For cross-validation, `catecv()` currently uses `score.method` and `cate.model`
-for its corresponding score methods and formula.
+Use the same model arguments in `catecv()` to validate a score.
 
 
 ## Overview of the vignettes

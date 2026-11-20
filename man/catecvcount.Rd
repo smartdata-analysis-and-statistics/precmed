@@ -7,11 +7,12 @@ for count outcomes}
 \usage{
 catecvcount(
   data,
-  score.method,
-  cate.model,
-  ps.model,
-  ps.method = "glm",
-  initial.predictor.method = "boosting",
+  outcome_model,
+  outcome_method = "poisson",
+  benefit_model = NULL,
+  benefit_method = "t_learner",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -35,7 +36,6 @@ catecvcount(
   verbose = 0,
   contrast.control = list(),
   ps.control = list(),
-  init.model = NULL,
   ...
 )
 }
@@ -44,31 +44,28 @@ catecvcount(
 treatment model; a data frame with \code{n} rows (1 row per
 observation).}
 
-\item{score.method}{A vector of one or multiple methods to estimate the CATE
-score. Allowed values are: \code{'boosting'}, \code{'poisson'},
-\code{'twoReg'}, \code{'contrastReg'}, and \code{'negBin'}.}
+\item{outcome_model}{A formula specifying the outcome and baseline covariates. Use a
+\code{Surv} response for survival and include an exposure offset for count outcomes.}
 
-\item{cate.model}{A formula describing the outcome model to be fitted.
-The outcome must appear on the left-hand side.}
+\item{outcome_method}{Outcome-model method for each \code{benefit_method}. For a
+T-learner, choose \code{'poisson'} (default), \code{'negative_binomial'}, or
+\code{'boosting'}. For two-regression or contrast regression, choose \code{'poisson'},
+\code{'gam'}, or \code{'boosting'}.}
 
-\item{ps.model}{A formula describing the treatment model (propensity-score model) to be fitted.
-The treatment must appear on the left-hand side. The treatment must be a
-numeric vector coded as 0 or 1. If data are from a randomized trial, specify
-\code{ps.model} as an intercept-only model.}
+\item{benefit_model}{Optional one-sided formula for the covariates and terms used in
+two-regression and contrast-regression scores. The default uses the terms in
+\code{outcome_model}. T-learners use \code{outcome_model} directly.}
 
-\item{ps.method}{A character value for the method to estimate the propensity
-score. Allowed values include one of: \code{'glm'} for logistic regression
-with main effects only (default), or \code{'lasso'} for a logistic regression
-with main effects and LASSO penalization on two-way interactions (added to
-the model if interactions are not specified in \code{ps.model}). Relevant
-only when \code{ps.model} has more than one variable.}
+\item{benefit_method}{Score-construction method, with one entry per \code{outcome_method}.
+The default is \code{'t_learner'}. See \code{\link{catefit}} for supported combinations.}
 
-\item{initial.predictor.method}{A character vector for the method used to get
-initial outcome predictions conditional on the covariates in
-\code{init.model} (or \code{cate.model} when omitted). Only applies when \code{score.method} includes
-\code{'twoReg'} or \code{'contrastReg'}. Allowed values include one of
-\code{'poisson'} (fastest), \code{'boosting'} and \code{'gam'}. Default is
-\code{'boosting'}.}
+\item{ps_model}{A formula for the treatment model, with treatment on the left. It
+estimates propensity scores. For a common randomization probability, use an intercept-only
+formula such as \code{trt ~ 1}.}
+
+\item{ps_method}{Treatment-model fitting method. The default \code{'glm'} uses logistic
+regression. \code{'lasso'} uses a logistic model with LASSO screening for two-way
+interactions.}
 
 \item{minPS}{A numerical value between 0 and 1 below which estimated
 propensity scores should be truncated. Default is \code{0.01}.}
@@ -97,7 +94,7 @@ subgroups. Default is \code{c(0, 1/3, 2/3, 1)}.}
 
 \item{abc}{A logical value indicating whether the area between curves (ABC)
 should be calculated at each cross-validation iterations, for each
-\code{score.method}. Default is \code{TRUE}.}
+scoring method. Default is \code{TRUE}.}
 
 \item{train.prop}{A numerical value between 0 and 1 indicating the proportion
 of total data used for training. Default is \code{3/4}.}
@@ -115,47 +112,32 @@ training-validation splitting. Default is \code{0.1}.}
 iterations when searching for a balanced training-validation split. Default
 is \code{5,000}.}
 
-\item{xvar.smooth}{A vector of characters indicating the name of the variables used as
-the smooth terms if \code{initial.predictor.method = 'gam'}. The variables must be selected
-from the variables listed in \code{init.model} (or \code{cate.model} when omitted).
-Default is \code{NULL}, which uses all initial outcome-model covariates.}
+\item{xvar.smooth}{Names of outcome-model variables to use as smooth terms with
+\code{outcome_method = 'gam'}. Defaults to all eligible variables.}
 
-\item{tree.depth}{A positive integer specifying the depth of individual trees in boosting
-(usually 2-3). Used only if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is 2.}
+\item{tree.depth}{Maximum depth of boosting trees. Defaults to 2.}
 
-\item{n.trees.boosting}{A positive integer specifying the maximum number of trees in boosting
-(usually 100-1000). Used if \code{score.method = 'boosting'} or
-if \code{initial.predictor.method = 'boosting'} with \code{score.method = 'twoReg'} or
-\code{'contrastReg'}. Default is \code{200}.}
+\item{n.trees.boosting}{Maximum number of trees for boosting. Defaults to 200.}
 
-\item{B}{A positive integer specifying the number of time cross-fitting is repeated in
-\code{score.method = 'twoReg'} and \code{'contrastReg'}. Default is \code{3}.}
+\item{B}{Number of cross-fitting repetitions used by two-regression and contrast
+regression. Defaults to 3.}
 
-\item{Kfold}{A positive integer specifying the number of folds used in cross-fitting
-to partition the data in \code{score.method = 'twoReg'} and \code{'contrastReg'}.
-Default is \code{5}.}
+\item{Kfold}{Number of folds used for cross-fitting within each training set. Defaults to
+5.}
 
-\item{error.maxNR}{A numerical value > 0 indicating the minimum value of the mean absolute
-error in Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{0.001}.}
+\item{error.maxNR}{Newton–Raphson convergence tolerance for contrast regression. Defaults
+to 0.001.}
 
-\item{max.iterNR}{A positive integer indicating the maximum number of iterations in the
-Newton Raphson algorithm. Used only if \code{score.method = 'contrastReg'}.
-Default is \code{150}.}
+\item{max.iterNR}{Maximum number of Newton–Raphson iterations for contrast regression.
+Defaults to 150.}
 
-\item{tune}{A vector of 2 numerical values > 0 specifying tuning parameters for the
-Newton Raphson algorithm. \code{tune[1]} is the step size, \code{tune[2]} specifies a
-quantity to be added to diagonal of the slope matrix to prevent singularity.
-Used only if \code{score.method = 'contrastReg'}. Default is \code{c(0.5, 2)}.}
+\item{tune}{Two positive Newton–Raphson tuning values for contrast regression. Defaults to
+\code{c(0.5, 2)}.}
 
 \item{seed}{An optional integer specifying an initial randomization seed for reproducibility.
 Default is \code{NULL}, corresponding to no seed.}
 
-\item{plot.gbmperf}{A logical value indicating whether to plot the performance measures in
-boosting. Used only if \code{score.method = 'boosting'} or if \code{score.method = 'twoReg'}
-or \code{'contrastReg'} and \code{initial.predictor.method = 'boosting'}. Default is \code{FALSE}.}
+\item{plot.gbmperf}{Whether to plot boosting performance. Defaults to FALSE.}
 
 \item{verbose}{An integer value indicating what kind of intermediate progress messages should
 be printed. \code{0} means no outputs. \code{1} means only progress bar and run time.
@@ -171,19 +153,19 @@ outcomes support this list; continuous outcomes retain their existing solver.}
 
 \item{ps.control}{Named options for LASSO propensity-score interaction screening.
 Supported entry: \code{solver = "C"} (default) or \code{solver = "R"}.
-Only affects screening when \code{ps.method = "lasso"}; the LASSO fit and
+Only affects screening when \code{ps_method = "lasso"}; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 \code{...} and other numerical controls.}
 
-\item{init.model}{Optional formula for initial outcome predictions in \code{twoReg}
-and \code{contrastReg}; defaults to \code{cate.model}. The outcome must match.}
-
-\item{...}{Additional boosting arguments; see \code{\link{boosting-control}}.}
+\item{...}{Additional arguments. Deprecated argument names from precmed 1.1.0 remain
+supported for backward compatibility and emit warnings.}
 }
 \value{
-Returns a list containing the following components saved as a \code{"precmed"} object:
+A \code{"precmed"} object with the components below. When doubly
+robust scores use different outcome methods, \code{outcome_methods}
+records the method used for each score.
 \itemize{
- \item{\code{ate.poisson}: }A list of results output if \code{score.method} includes
+ \item{\code{ate.poisson}: }A list of results output if the selected scoring methods includes
  \code{'poisson'}:
  \itemize{
     \item{\code{ate.est.train.high.cv}: }A matrix of numerical values with
@@ -214,11 +196,11 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     iteration. Only returned if \code{abc = TRUE}.
  }
  \item{\code{ate.boosting}: }A list of results similar to \code{ate.poisson} output
- if \code{score.method} includes \code{'boosting'}.
+ if the selected scoring methods includes \code{'boosting'}.
  \item{\code{ate.twoReg}: }A list of results similar to \code{ate.poisson} output
- if \code{score.method} includes \code{'twoReg'}.
+ if the selected scoring methods includes \code{'twoReg'}.
  \item{\code{ate.contrastReg}: }A list of results similar to \code{ate.poisson} output
- if \code{score.method} includes \code{'contrastReg'}.
+ if the selected scoring methods includes \code{'contrastReg'}.
  This method has additional convergence information:
  \itemize{
     \item{\code{converge.contrastReg.cv}: }A vector of logical value of length \code{cv.n}.
@@ -228,7 +210,7 @@ Returns a list containing the following components saved as a \code{"precmed"} o
     convergence of each cross-fitting repetition in each CV iteration.
  }
  \item{\code{ate.negBin}: }A list of results similar to \code{ate.poisson} output
- if \code{score.method} includes \code{'negBin'}.
+ if the selected scoring methods includes \code{'negBin'}.
  \item{\code{props}: }A list of 3 elements:
  \itemize{
     \item{\code{prop.onlyhigh}: }The original argument \code{prop.cutoff},
@@ -244,14 +226,14 @@ Returns a list containing the following components saved as a \code{"precmed"} o
 \item{\code{overall.ate.train}: }A vector of numerical values of length \code{cv.n}.
 The ith element contains the ATE in the training set of the ith cross-validation
 iteration, estimated with the doubly robust estimator.
- \item{\code{fgam}: }The formula used in GAM if \code{initial.predictor.method = 'gam'}.
+ \item{\code{fgam}: }The formula used in GAM if \code{outcome_method = 'gam'}.
  \item{\code{higher.y}: }The original \code{higher.y} argument.
  \item{\code{abc}: }The original \code{abc} argument.
  \item{\code{cv.n}: }The original \code{cv.n} argument.
  \item{\code{response}: }The type of response. Always 'count' for this function.
- \item{\code{formulas}:}A list of 3 elements: (1) \code{cate.model} argument,
- (2) \code{ps.model} argument and (3) original labels of the left-hand side variable in
- \code{ps.model} (treatment) if it was not 0/1.
+ \item{\code{formulas}:}A list of 3 elements: (1) \code{outcome_model} argument,
+ (2) \code{ps_model} argument and (3) original labels of the left-hand side variable in
+ \code{ps_model} (treatment) if it was not 0/1.
 }
 }
 \description{
@@ -260,7 +242,7 @@ nested and mutually exclusive subgroups of patients defined by an estimated
 conditional average treatment effect (CATE) score via cross-validation (CV).
 The CATE score can be estimated with up to 5 methods among the following:
 Poisson regression, boosting, two regressions, contrast regression, and
-negative binomial (see \code{score.method}).
+negative binomial (see \code{outcome_method}).
 }
 \details{
 The CATE score represents an individual-level treatment effect expressed as a
@@ -303,11 +285,11 @@ following steps \code{cv.n} times:
 \examples{
 \donttest{
 catecv <- catecvcount(data = countExample,
-                      score.method = "poisson",
-                      cate.model = y ~ age + female + previous_treatment +
+                      outcome_method = "poisson",
+                      outcome_model = y ~ age + female + previous_treatment +
                                    previous_cost + previous_number_relapses +
                                    offset(log(years)),
-                      ps.model = trt ~ age + previous_treatment,
+                      ps_model = trt ~ age + previous_treatment,
                       higher.y = FALSE,
                       cv.n = 5,
                       seed = 999,

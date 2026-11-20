@@ -2,8 +2,8 @@ test_that("binary CV scores held-out data with the training model", {
   set.seed(129)
   d <- data.frame(x = rnorm(500), trt = rbinom(500, 1, .5))
   d$y <- rbinom(500, 1, plogis(-.4 + .4*d$trt + .3*d$x + .5*d$trt*d$x))
-  args <- list(response = "binary", data = d, score.method = c("logistic", "twoReg"),
-               cate.model = y ~ x, ps.model = trt ~ x, cv.n = 2, B = 1, Kfold = 2,
+  args <- list(response = "binary", data = d, outcome_method = rep("logistic", 2),
+               benefit_method = c("t_learner", "two_regression"), outcome_model = y ~ x, ps_model = trt ~ x, cv.n = 2, B = 1, Kfold = 2,
                prop.cutoff = c(.5, .75, 1), abc = FALSE, seed = 27)
   fit <- do.call(catecv, args)
   expect_identical(fit, do.call(catecv, args))
@@ -42,7 +42,7 @@ test_that("binary CV scores held-out data with the training model", {
 test_that("binary CV computes ABC and records unsupported subgroups", {
   set.seed(7)
   d <- data.frame(y = rbinom(240, 1, .4), trt = rep(0:1, 120))
-  fit <- suppressWarnings(catecv("binary", d, "logistic", y ~ 1, trt ~ 1,
+  fit <- suppressWarnings(catecv("binary", d, outcome_model = y ~ 1, ps_model = trt ~ 1,
       cv.n = 1, prop.cutoff = c(.5, 1), seed = 7))
   expect_equal(dim(abc(fit)), c(1L, 1L))
   expect_equal(unname(abc(fit)[1, 1]), 0, tolerance = 1e-8)
@@ -54,11 +54,12 @@ test_that("binary CV computes ABC and records unsupported subgroups", {
 
 test_that("binary CV validates settings and reports score failures", {
   d <- data.frame(y = rep(0:1, 20), trt = rep(0:1, each = 20))
-  expect_error(catecv("binary", d, "logistic", y ~ 1, trt ~ 1, cv.n = 0), "cv.n")
-  expect_error(catecv("binary", d, "logistic", y ~ 1, trt ~ 1, error.max = .1), "Unsupported binary")
-  expect_error(catecv("binary", d, "logistic", y ~ 1, trt ~ 1, prop.cutoff = 1), "ABC requires")
-  expect_error(catecv("binary", transform(d, trt = 1), "logistic", y ~ 1, trt ~ 1), "two non-missing")
-  fit <- suppressWarnings(catecv("binary", d, "twoReg", y ~ 1, trt ~ 1,
+  expect_error(catecv("binary", d, outcome_model = y ~ 1, ps_model = trt ~ 1, cv.n = 0), "cv.n")
+  expect_error(catecv("binary", d, outcome_model = y ~ 1, ps_model = trt ~ 1, error.max = .1), "Unsupported binary")
+  expect_error(catecv("binary", d, outcome_model = y ~ 1, ps_model = trt ~ 1, prop.cutoff = 1), "ABC requires")
+  expect_error(catecv("binary", transform(d, trt = 1), outcome_model = y ~ 1, ps_model = trt ~ 1), "two non-missing")
+  fit <- suppressWarnings(catecv("binary", d, outcome_model = y ~ 1, ps_model = trt ~ 1,
+    outcome_method = "logistic", benefit_method = "two_regression",
     cv.n = 1, Kfold = 100, abc = FALSE, seed = 1))
   expect_true(all(is.na(fit$ate.twoReg$ate.est.valid.high.cv)))
   expect_true(any(diagnostics(fit)$group == "score"))
@@ -74,7 +75,7 @@ test_that("binary CV learns formula transformations from training data", {
 
 test_that("binary boosting scores validation observations", {
   d <- simulate_binary(n = 400, seed = 10)
-  fit <- suppressWarnings(catecv("binary", d, "boosting", y ~ age, trt ~ 1,
+  fit <- suppressWarnings(catecv("binary", d, outcome_model = y ~ age, ps_model = trt ~ 1, outcome_method = "boosting",
     cv.n = 1, abc = FALSE, prop.cutoff = c(.5, 1), seed = 3,
     n.trees.boosting = 15, plot.gbmperf = FALSE))
   expect_true(is.finite(fit$ate.boosting$ate.est.valid.high.cv[2, 1]))

@@ -99,7 +99,7 @@ only after results of \code{\link{catecv}()} or \code{\link{catecvmean}()} have 
 \details{
 \code{\link{plot}()} takes in outputs from \code{\link{catecv}()} and generates two plots
 of validation curves side-by-side, one for the training set and one for validation set.
-Separate validation curves are produced for each scoring method specified via \code{score.method}
+Separate validation curves are produced for each fitted scoring method
 in \code{\link{catecv}()} or \code{\link{catecvmean}()}.
 
 The validation curves (and ABC statistics, if applicable) can help compare the performance of
