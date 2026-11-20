@@ -72,11 +72,11 @@ doubly robust scores. Continuous outcomes are not yet implemented.</p>
 <span>  <span class="va">outcome_model</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  benefit_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="st">"t_learner"</span>,</span>
 <span>  <span class="va">ps_model</span>,</span>
 <span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  censoring_method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -175,19 +175,20 @@ two-way interactions (added to the model if interactions are not specified in <c
 Relevant only when <code>ps_model</code> has more than one variable.</p></dd>
 
 
-<dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
-<dd><p>A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Only applies for survival outcomes.
-Default is <code>NULL</code>, which uses a censoring model with the same covariates
-as the outcome model <code>outcome_model</code>, plus the treatment.</p></dd>
+<dt id="arg-censoring-model">censoring_model<a class="anchor" aria-label="anchor" href="#arg-censoring-model"></a></dt>
+<dd><p>A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring
+weighting (IPCW). By default (<code>NULL</code>), the model uses the outcome-model
+covariates and treatment. Applies to survival outcomes only.</p></dd>
 
 
-<dt id="arg-ipcw-method">ipcw.method<a class="anchor" aria-label="anchor" href="#arg-ipcw-method"></a></dt>
-<dd><p>A character value for the censoring model. Only applies for survival
-outcomes. Allowed values are: <code>'breslow'</code> (Cox regression with Breslow estimator of t
-he baseline survivor function), <code>'aft (exponential)'</code>, <code>'aft (weibull)'</code>,
-<code>'aft (lognormal)'</code> or <code>'aft (loglogistic)'</code> (accelerated failure time model
-with different distributions for y variable). Default is <code>'breslow'</code>.</p></dd>
+<dt id="arg-censoring-method">censoring_method<a class="anchor" aria-label="anchor" href="#arg-censoring-method"></a></dt>
+<dd><p>Method for fitting the censoring model. The default
+<code>"breslow"</code> fits Cox regression with the Breslow estimator of the
+baseline survivor function. Accelerated failure time options are
+<code>"aft (exponential)"</code>, <code>"aft (weibull)"</code>,
+<code>"aft (lognormal)"</code>, and <code>"aft (loglogistic)"</code>.
+Applies to survival outcomes only.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
@@ -233,9 +234,7 @@ outcomes. Default is <code>0.025</code>.</p></dd>
 
 
 <dt id="arg-xvar-smooth-score">xvar.smooth.score<a class="anchor" aria-label="anchor" href="#arg-xvar-smooth-score"></a></dt>
-<dd><p>A vector of characters indicating the name of the variables used as
-the smooth terms if <code>score.method = 'gam'</code>. The variables must be selected
-from the variables listed in <code>outcome_model</code>.</p></dd>
+<dd><p>Reserved for smooth terms in continuous-outcome scores.</p></dd>
 
 
 <dt id="arg-xvar-smooth-init">xvar.smooth.init<a class="anchor" aria-label="anchor" href="#arg-xvar-smooth-init"></a></dt>
@@ -252,8 +251,7 @@ Used when <code>outcome_method = 'boosting'</code>. Default is <code>2</code>.</
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
 <dd><p>A positive integer specifying the number of trees in random forest.
-Used if <code>score.method = 'randomForest'</code> or if <code>outcome_method = 'random_forest'</code>
-with <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code>. Only applies for survival outcomes.
+Used with <code>outcome_method = 'random_forest'</code> for survival outcomes.
 Default is <code>1000</code>.</p></dd>
 
 
@@ -339,15 +337,9 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>The legacy <code>init.model</code> argument supplies a separate initial
-outcome formula using the previous interface, where <code>outcome_model</code>
-defines the score. It cannot be combined with <code>benefit_model</code>.
-The legacy <code>initial.predictor.method</code> is accepted with a deprecation
-warning and cannot be supplied together with <code>outcome_method</code>.
-Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.
-The old named arguments <code>score.method</code> and <code>cate.model</code> are
-accepted with deprecation warnings. Legacy score names and positional calls
-remain supported when <code>outcome_method</code> is omitted.</p></dd>
+<dd><p>Additional boosting options. See <code><a href="boosting-control.html">boosting-control</a></code>.
+Deprecated argument names from precmed 1.1.0 remain supported for
+backward compatibility and emit warnings.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -392,7 +384,7 @@ For survival response, see details in <code><a href="catefitsurv.html">catefitsu
     <h2 id="binary-outcomes">Binary outcomes<a class="anchor" aria-label="anchor" href="#binary-outcomes"></a></h2>
 
 
-<p>For <code>response = "binary"</code>, <code>score.method = "logistic"</code>
+<p>For binary outcomes, the default logistic T-learner
 fits a separate logistic outcome model in each treatment arm and subtracts
 their predicted risks. <code>"twoReg"</code> cross-fits
 separate logistic outcome models and a treatment model, then projects the
@@ -487,19 +479,19 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                 outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"random_forest"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                 <span class="co">#'                  ipcw.model = ~ age + previous_cost + previous_treatment,</span></span></span>
+<span class="r-in"><span>                 censoring_model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>, higher.y <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">999</span>, n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting" </span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting"; see 'errors/warnings'.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" </span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson"; see 'errors/warnings'.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit_2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                              poisson</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)               0.45047296</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age                      -0.24616564</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> female                    0.11776100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> previous_cost             0.87728869</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> previous_number_relapses -0.03975634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)               0.46109243</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age                      -0.24335209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> female                    0.12532711</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> previous_cost             0.89803249</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> previous_number_relapses -0.02470863</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

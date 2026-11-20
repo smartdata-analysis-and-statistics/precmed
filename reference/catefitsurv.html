@@ -66,13 +66,13 @@ two regressions, and contrast regression.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">catefitsurv</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  outcome_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  outcome_method <span class="op">=</span> <span class="st">"coxph"</span>,</span>
 <span>  benefit_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  benefit_method <span class="op">=</span> <span class="st">"t_learner"</span>,</span>
 <span>  <span class="va">ps_model</span>,</span>
 <span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
-<span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ipcw.method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
+<span>  censoring_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  censoring_method <span class="op">=</span> <span class="st">"breslow"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
 <span>  maxPS <span class="op">=</span> <span class="fl">0.99</span>,</span>
 <span>  followup.time <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -109,7 +109,7 @@ and censoring models (if specified); a data frame with <code>n</code> rows (1 ro
 
 
 <dt id="arg-outcome-model">outcome_model<a class="anchor" aria-label="anchor" href="#arg-outcome-model"></a></dt>
-<dd><p>Formula for the outcome and outcome-model covariates; replaces <code>cate.model</code>.</p></dd>
+<dd><p>A formula specifying the outcome and baseline covariates.</p></dd>
 
 
 <dt id="arg-outcome-method">outcome_method<a class="anchor" aria-label="anchor" href="#arg-outcome-method"></a></dt>
@@ -156,19 +156,19 @@ two-way interactions (added to the model if interactions are not specified in <c
 Relevant only when <code>ps_model</code> has more than one variable.</p></dd>
 
 
-<dt id="arg-ipcw-model">ipcw.model<a class="anchor" aria-label="anchor" href="#arg-ipcw-model"></a></dt>
-<dd><p>A formula describing the censoring model used for inverse
-probability of censoring weighting (IPCW). The left-hand side must be empty. Default is <code>ipcw.model = NULL</code>,
-which corresponds to specifying the censoring model with the same covariates as the outcome model
-<code>outcome_model</code> plus the treatment.</p></dd>
+<dt id="arg-censoring-model">censoring_model<a class="anchor" aria-label="anchor" href="#arg-censoring-model"></a></dt>
+<dd><p>A one-sided formula for the model that estimates
+probabilities of remaining uncensored for inverse probability of censoring
+weighting (IPCW). By default (<code>NULL</code>), the model uses the outcome-model
+covariates and treatment.</p></dd>
 
 
-<dt id="arg-ipcw-method">ipcw.method<a class="anchor" aria-label="anchor" href="#arg-ipcw-method"></a></dt>
-<dd><p>A character value for the censoring model. Allowed values are:
-<code>'breslow'</code> (Cox regression with Breslow estimator of the baseline survivor function),
-<code>'aft (exponential)'</code>, <code>'aft (weibull)'</code>, <code>'aft (lognormal)'</code>
-or <code>'aft (loglogistic)'</code> (accelerated failure time model with different distributions for
-y variable). Default is <code>'breslow'</code>.</p></dd>
+<dt id="arg-censoring-method">censoring_method<a class="anchor" aria-label="anchor" href="#arg-censoring-method"></a></dt>
+<dd><p>Method for fitting the censoring model. The default
+<code>"breslow"</code> fits Cox regression with the Breslow estimator of the
+baseline survivor function. Accelerated failure time options are
+<code>"aft (exponential)"</code>, <code>"aft (weibull)"</code>,
+<code>"aft (lognormal)"</code>, and <code>"aft (loglogistic)"</code>.</p></dd>
 
 
 <dt id="arg-minps">minPS<a class="anchor" aria-label="anchor" href="#arg-minps"></a></dt>
@@ -218,8 +218,7 @@ Used when <code>outcome_method = 'boosting'</code>. Default is <code>2</code>.</
 
 <dt id="arg-n-trees-rf">n.trees.rf<a class="anchor" aria-label="anchor" href="#arg-n-trees-rf"></a></dt>
 <dd><p>A positive integer specifying the number of trees in random forest.
-Used if <code>score.method = 'randomForest'</code> or if <code>outcome_method = 'random_forest'</code>
-with <code>score.method = 'twoReg'</code> or <code>'contrastReg'</code>. Only applies for survival outcomes.
+Used with <code>outcome_method = 'random_forest'</code> for survival outcomes.
 Default is <code>1000</code>.</p></dd>
 
 
@@ -305,12 +304,9 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>The legacy <code>init.model</code> argument specifies a separate initial
-outcome formula under the previous interface; it cannot be combined with
-<code>benefit_model</code>. The legacy <code>initial.predictor.method</code> is also
-accepted with a deprecation warning; do not supply it with
-<code>outcome_method</code>.
-Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+<dd><p>Additional boosting options. See <code><a href="boosting-control.html">boosting-control</a></code>.
+Deprecated argument names from precmed 1.1.0 remain supported for
+backward compatibility and emit warnings.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -320,86 +316,78 @@ When the doubly robust scores use distinct outcome methods, <code>outcome_method
 records the method selected for each score.</p><ul><li><p><code>ate.randomForest</code>:  A vector of numerical values of length <code>prop.cutoff</code>
  containing the estimated ATE by the RMTL ratio in nested subgroups (defined by <code>prop.cutoff</code>)
  constructed based on the estimated CATE scores with random forest method.
- Only provided if <code>score.method</code> includes <code>'randomForest'</code>.</p></li>
+ Only provided if the fit includes a random forest.</p></li>
 <li><p><code>ate.boosting</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
- the estimated CATE scores with boosting. Only provided if <code>score.method</code>
- includes <code>'boosting'</code>.</p></li>
+ the estimated CATE scores with boosting. Only provided if the fit includes boosting.</p></li>
 <li><p><code>ate.poisson</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with poisson regression.
- Only provided if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
+ Only provided if the fit includes Poisson regression.</p></li>
 <li><p><code>ate.twoReg</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
+ Only provided if the fit includes two-regression.</p></li>
 <li><p><code>ate.contrastReg</code>: Same as <code>ate.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
+ Only provided if the fit includes contrast regression.</p></li>
 <li><p><code>chr.&lt;method&gt;</code>:  A vector of subgroup marginal cumulative hazard
  ratios at <code>tau0</code>, for each selected scoring method. Undefined estimates
  are <code>NA</code>; existing <code>hr.*</code> results are conditional Cox HRs.</p></li>
 <li><p><code>hr.randomForest</code>: A vector of numerical values of length <code>prop.cutoff</code>
  containing the adjusted hazard ratio in nested subgroups (defined by <code>prop.cutoff</code>)
  constructed based on the estimated CATE scores with random forest method.
- Only provided if <code>score.method</code> includes <code>'randomForest'</code>.</p></li>
+ Only provided if the fit includes a random forest.</p></li>
 <li><p><code>hr.boosting</code>: Same as <code>hr.randomForest</code>, but with the nested subgroups based
- the estimated CATE scores with boosting. Only provided if <code>score.method</code>
- includes <code>'boosting'</code>.</p></li>
+ the estimated CATE scores with boosting. Only provided if the fit includes boosting.</p></li>
 <li><p><code>hr.poisson</code>: Same as <code>hr.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with poisson regression.
- Only provided if <code>score.method</code> includes <code>'poisson'</code>.</p></li>
+ Only provided if the fit includes Poisson regression.</p></li>
 <li><p><code>hr.twoReg</code>: Same as <code>hr.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with two regressions.
- Only provided if <code>score.method</code> includes <code>'twoReg'</code>.</p></li>
+ Only provided if the fit includes two-regression.</p></li>
 <li><p><code>hr.contrastReg</code>: Same as <code>hr.randomForest</code>, but with the nested subgroups based
  the estimated CATE scores with contrast regression.
- Only provided if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
+ Only provided if the fit includes contrast regression.</p></li>
 <li><p><code>score.randomForest</code>: A vector of numerical values of length n
  (number of observations in <code>data</code>) containing the estimated log-CATE scores
- according to random forest. Only provided if <code>score.method</code>
- includes <code>'randomForest'</code>.</p></li>
+ according to random forest. Only provided if the fit includes a random forest.</p></li>
 <li><p><code>score.boosting</code>: Same as <code>score.randomForest</code>, but with estimated log-CATE score
- according to boosting. Only provided if <code>score.method</code> includes
- <code>'boosting'</code>.</p></li>
+ according to boosting. Only provided if the fit includes boosting.</p></li>
 <li><p><code>score.poisson</code>: Same as <code>score.randomForest</code>, but with estimated log-CATE score
- according to the Poisson regression. Only provided if <code>score.method</code>
- includes <code>'poisson'</code>.</p></li>
+ according to the Poisson regression. Only provided if the fit includes Poisson regression.</p></li>
 <li><p><code>score.twoReg</code>: Same as <code>score.randomForest</code>, but with estimated log-CATE score
- according to two regressions. Only provided if <code>score.method</code> includes
- <code>'twoReg'</code>.</p></li>
+ according to two regressions. Only provided if the fit includes two-regression.</p></li>
 <li><p><code>score.contrastReg</code>: Same as <code>score.randomForest</code>, but with estimated log-CATE score
- according to contrast regression. Only provided if <code>score.method</code> includes
- <code>'contrastReg'</code>.</p></li>
-<li><p><code>fit</code>: Additional details on model fitting if <code>score.method</code>
- includes 'randomForest', 'boosting' or 'contrastReg':</p><ul><li><p><code>result.randomForest</code>: Details on the random forest model fitted to observations
+ according to contrast regression. Only provided if the fit includes contrast regression.</p></li>
+<li><p><code>fit</code>: Additional model-fitting details for random forests,
+ boosting, and contrast regression.</p><ul><li><p><code>result.randomForest</code>: Details on the random forest model fitted to observations
    with treatment = 0 <code>($fit0.rf)</code> and to observations with treatment = 1 <code>($fit1.rf)</code>.
-   Only provided if <code>score.method</code> includes <code>'randomForest'</code>.</p></li>
+   Only provided if the fit includes a random forest.</p></li>
 <li><p><code>result.boosting</code>: Details on the boosting model fitted to observations
    with treatment = 0, <code>($fit0.boosting)</code> and <code>($fit0.gam)</code> and to observations with treatment = 1,
    <code>($fit1.boosting)</code> and <code>($fit1.gam)</code>.
-   Only provided if <code>score.method</code> includes <code>'boosting'</code>.</p></li>
+   Only provided if the fit includes boosting.</p></li>
 <li><p><code>result.contrastReg$converge.contrastReg</code>: Whether the contrast regression algorithm converged
-   or not. Only provided if <code>score.method</code> includes <code>'contrastReg'</code>.</p></li>
+   or not. Only provided if the fit includes contrast regression.</p></li>
 </ul></li>
 <li><p><code>coefficients</code>: A data frame with the coefficients of the estimated log-CATE
- score by <code>score.method</code>. The data frame has number of rows equal to the number of
- design columns in <code>cate.model</code>, including the intercept, and one column per
+ score for each applicable method. The data frame has number of rows equal to the number of
+ design columns in <code>outcome_model</code>, including the intercept, and one column per
  available linear scoring method. Standard errors are not calculated for survival scores.
  <code>'randomForest'</code> and <code>'boosting'</code> do not have coefficient results because
  tree-based methods typically do not express the log-CATE as a linear combination of coefficients
  and covariates.</p></li>
 <li><p><code>risk0.&lt;method&gt;</code>, <code>risk1.&lt;method&gt;</code>, <code>rd.&lt;method&gt;</code>, <code>rmst0.&lt;method&gt;</code>, <code>rmst1.&lt;method&gt;</code>:  Subgroup event risks, risk differences (treatment 1 minus 0), and treatment-specific RMST at <code>tau0</code>. See <code><a href="subgroup_estimates.html">subgroup_estimates</a></code> for extraction.</p></li>
 <li><p><code>errors/warnings</code>: A nested list of errors and warnings that were wrapped during the
- calculation of ATE. Errors and warnings are organized by <code>score.method</code>.</p></li>
+ calculation of ATE. Errors and warnings are organized by scoring method.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The legacy arguments <code>score.method</code> and <code>cate.model</code> are accepted through <code>...</code>; see <code><a href="catefit.html">catefit</a></code>.</p>
-<p>The CATE score estimates a covariate-conditional average treatment effect for survival data,
+    <p>The CATE score estimates a covariate-conditional average treatment effect for survival data,
 estimated with random forest, boosting, Poisson regression, and the doubly
 robust estimator (two regressions, Yadlowsky, 2020) applied separately by treatment group
 or with the other doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
 to the entire data set.</p>
-<p><code>catefitsurv()</code> provides the coefficients of the CATE score for each scoring method requested
-through <code>score.method</code> for supported linear scoring methods. The coefficients
+<p><code>catefitsurv()</code> provides CATE score coefficients for supported
+linear scoring methods. The coefficients
 describe the fitted log-RMTL score; coefficient standard errors and confidence
 intervals are not currently calculated for survival fits.</p>
 <p><code>catefitsurv()</code> also provides the predicted CATE score of each observation in the data set,
@@ -436,7 +424,7 @@ observational data. Journal of the American Statistical Association, 1-18.</em> 
 <span class="r-in"><span>                   outcome_method <span class="op">=</span> <span class="st">"random_forest"</span>,</span></span>
 <span class="r-in"><span>                   benefit_method <span class="op">=</span> <span class="st">"t_learner"</span>,</span></span>
 <span class="r-in"><span>                   ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
-<span class="r-in"><span>                   ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                   censoring_model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                   tau0 <span class="op">=</span> <span class="va">tau0</span>,</span></span>
 <span class="r-in"><span>                   seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>

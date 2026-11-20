@@ -119,13 +119,30 @@ assumptions and support at the selected horizon.</p>
 <h2 id="how-are-the-scores-fitted">How are the scores fitted?<a class="anchor" aria-label="anchor" href="#how-are-the-scores-fitted"></a>
 </h2>
 <p>A <strong>T-learner</strong> fits an outcome model separately in each
-treatment arm and contrasts their predictions. For example, separate
-logistic outcome models can predict binary risks under each treatment;
-their difference is a fitted risk-difference score. An
-<strong>S-learner</strong>, by contrast, fits a single outcome model
-that includes treatment as a predictor, and compares predictions under
-the two treatment values. The S-learner is described here for context;
-it is not a selectable CATE score method in the current
+treatment arm and contrasts their predictions at the same covariate
+values. For a binary outcome, separate logistic outcome models give a
+fitted risk-difference score by subtracting the predicted event risk
+under treatment 0 from that under treatment 1. This score uses the
+outcome predictions alone. For binary outcomes, <code><a href="../reference/catefit.html">catefit()</a></code>
+combines outcome predictions and propensity scores from the treatment
+model to obtain doubly robust estimates of the average risk difference
+within each score-defined subgroup.</p>
+<p>Use <code>outcome_model</code> to specify baseline covariates and
+terms that let each arm-specific model adequately estimate the
+conditional outcome and capture variation in the treatment contrast. For
+binary outcomes, the risk difference can vary with baseline risk even
+when the treatment odds ratio is constant <span class="citation">(Hoogland et al. 2021)</span>. A causal interpretation
+of the T-learner score in observational data requires consistency,
+treatment overlap, and a set of covariates in the outcome models that
+suffices to control treatment–outcome confounding. Chapter 17 discusses
+CATE prediction and its identification assumptions <span class="citation">(Hoogland et al. 2026)</span>. The fitted scores are
+fixed before subgroup estimation, so propensity-score adjustment at that
+stage cannot repair bias in the scores due to omitted effect modifiers,
+misspecified outcome models, or unmeasured confounding.</p>
+<p>An <strong>S-learner</strong>, by contrast, fits a single outcome
+model that includes treatment as a predictor, and compares predictions
+under the two treatment values. The S-learner is described here for
+context; it is not a selectable CATE score method in the current
 <code>precmed</code> interface.</p>
 <p>The package also implements <strong>two-regression</strong> and
 <strong>contrast-regression</strong> scores. These use cross-fitted
@@ -468,9 +485,10 @@ weight is</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>i</mi></msub><mo>=</mo><mfrac><msubsup><mi>D</mi><mi>i</mi><mo>*</mo></msubsup><mrow><mrow><mi mathvariant="normal">max</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">{</mo><mover><mi>G</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="prefix">(</mo><msub><mi>U</mi><mi>i</mi></msub><mo>∣</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mtext mathvariant="monospace">𝚜𝚞𝚛𝚟.𝚖𝚒𝚗</mtext><mo stretchy="false" form="postfix">}</mo></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">w_i=\frac{D_i^*}{\max\{\hat G(U_i\mid X_i),\texttt{surv.min}\}},</annotation></semantics></math></p>
 <p>normalized to have mean one, where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>G</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat G</annotation></semantics></math>
-estimates censoring survival using <code>ipcw.model</code>. The default
-model includes the outcome-model covariates and treatment; a supplied
-<code>ipcw.model</code> determines its covariates.</p>
+is the estimated probability of remaining uncensored. In
+<code><a href="../reference/catefit.html">catefit()</a></code>, the censoring model defaults to the
+outcome-model covariates and treatment. Use <code>censoring_model</code>
+to specify a different formula.</p>
 <p>Split the data into treatment-stratified folds. Fit arm-specific
 initial survival outcome models and a treatment model on each fold’s
 complement and predict its held-out observations. The initial model may
@@ -727,6 +745,12 @@ Medicine.”</span> Chap. 17 in <em>Comparative Effectiveness and
 Personalized Medicine Research Using Real-World Data</em>, edited by
 Thomas P. A. Debray, Tri-Long Nguyen, and Robert W. Platt. Chapman &amp;
 Hall/CRC. <a href="https://doi.org/10.1201/9781003300809-17" class="external-link">https://doi.org/10.1201/9781003300809-17</a>.
+</div>
+<div id="ref-hoogland2021binary" class="csl-entry">
+Hoogland, Jeroen, Joanna IntHout, Michail Belias, et al. 2021. <span>“A
+Tutorial on Individualized Treatment Effect Prediction from Randomized
+Trials with a Binary Endpoint.”</span> <em>Statistics in Medicine</em>
+40 (26): 5961–81. <a href="https://doi.org/10.1002/sim.9154" class="external-link">https://doi.org/10.1002/sim.9154</a>.
 </div>
 <div id="ref-ishwaran2008random" class="csl-entry">
 Ishwaran, Hemant, Udaya B. Kogalur, Eugene H. Blackstone, and Michael S.

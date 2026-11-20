@@ -36,13 +36,34 @@ the selected horizon.
 ## How are the scores fitted?
 
 A **T-learner** fits an outcome model separately in each treatment arm
-and contrasts their predictions. For example, separate logistic outcome
-models can predict binary risks under each treatment; their difference
-is a fitted risk-difference score. An **S-learner**, by contrast, fits a
-single outcome model that includes treatment as a predictor, and
-compares predictions under the two treatment values. The S-learner is
-described here for context; it is not a selectable CATE score method in
-the current `precmed` interface.
+and contrasts their predictions at the same covariate values. For a
+binary outcome, separate logistic outcome models give a fitted
+risk-difference score by subtracting the predicted event risk under
+treatment 0 from that under treatment 1. This score uses the outcome
+predictions alone. For binary outcomes,
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+combines outcome predictions and propensity scores from the treatment
+model to obtain doubly robust estimates of the average risk difference
+within each score-defined subgroup.
+
+Use `outcome_model` to specify baseline covariates and terms that let
+each arm-specific model adequately estimate the conditional outcome and
+capture variation in the treatment contrast. For binary outcomes, the
+risk difference can vary with baseline risk even when the treatment odds
+ratio is constant (Hoogland et al. 2021). A causal interpretation of the
+T-learner score in observational data requires consistency, treatment
+overlap, and a set of covariates in the outcome models that suffices to
+control treatment–outcome confounding. Chapter 17 discusses CATE
+prediction and its identification assumptions (Hoogland et al. 2026).
+The fitted scores are fixed before subgroup estimation, so
+propensity-score adjustment at that stage cannot repair bias in the
+scores due to omitted effect modifiers, misspecified outcome models, or
+unmeasured confounding.
+
+An **S-learner**, by contrast, fits a single outcome model that includes
+treatment as a predictor, and compares predictions under the two
+treatment values. The S-learner is described here for context; it is not
+a selectable CATE score method in the current `precmed` interface.
 
 The package also implements **two-regression** and
 **contrast-regression** scores. These use cross-fitted initial outcome
@@ -319,10 +340,11 @@ fitted on the full data used for the fit. The weight is
 w_i=\frac{D_i^*}{\max\{\hat G(U_i\mid X_i),\texttt{surv.min}\}},
 ```
 
-normalized to have mean one, where $`\hat G`$ estimates censoring
-survival using `ipcw.model`. The default model includes the
-outcome-model covariates and treatment; a supplied `ipcw.model`
-determines its covariates.
+normalized to have mean one, where $`\hat G`$ is the estimated
+probability of remaining uncensored. In
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
+the censoring model defaults to the outcome-model covariates and
+treatment. Use `censoring_model` to specify a different formula.
 
 Split the data into treatment-stratified folds. Fit arm-specific initial
 survival outcome models and a treatment model on each fold’s complement
@@ -564,6 +586,11 @@ Chap. 17 in *Comparative Effectiveness and Personalized Medicine
 Research Using Real-World Data*, edited by Thomas P. A. Debray, Tri-Long
 Nguyen, and Robert W. Platt. Chapman & Hall/CRC.
 <https://doi.org/10.1201/9781003300809-17>.
+
+Hoogland, Jeroen, Joanna IntHout, Michail Belias, et al. 2021. “A
+Tutorial on Individualized Treatment Effect Prediction from Randomized
+Trials with a Binary Endpoint.” *Statistics in Medicine* 40 (26):
+5961–81. <https://doi.org/10.1002/sim.9154>.
 
 Ishwaran, Hemant, Udaya B. Kogalur, Eugene H. Blackstone, and Michael S.
 Lauer. 2008. “Random Survival Forests.” *The Annals of Applied

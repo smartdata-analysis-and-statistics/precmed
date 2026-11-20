@@ -178,14 +178,9 @@ atefit(
 
 - ...:
 
-  Additional arguments passed to the outcome-specific function. Also
-  accepts the deprecated named argument `cate.model` as an alias for
-  `outcome_model`, with a warning. Supply only one of these arguments.
-  The deprecated aliases `ps.model` and `ps.method` are also accepted
-  with warnings; use `ps_model` and `ps_method` instead. The deprecated
-  survival arguments `ipcw.model` and `ipcw.method` are accepted with
-  warnings as aliases for `censoring_model` and `censoring_method`,
-  respectively.
+  Additional arguments passed to the outcome-specific function.
+  Deprecated argument names from precmed 1.1.0 remain supported for
+  backward compatibility and emit warnings.
 
 ## Value
 

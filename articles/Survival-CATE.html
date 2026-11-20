@@ -150,8 +150,10 @@ scores. T-learner scores use outcome predictions alone, but the
 treatment model is still used for the subgroup estimates reported by
 <code><a href="../reference/catefit.html">catefit()</a></code>. Survival estimation also uses a censoring model
 to supply probabilities for inverse probability of censoring weighting
-(IPCW). Here the default censoring model uses the outcome-model
-covariates; see <code><a href="../reference/catefit.html">?catefit</a></code> for alternatives.</p>
+(IPCW). In <code><a href="../reference/catefit.html">catefit()</a></code>, the default censoring model uses the
+outcome-model covariates and treatment. Use <code>censoring_model</code>
+to supply a different formula and <code>censoring_method</code> to
+change how the model is fitted.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">outcome_formula</span> <span class="op">&lt;-</span> <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">d</span><span class="op">)</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">female</span> <span class="op">+</span></span>
 <span>  <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_number_relapses</span></span>

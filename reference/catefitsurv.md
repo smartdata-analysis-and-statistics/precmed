@@ -11,13 +11,13 @@ regression.
 catefitsurv(
   data,
   outcome_model = NULL,
-  outcome_method = NULL,
+  outcome_method = "coxph",
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -54,8 +54,7 @@ catefitsurv(
 
 - outcome_model:
 
-  Formula for the outcome and outcome-model covariates; replaces
-  `cate.model`.
+  A formula specifying the outcome and baseline covariates.
 
 - outcome_method:
 
@@ -104,22 +103,19 @@ catefitsurv(
   (added to the model if interactions are not specified in `ps_model`).
   Relevant only when `ps_model` has more than one variable.
 
-- ipcw.model:
+- censoring_model:
 
-  A formula describing the censoring model used for inverse probability
-  of censoring weighting (IPCW). The left-hand side must be empty.
-  Default is `ipcw.model = NULL`, which corresponds to specifying the
-  censoring model with the same covariates as the outcome model
-  `outcome_model` plus the treatment.
+  A one-sided formula for the model that estimates probabilities of
+  remaining uncensored for inverse probability of censoring weighting
+  (IPCW). By default (`NULL`), the model uses the outcome-model
+  covariates and treatment.
 
-- ipcw.method:
+- censoring_method:
 
-  A character value for the censoring model. Allowed values are:
-  `'breslow'` (Cox regression with Breslow estimator of the baseline
-  survivor function), `'aft (exponential)'`, `'aft (weibull)'`,
-  `'aft (lognormal)'` or `'aft (loglogistic)'` (accelerated failure time
-  model with different distributions for y variable). Default is
-  `'breslow'`.
+  Method for fitting the censoring model. The default `"breslow"` fits
+  Cox regression with the Breslow estimator of the baseline survivor
+  function. Accelerated failure time options are `"aft (exponential)"`,
+  `"aft (weibull)"`, `"aft (lognormal)"`, and `"aft (loglogistic)"`.
 
 - minPS:
 
@@ -173,10 +169,8 @@ catefitsurv(
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
-  Used if `score.method = 'randomForest'` or if
-  `outcome_method = 'random_forest'` with `score.method = 'twoReg'` or
-  `'contrastReg'`. Only applies for survival outcomes. Default is
-  `1000`.
+  Used with `outcome_method = 'random_forest'` for survival outcomes.
+  Default is `1000`.
 
 - n.trees.boosting:
 
@@ -268,13 +262,10 @@ catefitsurv(
 
 - ...:
 
-  The legacy `init.model` argument specifies a separate initial outcome
-  formula under the previous interface; it cannot be combined with
-  `benefit_model`. The legacy `initial.predictor.method` is also
-  accepted with a deprecation warning; do not supply it with
-  `outcome_method`. Legacy arguments `ps.model` and `ps.method` are
-  accepted with warnings. Additional boosting arguments; see
+  Additional boosting options. See
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  Deprecated argument names from precmed 1.1.0 remain supported for
+  backward compatibility and emit warnings.
 
 ## Value
 
@@ -285,24 +276,24 @@ components: When the doubly robust scores use distinct outcome methods,
 - `ate.randomForest`: A vector of numerical values of length
   `prop.cutoff` containing the estimated ATE by the RMTL ratio in nested
   subgroups (defined by `prop.cutoff`) constructed based on the
-  estimated CATE scores with random forest method. Only provided if
-  `score.method` includes `'randomForest'`.
+  estimated CATE scores with random forest method. Only provided if the
+  fit includes a random forest.
 
 - `ate.boosting`: Same as `ate.randomForest`, but with the nested
   subgroups based the estimated CATE scores with boosting. Only provided
-  if `score.method` includes `'boosting'`.
+  if the fit includes boosting.
 
 - `ate.poisson`: Same as `ate.randomForest`, but with the nested
   subgroups based the estimated CATE scores with poisson regression.
-  Only provided if `score.method` includes `'poisson'`.
+  Only provided if the fit includes Poisson regression.
 
 - `ate.twoReg`: Same as `ate.randomForest`, but with the nested
   subgroups based the estimated CATE scores with two regressions. Only
-  provided if `score.method` includes `'twoReg'`.
+  provided if the fit includes two-regression.
 
 - `ate.contrastReg`: Same as `ate.randomForest`, but with the nested
   subgroups based the estimated CATE scores with contrast regression.
-  Only provided if `score.method` includes `'contrastReg'`.
+  Only provided if the fit includes contrast regression.
 
 - `chr.<method>`: A vector of subgroup marginal cumulative hazard ratios
   at `tau0`, for each selected scoring method. Undefined estimates are
@@ -311,69 +302,69 @@ components: When the doubly robust scores use distinct outcome methods,
 - `hr.randomForest`: A vector of numerical values of length
   `prop.cutoff` containing the adjusted hazard ratio in nested subgroups
   (defined by `prop.cutoff`) constructed based on the estimated CATE
-  scores with random forest method. Only provided if `score.method`
-  includes `'randomForest'`.
+  scores with random forest method. Only provided if the fit includes a
+  random forest.
 
 - `hr.boosting`: Same as `hr.randomForest`, but with the nested
   subgroups based the estimated CATE scores with boosting. Only provided
-  if `score.method` includes `'boosting'`.
+  if the fit includes boosting.
 
 - `hr.poisson`: Same as `hr.randomForest`, but with the nested subgroups
   based the estimated CATE scores with poisson regression. Only provided
-  if `score.method` includes `'poisson'`.
+  if the fit includes Poisson regression.
 
 - `hr.twoReg`: Same as `hr.randomForest`, but with the nested subgroups
   based the estimated CATE scores with two regressions. Only provided if
-  `score.method` includes `'twoReg'`.
+  the fit includes two-regression.
 
 - `hr.contrastReg`: Same as `hr.randomForest`, but with the nested
   subgroups based the estimated CATE scores with contrast regression.
-  Only provided if `score.method` includes `'contrastReg'`.
+  Only provided if the fit includes contrast regression.
 
 - `score.randomForest`: A vector of numerical values of length n (number
   of observations in `data`) containing the estimated log-CATE scores
-  according to random forest. Only provided if `score.method` includes
-  `'randomForest'`.
+  according to random forest. Only provided if the fit includes a random
+  forest.
 
 - `score.boosting`: Same as `score.randomForest`, but with estimated
-  log-CATE score according to boosting. Only provided if `score.method`
-  includes `'boosting'`.
+  log-CATE score according to boosting. Only provided if the fit
+  includes boosting.
 
 - `score.poisson`: Same as `score.randomForest`, but with estimated
   log-CATE score according to the Poisson regression. Only provided if
-  `score.method` includes `'poisson'`.
+  the fit includes Poisson regression.
 
 - `score.twoReg`: Same as `score.randomForest`, but with estimated
-  log-CATE score according to two regressions. Only provided if
-  `score.method` includes `'twoReg'`.
+  log-CATE score according to two regressions. Only provided if the fit
+  includes two-regression.
 
 - `score.contrastReg`: Same as `score.randomForest`, but with estimated
-  log-CATE score according to contrast regression. Only provided if
-  `score.method` includes `'contrastReg'`.
+  log-CATE score according to contrast regression. Only provided if the
+  fit includes contrast regression.
 
-- `fit`: Additional details on model fitting if `score.method` includes
-  'randomForest', 'boosting' or 'contrastReg':
+- `fit`: Additional model-fitting details for random forests, boosting,
+  and contrast regression.
 
   - `result.randomForest`: Details on the random forest model fitted to
     observations with treatment = 0 `($fit0.rf)` and to observations
-    with treatment = 1 `($fit1.rf)`. Only provided if `score.method`
-    includes `'randomForest'`.
+    with treatment = 1 `($fit1.rf)`. Only provided if the fit includes a
+    random forest.
 
   - `result.boosting`: Details on the boosting model fitted to
     observations with treatment = 0, `($fit0.boosting)` and
     `($fit0.gam)` and to observations with treatment = 1,
-    `($fit1.boosting)` and `($fit1.gam)`. Only provided if
-    `score.method` includes `'boosting'`.
+    `($fit1.boosting)` and `($fit1.gam)`. Only provided if the fit
+    includes boosting.
 
   - `result.contrastReg$converge.contrastReg`: Whether the contrast
-    regression algorithm converged or not. Only provided if
-    `score.method` includes `'contrastReg'`.
+    regression algorithm converged or not. Only provided if the fit
+    includes contrast regression.
 
 - `coefficients`: A data frame with the coefficients of the estimated
-  log-CATE score by `score.method`. The data frame has number of rows
-  equal to the number of design columns in `cate.model`, including the
-  intercept, and one column per available linear scoring method.
-  Standard errors are not calculated for survival scores.
+  log-CATE score for each applicable method. The data frame has number
+  of rows equal to the number of design columns in `outcome_model`,
+  including the intercept, and one column per available linear scoring
+  method. Standard errors are not calculated for survival scores.
   `'randomForest'` and `'boosting'` do not have coefficient results
   because tree-based methods typically do not express the log-CATE as a
   linear combination of coefficients and covariates.
@@ -386,13 +377,9 @@ components: When the doubly robust scores use distinct outcome methods,
 
 - `errors/warnings`: A nested list of errors and warnings that were
   wrapped during the calculation of ATE. Errors and warnings are
-  organized by `score.method`.
+  organized by scoring method.
 
 ## Details
-
-The legacy arguments `score.method` and `cate.model` are accepted
-through `...`; see
-[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 The CATE score estimates a covariate-conditional average treatment
 effect for survival data, estimated with random forest, boosting,
@@ -401,8 +388,7 @@ Yadlowsky, 2020) applied separately by treatment group or with the other
 doubly robust estimators (contrast regression, Yadlowsky, 2020) applied
 to the entire data set.
 
-`catefitsurv()` provides the coefficients of the CATE score for each
-scoring method requested through `score.method` for supported linear
+`catefitsurv()` provides CATE score coefficients for supported linear
 scoring methods. The coefficients describe the fitted log-RMTL score;
 coefficient standard errors and confidence intervals are not currently
 calculated for survival fits.
@@ -446,7 +432,7 @@ fit <- catefitsurv(data = survivalExample,
                    outcome_method = "random_forest",
                    benefit_method = "t_learner",
                    ps_model = trt ~ age + previous_treatment,
-                   ipcw.model = ~ age + previous_cost + previous_treatment,
+                   censoring_model = ~ age + previous_cost + previous_treatment,
                    tau0 = tau0,
                    seed = 999)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.

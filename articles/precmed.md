@@ -23,10 +23,15 @@ non-randomized study ([Yadlowsky et al.
 
 The treatment model estimates propensity scores, and the censoring model
 provides probabilities used for inverse probability of censoring
-weighting (IPCW). In
-[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md),
-the corresponding arguments are `ps_model` and `censoring_model`; CATE
-functions use `ps.model` and `ipcw.model`.
+weighting (IPCW). Use `ps_model` for the treatment formula in
+[`atefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/atefit.md)
+and
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+For survival outcomes, use `censoring_model` for the censoring formula
+and `censoring_method` to choose how it is fitted. The validation
+interface
+[`catecv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catecv.md)
+uses `ps.model`, `ipcw.model`, and `ipcw.method`.
 
 For background on marginal and conditional treatment effects, see
 Chapter 5 ([Nguyen et al. 2026](#ref-nguyen2026causaleffects)). Chapter

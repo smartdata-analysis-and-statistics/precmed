@@ -75,10 +75,11 @@ T-learner scores use outcome predictions alone, but the treatment model
 is still used for the subgroup estimates reported by
 [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 Survival estimation also uses a censoring model to supply probabilities
-for inverse probability of censoring weighting (IPCW). Here the default
-censoring model uses the outcome-model covariates; see
-[`?catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-for alternatives.
+for inverse probability of censoring weighting (IPCW). In
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md),
+the default censoring model uses the outcome-model covariates and
+treatment. Use `censoring_model` to supply a different formula and
+`censoring_method` to change how the model is fitted.
 
 ``` r
 

@@ -10,9 +10,9 @@ subgroups. This is the binary-outcome interface used by
 catefitbinary(
   data,
   outcome_model = NULL,
-  outcome_method = NULL,
+  outcome_method = "logistic",
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
   minPS = 0.01,
@@ -39,8 +39,7 @@ catefitbinary(
 
 - outcome_model:
 
-  Formula for the outcome and outcome-model covariates; replaces
-  `cate.model`.
+  A formula specifying the outcome and baseline covariates.
 
 - outcome_method:
 
@@ -150,13 +149,10 @@ catefitbinary(
 
 - ...:
 
-  The legacy `init.model` argument specifies a separate initial outcome
-  formula under the previous interface; it cannot be combined with
-  `benefit_model`. The legacy `initial.predictor.method` is accepted
-  with a deprecation warning and cannot be combined with
-  `outcome_method`. Legacy arguments `ps.model` and `ps.method` are
-  accepted with warnings. Additional boosting arguments; see
+  Additional boosting options. See
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  Deprecated argument names from precmed 1.1.0 remain supported for
+  backward compatibility and emit warnings.
 
 ## Value
 
@@ -166,10 +162,6 @@ requested method. Linear `twoReg` score coefficients are stored in
 `coefficients`.
 
 ## Details
-
-The legacy arguments `score.method` and `cate.model` are accepted
-through `...`; see
-[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 See the Binary outcomes section of
 [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)

@@ -15,11 +15,11 @@ catefit(
   outcome_model,
   outcome_method = NULL,
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
-  ipcw.model = NULL,
-  ipcw.method = "breslow",
+  censoring_model = NULL,
+  censoring_method = "breslow",
   minPS = 0.01,
   maxPS = 0.99,
   followup.time = NULL,
@@ -124,22 +124,20 @@ catefit(
   (added to the model if interactions are not specified in `ps_model`).
   Relevant only when `ps_model` has more than one variable.
 
-- ipcw.model:
+- censoring_model:
 
-  A formula describing the censoring model used for inverse probability
-  of censoring weighting (IPCW). The left-hand side must be empty. Only
-  applies for survival outcomes. Default is `NULL`, which uses a
-  censoring model with the same covariates as the outcome model
-  `outcome_model`, plus the treatment.
+  A one-sided formula for the model that estimates probabilities of
+  remaining uncensored for inverse probability of censoring weighting
+  (IPCW). By default (`NULL`), the model uses the outcome-model
+  covariates and treatment. Applies to survival outcomes only.
 
-- ipcw.method:
+- censoring_method:
 
-  A character value for the censoring model. Only applies for survival
-  outcomes. Allowed values are: `'breslow'` (Cox regression with Breslow
-  estimator of t he baseline survivor function), `'aft (exponential)'`,
-  `'aft (weibull)'`, `'aft (lognormal)'` or `'aft (loglogistic)'`
-  (accelerated failure time model with different distributions for y
-  variable). Default is `'breslow'`.
+  Method for fitting the censoring model. The default `"breslow"` fits
+  Cox regression with the Breslow estimator of the baseline survivor
+  function. Accelerated failure time options are `"aft (exponential)"`,
+  `"aft (weibull)"`, `"aft (lognormal)"`, and `"aft (loglogistic)"`.
+  Applies to survival outcomes only.
 
 - minPS:
 
@@ -187,9 +185,7 @@ catefit(
 
 - xvar.smooth.score:
 
-  A vector of characters indicating the name of the variables used as
-  the smooth terms if `score.method = 'gam'`. The variables must be
-  selected from the variables listed in `outcome_model`.
+  Reserved for smooth terms in continuous-outcome scores.
 
 - xvar.smooth.init:
 
@@ -206,10 +202,8 @@ catefit(
 - n.trees.rf:
 
   A positive integer specifying the number of trees in random forest.
-  Used if `score.method = 'randomForest'` or if
-  `outcome_method = 'random_forest'` with `score.method = 'twoReg'` or
-  `'contrastReg'`. Only applies for survival outcomes. Default is
-  `1000`.
+  Used with `outcome_method = 'random_forest'` for survival outcomes.
+  Default is `1000`.
 
 - n.trees.boosting:
 
@@ -301,17 +295,10 @@ catefit(
 
 - ...:
 
-  The legacy `init.model` argument supplies a separate initial outcome
-  formula using the previous interface, where `outcome_model` defines
-  the score. It cannot be combined with `benefit_model`. The legacy
-  `initial.predictor.method` is accepted with a deprecation warning and
-  cannot be supplied together with `outcome_method`. Legacy arguments
-  `ps.model` and `ps.method` are accepted with warnings. Additional
-  boosting arguments; see
+  Additional boosting options. See
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
-  The old named arguments `score.method` and `cate.model` are accepted
-  with deprecation warnings. Legacy score names and positional calls
-  remain supported when `outcome_method` is omitted.
+  Deprecated argument names from precmed 1.1.0 remain supported for
+  backward compatibility and emit warnings.
 
 ## Value
 
@@ -378,7 +365,7 @@ For survival response, see details in
 
 ## Binary outcomes
 
-For `response = "binary"`, `score.method = "logistic"` fits a separate
+For binary outcomes, the default logistic T-learner fits a separate
 logistic outcome model in each treatment arm and subtracts their
 predicted risks. `"twoReg"` cross-fits separate logistic outcome models
 and a treatment model, then projects the augmented inverse-propensity
@@ -480,19 +467,19 @@ fit_2 <- catefit(response = "survival",
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
                  ps_model = trt ~ age + previous_treatment,
-                 #'                  ipcw.model = ~ age + previous_cost + previous_treatment,
+                 censoring_model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting" 
-#> Warning: Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson", "boosting"; see 'errors/warnings'.
+#>     Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson" 
+#> Warning: Warning: Warning(s) occurred when estimating the ATEs in the nested subgroup using "poisson"; see 'errors/warnings'.
 
 coef(fit_2)
 #>                              poisson
-#> (Intercept)               0.45047296
-#> age                      -0.24616564
-#> female                    0.11776100
-#> previous_cost             0.87728869
-#> previous_number_relapses -0.03975634
+#> (Intercept)               0.46109243
+#> age                      -0.24335209
+#> female                    0.12532711
+#> previous_cost             0.89803249
+#> previous_number_relapses -0.02470863
 
 # }
 ```

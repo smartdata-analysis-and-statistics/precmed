@@ -80,11 +80,8 @@ atefitbinary(
 
 - ...:
 
-  Additional arguments. The deprecated named argument `cate.model` is
-  accepted as an alias for `outcome_model`, with a warning. Supply only
-  one of these arguments. The deprecated aliases `ps.model` and
-  `ps.method` are also accepted with warnings; use `ps_model` and
-  `ps_method` instead. Other arguments are currently unsupported.
+  Additional arguments. Deprecated argument names from precmed 1.1.0
+  remain supported for backward compatibility and emit warnings.
 
 ## Value
 

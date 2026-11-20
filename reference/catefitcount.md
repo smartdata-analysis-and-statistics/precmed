@@ -10,9 +10,9 @@ boosting, two regressions, contrast regression, and negative binomial.
 catefitcount(
   data,
   outcome_model = NULL,
-  outcome_method = NULL,
+  outcome_method = "poisson",
   benefit_model = NULL,
-  benefit_method = NULL,
+  benefit_method = "t_learner",
   ps_model,
   ps_method = "glm",
   minPS = 0.01,
@@ -45,8 +45,7 @@ catefitcount(
 
 - outcome_model:
 
-  Formula for the outcome and outcome-model covariates; replaces
-  `cate.model`.
+  A formula specifying the outcome and baseline covariates.
 
 - outcome_method:
 
@@ -197,13 +196,10 @@ catefitcount(
 
 - ...:
 
-  The legacy `init.model` argument specifies a separate initial outcome
-  formula under the previous interface; it cannot be combined with
-  `benefit_model`. The legacy `initial.predictor.method` is also
-  accepted with a deprecation warning; do not supply it with
-  `outcome_method`. Legacy arguments `ps.model` and `ps.method` are
-  accepted with warnings. Additional boosting arguments; see
+  Additional boosting options. See
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
+  Deprecated argument names from precmed 1.1.0 remain supported for
+  backward compatibility and emit warnings.
 
 ## Value
 
@@ -214,73 +210,69 @@ the method selected for each score.
 - `ate.poisson`: A vector of numerical values of length `prop.cutoff`
   containing the estimated ATE in nested subgroups (defined by
   `prop.cutoff`) constructed based on the estimated CATE scores with
-  poisson regression. Only provided if `score.method` includes
-  `'poisson'`.
+  poisson regression. Only provided if the fit includes Poisson
+  regression.
 
 - `ate.boosting`: Same as `ate.poisson`, but with the nested subgroups
-  based the estimated CATE scores with boosting. Only provided if
-  `score.method` includes `'boosting'`.
+  based the estimated CATE scores with boosting. Only provided if the
+  fit includes boosting.
 
 - `ate.twoReg`: Same as `ate.poisson`, but with the nested subgroups
   based the estimated CATE scores with two regressions. Only provided if
-  `score.method` includes `'twoReg'`.
+  the fit includes two-regression.
 
 - `ate.contrastReg`: Same as `ate.poisson`, but with the nested
   subgroups based the estimated CATE scores with contrast regression.
-  Only provided if `score.method` includes `'contrastReg'`.
+  Only provided if the fit includes contrast regression.
 
 - `ate.negBin`: Same as `ate.poisson`, but with the nested subgroups
   based the estimated CATE scores with negative binomial regression.
-  Only provided if `score.method` includes `'negBin'`.
+  Only provided if the fit includes negative binomial regression.
 
 - `score.poisson`: A vector of numerical values of length n (number of
   observations in `data`) containing the estimated log-CATE scores
-  according to the Poisson regression. Only provided if `score.method`
-  includes `'poisson'`.
+  according to the Poisson regression. Only provided if the fit includes
+  Poisson regression.
 
 - `score.boosting`: Same as `score.poisson`, but with estimated log-CATE
-  score according to boosting. Only provided if `score.method` includes
-  `'boosting'`.
+  score according to boosting. Only provided if the fit includes
+  boosting.
 
 - `score.twoReg`: Same as `score.poisson`, but with estimated log-CATE
-  score according to two regressions. Only provided if `score.method`
-  includes `'twoReg'`.
+  score according to two regressions. Only provided if the fit includes
+  two-regression.
 
 - `score.contrastReg`: Same as `score.poisson`, but with estimated
-  log-CATE score according to contrast regression. Only provided if
-  `score.method` includes `'contrastReg'`.
+  log-CATE score according to contrast regression. Only provided if the
+  fit includes contrast regression.
 
 - `score.negBin`: Same as `score.poisson`, but with estimated log-CATE
-  score according to negative binomial regression. Only provided if
-  `score.method` includes `'negBin'`.
+  score according to negative binomial regression. Only provided if the
+  fit includes negative binomial regression.
 
-- `fit`: Additional details on model fitting if `score.method` includes
-  'boosting' or 'contrastReg':
+- `fit`: Additional details on model fitting when the fit includes
+  boosting or contrast regression:
 
   - `result.boosting`: Details on the boosting model fitted to
     observations with treatment = 0 `($fit0.boosting)` and to
     observations with treatment = 1 `($fit1.boosting)`. Only provided if
-    `score.method` includes `'boosting'`.
+    the fit includes boosting.
 
   - `result.contrastReg$sigma.contrastReg`: Variance-covariance matrix
     of the estimated log-CATE coefficients in contrast regression. Only
-    provided if `score.method` includes `'contrastReg'`.
+    provided if the fit includes contrast regression.
 
 - `coefficients`: A data frame with the coefficients of the estimated
-  log-CATE score by `score.method`. The data frame has number of rows
-  equal to the number of covariates in `cate.model` and number of
-  columns equal to `length(score.method)`. If `score.method` includes
-  `'contrastReg'`, the data frame has an additional column containing
-  the standard errors of the coefficients estimated with contrast
-  regression. `'boosting'` does not have coefficient results because
-  tree-based methods typically do not express the log-CATE as a linear
-  combination of coefficients and covariates.
+  log-CATE score for each applicable method. The data frame has number
+  of rows equal to the number of covariates in `outcome_model` and one
+  column per method that provides coefficients. If the fit includes
+  contrast regression, the data frame has an additional column
+  containing the standard errors of the coefficients estimated with
+  contrast regression. `'boosting'` does not have coefficient results
+  because tree-based methods typically do not express the log-CATE as a
+  linear combination of coefficients and covariates.
 
 ## Details
-
-The legacy arguments `score.method` and `cate.model` are accepted
-through `...`; see
-[`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
 The CATE score estimates a covariate-conditional average treatment
 effect, estimated with either Poisson regression, boosting or negative
@@ -288,12 +280,9 @@ binomial regression applied separately by treatment group or with two
 doubly robust estimators, two regressions and contrast regression
 (Yadlowsky, 2020) applied to the entire dataset.
 
-`catefitcount()` provides the coefficients of the CATE score for each
-scoring method requested through `score.method`. Currently, contrast
-regression is the only method which allows for inference of the CATE
-coefficients by providing standard errors of the coefficients. The
-coefficients can be used to learn the effect size of each variable and
-predict the CATE score for a new observation.
+`catefitcount()` provides CATE score coefficients for supported linear
+scoring methods. Standard errors for the score coefficients are
+available for contrast regression.
 
 `catefitcount()` also provides the predicted CATE score of each
 observation in the data set, for each scoring method. The predictions
@@ -332,5 +321,5 @@ fit <- catefitcount(data = countExample,
                     higher.y = FALSE,
                     seed = 999, verbose = 1)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
-#> Total runtime : 0.08 secs 
+#> Total runtime : 0.18 secs 
 ```
