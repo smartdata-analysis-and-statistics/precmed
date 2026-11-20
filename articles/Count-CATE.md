@@ -27,77 +27,78 @@ scale.
 
 ## Estimate CATE scores
 
-A population-average effect may vary across patients. We fit conditional
-average treatment effect (CATE) scores to rank patients by estimated
-treatment effect.
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-fits scores and estimates score-defined subgroup effects on the full
-dataset; internal validation is discussed below.
+A CATE score describes the estimated treatment effect conditional on
+baseline covariates. Here the score is a log rate ratio for drug 1
+versus drug 0; exponentiating it gives the corresponding conditional
+relapse rate ratio. Lower scores indicate greater estimated benefit from
+drug 1.
 
-- `poisson` fits a Poisson model separately by treatment group.
+### Specify the outcome and treatment models
 
-- `boosting` uses gradient boosted regression models (GBM) separately by
-  treatment group.
+The outcome formula specifies the relapse count and covariates used for
+the outcome models and scores. The offset accounts for follow-up time
+when modelling rates. Outcome models are fitted separately by treatment
+arm, so treatment is not included in this formula. The treatment-model
+formula specifies treatment on the left and baseline covariates on the
+right; it estimates propensity scores, the probabilities of treatment
+conditional on those covariates.
 
-- `twoReg` implements the doubly robust two regressions estimator in
-  (Yadlowsky et al. 2021).
+Both formulas are needed because the doubly robust scores and subgroup
+effect estimates combine outcome predictions with propensity scores.
+T-learner scores use outcome predictions alone, but the treatment model
+is still used for the subgroup estimates reported by
+[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
+In a randomized trial, an intercept-only treatment model can reflect a
+common assignment probability.
 
-- `contrastReg` implements the doubly robust contrast regression
-  estimator from (Yadlowsky et al. 2021).
+``` r
 
-- `negBin` fits negative binomial regressions by treatment group. This
-  method is recommended if there is overdispersion in the data.
+outcome_formula <- y ~ age + female + previous_treatment + previous_cost +
+  previous_number_relapses + offset(log(years))
+ps_formula <- trt ~ age + previous_treatment
+```
 
-We can use
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-to compare these scoring methods using the formulas below. The outcome
-formula specifies relapse counts and score covariates, with a log
-follow-up offset for exposure time. The treatment-model formula
-specifies treatment and its covariates; it estimates propensity scores
-used by the doubly robust scores and subgroup estimators. The direct
-Poisson, negative binomial, and boosting scores are constructed from
-outcome predictions.
+### Choose how to construct scores
 
-The score represents an estimated conditional log rate ratio:
-exponentiating it gives the estimated rate ratio for patients with those
-covariates. Lower scores therefore indicate greater estimated benefit
-from drug 1 in this example. Chapter 17 describes treatment effect
-heterogeneity and methods for CATE prediction (Hoogland et al. 2026).
-Because
-[`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
-fits the scores using the full dataset, its results do not on their own
-establish performance in new patients.
+`benefit_method` selects the score-construction approach;
+`outcome_method` selects the outcome-model method for each score:
 
-The mandatory arguments are `response`, `data`, `benefit_method`,
-`outcome_method`, `outcome_model`, and `ps.model`. The user can also
-specify the non-mandatory arguments to fit with the data and problem at
-hand. Please see the [Function
-description](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.html)
-section for details.
+- A **T-learner** fits an outcome model in each treatment arm and
+  compares predicted relapse rates. The available outcome methods
+  include Poisson, negative binomial and boosting.
+- **Two-regression** combines initial outcome predictions with
+  propensity scores and fits separate augmented outcome regressions
+  before comparing the two arms.
+- **Contrast regression** combines initial outcome predictions with
+  propensity scores to fit a model for the treatment contrast directly.
 
-For compatibility, `benefit_method` also accepts the established names
-`"twoReg"` and `"contrastReg"` for `"two_regression"` and
-`"contrast_regression"`, respectively. The fitted scores retain their
-established names.
+The latter two are doubly robust methods (Yadlowsky et al. 2021). Their
+interpretation relies on causal identification, positivity and
+appropriate model assumptions; propensity-score truncation can affect
+robustness. See Chapter 17 for more on treatment effect heterogeneity
+and CATE prediction (Hoogland et al. 2026).
 
-If you run into errors or warnings with your data, it might be helpful
-to go over the descriptions to see if you need to alter the default
-values. We set `n.cores = 1` to run boosting with one thread. `precmed`
-translates this argument to the GBM3 parallel settings; one thread is
-also the fallback when neither `n.cores` nor `par.details` is supplied
-and the `gbm.parallel` option is unset.
+### Fit five scores
+
+Entries in `outcome_method` and `benefit_method` are paired in order.
+This call fits Poisson and boosting T-learners, two-regression and
+contrast-regression scores using Poisson initial outcome models, and a
+negative binomial T-learner. `higher.y = FALSE` ranks lower estimated
+relapse rate ratios as greater benefit. We set `n.cores = 1` for
+boosting and a seed for reproducibility. The scores and subgroup effects
+are fitted on the full dataset; they do not on their own establish
+performance in new patients.
 
 ``` r
 
 fit_cate <- catefit(
   response = "count",
   data = countExample,
-  outcome_model = y ~ age + female + previous_treatment +
-    previous_cost + previous_number_relapses + offset(log(years)),
+  outcome_model = outcome_formula,
   outcome_method = c("poisson", "boosting", "poisson", "poisson", "negative_binomial"),
   benefit_method = c("t_learner", "t_learner", "two_regression",
                      "contrast_regression", "t_learner"),
-  ps.model = trt ~ age + previous_treatment,
+  ps_model = ps_formula,
   initial.predictor.method = "poisson",
   higher.y = FALSE, 
   seed = 999,

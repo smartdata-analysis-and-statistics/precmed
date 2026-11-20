@@ -72,8 +72,8 @@ doubly robust scores. Continuous outcomes are not yet implemented.</p>
 <span>  <span class="va">outcome_model</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">benefit_method</span>,</span>
-<span>  <span class="va">ps.model</span>,</span>
-<span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
+<span>  <span class="va">ps_model</span>,</span>
+<span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  initial.predictor.method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  ipcw.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -151,21 +151,21 @@ accepted as aliases for <code>"two_regression"</code> and
 <code>"contrast_regression"</code>, respectively.</p></dd>
 
 
-<dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
+<dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
 <dd><p>A formula describing the treatment model (propensity-score model) to be fitted. The treatment must
 appear on the left-hand side. For binary outcomes, logical treatment values
 <code>FALSE</code> and <code>TRUE</code> are mapped to 0 and 1, respectively.
 Numeric 0/1 values or two distinct treatment labels are also accepted.
-If data are from a randomized controlled trial, specify <code>ps.model = trt ~ 1</code> as an intercept-only model.</p></dd>
+If data are from a randomized controlled trial, specify <code>ps_model = trt ~ 1</code> as an intercept-only model.</p></dd>
 
 
-<dt id="arg-ps-method">ps.method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
+<dt id="arg-ps-method">ps_method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
 <dd><p>A character value for the method to estimate the propensity score.
 Allowed values include one of:
 <code>'glm'</code> for logistic regression with main effects only (default), or
 <code>'lasso'</code> for a logistic regression with main effects and LASSO penalization on
-two-way interactions (added to the model if interactions are not specified in <code>ps.model</code>).
-Relevant only when <code>ps.model</code> has more than one variable.</p></dd>
+two-way interactions (added to the model if interactions are not specified in <code>ps_model</code>).
+Relevant only when <code>ps_model</code> has more than one variable.</p></dd>
 
 
 <dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
@@ -346,7 +346,7 @@ for survival outcomes; independent of <code>contrast.control</code>.</p></dd>
 <dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
 <dd><p>Named options for LASSO propensity-score interaction screening.
 Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
-Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+Only affects screening when <code>ps_method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
 
@@ -358,7 +358,7 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.
+<dd><p>Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.
 The old named arguments <code>score.method</code> and <code>cate.model</code> are
 accepted with deprecation warnings. Legacy score names and positional calls
 remain supported when <code>outcome_method</code> is omitted.</p></dd>
@@ -465,7 +465,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                                  <span class="fu"><a href="https://rdrr.io/r/stats/offset.html" class="external-link">offset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">years</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 outcome_method <span class="op">=</span> <span class="st">"poisson"</span>,</span></span>
 <span class="r-in"><span>                 benefit_method <span class="op">=</span> <span class="st">"t_learner"</span>,</span></span>
-<span class="r-in"><span>                 ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                 ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 higher.y <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>                 seed <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Variable trt was recoded to 0/1 with drug0-&gt;0 and drug1-&gt;1.</span>
@@ -492,7 +492,7 @@ T. P. A. Debray, T.-L. Nguyen, &amp; R. W. Platt (Eds.),
 <span class="r-in"><span>                                           <span class="va">previous_number_relapses</span>,</span></span>
 <span class="r-in"><span>                 outcome_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"boosting"</span>, <span class="st">"random_forest"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 benefit_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"t_learner"</span>, <span class="fl">3</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                 ps.model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
+<span class="r-in"><span>                 ps_model <span class="op">=</span> <span class="va">trt</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 initial.predictor.method <span class="op">=</span> <span class="st">"logistic"</span>,</span></span>
 <span class="r-in"><span>                 ipcw.model <span class="op">=</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">previous_cost</span> <span class="op">+</span> <span class="va">previous_treatment</span>,</span></span>
 <span class="r-in"><span>                 tau0 <span class="op">=</span> <span class="va">tau0</span>, higher.y <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">999</span>, n.cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>

@@ -83,13 +83,23 @@
 
 ### Minor changes
 
+- Reorganized the binary, count and survival CATE vignettes to introduce
+  model formulas, score-construction methods and fitted examples in
+  sequence.
+
+- [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md)
+  and its outcome-specific interfaces now expose `ps_model` and
+  `ps_method` after `benefit_method`. The dotted names remain accepted
+  through `...` with deprecation warnings; existing positional CATE
+  calls remain supported.
+
 - Outcome-specific
   [`catefitbinary()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitbinary.md),
   [`catefitcount()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitcount.md),
   [`catefitsurv()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitsurv.md),
   and
   [`catefitmean()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefitmean.md)
-  accept `outcome_model`, `benefit_method`, and `outcome_method` in the
+  accept `outcome_model`, `outcome_method`, and `benefit_method` in the
   same order as
   [`catefit()`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
   Existing dotted arguments and positional calls remain supported.

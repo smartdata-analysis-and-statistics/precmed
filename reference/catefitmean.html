@@ -68,8 +68,8 @@ generalized additive model.</p>
 <span>  outcome_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcome_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  benefit_method <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">ps.model</span>,</span>
-<span>  ps.method <span class="op">=</span> <span class="st">"glm"</span>,</span>
+<span>  <span class="va">ps_model</span>,</span>
+<span>  ps_method <span class="op">=</span> <span class="st">"glm"</span>,</span>
 <span>  init.model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  initial.predictor.method <span class="op">=</span> <span class="st">"boosting"</span>,</span>
 <span>  minPS <span class="op">=</span> <span class="fl">0.01</span>,</span>
@@ -115,18 +115,18 @@ a data frame with <code>n</code> rows (1 row per observation).</p></dd>
 <dd><p>Score-construction methods; see <code><a href="catefit.html">catefit</a></code>.</p></dd>
 
 
-<dt id="arg-ps-model">ps.model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
+<dt id="arg-ps-model">ps_model<a class="anchor" aria-label="anchor" href="#arg-ps-model"></a></dt>
 <dd><p>A formula describing the treatment model (propensity-score model) to be fitted.
 The treatment must appear on the left-hand side.
 The treatment must be a numeric vector coded as 0/1.
-If data are from a RCT, specify <code>ps.model</code> as an intercept-only model.</p></dd>
+If data are from a RCT, specify <code>ps_model</code> as an intercept-only model.</p></dd>
 
 
-<dt id="arg-ps-method">ps.method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
+<dt id="arg-ps-method">ps_method<a class="anchor" aria-label="anchor" href="#arg-ps-method"></a></dt>
 <dd><p>A character value for the method to estimate the propensity score.
 Allowed values include one of: <code>'glm'</code> for logistic regression with main effects only
 (default), or <code>'lasso'</code> for a logistic regression with main effects and LASSO penalization
-on two-way interactions (added to the model if not specified in <code>ps.model</code>).</p></dd>
+on two-way interactions (added to the model if not specified in <code>ps_model</code>).</p></dd>
 
 
 <dt id="arg-init-model">init.model<a class="anchor" aria-label="anchor" href="#arg-init-model"></a></dt>
@@ -245,7 +245,7 @@ be printed. <code>0</code> means no outputs. <code>1</code> means only progress 
 <dt id="arg-ps-control">ps.control<a class="anchor" aria-label="anchor" href="#arg-ps-control"></a></dt>
 <dd><p>Named options for LASSO propensity-score interaction screening.
 Supported entry: <code>solver = "C"</code> (default) or <code>solver = "R"</code>.
-Only affects screening when <code>ps.method = "lasso"</code>; the LASSO fit and
+Only affects screening when <code>ps_method = "lasso"</code>; the LASSO fit and
 interaction selection rule are unchanged. Kept separate from boosting's
 <code>...</code> and other numerical controls.</p></dd>
 
@@ -257,7 +257,7 @@ and survival initial-predictor forests. Use <code>n.trees.rf</code> for the numb
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
+<dd><p>Legacy arguments <code>ps.model</code> and <code>ps.method</code> are accepted with warnings. Additional boosting arguments; see <code><a href="boosting-control.html">boosting-control</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

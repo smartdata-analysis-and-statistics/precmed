@@ -12,8 +12,8 @@ catefitbinary(
   outcome_model = NULL,
   outcome_method = NULL,
   benefit_method = NULL,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   minPS = 0.01,
   maxPS = 0.99,
   higher.y = TRUE,
@@ -52,23 +52,23 @@ catefitbinary(
   Score-construction methods; see
   [`catefit`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/catefit.md).
 
-- ps.model:
+- ps_model:
 
   A formula describing the treatment model (propensity-score model) to
   be fitted. The treatment must appear on the left-hand side. For binary
   outcomes, logical treatment values `FALSE` and `TRUE` are mapped to 0
   and 1, respectively. Numeric 0/1 values or two distinct treatment
   labels are also accepted. If data are from a randomized controlled
-  trial, specify `ps.model = trt ~ 1` as an intercept-only model.
+  trial, specify `ps_model = trt ~ 1` as an intercept-only model.
 
-- ps.method:
+- ps_method:
 
   A character value for the method to estimate the propensity score.
   Allowed values include one of: `'glm'` for logistic regression with
   main effects only (default), or `'lasso'` for a logistic regression
   with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  (added to the model if interactions are not specified in `ps_model`).
+  Relevant only when `ps_model` has more than one variable.
 
 - minPS:
 
@@ -104,7 +104,7 @@ catefitbinary(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
@@ -148,7 +148,8 @@ catefitbinary(
 
 - ...:
 
-  Additional boosting arguments; see
+  Legacy arguments `ps.model` and `ps.method` are accepted with
+  warnings. Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
 
 ## Value
@@ -183,7 +184,7 @@ fit <- catefitbinary(data = dat,
                      outcome_model = y ~ age + previous_treatment,
                      outcome_method = "logistic",
                      benefit_method = "t_learner",
-                     ps.model = trt ~ age + previous_treatment,
+                     ps_model = trt ~ age + previous_treatment,
                      seed = 2026)
 # }
 ```

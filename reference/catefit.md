@@ -15,8 +15,8 @@ catefit(
   outcome_model,
   outcome_method = NULL,
   benefit_method,
-  ps.model,
-  ps.method = "glm",
+  ps_model,
+  ps_method = "glm",
   init.model = NULL,
   initial.predictor.method = NULL,
   ipcw.model = NULL,
@@ -98,23 +98,23 @@ catefit(
   are accepted as aliases for `"two_regression"` and
   `"contrast_regression"`, respectively.
 
-- ps.model:
+- ps_model:
 
   A formula describing the treatment model (propensity-score model) to
   be fitted. The treatment must appear on the left-hand side. For binary
   outcomes, logical treatment values `FALSE` and `TRUE` are mapped to 0
   and 1, respectively. Numeric 0/1 values or two distinct treatment
   labels are also accepted. If data are from a randomized controlled
-  trial, specify `ps.model = trt ~ 1` as an intercept-only model.
+  trial, specify `ps_model = trt ~ 1` as an intercept-only model.
 
-- ps.method:
+- ps_method:
 
   A character value for the method to estimate the propensity score.
   Allowed values include one of: `'glm'` for logistic regression with
   main effects only (default), or `'lasso'` for a logistic regression
   with main effects and LASSO penalization on two-way interactions
-  (added to the model if interactions are not specified in `ps.model`).
-  Relevant only when `ps.model` has more than one variable.
+  (added to the model if interactions are not specified in `ps_model`).
+  Relevant only when `ps_model` has more than one variable.
 
 - init.model:
 
@@ -309,7 +309,7 @@ catefit(
 
   Named options for LASSO propensity-score interaction screening.
   Supported entry: `solver = "C"` (default) or `solver = "R"`. Only
-  affects screening when `ps.method = "lasso"`; the LASSO fit and
+  affects screening when `ps_method = "lasso"`; the LASSO fit and
   interaction selection rule are unchanged. Kept separate from
   boosting's `...` and other numerical controls.
 
@@ -322,7 +322,8 @@ catefit(
 
 - ...:
 
-  Additional boosting arguments; see
+  Legacy arguments `ps.model` and `ps.method` are accepted with
+  warnings. Additional boosting arguments; see
   [`boosting-control`](https://smartdata-analysis-and-statistics.github.io/precmed/reference/boosting-control.md).
   The old named arguments `score.method` and `cate.model` are accepted
   with deprecation warnings. Legacy score names and positional calls
@@ -456,7 +457,7 @@ fit_1 <- catefit(response = "count",
                                   offset(log(years)),
                  outcome_method = "poisson",
                  benefit_method = "t_learner",
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  higher.y = TRUE,
                  seed = 999)
 #> Variable trt was recoded to 0/1 with drug0->0 and drug1->1.
@@ -483,7 +484,7 @@ fit_2 <- catefit(response = "survival",
                                            previous_number_relapses,
                  outcome_method = c("poisson", "boosting", "random_forest"),
                  benefit_method = rep("t_learner", 3),
-                 ps.model = trt ~ age + previous_treatment,
+                 ps_model = trt ~ age + previous_treatment,
                  initial.predictor.method = "logistic",
                  ipcw.model = ~ age + previous_cost + previous_treatment,
                  tau0 = tau0, higher.y = TRUE, seed = 999, n.cores = 1)
